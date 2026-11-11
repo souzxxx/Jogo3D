@@ -393,8 +393,8 @@ namespace Quintessence.UI
             foreach (Transform child in pausePanel) Destroy(child.gameObject);
             var center = new Vector2(0.5f, 0.5f);
             UiKit.Text(UiKit.Rect("Title", pausePanel, center, new Vector2(0, 300), new Vector2(800, 80)), "PAUSADO", 72, UiKit.Cream);
-            UiKit.Button(pausePanel, "Continuar", center, new Vector2(0, 180), new Vector2(380, 70), new Color(0.24f, 0.4f, 0.55f), resume);
-            UiKit.Button(pausePanel, "Menu principal", center, new Vector2(0, 90), new Vector2(380, 70), new Color(0.3f, 0.28f, 0.36f), menu);
+            UiKit.Button(pausePanel, "Continuar", center, new Vector2(0, 180), new Vector2(380, 70), UiKit.Primary, resume);
+            UiKit.Button(pausePanel, "Menu principal", center, new Vector2(0, 90), new Vector2(380, 70), UiKit.Secondary, menu);
             if (boons != null && boons.Count > 0)
             {
                 UiKit.Text(UiKit.Rect("BoonsTitle", pausePanel, center, new Vector2(0, -10), new Vector2(900, 40)), "BÊNÇÃOS", 30, UiKit.Dim);
@@ -421,8 +421,8 @@ namespace Quintessence.UI
                 set(Mathf.Clamp(AudioPrefs.Step(get()) + delta, 0, 10) / 10f);
                 value.text = AudioPrefs.Step(get()).ToString();
             }
-            UiKit.Button(box, "−", center, new Vector2(-96, -18), new Vector2(64, 64), new Color(0.3f, 0.28f, 0.36f), () => Change(-1));
-            UiKit.Button(box, "+", center, new Vector2(96, -18), new Vector2(64, 64), new Color(0.3f, 0.28f, 0.36f), () => Change(1));
+            UiKit.Button(box, "−", center, new Vector2(-96, -18), new Vector2(64, 64), UiKit.Secondary, () => Change(-1));
+            UiKit.Button(box, "+", center, new Vector2(96, -18), new Vector2(64, 64), UiKit.Secondary, () => Change(1));
         }
 
         public bool ResultVisible => resultPanel.gameObject.activeSelf;
@@ -436,8 +436,8 @@ namespace Quintessence.UI
                 victory ? "VITÓRIA" : "VOCÊ CAIU", 104, victory ? new Color(0.9f, 0.76f, 0.42f) : new Color(0.78f, 0.3f, 0.28f));
             title.font = GameFonts.Title;
             UiKit.Text(UiKit.Rect("Stats", resultPanel, center, new Vector2(0, 70), new Vector2(1400, 120)), stats, 30, UiKit.Cream, TextAnchor.MiddleCenter, false);
-            UiKit.Button(resultPanel, "Jogar de novo", center, new Vector2(0, -60), new Vector2(380, 70), new Color(0.24f, 0.4f, 0.55f), again);
-            UiKit.Button(resultPanel, "Menu principal", center, new Vector2(0, -150), new Vector2(380, 70), new Color(0.3f, 0.28f, 0.36f), menu);
+            UiKit.Button(resultPanel, "Jogar de novo", center, new Vector2(0, -60), new Vector2(380, 70), UiKit.Primary, again);
+            UiKit.Button(resultPanel, "Menu principal", center, new Vector2(0, -150), new Vector2(380, 70), UiKit.Secondary, menu);
         }
     }
 }

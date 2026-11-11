@@ -115,10 +115,10 @@ public static class GameSceneBuilder
         Solid(P("barrel_small_stack", -3.0f, 2.6f, 15));
         P("box_small_decorated", -8.9f, -1.6f, -20);
         // ouro: bau aberto ao lado do balcao com moedas pelo chao
-        Solid(P("chest_gold", -3.2f, -0.2f, -20));
-        P("coin_stack_large", -3.9f, -1.3f, 0);
-        P("coin_stack_medium", -2.9f, -1.5f, 40);
-        P("coin_stack_small", -3.4f, -1.9f, 10);
+        Solid(P("chest_gold", -3.2f, 0.2f, 165));
+        P("coin_stack_large", -4.3f, -0.9f, 0);
+        P("coin_stack_medium", -2.2f, -0.9f, 40);
+        P("coin_stack_small", -2.5f, -1.6f, 10);
         P("coin_stack_small", -4.3f, -2.1f, 70);
         // lado leste, para a sala nao ficar torta
         Solid(P("trunk_large_A", 8.7f, 1.6f, -90));

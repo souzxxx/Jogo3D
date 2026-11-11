@@ -490,7 +490,13 @@ namespace Quintessence.Game
                 var root = new GameObject("Boon_" + boon.id);
                 root.transform.position = new Vector3((i - (offer.Count - 1) / 2f) * 5.6f, 0, -0.5f);
                 // bau do pack com uma pedra fosca na cor do mestre que oferece
-                if (chestPrefab != null) Instantiate(chestPrefab, root.transform).transform.localPosition = Vector3.zero;
+                if (chestPrefab != null)
+                {
+                    // a frente do modelo aponta para o fundo da sala: vira para a camera
+                    var chest = Instantiate(chestPrefab, root.transform).transform;
+                    chest.localPosition = Vector3.zero;
+                    chest.localRotation = Quaternion.Euler(0, 180, 0);
+                }
                 Medal(root.transform, new Vector3(0, 1.8f, 0), BoonEffects.Icon(boon.stat), c, 1.15f);
                 Label(root.transform, new Vector3(0, 3.5f, 0), boon.name, Cream, 0.9f);
                 Label(root.transform, new Vector3(0, 2.7f, 0), Wrap(boon.description, 20), new Color(0.8f, 0.76f, 0.7f), 0.6f);

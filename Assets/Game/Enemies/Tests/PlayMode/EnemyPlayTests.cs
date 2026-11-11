@@ -73,6 +73,16 @@ namespace Quintessence.Enemies.PlayTests
             Assert.Less(hp.Current, hp.Max, "heroi parado deveria apanhar");
             Assert.Greater(telegraphsBeforeFirstHit, 0, "todo golpe tem aviso antes");
 
+            // ainda parado, quase sem levar dano, ate o atirador avisar ou disparar: nao depende da sorte da luta
+            float keep = hp.Pool.ExtraDamageTakenMultiplier;
+            hp.Pool.ExtraDamageTakenMultiplier = 0.02f;
+            for (float t = 10f; t > 0f && !sawProjectile; t -= Time.deltaTime)
+            {
+                if (Object.FindFirstObjectByType<Projectile>() != null) sawProjectile = true;
+                yield return Step();
+            }
+            hp.Pool.ExtraDamageTakenMultiplier = keep;
+
             // 2) agora joga: desvia dos avisos, bate, troca de elemento e usa skill ate limpar a sala
             dodging = true;
             float limit = 150f, sinceSwitch = 0f;

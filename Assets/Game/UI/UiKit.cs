@@ -156,19 +156,40 @@ namespace Quintessence.UI
             return t;
         }
 
-        public static Button Button(Transform parent, string label, Vector2 anchor, Vector2 pos, Vector2 size, Color color, Action onClick)
+        /// Cores de botao: acao principal (ambar fosco, como o ouro do pack), secundaria (ardosia) e perigo.
+        public static readonly Color Primary = new(0.56f, 0.39f, 0.17f);
+        public static readonly Color Secondary = new(0.24f, 0.23f, 0.31f);
+        public static readonly Color Danger = new(0.52f, 0.2f, 0.18f);
+        public static readonly Color Disabled = new(0.16f, 0.15f, 0.2f);
+
+        /// Botao arredondado com espessura: base escura embaixo, corpo na cor, brilho leve no topo e contorno.
+        public static Button Button(Transform parent, string label, Vector2 anchor, Vector2 pos, Vector2 size, Color color, Action onClick, Color? edge = null)
         {
             var rt = Rect("Button_" + label, parent, anchor, pos, size);
-            var img = Image(rt, null, color, true);
+            var lip = Stretch("Lip", rt);
+            lip.offsetMin = new Vector2(0, -6); lip.offsetMax = new Vector2(0, -6);
+            Image(lip, Panel, new Color(color.r * 0.35f, color.g * 0.35f, color.b * 0.35f, 1f)).type = UnityEngine.UI.Image.Type.Sliced;
+            var body = Stretch("Body", rt);
+            var img = Image(body, Panel, new Color(color.r, color.g, color.b, 1f), true);
+            img.type = UnityEngine.UI.Image.Type.Sliced;
+            var sheen = Stretch("Sheen", rt);
+            sheen.anchorMin = new Vector2(0, 0.5f);
+            sheen.offsetMin = new Vector2(4, 0); sheen.offsetMax = new Vector2(-4, -4);
+            Image(sheen, Panel, new Color(1f, 1f, 1f, 0.07f)).type = UnityEngine.UI.Image.Type.Sliced;
+            var e = edge ?? Color.Lerp(color, Cream, 0.5f);
+            Image(Stretch("Edge", rt), Frame, new Color(e.r, e.g, e.b, edge.HasValue ? 0.9f : 0.6f)).type = UnityEngine.UI.Image.Type.Sliced;
             var b = rt.gameObject.AddComponent<Button>();
             b.targetGraphic = img;
             var colors = b.colors;
-            colors.highlightedColor = new Color(1.25f, 1.25f, 1.25f);
-            colors.pressedColor = new Color(0.8f, 0.8f, 0.8f);
+            colors.highlightedColor = new Color(1.22f, 1.22f, 1.22f);
+            colors.pressedColor = new Color(0.82f, 0.82f, 0.82f);
+            colors.selectedColor = Color.white;
+            colors.fadeDuration = 0.06f;
             b.colors = colors;
             b.onClick.AddListener(() => { Quintessence.Core.Sfx.Play("ui_click"); onClick?.Invoke(); });
+            rt.gameObject.AddComponent<UiHover>();
             var txt = Stretch("Label", rt);
-            Text(txt, label, 30, Paper);
+            Text(txt, label, 30, Cream);
             return b;
         }
     }

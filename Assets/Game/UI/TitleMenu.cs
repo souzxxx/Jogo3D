@@ -69,12 +69,12 @@ namespace Quintessence.UI
                 var u = (MetaUpgrade)i;
                 int level = meta.Level(u), max = MetaInfo.MaxLevel(u);
                 var row = UiKit.Box("Row" + i, box, new Vector2(0.5f, 1), new Vector2(0, -232 - i * 94), new Vector2(1080, 84), 0.5f);
-                var disc = UiKit.Rect("Disc", row, new Vector2(0, 0.5f), new Vector2(52, 0), new Vector2(60, 60));
+                var disc = UiKit.Rect("Disc", row, new Vector2(0, 0.5f), new Vector2(16, 0), new Vector2(60, 60));
                 UiKit.Image(disc, UiKit.Circle, new Color(0.16f, 0.14f, 0.2f));
                 UiKit.Image(UiKit.Rect("Icon", disc, center, Vector2.zero, new Vector2(40, 40)), UiKit.Icon(MetaInfo.Icon(u)), UiKit.Cream);
-                UiKit.Text(UiKit.Rect("Name", row, new Vector2(0, 0.5f), new Vector2(104, 16), new Vector2(210, 36)), MetaInfo.Name(u), 32, UiKit.Paper, TextAnchor.MiddleLeft);
+                UiKit.Text(UiKit.Rect("Name", row, new Vector2(0, 0.5f), new Vector2(92, 16), new Vector2(210, 36)), MetaInfo.Name(u), 32, UiKit.Paper, TextAnchor.MiddleLeft);
                 for (int k = 0; k < max; k++)
-                    UiKit.Image(UiKit.Rect("Pip" + k, row, new Vector2(0, 0.5f), new Vector2(106 + k * 24, -20), new Vector2(16, 16)),
+                    UiKit.Image(UiKit.Rect("Pip" + k, row, new Vector2(0, 0.5f), new Vector2(94 + k * 24, -20), new Vector2(16, 16)),
                         k < level ? UiKit.Circle : UiKit.Ring, k < level ? new Color(0.88f, 0.74f, 0.42f) : UiKit.Dim);
                 string now = level > 0 ? "Agora: " + MetaInfo.Describe(u, level) : "Ainda sem efeito";
                 string next = level < max ? "Próximo: " + MetaInfo.Describe(u, level + 1) : "Nível máximo";
@@ -86,15 +86,15 @@ namespace Quintessence.UI
                 {
                     bool can = meta.CanBuy(u);
                     var b = UiKit.Button(row, $"{meta.Cost(u)} Fragmentos", new Vector2(1, 0.5f), new Vector2(-16, 0), new Vector2(210, 56),
-                        can ? new Color(0.5f, 0.38f, 0.16f) : new Color(0.2f, 0.19f, 0.24f), () => Buy(u));
+                        can ? UiKit.Primary : UiKit.Disabled, () => Buy(u));
                     var t = b.transform.Find("Label").GetComponent<UnityEngine.UI.Text>();
                     t.fontSize = 23;
                     if (!can) t.color = UiKit.Dim;
                 }
             }
-            UiKit.Button(box, "Voltar", new Vector2(0.5f, 0), new Vector2(0, 56), new Vector2(300, 60), new Color(0.24f, 0.4f, 0.55f), () => ShowRefuge(false));
+            UiKit.Button(box, "Voltar", new Vector2(0.5f, 0), new Vector2(0, 56), new Vector2(300, 60), UiKit.Primary, () => ShowRefuge(false));
             var wipe = UiKit.Button(box, confirmReset ? "Apagar mesmo?" : "Apagar progresso", new Vector2(1, 0), new Vector2(-50, 62), new Vector2(250, 46),
-                confirmReset ? new Color(0.55f, 0.2f, 0.18f) : new Color(0.2f, 0.19f, 0.24f), () =>
+                confirmReset ? UiKit.Danger : UiKit.Secondary, () =>
                 {
                     if (!confirmReset) { confirmReset = true; BuildRefuge(); return; }
                     confirmReset = false;
@@ -116,32 +116,39 @@ namespace Quintessence.UI
             logo.font = GameFonts.Title;
             UiKit.Text(UiKit.Rect("Sub", root, new Vector2(0.5f, 1), new Vector2(0, -330), new Vector2(1400, 50)),
                 "Comece com um elemento. Desperte os outros três. Alcance o quinto estado.", 34, UiKit.Dim, TextAnchor.MiddleCenter, false);
-            UiKit.Text(UiKit.Rect("Pick", root, new Vector2(0.5f, 0.5f), new Vector2(0, 40), new Vector2(1000, 50)), "ESCOLHA O ELEMENTO INICIAL", 34, UiKit.Paper);
+            UiKit.Text(UiKit.Rect("Pick", root, new Vector2(0.5f, 0.5f), new Vector2(0, 76), new Vector2(1000, 50)), "ESCOLHA O ELEMENTO INICIAL", 34, UiKit.Paper);
 
             string[] names = { "Fogo", "Água", "Terra", "Ar" };
             string[] notes = { "Agressivo\ndano contínuo", "Alcance\ne controle", "Pesado\nquebra armadura", "Mobilidade\ne crítico" };
+            string[] iconNames = { "fire", "water", "earth", "air" };
+            var mid = new Vector2(0.5f, 0.5f);
             for (int i = 0; i < 4; i++)
             {
                 var e = Elements.All[i];
                 var c = ElementColors.Of(e);
-                var pos = new Vector2((i - 1.5f) * 300f, -150);
-                var b = UiKit.Button(root, names[i], new Vector2(0.5f, 0.5f), pos, new Vector2(260, 260), new Color(c.r * 0.55f, c.g * 0.55f, c.b * 0.55f, 0.95f), () => OnPick?.Invoke(e));
-                var orb = UiKit.Rect("Orb", b.transform, new Vector2(0.5f, 1), new Vector2(0, -22), new Vector2(92, 92));
-                UiKit.Image(orb, UiKit.Circle, c);
-                string[] iconNames = { "fire", "water", "earth", "air" };
-                UiKit.Image(UiKit.Rect("Icon", orb, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(60, 60)), UiKit.Icon(iconNames[i]), UiKit.Cream);
-                var label = (RectTransform)b.transform.Find("Label");
-                label.offsetMin = new Vector2(0, 60); label.offsetMax = new Vector2(0, -110);
-                label.GetComponent<UnityEngine.UI.Text>().fontSize = 40;
-                UiKit.Text(UiKit.Rect("Note", b.transform, new Vector2(0.5f, 0), new Vector2(0, 16), new Vector2(240, 64)), notes[i], 23, UiKit.Paper, TextAnchor.MiddleCenter, false);
+                // carta escura com o elemento so no contorno, no medalhao e no filete: a cor entra como acento
+                var body = Color.Lerp(new Color(0.09f, 0.08f, 0.12f), c, 0.16f);
+                var b = UiKit.Button(root, "", mid, new Vector2((i - 1.5f) * 300f, -130), new Vector2(264, 330), body, () => OnPick?.Invoke(e), Color.Lerp(c, UiKit.Cream, 0.15f));
+                b.name = "Card_" + names[i];
+                b.GetComponent<UiHover>().hoverScale = 1.06f;
+                Destroy(b.transform.Find("Sheen").gameObject); // o brilho de botao nao cabe numa carta alta
+                var card = b.transform;
+                UiKit.Image(UiKit.Rect("Halo", card, new Vector2(0.5f, 1), new Vector2(0, -22), new Vector2(136, 136)), UiKit.Circle, new Color(c.r, c.g, c.b, 0.16f));
+                var orb = UiKit.Rect("Orb", card, new Vector2(0.5f, 1), new Vector2(0, -32), new Vector2(116, 116));
+                UiKit.Image(orb, UiKit.Circle, Color.Lerp(c, new Color(0.05f, 0.04f, 0.08f), 0.35f));
+                UiKit.Image(UiKit.Stretch("Rim", orb), UiKit.Ring, Color.Lerp(c, UiKit.Cream, 0.45f));
+                UiKit.Image(UiKit.Rect("Icon", orb, mid, Vector2.zero, new Vector2(70, 70)), UiKit.Icon(iconNames[i]), UiKit.Cream);
+                UiKit.Text(UiKit.Rect("Name", card, new Vector2(0.5f, 1), new Vector2(0, -160), new Vector2(240, 56)), names[i], 46, UiKit.Cream);
+                UiKit.Image(UiKit.Rect("Rule", card, new Vector2(0.5f, 1), new Vector2(0, -220), new Vector2(72, 4)), null, Color.Lerp(c, UiKit.Cream, 0.2f));
+                UiKit.Text(UiKit.Rect("Note", card, new Vector2(0.5f, 0), new Vector2(0, 30), new Vector2(240, 68)), notes[i], 24, UiKit.Paper, TextAnchor.MiddleCenter, false);
             }
-            var open = UiKit.Button(root, "REFÚGIO", new Vector2(0.5f, 0), new Vector2(0, 150), new Vector2(520, 62), new Color(0.3f, 0.24f, 0.14f, 0.95f), () => ShowRefuge(true));
+            var open = UiKit.Button(root, "REFÚGIO", new Vector2(0.5f, 0), new Vector2(0, 118), new Vector2(480, 64), UiKit.Primary, () => ShowRefuge(true));
             refugeLabel = open.transform.Find("Label").GetComponent<UnityEngine.UI.Text>();
             refugeLabel.fontSize = 28;
             refuge = UiKit.Stretch("Refuge", root);
             refuge.gameObject.SetActive(false);
             UpdateRefugeLabel();
-            UiKit.Text(UiKit.Rect("Keys", root, new Vector2(0.5f, 0), new Vector2(0, 60), new Vector2(1600, 30)),
+            UiKit.Text(UiKit.Rect("Keys", root, new Vector2(0.5f, 0), new Vector2(0, 44), new Vector2(1600, 30)),
                 "WASD mover · mouse mira · clique ataca · clique dir. skill · Espaço dash · Q/E troca elemento · R Quintessência · F interagir", 22, UiKit.Dim, TextAnchor.MiddleCenter, false);
         }
 
