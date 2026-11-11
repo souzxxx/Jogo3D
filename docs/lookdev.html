@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quintessence 3D — Look-dev</title>
+<style>
+  :root { --bg:#0e0c16; --panel:#181524; --line:#2c2740; --text:#e9e6f2; --dim:#9a94b3; --a:#ff8a3c; --b:#4fc3ff; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--text); font:16px/1.5 system-ui,-apple-system,sans-serif; }
+  main { max-width:1500px; margin:0 auto; padding:28px 16px 60px; }
+  h1 { font-size:26px; margin:0 0 4px; }
+  h2 { font-size:18px; margin:36px 0 12px; }
+  p.sub { color:var(--dim); margin:0 0 20px; }
+  .grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  @media (max-width:900px){ .grid { grid-template-columns:1fr; } }
+  figure { margin:0; background:var(--panel); border:1px solid var(--line); border-radius:10px; overflow:hidden; }
+  figure img { display:block; width:100%; height:auto; cursor:zoom-in; }
+  figcaption { padding:10px 14px; font-size:14px; color:var(--dim); }
+  figcaption b { color:var(--text); }
+  .tagA { color:var(--a); } .tagB { color:var(--b); }
+  .cmp { position:relative; border:1px solid var(--line); border-radius:10px; overflow:hidden; background:var(--panel); user-select:none; }
+  .cmp img { display:block; width:100%; height:auto; pointer-events:none; }
+  .cmp .top { position:absolute; inset:0; overflow:hidden; width:50%; border-right:2px solid #fff; }
+  .cmp .top img { width:auto; height:100%; max-width:none; }
+  .cmp input { position:absolute; inset:0; width:100%; height:100%; opacity:0; cursor:ew-resize; margin:0; }
+  .cmp span { position:absolute; top:10px; padding:3px 10px; border-radius:20px; background:#000a; font-size:13px; font-weight:600; }
+  .cmp .la { left:10px; color:var(--a); } .cmp .lb { right:10px; color:var(--b); }
+  ul { margin:0; padding-left:20px; } li { margin:4px 0; }
+  .cols { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  @media (max-width:900px){ .cols { grid-template-columns:1fr; } }
+  .card { background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:14px 18px; }
+  .card h3 { margin:0 0 8px; font-size:15px; }
+  dialog { border:0; padding:0; background:transparent; max-width:98vw; max-height:98vh; }
+  dialog::backdrop { background:#000d; }
+  dialog img { max-width:98vw; max-height:96vh; display:block; cursor:zoom-out; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Quintessence 3D — Look-dev</h1>
+  <p class="sub">Variação <b class="tagB">B (URP Lit)</b> escolhida. Abaixo a segunda passada (v1); o comparador A/B do v0 fica no fim como registro. Clique em qualquer print para ampliar.</p>
+
+  <h2>v1 — alvo visual atual</h2>
+  <div class="grid">
+    <figure><img src="img/lookdev_v1.png" alt="v1 sala"><figcaption><b class="tagB">v1 · sala</b> — câmera a 41°, rachaduras de brasa, cristais, santuários com a cor de cada elemento</figcaption></figure>
+    <figure><img src="img/lookdev_v1_close.png" alt="v1 close"><figcaption><b class="tagB">v1 · close</b> — labareda do herói, telegrafia do inimigo no chão</figcaption></figure>
+  </div>
+  <div class="card" style="margin-top:14px"><h3>O que mudou do v0 pro v1</h3><ul>
+    <li>Câmera mais baixa (46° → 41°): dá pra ver o rosto do herói</li>
+    <li>Feitiço de fogo virou labareda laranja de verdade</li>
+    <li>Rachaduras de brasa visíveis, com brilho vermelho no piso</li>
+    <li>Cristais âmbar com forma de cristal (malha própria)</li>
+    <li>Emissivos mantêm a cor do elemento em vez de estourar pra branco/amarelo</li>
+  </ul><h3 style="margin-top:12px">Ainda falta</h3><ul>
+    <li>Orbe de Ar ainda sai quase branco; Fogo e Terra ficam parecidos</li>
+    <li>Cristais estão amarelos demais, deviam ser âmbar</li>
+    <li>Telegrafia é um disco chapado; vira anel animado quando houver shader</li>
+  </ul></div>
+
+  <h2 style="margin-top:48px;color:var(--dim)">Registro: v0, comparação A × B</h2>
+
+  <h2>Comparador (arraste)</h2>
+  <div class="cmp" id="cmp">
+    <img src="img/lookdev_B_Lit.png" alt="Variação B, URP Lit">
+    <div class="top" id="top"><img src="img/lookdev_A_Toon.png" alt="Variação A, toon" id="topimg"></div>
+    <span class="la">A · Toon + contorno</span><span class="lb">B · URP Lit</span>
+    <input type="range" min="0" max="100" value="50" id="rng" aria-label="Comparar A e B">
+  </div>
+
+  <h2>Sala inteira</h2>
+  <div class="grid">
+    <figure><img src="img/lookdev_A_Toon.png" alt="A sala"><figcaption><b class="tagA">A · Toon + contorno</b> — sombra em bloco, contorno escuro em personagens e props</figcaption></figure>
+    <figure><img src="img/lookdev_B_Lit.png" alt="B sala"><figcaption><b class="tagB">B · URP Lit</b> — sombreamento suave padrão, sem contorno</figcaption></figure>
+  </div>
+
+  <h2>Close no herói</h2>
+  <div class="grid">
+    <figure><img src="img/lookdev_A_Toon_close.png" alt="A close"><figcaption><b class="tagA">A · Toon + contorno</b></figcaption></figure>
+    <figure><img src="img/lookdev_B_Lit_close.png" alt="B close"><figcaption><b class="tagB">B · URP Lit</b></figcaption></figure>
+  </div>
+
+  <h2>Notas do v0</h2>
+  <div class="cols">
+    <div class="card">
+      <h3>O que tem na cena</h3>
+      <ul>
+        <li>Herói (mago) lançando fogo num esqueleto guerreiro</li>
+        <li>Disco vermelho no chão: telegrafia do ataque inimigo</li>
+        <li>Esfera ciano sobre um inimigo: marca de Água</li>
+        <li>Quatro santuários ao fundo, um por elemento</li>
+        <li>Rachaduras de brasa e cristais âmbar: a corrupção</li>
+        <li>Modelos KayKit (CC0), câmera a 46°, FOV 30</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>O que ainda está ruim (nas duas)</h3>
+      <ul>
+        <li>Rachaduras de brasa quase não aparecem</li>
+        <li>Feitiço de fogo virou pontinhos amarelo-esverdeados</li>
+        <li>Orbes dos santuários estouraram pra branco</li>
+        <li>Câmera esconde o rosto do herói atrás do chapéu</li>
+        <li>Cristais são cubos esticados, só marcam posição</li>
+      </ul>
+    </div>
+  </div>
+</main>
+
+<dialog id="dlg"><img id="dimg" alt=""></dialog>
+<script>
+  const rng = document.getElementById('rng'), top_ = document.getElementById('top'),
+        cmp = document.getElementById('cmp'), topimg = document.getElementById('topimg');
+  const fit = () => { topimg.style.width = cmp.clientWidth + 'px'; topimg.style.height = 'auto'; };
+  rng.addEventListener('input', () => top_.style.width = rng.value + '%');
+  addEventListener('resize', fit); addEventListener('load', fit); fit();
+  const dlg = document.getElementById('dlg'), dimg = document.getElementById('dimg');
+  document.querySelectorAll('figure img').forEach(i => i.addEventListener('click', () => { dimg.src = i.src; dlg.showModal(); }));
+  dlg.addEventListener('click', () => dlg.close());
+</script>
+</body>
+</html>
