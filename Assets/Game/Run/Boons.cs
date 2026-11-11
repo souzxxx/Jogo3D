@@ -24,6 +24,25 @@ namespace Quintessence.Run
 
     public static class BoonEffects
     {
+        /// Nome do icone (Resources/Icons) que representa o efeito da bencao.
+        public static string Icon(BoonStat stat) => stat switch
+        {
+            BoonStat.DamageAll => "boon_damage",
+            BoonStat.DamageElement => "boon_element",
+            BoonStat.ReactionPower => "boon_reaction",
+            BoonStat.CritChance => "boon_crit",
+            BoonStat.MoveSpeed => "boon_speed",
+            BoonStat.DashCooldown => "boon_dash",
+            BoonStat.SkillCooldown => "boon_skill",
+            BoonStat.MaxHealth => "boon_health",
+            BoonStat.QuintessenceGain => "boon_quint",
+            BoonStat.HealOnReaction => "boon_leech",
+            BoonStat.HealOnRoomClear => "boon_rest",
+            BoonStat.SwitchStrike => "boon_switch",
+            BoonStat.StatusDuration => "boon_status",
+            _ => "boon",
+        };
+
         public static void Apply(HeroModifiers m, Boon b)
         {
             switch (b.stat)

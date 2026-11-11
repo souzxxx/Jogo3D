@@ -405,6 +405,33 @@ namespace Quintessence.Game.PlayTests
         }
 
         [UnityTest, Timeout(600000)]
+        public IEnumerator Shop_Has_A_Stall_And_A_Merchant()
+        {
+            GameEvents.Clear();
+            Time.timeScale = 1f;
+            Time.captureFramerate = 30;
+            GameFlow.StartElement = ElementType.Fire;
+            GameFlow.Seed = 3; GameFlow.Layers = 5; GameFlow.Shrines = 1;
+            yield return EditorSceneManager.LoadSceneAsyncInPlayMode("Assets/Scenes/Run.unity", new LoadSceneParameters(LoadSceneMode.Single));
+            yield return null;
+            yield return null;
+            var director = Object.FindFirstObjectByType<RunDirector>();
+            var hud = Object.FindFirstObjectByType<Hud>();
+            cam = Camera.main;
+            hud.UseCamera(cam);
+            Object.FindFirstObjectByType<WaveSpawner>().enabled = false;
+            for (int k = 0; k < 2000 && director.Busy; k++) yield return null;
+            director.ShowShop();
+            Object.FindFirstObjectByType<PlayerController>().Teleport(new Vector3(0.5f, 0, -3.8f), Vector3.forward);
+            for (int k = 0; k < 60; k++) yield return null;
+            Assert.IsNotNull(GameObject.Find("Merchant"), "a loja tem um mercador");
+            Assert.GreaterOrEqual(director.Interactables.Count(i => i.Prompt.StartsWith("comprar")), 2);
+            Shot(cam, "docs/img/loja_banca.png");
+            GameFlow.Layers = 8; GameFlow.Shrines = 3;
+            Time.captureFramerate = 0;
+        }
+
+        [UnityTest, Timeout(600000)]
         public IEnumerator Every_Layout_Loads_With_Its_Pieces()
         {
             GameEvents.Clear();

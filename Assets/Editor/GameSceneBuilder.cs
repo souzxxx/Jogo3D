@@ -57,7 +57,7 @@ public static class GameSceneBuilder
         }
         director.BindBoons(catalog);
         director.BindBoss(EnemyDevSceneBuilder.BossPrefab(melee, bomber));
-        director.BindShop(Prop("table_small", 1f), Prop("bottle_A_labeled_green", 1.8f));
+        director.BindShop(Prop("table_small", 1f), Prop("bottle_A_labeled_green", 1.8f), Prop("bottle_B_brown", 1.8f), ShopDecor());
         // ordem do enum RoomType: Combat, Elite, Shrine, Rest, Boss, Master, Shop
         string[] banners = { "banner_red", "banner_patternB_brown", "banner_blue", "banner_green", "banner_shield_red", "banner_patternA_yellow", "banner_patternA_green" };
         var bannerPrefabs = new GameObject[banners.Length];
@@ -70,6 +70,80 @@ public static class GameSceneBuilder
         hud.transform.SetParent(root, false);
         hud.AddComponent<Hud>();
     });
+
+    /// Banca do mercador, so com pecas do pack: prateleiras, balcao, barris, ouro e o vendedor atras do balcao.
+    static GameObject ShopDecor()
+    {
+        const string dir = "Assets/Game/Game/Prefabs/";
+        System.IO.Directory.CreateDirectory(dir);
+        var mat = LookDevBuilder.Mat("DungeonProp", CombatDevSceneBuilder.KK + "Dungeon/dungeon_texture.png", Color.white, Color.black, 0f);
+        var root = new GameObject("ShopDecor");
+        GameObject P(string model, float x, float z, float rot, float scale = 1f, float y = 0f)
+        {
+            var go = LookDevBuilder.Spawn("Dungeon/" + model + ".fbx", new Vector3(x, y, z), rot, mat, scale);
+            go.name = model;
+            go.transform.SetParent(root.transform, true);
+            return go;
+        }
+        float Top(GameObject go)
+        {
+            var rs = go.GetComponentsInChildren<Renderer>();
+            var b = rs[0].bounds; foreach (var r in rs) b.Encapsulate(r.bounds);
+            Debug.Log($"loja {go.name}: tamanho {b.size}");
+            return b.max.y;
+        }
+        void Solid(GameObject go)
+        {
+            var rs = go.GetComponentsInChildren<Renderer>();
+            var b = rs[0].bounds; foreach (var r in rs) b.Encapsulate(r.bounds);
+            var col = root.AddComponent<BoxCollider>();
+            col.center = b.center; col.size = b.size;
+        }
+
+        // balcao com toalha virado para quem entra; o mercador fica atras, de frente para a camera
+        var counter = P("table_long_tablecloth_decorated_A", -6.2f, -1.0f, 90);
+        Solid(counter);
+        float top = Top(counter);
+        P("coin_stack_large", -7.55f, -0.8f, 20, 1f, top);
+        P("coin_stack_medium", -7.1f, -1.3f, 0, 1f, top);
+        P("coin_stack_small", -7.75f, -1.45f, 50, 1f, top);
+        P("candle_triple", -4.75f, -0.75f, 0, 1f, top);
+        // estantes atras dele e estoque em volta
+        Solid(P("shelves", -7.3f, 2.4f, 0));
+        Solid(P("shelves", -5.1f, 2.4f, 0));
+        Solid(P("keg_decorated", -9.0f, 0.2f, 60));
+        Solid(P("barrel_small_stack", -3.0f, 2.6f, 15));
+        P("box_small_decorated", -8.9f, -1.6f, -20);
+        // ouro: bau aberto ao lado do balcao com moedas pelo chao
+        Solid(P("chest_gold", -3.2f, -0.2f, -20));
+        P("coin_stack_large", -3.9f, -1.3f, 0);
+        P("coin_stack_medium", -2.9f, -1.5f, 40);
+        P("coin_stack_small", -3.4f, -1.9f, 10);
+        P("coin_stack_small", -4.3f, -2.1f, 70);
+        // lado leste, para a sala nao ficar torta
+        Solid(P("trunk_large_A", 8.7f, 1.6f, -90));
+        Solid(P("box_stacked", 8.7f, -4.3f, 10));
+
+        // o mercador: o modelo de aventureiro do pack com outra paleta, parado atras do balcao
+        const string fbx = CombatDevSceneBuilder.KK + "Adventurers/Characters/Mage.fbx";
+        CombatDevSceneBuilder.Loop(fbx, "Idle");
+        var ctrl = CombatDevSceneBuilder.Controller(fbx, dir + "Merchant.controller", ("Idle", "Idle", 0f));
+        var cloth = LookDevBuilder.Mat("Merchant", CombatDevSceneBuilder.KK + "Adventurers/Props/rogue_texture.png", Color.white, Color.black, 0f);
+        var who = LookDevBuilder.Spawn("Adventurers/Characters/Mage.fbx", new Vector3(-6.2f, 0, 0.75f), 180, cloth);
+        who.name = "Merchant";
+        LookDevBuilder.Hide(who, "1H_Wand", "2H_Staff", "Spellbook_open");
+        who.transform.SetParent(root.transform, true);
+        CombatDevSceneBuilder.Animator(who, ctrl);
+
+        var lamp = new GameObject("StallLight").AddComponent<Light>();
+        lamp.transform.SetParent(root.transform, false);
+        lamp.transform.position = new Vector3(-6.2f, 3.0f, -1.6f);
+        lamp.type = LightType.Point; lamp.color = new Color(1f, 0.72f, 0.42f); lamp.intensity = 2.2f; lamp.range = 7f;
+
+        var prefab = PrefabUtility.SaveAsPrefabAsset(root, dir + "ShopDecor.prefab");
+        Object.DestroyImmediate(root);
+        return prefab;
+    }
 
     /// Prefab de uma peca do pack com o material do jogo.
     static GameObject Prop(string model, float scale)

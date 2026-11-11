@@ -29,6 +29,8 @@ namespace Quintessence.Game
         [SerializeField] GameObject chestPrefab;
         [SerializeField] GameObject tablePrefab;
         [SerializeField] GameObject bottlePrefab;
+        [SerializeField] GameObject elixirPrefab;
+        [SerializeField] GameObject shopDecorPrefab;
         [SerializeField] Material matteMaterial;
         [Tooltip("Arranjos de cobertura das salas de combate; a run sorteia um por sala.")]
         [SerializeField] RoomLayout[] layouts = new RoomLayout[0];
@@ -75,7 +77,18 @@ namespace Quintessence.Game
         static readonly Color Cream = new(0.93f, 0.88f, 0.78f);
 
         public void BindLayouts(RoomLayout[] list) => layouts = list;
-        public void BindShop(GameObject table, GameObject bottle) { tablePrefab = table; bottlePrefab = bottle; }
+        public void BindShop(GameObject table, GameObject bottle, GameObject elixir, GameObject decor)
+        {
+            tablePrefab = table; bottlePrefab = bottle; elixirPrefab = elixir; shopDecorPrefab = decor;
+        }
+
+        /// Monta a loja na sala atual sem passar pelo mapa. Para a cena de teste e as capturas.
+        public void ShowShop()
+        {
+            Cleanup();
+            ApplyLayout(-1);
+            SetupShop();
+        }
         public int LayoutCount => layouts.Length;
         public string CurrentLayout { get; private set; } = "";
         Transform layoutRoot;
@@ -375,13 +388,21 @@ namespace Quintessence.Game
         {
             var catalog = boonCatalog != null ? boonCatalog.boons : new List<Boon>();
             var stock = ShopPlanner.Stock(catalog, Run.BoonIds, player.Loadout.Awakened, rng, Run.Depth);
+            // banca do mercador: prateleiras, balcao, ouro e o proprio (tudo do pack), some junto com o layout da sala
+            if (shopDecorPrefab != null)
+            {
+                if (layoutRoot == null) layoutRoot = new GameObject("Layout").transform;
+                var decor = Instantiate(shopDecorPrefab, layoutRoot);
+                var merchant = decor.transform.Find("Merchant");
+                if (merchant != null) Label(merchant, new Vector3(0, 3.1f, 0), "MERCADOR", new Color(0.88f, 0.74f, 0.42f), 0.7f);
+            }
             for (int i = 0; i < stock.Count; i++)
             {
                 var item = stock[i];
                 var c = item.Kind == ShopItemKind.Boon && item.Boon.patron != ElementType.None ? ElementColors.Of(item.Boon.patron)
                     : item.Kind == ShopItemKind.Boon ? new Color(0.85f, 0.72f, 0.4f) : new Color(0.45f, 0.7f, 0.45f);
                 var root = new GameObject("Shop_" + item.Name);
-                root.transform.position = new Vector3((i - (stock.Count - 1) / 2f) * 4.4f, 0, -0.5f);
+                root.transform.position = new Vector3(2.7f + (i - (stock.Count - 1) / 2f) * 3.1f, 0, -1.4f);
                 float top = 0.9f;
                 if (tablePrefab != null)
                 {
@@ -391,12 +412,16 @@ namespace Quintessence.Game
                     if (rs.Length > 0) { var b = rs[0].bounds; foreach (var x in rs) b.Encapsulate(x.bounds); top = b.max.y; }
                 }
                 if (item.Kind == ShopItemKind.Boon)
-                    Matte(GameObject.CreatePrimitive(PrimitiveType.Cube), root.transform, new Vector3(0, top + 0.4f, 0), Vector3.one * 0.4f, c).localRotation = Quaternion.Euler(45, 45, 0);
-                else if (bottlePrefab != null) Instantiate(bottlePrefab, root.transform).transform.localPosition = new Vector3(0, top, 0);
-                Label(root.transform, new Vector3(0, top + 2.5f, 0), item.Name, Cream, 0.85f);
-                Label(root.transform, new Vector3(0, top + 1.8f, 0), Wrap(item.Description, 20), new Color(0.8f, 0.76f, 0.7f), 0.58f);
-                Label(root.transform, new Vector3(0, top + 1.05f, 0), item.Price + " de Essência", new Color(0.88f, 0.74f, 0.42f), 0.66f);
-                Glow(root.transform, new Vector3(0, top + 0.8f, -0.7f), c, 1.6f);
+                    Medal(root.transform, new Vector3(0, top + 0.75f, 0), BoonEffects.Icon(item.Boon.stat), c, 1.25f);
+                else
+                {
+                    var flask = item.Kind == ShopItemKind.MaxHealth && elixirPrefab != null ? elixirPrefab : bottlePrefab;
+                    if (flask != null) Instantiate(flask, root.transform).transform.localPosition = new Vector3(0, top, 0);
+                }
+                Label(root.transform, new Vector3(0, top + 2.8f, 0), Wrap(item.Name, 13), Cream, 0.72f);
+                Label(root.transform, new Vector3(0, top + 2.1f, 0), Wrap(item.Description, 16), new Color(0.8f, 0.76f, 0.7f), 0.5f);
+                Label(root.transform, new Vector3(0, top + 1.6f, 0), item.Price + " de Essência", new Color(0.88f, 0.74f, 0.42f), 0.62f);
+                Glow(root.transform, new Vector3(0, top + 0.8f, -0.7f), c, 1.1f);
                 Interactable entry = null;
                 entry = new Interactable
                 {
@@ -457,7 +482,7 @@ namespace Quintessence.Game
                 root.transform.position = new Vector3((i - (offer.Count - 1) / 2f) * 5.6f, 0, -0.5f);
                 // bau do pack com uma pedra fosca na cor do mestre que oferece
                 if (chestPrefab != null) Instantiate(chestPrefab, root.transform).transform.localPosition = Vector3.zero;
-                Matte(GameObject.CreatePrimitive(PrimitiveType.Cube), root.transform, new Vector3(0, 1.75f, 0), Vector3.one * 0.42f, c).localRotation = Quaternion.Euler(45, 45, 0);
+                Medal(root.transform, new Vector3(0, 1.8f, 0), BoonEffects.Icon(boon.stat), c, 1.15f);
                 Label(root.transform, new Vector3(0, 3.5f, 0), boon.name, Cream, 0.9f);
                 Label(root.transform, new Vector3(0, 2.7f, 0), Wrap(boon.description, 20), new Color(0.8f, 0.76f, 0.7f), 0.6f);
                 Glow(root.transform, new Vector3(0, 1.9f, -0.7f), c, 1.8f);
@@ -507,6 +532,25 @@ namespace Quintessence.Game
             if (m.HasProperty("_BaseColor")) m.SetColor("_BaseColor", color);
             go.GetComponent<Renderer>().material = m;
             return go.transform;
+        }
+
+        /// Medalhao com o icone do efeito, virado para a camera: disco escuro, aro e desenho na cor do mestre.
+        void Medal(Transform parent, Vector3 localPos, string icon, Color color, float size = 0.95f)
+        {
+            var root = new GameObject("Medal").transform;
+            root.SetParent(parent, false);
+            root.localPosition = localPos;
+            root.gameObject.AddComponent<FaceCamera>();
+            void Layer(Sprite sprite, Color tint, float width, int order)
+            {
+                var sr = new GameObject("Layer" + order).AddComponent<SpriteRenderer>();
+                sr.transform.SetParent(root, false);
+                sr.sprite = sprite; sr.color = tint; sr.sortingOrder = order;
+                sr.transform.localScale = Vector3.one * (width / sprite.bounds.size.x);
+            }
+            Layer(UI.UiKit.Circle, new Color(0.1f, 0.09f, 0.13f), size, 0);
+            Layer(UI.UiKit.Ring, Color.Lerp(color, Cream, 0.2f), size, 1);
+            Layer(UI.UiKit.Icon(icon), Color.Lerp(color, Cream, 0.55f), size * 0.66f, 2);
         }
 
         Transform Block(Transform parent, Vector3 localPos, Vector3 scale, Color color)

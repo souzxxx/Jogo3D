@@ -321,7 +321,7 @@ namespace Quintessence.UI
                 var c = list[i].patron == ElementType.None ? new Color(0.85f, 0.72f, 0.4f) : ElementColors.Of(list[i].patron);
                 var rt = UiKit.Rect("Boon" + i, boonRow, new Vector2(0, 0.5f), new Vector2(i * 46f, 0), new Vector2(40, 40));
                 UiKit.Image(rt, UiKit.Circle, new Color(0.07f, 0.06f, 0.1f, 0.85f));
-                UiKit.Image(UiKit.Rect("Icon", rt, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(28, 28)), UiKit.Icon("boon"), Color.Lerp(c, UiKit.Cream, 0.25f));
+                UiKit.Image(UiKit.Rect("Icon", rt, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(28, 28)), UiKit.Icon(BoonEffects.Icon(list[i].stat)), Color.Lerp(c, UiKit.Cream, 0.35f));
             }
         }
 
