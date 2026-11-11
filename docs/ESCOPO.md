@@ -158,10 +158,10 @@ Quatro frentes verticais. Cada uma tem a sua pasta/assembly e conversa com as ou
 Sprints sem data até confirmar a entrega. S0 é de todos e destrava o resto.
 
 ### S0 — Fundação (todos, feito nesta sessão)
-- [ ] Projeto Unity 6000.6.4f1 URP, .gitignore, estrutura de pastas e assemblies — **Leonardo**
-- [ ] Import dos packs CC0 + créditos no README — **Miguel**
-- [ ] Cena de look-dev aprovada pelo time — **Miguel**
-- [ ] Contratos entre frentes (eventos, `ElementType`, `DamageInfo`, `Health`) — **Leonardo**
+- [x] Projeto Unity 6000.6.4f1 URP, .gitignore, estrutura de pastas e assemblies — **Leonardo**
+- [x] Import dos packs CC0 + créditos no README — **Miguel**
+- [x] Cena de look-dev aprovada pelo time — **Miguel**
+- [x] Contratos entre frentes (eventos, `ElementType`, `DamageInfo`, `Health`) — **Leonardo**
 - [ ] Build WebGL vazia rodando no itch (prova o pipeline cedo) — **Nicolas**
 - [ ] Validar pesos da rubrica com o professor — **Nicolas**
 
