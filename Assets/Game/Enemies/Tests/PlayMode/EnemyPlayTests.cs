@@ -60,6 +60,9 @@ namespace Quintessence.Enemies.PlayTests
             GameEvents.EnemySpawned += _ => spawned++;
             GameEvents.RoomStarted += () => started = true;
             GameEvents.RoomCleared += () => cleared = true;
+            bool sawArmor = false, sawExplosion = false;
+            GameEvents.ArmorChanged += (_, on) => { if (on) sawArmor = true; };
+            GameEvents.Exploded += (_, _) => sawExplosion = true;
 
             // 1) parado: os inimigos chegam, avisam e acertam
             float wait = 9f;
@@ -71,7 +74,7 @@ namespace Quintessence.Enemies.PlayTests
 
             // 2) agora joga: desvia dos avisos, bate, troca de elemento e usa skill ate limpar a sala
             dodging = true;
-            float limit = 90f, sinceSwitch = 0f;
+            float limit = 150f, sinceSwitch = 0f;
             while (!cleared && !hp.IsDead && limit > 0f)
             {
                 float dt = Time.deltaTime;
@@ -109,8 +112,10 @@ namespace Quintessence.Enemies.PlayTests
 
             Assert.IsFalse(hp.IsDead, "o heroi morreu antes de limpar a sala");
             Assert.IsTrue(cleared, "a sala deveria ficar limpa quando a ultima onda morre");
-            Assert.AreEqual(2, waves, "duas ondas");
-            Assert.AreEqual(7, spawned, "3 na primeira onda + 4 na segunda");
+            Assert.AreEqual(3, waves, "tres ondas");
+            Assert.AreEqual(12, spawned, "3 + 4 + 5 (Bruto, 2 Explosivos, 2 Rastejantes)");
+            Assert.IsTrue(sawArmor, "o Bruto nasce com armadura");
+            Assert.IsTrue(sawExplosion, "Explosivo deveria explodir (ou ser morto antes: entao este teste precisa de outro roteiro)");
             Assert.IsTrue(sawProjectile, "o atirador deveria ter atirado");
             for (float t = 1.8f; t > 0f; t -= Time.deltaTime) yield return Step();
             Assert.IsNull(Object.FindFirstObjectByType<EnemyBrain>(), "inimigos mortos somem da cena");
@@ -146,6 +151,8 @@ namespace Quintessence.Enemies.PlayTests
             {
                 var h = e.GetComponent<Health>();
                 if (h.IsDead) continue;
+                // o roteiro nao ataca o Explosivo: deixa chegar, desvia do aviso e confere a explosao
+                if (e.Definition.attack == EnemyAttackKind.Explode) continue;
                 float d = Vector3.Distance(e.transform.position, player.transform.position);
                 if (d < bestD) { bestD = d; best = h; }
             }

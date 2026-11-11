@@ -3,7 +3,8 @@ using UnityEngine;
 
 namespace Quintessence.Enemies
 {
-    public enum EnemyAttackKind { Melee, Projectile }
+    /// Explode: avisa um circulo em volta de si, explode (fere heroi e outros inimigos) e morre.
+    public enum EnemyAttackKind { Melee, Projectile, Explode }
 
     /// Numeros de um tipo de inimigo.
     [CreateAssetMenu(menuName = "Quintessence/Enemy Definition")]
@@ -12,6 +13,11 @@ namespace Quintessence.Enemies
         public string displayName = "Inimigo";
         public float maxHealth = 30f;
         public float moveSpeed = 4f;
+
+        [Header("Armadura")]
+        [Tooltip("Enquanto tiver armadura, leva so esta fracao do dano. Cai com Armadura Quebrada (finalizador de Terra).")]
+        public bool armored;
+        [Range(0.05f, 1f)] public float armoredDamageTaken = 0.4f;
 
         [Header("Ataque")]
         public EnemyAttackKind attack = EnemyAttackKind.Melee;
@@ -29,6 +35,8 @@ namespace Quintessence.Enemies
         [Tooltip("Centro da area do golpe, a frente do inimigo.")]
         public float strikeOffset = 1.5f;
         public float strikeRadius = 1.5f;
+        [Tooltip("So para Explode: dano nos outros inimigos pegos na explosao.")]
+        public float explosionDamageToEnemies = 12f;
 
         [Header("Projetil")]
         public GameObject projectilePrefab;

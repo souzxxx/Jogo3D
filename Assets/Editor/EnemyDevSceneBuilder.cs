@@ -18,15 +18,17 @@ public static class EnemyDevSceneBuilder
     public static void Build() => CombatDevSceneBuilder.BuildPlayable("Enzo_Enemies", ScenePath, root =>
     {
         Bake(root, NavPath);
-        Prefabs(out var melee, out var ranged);
+        Prefabs(out var melee, out var ranged, out var brute, out var bomber);
         var go = new GameObject("WaveSpawner");
         go.transform.SetParent(root, false);
         go.transform.position = new Vector3(1, 0, 0);
         var spawner = go.AddComponent<WaveSpawner>();
         var w1 = new Wave(); w1.entries.Add(new WaveEntry { prefab = melee, count = 3 });
         var w2 = new Wave(); w2.entries.Add(new WaveEntry { prefab = melee, count = 2 }); w2.entries.Add(new WaveEntry { prefab = ranged, count = 2 });
+        var w3 = new Wave(); w3.entries.Add(new WaveEntry { prefab = brute, count = 1 }); w3.entries.Add(new WaveEntry { prefab = bomber, count = 2 }); w3.entries.Add(new WaveEntry { prefab = melee, count = 2 });
         spawner.Waves.Add(w1);
         spawner.Waves.Add(w2);
+        spawner.Waves.Add(w3);
         EditorUtility.SetDirty(spawner);
     });
 
@@ -45,7 +47,7 @@ public static class EnemyDevSceneBuilder
     }
 
     /// Definicoes, animacoes e prefabs dos inimigos. Precisa de uma cena aberta por LookDevBuilder.BeginArena.
-    public static void Prefabs(out GameObject melee, out GameObject ranged)
+    public static void Prefabs(out GameObject melee, out GameObject ranged, out GameObject brute, out GameObject bomber)
     {
         Directory.CreateDirectory(Dir + "Data");
         Directory.CreateDirectory(Dir + "Prefabs");
@@ -84,6 +86,35 @@ public static class EnemyDevSceneBuilder
 
         melee = EnemyPrefab("Rastejante", "Skeletons/Characters/Skeleton_Minion.fbx", meleeDef, meleeCtrl, skel);
         ranged = EnemyPrefab("Atirador", "Skeletons/Characters/Skeleton_Mage.fbx", rangedDef, rangedCtrl, skel);
+
+        const string warriorFbx = KK + "Skeletons/Characters/Skeleton_Warrior.fbx";
+        const string rogueFbx = KK + "Skeletons/Characters/Skeleton_Rogue.fbx";
+        CombatDevSceneBuilder.Loop(warriorFbx, "Idle", "Idle_Combat", "Walking_A", "Running_A");
+        CombatDevSceneBuilder.Loop(rogueFbx, "Idle", "Idle_Combat", "Running_A", "Running_B");
+        var bruteCtrl = CombatDevSceneBuilder.Controller(warriorFbx, Dir + "Animation/Bruto.controller",
+            ("Idle", "Idle_Combat|Idle", 0f), ("Run", "Walking_A|Running_A", 0f), ("Attack", "2H_Melee_Attack_Chop|1H_Melee_Attack_Chop", 1.25f),
+            ("Death", "Death_B|Death_A", 0f), ("Spawn", "Spawn_Ground|Skeletons_Awaken_Standing|Idle", 0.7f));
+        var bomberCtrl = CombatDevSceneBuilder.Controller(rogueFbx, Dir + "Animation/Explosivo.controller",
+            ("Idle", "Idle_Combat|Idle", 0f), ("Run", "Running_B|Running_A", 0f), ("Attack", "Cheer|Spellcast_Raise|Idle", 0.75f),
+            ("Death", "Death_A", 0f), ("Spawn", "Spawn_Ground|Skeletons_Awaken_Standing|Idle", 0.7f));
+        var bruteDef = Asset<EnemyDefinition>("Bruto", d =>
+        {
+            d.displayName = "Bruto"; d.maxHealth = 70; d.moveSpeed = 2.7f;
+            d.armored = true; d.armoredDamageTaken = 0.4f;
+            d.attack = EnemyAttackKind.Melee; d.damage = 16; d.knockback = 9;
+            d.attackRange = 3f; d.telegraphTime = 0.95f; d.recoverTime = 0.8f; d.cooldown = 2.2f;
+            d.strikeOffset = 2f; d.strikeRadius = 2.4f;
+        });
+        var bomberDef = Asset<EnemyDefinition>("Explosivo", d =>
+        {
+            d.displayName = "Explosivo"; d.maxHealth = 16; d.moveSpeed = 5.6f;
+            d.attack = EnemyAttackKind.Explode; d.damage = 14; d.knockback = 8; d.explosionDamageToEnemies = 12;
+            d.attackRange = 1.9f; d.telegraphTime = 0.75f; d.recoverTime = 0.2f; d.cooldown = 1f;
+            d.strikeOffset = 0f; d.strikeRadius = 2.7f; d.element = ElementType.Fire;
+        });
+        var hot = LookDevBuilder.Mat("SkeletonExplosive", KK + "Skeletons/Characters/skeleton_texture.png", new Color(1.5f, 0.75f, 0.4f), Color.black, 0f);
+        brute = EnemyPrefab("Bruto", "Skeletons/Characters/Skeleton_Warrior.fbx", bruteDef, bruteCtrl, skel, 1.3f);
+        bomber = EnemyPrefab("Explosivo", "Skeletons/Characters/Skeleton_Rogue.fbx", bomberDef, bomberCtrl, hot, 0.9f);
     }
 
     static T Asset<T>(string name, System.Action<T> init) where T : ScriptableObject
@@ -116,7 +147,7 @@ public static class EnemyDevSceneBuilder
         return prefab;
     }
 
-    static GameObject EnemyPrefab(string name, string fbx, EnemyDefinition def, RuntimeAnimatorController ctrl, Material mat)
+    static GameObject EnemyPrefab(string name, string fbx, EnemyDefinition def, RuntimeAnimatorController ctrl, Material mat, float scale = 1f)
     {
         string path = Dir + "Prefabs/" + name + ".prefab";
         var go = new GameObject(name);
@@ -128,6 +159,8 @@ public static class EnemyDevSceneBuilder
         var model = LookDevBuilder.Spawn(fbx, Vector3.zero, 0, mat);
         model.name = "Model";
         model.transform.SetParent(go.transform, false);
+        model.transform.localScale = Vector3.one * scale;
+        col.height *= scale; col.radius *= scale; col.center *= scale;
         var anim = CombatDevSceneBuilder.Animator(model, ctrl);
         go.AddComponent<EnemyBrain>().Bind(def, anim);
         var prefab = PrefabUtility.SaveAsPrefabAsset(go, path);

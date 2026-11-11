@@ -16,6 +16,8 @@ namespace Quintessence.Game
     {
         [SerializeField] GameObject meleePrefab;
         [SerializeField] GameObject rangedPrefab;
+        [SerializeField] GameObject brutePrefab;
+        [SerializeField] GameObject bomberPrefab;
         [SerializeField] Material flatMaterial;
         [SerializeField] Vector3 entryPoint = new(0, 0.05f, -5.5f);
         [SerializeField] float doorLine = 5.6f;
@@ -43,7 +45,10 @@ namespace Quintessence.Game
             public Vector3 Position => Object.transform.position;
         }
 
-        public void Bind(GameObject melee, GameObject ranged, Material flat) { meleePrefab = melee; rangedPrefab = ranged; flatMaterial = flat; }
+        public void Bind(GameObject melee, GameObject ranged, GameObject brute, GameObject bomber, Material flat)
+        {
+            meleePrefab = melee; rangedPrefab = ranged; brutePrefab = brute; bomberPrefab = bomber; flatMaterial = flat;
+        }
 
         void Awake()
         {
@@ -165,6 +170,8 @@ namespace Quintessence.Game
                 var w = new Wave();
                 if (p.Melee > 0) w.entries.Add(new WaveEntry { prefab = meleePrefab, count = p.Melee });
                 if (p.Ranged > 0) w.entries.Add(new WaveEntry { prefab = rangedPrefab, count = p.Ranged });
+                if (p.Brute > 0 && brutePrefab != null) w.entries.Add(new WaveEntry { prefab = brutePrefab, count = p.Brute });
+                if (p.Bomber > 0 && bomberPrefab != null) w.entries.Add(new WaveEntry { prefab = bomberPrefab, count = p.Bomber });
                 waves.Add(w);
             }
             return waves;
@@ -324,15 +331,14 @@ namespace Quintessence.Game
             go.transform.SetParent(parent, false);
             go.transform.localPosition = localPos;
             var t = go.AddComponent<TextMesh>();
-            t.font = UiKit.Font;
+            t.font = GameFonts.Display;
             t.text = text;
-            t.fontSize = 64;
-            t.characterSize = 0.09f;
-            t.fontStyle = FontStyle.Bold;
+            t.fontSize = 80;
+            t.characterSize = 0.075f;
             t.anchor = TextAnchor.MiddleCenter;
             t.alignment = TextAlignment.Center;
             t.color = Color.Lerp(color, Color.white, 0.55f);
-            go.GetComponent<MeshRenderer>().sharedMaterial = UiKit.Font.material;
+            go.GetComponent<MeshRenderer>().sharedMaterial = GameFonts.Display.material;
             go.AddComponent<FaceCamera>();
         }
     }

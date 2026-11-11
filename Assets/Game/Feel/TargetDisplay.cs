@@ -72,7 +72,27 @@ namespace Quintessence.Feel
             return changed && on;
         }
 
-        public void Touch() => barTimer = 4f;
+        public bool Armored { get; private set; }
+
+        /// Com armadura: barra cinza-azulada e um segundo anel fixo no chao.
+        public void SetArmored(bool on)
+        {
+            Armored = on;
+            fillMat.color = on ? new Color(0.62f, 0.72f, 0.95f, 1f) : new Color(0.95f, 0.2f, 0.2f, 1f);
+            if (armorRing == null)
+            {
+                armorRing = new GameObject("ArmorRing").transform;
+                armorRing.SetParent(transform, false);
+                armorRing.gameObject.AddComponent<MeshFilter>().sharedMesh = CombatFeedback.RingMesh;
+                armorRing.gameObject.AddComponent<MeshRenderer>().sharedMaterial = new Material(feedback.FlatMaterial) { color = new Color(0.62f, 0.72f, 0.95f, 0.9f) };
+            }
+            armorRing.gameObject.SetActive(on);
+            barTimer = 9999f;
+        }
+
+        Transform armorRing;
+
+        public void Touch() => barTimer = Mathf.Max(barTimer, 4f);
 
         void LateUpdate()
         {
@@ -88,9 +108,15 @@ namespace Quintessence.Feel
                 ring.localScale = Vector3.one * (1.25f * pulse);
             }
 
+            if (armorRing != null && armorRing.gameObject.activeSelf)
+            {
+                if (!alive) armorRing.gameObject.SetActive(false);
+                armorRing.position = pos + Vector3.up * 0.05f;
+                armorRing.localScale = Vector3.one * 1.7f;
+            }
             barTimer -= Time.deltaTime;
             float hp = health.Max > 0f ? health.Current / health.Max : 0f;
-            bar.gameObject.SetActive(alive && barTimer > 0f && hp < 1f);
+            bar.gameObject.SetActive(alive && barTimer > 0f && (hp < 1f || Armored));
             if (bar.gameObject.activeSelf)
             {
                 shown = Mathf.MoveTowards(shown, hp, Time.deltaTime * 1.5f);

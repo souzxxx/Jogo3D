@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a9cf8aada748e4833867add4efcb33fc, type: 3}
+  m_Name: Bruto
+  m_EditorClassIdentifier: Quintessence.Enemies::Quintessence.Enemies.EnemyDefinition
+  displayName: Bruto
+  maxHealth: 70
+  moveSpeed: 2.7
+  armored: 1
+  armoredDamageTaken: 0.4
+  attack: 0
+  damage: 16
+  knockback: 9
+  attackRange: 3
+  telegraphTime: 0.95
+  recoverTime: 0.8
+  cooldown: 2.2
+  element: 0
+  strikeOffset: 2
+  strikeRadius: 2.4
+  explosionDamageToEnemies: 12
+  projectilePrefab: {fileID: 0}
+  projectileSpeed: 11
+  projectileRange: 16
+  keepDistance: 6

@@ -37,6 +37,17 @@ namespace Quintessence.Enemies
             agent.stoppingDistance = 0f;
             health.Damaged += OnDamaged;
             health.Died += OnDied;
+            GameEvents.StatusApplied += OnStatusApplied;
+        }
+
+        public bool Armored { get; private set; }
+
+        void OnStatusApplied(Health target, StatusType type, float duration)
+        {
+            if (target != health || type != StatusType.ArmorBroken || !Armored) return;
+            Armored = false;
+            health.Pool.ExtraDamageTakenMultiplier = 1f;
+            GameEvents.RaiseArmorChanged(health, false);
         }
 
         void Start()
@@ -45,10 +56,17 @@ namespace Quintessence.Enemies
             if (p != null) target = p.GetComponent<Health>();
             Play("Spawn", 0f);
             GameEvents.RaiseEnemySpawned(health);
+            if (definition.armored)
+            {
+                Armored = true;
+                health.Pool.ExtraDamageTakenMultiplier = definition.armoredDamageTaken;
+                GameEvents.RaiseArmorChanged(health, true);
+            }
         }
 
         void OnDestroy()
         {
+            GameEvents.StatusApplied -= OnStatusApplied;
             if (health == null) return;
             health.Damaged -= OnDamaged;
             health.Died -= OnDied;
@@ -87,7 +105,7 @@ namespace Quintessence.Enemies
             {
                 case EnemyAction.StartWindup:
                     strikeDir = toDir;
-                    strikePoint = transform.position + strikeDir * definition.strikeOffset;
+                    strikePoint = transform.position + strikeDir * (definition.attack == EnemyAttackKind.Explode ? 0f : definition.strikeOffset);
                     bool line = definition.attack == EnemyAttackKind.Projectile;
                     GameEvents.RaiseTelegraph(new TelegraphEvent
                     {
@@ -147,6 +165,7 @@ namespace Quintessence.Enemies
         void Strike(float missChance)
         {
             if (missChance > 0f && Random.value < missChance) { GameEvents.RaiseAttackMissed(health); return; }
+            if (definition.attack == EnemyAttackKind.Explode) { Explode(); return; }
             if (definition.attack == EnemyAttackKind.Projectile)
             {
                 Projectile.Spawn(definition.projectilePrefab, transform.position + Vector3.up * 1.3f + strikeDir * 0.8f, strikeDir,
@@ -162,6 +181,31 @@ namespace Quintessence.Enemies
             {
                 Point = target.transform.position + Vector3.up * 1.2f, Direction = strikeDir, Knockback = definition.knockback,
             });
+        }
+
+        static readonly Collider[] blast = new Collider[32];
+
+        void Explode()
+        {
+            var center = transform.position;
+            GameEvents.RaiseExploded(center, definition.strikeRadius);
+            int n = Physics.OverlapSphereNonAlloc(center + Vector3.up, definition.strikeRadius, blast, ~0, QueryTriggerInteraction.Ignore);
+            var seen = new System.Collections.Generic.HashSet<Health>();
+            for (int i = 0; i < n; i++)
+            {
+                var h = blast[i].GetComponentInParent<Health>();
+                if (h == null || h == health || h.IsDead || !seen.Add(h)) continue;
+                var dir = h.transform.position - center; dir.y = 0f;
+                dir = dir.sqrMagnitude > 0.01f ? dir.normalized : transform.forward;
+                bool ally = h.Team == health.Team;
+                // contra aliados o dano entra como se fosse do heroi: da pra usar o Explosivo contra o proprio bando
+                h.TakeDamage(new DamageInfo(ally ? definition.explosionDamageToEnemies : definition.damage, definition.element,
+                    ally ? Team.Player : health.Team, gameObject)
+                {
+                    Point = h.transform.position + Vector3.up * 1.2f, Direction = dir, Knockback = definition.knockback, IsReaction = true,
+                });
+            }
+            health.TakeDamage(new DamageInfo(99999f, ElementType.None, Team.Player, gameObject) { IsReaction = true });
         }
 
         static readonly RaycastHit[] rayHits = new RaycastHit[16];

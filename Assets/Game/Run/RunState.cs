@@ -48,7 +48,11 @@ namespace Quintessence.Run
     /// Quantos inimigos cada onda de uma sala tem. Cresce com a profundidade.
     public static class EncounterPlanner
     {
-        public struct WavePlan { public int Melee, Ranged; public int Total => Melee + Ranged; }
+        public struct WavePlan
+        {
+            public int Melee, Ranged, Brute, Bomber;
+            public int Total => Melee + Ranged + Brute + Bomber;
+        }
 
         public static List<WavePlan> Plan(RoomType type, int depth)
         {
@@ -56,18 +60,18 @@ namespace Quintessence.Run
             switch (type)
             {
                 case RoomType.Combat:
-                    waves.Add(new WavePlan { Melee = 2 + depth / 2 });
-                    waves.Add(new WavePlan { Melee = 2 + depth / 3, Ranged = depth >= 1 ? 1 + depth / 3 : 0 });
+                    waves.Add(new WavePlan { Melee = 2 + depth / 2, Bomber = depth >= 2 ? 1 + depth / 5 : 0 });
+                    waves.Add(new WavePlan { Melee = 2 + depth / 3, Ranged = depth >= 1 ? 1 + depth / 3 : 0, Brute = depth >= 3 ? 1 : 0 });
                     break;
                 case RoomType.Elite:
-                    waves.Add(new WavePlan { Melee = 3 + depth / 2, Ranged = 1 });
-                    waves.Add(new WavePlan { Melee = 3 + depth / 3, Ranged = 2 + depth / 3 });
-                    waves.Add(new WavePlan { Melee = 2, Ranged = 2 + depth / 4 });
+                    waves.Add(new WavePlan { Melee = 3 + depth / 2, Ranged = 1, Bomber = 1 });
+                    waves.Add(new WavePlan { Melee = 2 + depth / 3, Ranged = 2 + depth / 3, Brute = 1 });
+                    waves.Add(new WavePlan { Melee = 2, Ranged = 2 + depth / 4, Brute = 1 + depth / 5, Bomber = 2 });
                     break;
                 case RoomType.Boss: // provisorio ate o Guardiao das Cinzas existir
-                    waves.Add(new WavePlan { Melee = 4, Ranged = 1 });
-                    waves.Add(new WavePlan { Melee = 3, Ranged = 3 });
-                    waves.Add(new WavePlan { Melee = 5, Ranged = 2 });
+                    waves.Add(new WavePlan { Melee = 4, Ranged = 1, Bomber = 2 });
+                    waves.Add(new WavePlan { Melee = 3, Ranged = 3, Brute = 1 });
+                    waves.Add(new WavePlan { Melee = 3, Ranged = 2, Brute = 2, Bomber = 2 });
                     break;
             }
             return waves;

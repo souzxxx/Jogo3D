@@ -80,6 +80,8 @@ namespace Quintessence.Feel
             GameEvents.AttackMissed += OnMissed;
             GameEvents.EnemySpawned += OnEnemySpawned;
             GameEvents.WaveStarted += OnWave;
+            GameEvents.ArmorChanged += OnArmor;
+            GameEvents.Exploded += OnExploded;
             GameEvents.RoomCleared += OnRoomCleared;
             GameEvents.Shattered += OnShattered;
             GameEvents.QuintessenceActiveChanged += OnQuintessence;
@@ -103,6 +105,8 @@ namespace Quintessence.Feel
             GameEvents.AttackMissed -= OnMissed;
             GameEvents.EnemySpawned -= OnEnemySpawned;
             GameEvents.WaveStarted -= OnWave;
+            GameEvents.ArmorChanged -= OnArmor;
+            GameEvents.Exploded -= OnExploded;
             GameEvents.RoomCleared -= OnRoomCleared;
             GameEvents.Shattered -= OnShattered;
             GameEvents.QuintessenceActiveChanged -= OnQuintessence;
@@ -118,6 +122,8 @@ namespace Quintessence.Feel
             Flash(target).Flash(enemy ? new Color(3f, 0.35f, 0.3f) : new Color(3f, 3f, 3f), 0.16f);
             float size = applied >= 15f ? 1.5f : applied >= 8f ? 1.15f : applied <= 3f ? 0.7f : 0.95f;
             if (info.IsCrit) size *= 1.3f;
+            bool resisted = enemy && displays.TryGetValue(target, out var shown) && shown != null && shown.Armored && !info.IsReaction;
+            if (resisted) { size *= 0.8f; c = Steel; }
             DamageNumber.Spawn(target.transform.position + Vector3.up * 2.7f, Mathf.RoundToInt(applied) + (info.IsCrit ? "!" : ""),
                 enemy ? Color.Lerp(c, Color.white, 0.35f) : new Color(1f, 0.25f, 0.25f), size);
             var p = info.Point.sqrMagnitude > 0.001f ? info.Point : target.transform.position + Vector3.up * 1.2f;
@@ -204,6 +210,29 @@ namespace Quintessence.Feel
             var c = new Color(0.7f, 0.3f, 1f);
             Ring(p + Vector3.up * 0.2f, 30, 5f, 0.3f, 0.6f, 0.4f, c);
             Burst(p + Vector3.up * 0.3f, Vector3.up, 25f, 24, 2f, 7f, 0.3f, 0.7f, 0.55f, c);
+        }
+
+        static readonly Color Steel = new(0.62f, 0.72f, 0.95f);
+
+        void OnArmor(Health enemy, bool armored)
+        {
+            Display(enemy).SetArmored(armored);
+            Flash(enemy).SetTint(armored ? new Color(0.75f, 0.85f, 1.25f) : Color.white);
+            if (armored) return;
+            var p = enemy.transform.position + Vector3.up * 1.4f;
+            Burst(p, Vector3.up, 180f, 50, 4f, 11f, 0.25f, 0.6f, 0.5f, Steel);
+            LightFlash(p, Steel, 8f, 6f, 0.3f);
+            CameraShake.Add(0.4f);
+        }
+
+        void OnExploded(Vector3 point, float radius)
+        {
+            var c = new Color(1f, 0.5f, 0.1f);
+            var p = point + Vector3.up * 0.8f;
+            Ring(p, 70, radius / 0.25f, 0.6f, 1.3f, 0.4f, c);
+            Burst(p, Vector3.up, 180f, 90, 3f, 13f, 0.4f, 1.2f, 0.6f, c);
+            LightFlash(p + Vector3.up, c, 14f, radius * 3.5f, 0.4f);
+            CameraShake.Add(0.6f);
         }
 
         void OnWave(int index, int total)

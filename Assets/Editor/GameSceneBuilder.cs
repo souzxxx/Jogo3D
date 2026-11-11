@@ -27,7 +27,7 @@ public static class GameSceneBuilder
     static void BuildRun() => CombatDevSceneBuilder.BuildPlayable("Run", RunPath, root =>
     {
         EnemyDevSceneBuilder.Bake(root, "Assets/Scenes/Run_NavMesh.asset");
-        EnemyDevSceneBuilder.Prefabs(out var melee, out var ranged);
+        EnemyDevSceneBuilder.Prefabs(out var melee, out var ranged, out var brute, out var bomber);
 
         var sp = new GameObject("WaveSpawner");
         sp.transform.SetParent(root, false);
@@ -39,7 +39,7 @@ public static class GameSceneBuilder
         var flat = AssetDatabase.LoadAssetAtPath<Material>("Assets/Game/Feel/Materials/Flat.mat");
         var dir = new GameObject("RunDirector");
         dir.transform.SetParent(root, false);
-        dir.AddComponent<RunDirector>().Bind(melee, ranged, flat);
+        dir.AddComponent<RunDirector>().Bind(melee, ranged, brute, bomber, flat);
         var hud = new GameObject("Hud");
         hud.transform.SetParent(root, false);
         hud.AddComponent<Hud>();
