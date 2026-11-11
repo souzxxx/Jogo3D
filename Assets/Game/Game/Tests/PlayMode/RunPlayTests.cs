@@ -568,6 +568,114 @@ namespace Quintessence.Game.PlayTests
         }
 
         [UnityTest, Timeout(600000)]
+        public IEnumerator Tutorial_Teaches_Every_Step_Until_Quintessence()
+        {
+            GameEvents.Clear();
+            Time.timeScale = 1f;
+            Time.captureFramerate = 30;
+            yield return EditorSceneManager.LoadSceneAsyncInPlayMode("Assets/Scenes/Title.unity", new LoadSceneParameters(LoadSceneMode.Single));
+            yield return null;
+            yield return null;
+            var menu = Object.FindFirstObjectByType<TitleMenu>();
+            Assert.IsNotNull(menu.OnTutorial, "o titulo deveria ter o botao de treino ligado");
+            menu.OnTutorial();
+            for (int i = 0; i < 30 && SceneManager.GetActiveScene().name != GameFlow.RunScene; i++) yield return null;
+            for (int i = 0; i < 10; i++) yield return null;
+            var tut = Object.FindFirstObjectByType<TutorialDirector>();
+            Assert.IsNotNull(tut, "a cena de run deveria abrir o treino");
+            var hud = Object.FindFirstObjectByType<Hud>();
+            player = Object.FindFirstObjectByType<PlayerController>();
+            hp = player.GetComponent<Health>();
+            player.GetComponent<PlayerInputReader>().enabled = false;
+            input = player.gameObject.AddComponent<ScriptedInput>();
+            player.Input = input;
+            cam = Camera.main;
+            hud.UseCamera(cam);
+            Assert.AreEqual(0, Object.FindObjectsByType<EnemyBrain>(FindObjectsSortMode.None).Length, "treino nao tem inimigo que revida");
+            var dummies = Object.FindObjectsByType<DummyTarget>(FindObjectsSortMode.None);
+            Assert.AreEqual(3, dummies.Length);
+            Assert.AreEqual(1, player.Loadout.Awakened.Count);
+
+            System.Func<TutorialStep, float, IEnumerator> until = WaitStep;
+            IEnumerator WaitStep(TutorialStep step, float seconds)
+            {
+                for (float t = seconds; t > 0f && tut.State.Step == step; t -= Time.deltaTime) yield return null;
+                Assert.AreNotEqual(step, tut.State.Step, "o treino travou em " + step);
+            }
+            Transform Closest() => dummies.Where(d => !d.GetComponent<Health>().IsDead)
+                .OrderBy(d => Vector3.Distance(d.transform.position, player.transform.position)).First().transform;
+            IEnumerator Approach()
+            {
+                for (float t = 6f; t > 0f; t -= Time.deltaTime)
+                {
+                    var to = Closest().position - player.transform.position; to.y = 0;
+                    input.AimPoint = Closest().position;
+                    if (to.magnitude < 2.4f) break;
+                    input.Move = new Vector2(to.x, to.z).normalized;
+                    yield return null;
+                }
+                input.Move = Vector2.zero;
+            }
+
+            // bater antes da hora nao pula a licao de mover
+            Assert.AreEqual(TutorialStep.Move, tut.State.Step);
+            input.Move = new Vector2(1, 0);
+            yield return until(TutorialStep.Move, 6f);
+            input.Move = Vector2.zero;
+            Shot(cam, "docs/img/treino.png");
+
+            Assert.AreEqual(TutorialStep.Dash, tut.State.Step);
+            input.Move = new Vector2(-1, 0);
+            input.PressDash();
+            yield return until(TutorialStep.Dash, 3f);
+            input.Move = Vector2.zero;
+
+            yield return Approach();
+            input.AttackHeld = true;
+            yield return until(TutorialStep.Attack, 8f);
+            input.AttackHeld = false;
+
+            for (float t = 1.5f; t > 0f; t -= Time.deltaTime) yield return null;
+            input.AimPoint = Closest().position;
+            input.PressSkill();
+            yield return until(TutorialStep.Skill, 4f);
+            Assert.AreEqual(2, player.Loadout.Awakened.Count, "o treino desperta o segundo elemento para a troca");
+
+            for (float t = 1.2f; t > 0f; t -= Time.deltaTime) yield return null;
+            input.PressSwitch(1);
+            yield return until(TutorialStep.Switch, 3f);
+
+            // o boneco ja tem a marca do primeiro elemento: bater com o segundo detona
+            yield return Approach();
+            input.AttackHeld = true;
+            for (float t = 12f; t > 0f && tut.State.Step == TutorialStep.React; t -= Time.deltaTime)
+            {
+                // se a marca sumiu, volta ao primeiro elemento, marca de novo e troca
+                input.AimPoint = Closest().position;
+                var to = Closest().position - player.transform.position; to.y = 0;
+                input.Move = to.magnitude > 2.4f ? new Vector2(to.x, to.z).normalized : Vector2.zero;
+                if (Mathf.FloorToInt(t * 0.5f) != Mathf.FloorToInt((t + Time.deltaTime) * 0.5f)) input.PressSwitch(1);
+                yield return null;
+            }
+            input.AttackHeld = false; input.Move = Vector2.zero;
+            Assert.AreNotEqual(TutorialStep.React, tut.State.Step, "o treino travou na reacao");
+            Shot(cam, "docs/img/treino_reacao.png");
+
+            Assert.AreEqual(4, player.Loadout.Awakened.Count, "para a Quintessencia o treino entrega os quatro elementos");
+            Assert.IsTrue(player.QuintessenceReady);
+            for (float t = 0.5f; t > 0f; t -= Time.deltaTime) yield return null;
+            input.PressQuintessence();
+            yield return until(TutorialStep.Quintessence, 3f);
+            Assert.IsTrue(tut.State.Finished);
+            for (float t = 8f; t > 0f && !hud.ResultVisible; t -= Time.deltaTime) yield return null;
+            Assert.IsTrue(hud.ResultVisible, "no fim o treino oferece comecar a run ou voltar ao menu");
+            Assert.AreEqual(hp.Max, hp.Current, 0.01f, "ninguem bate no heroi no treino");
+            Shot(cam, "docs/img/treino_fim.png");
+            GameFlow.Tutorial = false;
+            Time.captureFramerate = 0;
+        }
+
+        [UnityTest, Timeout(600000)]
         public IEnumerator Every_Layout_Loads_With_Its_Pieces()
         {
             GameEvents.Clear();

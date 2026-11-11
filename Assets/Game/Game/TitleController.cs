@@ -11,6 +11,7 @@ namespace Quintessence.Game
             var menu = FindFirstObjectByType<TitleMenu>();
             if (menu == null) menu = new GameObject("TitleMenu").AddComponent<TitleMenu>();
             menu.OnPick = GameFlow.StartRun;
+            menu.OnTutorial = GameFlow.StartTutorial;
             menu.BindMeta(MetaStore.Current, MetaStore.Save, MetaStore.Reset, () => MetaStore.Current);
         }
     }

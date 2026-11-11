@@ -36,6 +36,40 @@
   <p class="sub">Entrega mais recente no topo. Escopo em <a href="ESCOPO.md">ESCOPO.md</a> · kanban em <a href="https://github.com/users/souzxxx/projects/4">GitHub Projects</a>.</p>
 
   <section>
+    <h2>Treino: sala que ensina marca → troca → reação</h2>
+    <div class="meta"><span class="tag who">Leonardo</span><span class="tag ok">417 testes de regra + 13 testes jogando, todos passando</span></div>
+    <img src="img/treino.png" alt="Treino, passo do dash">
+    <img src="img/treino_reacao.png" alt="Treino, depois da reação">
+    <img src="img/treino_fim.png" alt="Fim do treino">
+    <div class="cols">
+      <div>
+        <h3>Como funciona</h3>
+        <ul>
+          <li>Botão <b>Treino</b> no título abre uma sala com três bonecos que não revidam</li>
+          <li>Sete passos, um de cada vez, numa caixa no topo: mover, dash, atacar e marcar, skill, trocar de elemento, reação e Quintessência</li>
+          <li>Só o passo atual conta: sair batendo não pula a lição de mover</li>
+          <li>O treino entrega o que cada passo precisa: o segundo elemento na hora da troca, e os quatro com a barra cheia na Quintessência</li>
+          <li>No fim: "Começar a run" ou "Menu principal". <kbd>Esc</kbd> pausa e deixa sair a qualquer momento</li>
+        </ul>
+      </div>
+      <div>
+        <h3>Conferido</h3>
+        <ul>
+          <li>Um teste abre o treino pelo título e faz os sete passos com o herói do roteiro, até a tela final, sem perder vida</li>
+          <li>Regras: sinal errado não avança, atacar pede três golpes, e depois de concluído nada mais muda</li>
+        </ul>
+        <h3 style="margin-top:14px">Limites</h3>
+        <ul>
+          <li class="warn">É opcional: quem clicar direto num elemento começa a run sem passar por ele</li>
+          <li class="warn">O texto do passo é só escrito; não há seta nem destaque na tecla</li>
+          <li class="warn">Não ensina portas, mapa, loja nem bênçãos</li>
+          <li class="warn">O treino começa sempre com Fogo</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section>
     <h2>Elite com traço e curva de dificuldade</h2>
     <div class="meta"><span class="tag who">Enzo</span><span class="tag ok">411 testes de regra + 12 testes jogando, todos passando</span></div>
     <img src="img/elite.png" alt="Sala de Elite Resistentes">

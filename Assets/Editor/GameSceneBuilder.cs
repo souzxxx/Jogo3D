@@ -64,6 +64,7 @@ public static class GameSceneBuilder
         for (int i = 0; i < banners.Length; i++) bannerPrefabs[i] = Prop(banners[i], 1f);
         var stone = LookDevBuilder.Mat("Stone", null, new Color(0.33f, 0.34f, 0.42f), Color.black, 0f);
         director.BindLayouts(Layouts());
+        director.BindTutorial(DummyPrefab());
         director.BindProps(Prop("wall_doorway", 1f), bannerPrefabs, Prop("column", 1f), Prop("chest_gold", 1f), stone);
         EditorUtility.SetDirty(director);
         var hud = new GameObject("Hud");
@@ -142,6 +143,26 @@ public static class GameSceneBuilder
 
         var prefab = PrefabUtility.SaveAsPrefabAsset(root, dir + "ShopDecor.prefab");
         Object.DestroyImmediate(root);
+        return prefab;
+    }
+
+    /// Boneco de treino: apanha, nao revida e volta depois de cair.
+    static GameObject DummyPrefab()
+    {
+        const string dir = "Assets/Game/Game/Prefabs/";
+        var mat = LookDevBuilder.Mat("Skeleton", CombatDevSceneBuilder.KK + "Skeletons/Characters/skeleton_texture.png", Color.white, Color.black, 0f);
+        var ctrl = AssetDatabase.LoadAssetAtPath<RuntimeAnimatorController>("Assets/Game/Combat/Animation/Dummy.controller");
+        var go = new GameObject("TrainingDummy");
+        var col = go.AddComponent<CapsuleCollider>();
+        col.height = 2.2f; col.radius = 0.55f; col.center = new Vector3(0, 1.1f, 0);
+        go.AddComponent<Quintessence.Core.Health>().Configure(150, Quintessence.Core.Team.Enemy);
+        go.AddComponent<Quintessence.Combat.DummyTarget>();
+        var model = LookDevBuilder.Spawn("Skeletons/Characters/Skeleton_Minion.fbx", Vector3.zero, 0, mat);
+        model.name = "Model";
+        model.transform.SetParent(go.transform, false);
+        if (ctrl != null) CombatDevSceneBuilder.Animator(model, ctrl);
+        var prefab = PrefabUtility.SaveAsPrefabAsset(go, dir + "TrainingDummy.prefab");
+        Object.DestroyImmediate(go);
         return prefab;
     }
 

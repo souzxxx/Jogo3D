@@ -176,7 +176,7 @@ Sprints sem data até confirmar a entrega. S0 é de todos e destrava o resto.
 - [x] S3 · Quintessência (medidor + estado)
 - [x] S4 · Morte, fim de run e pausa (feitos junto com a run do Nicolas)
 - [ ] S4 · Caça a dead ends e recuperação de erro (rubrica Estados e Erros)
-- [ ] S4 · Sala de treino/tutorial que ensina marca → reação
+- [x] S4 · Sala de treino/tutorial que ensina marca → reação (botão Treino no título, sete passos, opcional)
 
 ### Enzo — Inimigos e salas
 - [x] S1 · Inimigo base: NavMesh, perseguir, telegrafar, atacar, morrer

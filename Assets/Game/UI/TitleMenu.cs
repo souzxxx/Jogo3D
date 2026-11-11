@@ -9,6 +9,7 @@ namespace Quintessence.UI
     public class TitleMenu : MonoBehaviour
     {
         public Action<ElementType> OnPick;
+        public Action OnTutorial;
         Canvas canvas;
         RectTransform refuge;
         UnityEngine.UI.Text refugeLabel;
@@ -142,7 +143,9 @@ namespace Quintessence.UI
                 UiKit.Image(UiKit.Rect("Rule", card, new Vector2(0.5f, 1), new Vector2(0, -220), new Vector2(72, 4)), null, Color.Lerp(c, UiKit.Cream, 0.2f));
                 UiKit.Text(UiKit.Rect("Note", card, new Vector2(0.5f, 0), new Vector2(0, 30), new Vector2(240, 68)), notes[i], 24, UiKit.Paper, TextAnchor.MiddleCenter, false);
             }
-            var open = UiKit.Button(root, "REFÚGIO", new Vector2(0.5f, 0), new Vector2(0, 118), new Vector2(480, 64), UiKit.Primary, () => ShowRefuge(true));
+            var open = UiKit.Button(root, "REFÚGIO", new Vector2(0.5f, 0), new Vector2(-125, 118), new Vector2(440, 64), UiKit.Primary, () => ShowRefuge(true));
+            UiKit.Button(root, "TREINO", new Vector2(0.5f, 0), new Vector2(235, 118), new Vector2(240, 64), UiKit.Secondary, () => OnTutorial?.Invoke())
+                .transform.Find("Label").GetComponent<UnityEngine.UI.Text>().fontSize = 28;
             refugeLabel = open.transform.Find("Label").GetComponent<UnityEngine.UI.Text>();
             refugeLabel.fontSize = 28;
             refuge = UiKit.Stretch("Refuge", root);

@@ -15,11 +15,22 @@ namespace Quintessence.Game
         public static int Seed = 1;
         public static int Layers = 8;
         public static int Shrines = 3;
+        /// A proxima cena de run abre a sala de treino em vez do mapa.
+        public static bool Tutorial;
 
         public static void StartRun(ElementType element)
         {
             StartElement = element;
+            Tutorial = false;
             Seed = Random.Range(1, int.MaxValue);
+            GameClock.SetPaused(false);
+            SceneManager.LoadScene(RunScene);
+        }
+
+        public static void StartTutorial()
+        {
+            StartElement = ElementType.Fire;
+            Tutorial = true;
             GameClock.SetPaused(false);
             SceneManager.LoadScene(RunScene);
         }

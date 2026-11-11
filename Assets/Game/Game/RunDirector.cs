@@ -31,6 +31,7 @@ namespace Quintessence.Game
         [SerializeField] GameObject bottlePrefab;
         [SerializeField] GameObject elixirPrefab;
         [SerializeField] GameObject shopDecorPrefab;
+        [SerializeField] GameObject dummyPrefab;
         [SerializeField] Material matteMaterial;
         [Tooltip("Arranjos de cobertura das salas de combate; a run sorteia um por sala.")]
         [SerializeField] RoomLayout[] layouts = new RoomLayout[0];
@@ -76,6 +77,7 @@ namespace Quintessence.Game
 
         static readonly Color Cream = new(0.93f, 0.88f, 0.78f);
 
+        public void BindTutorial(GameObject dummy) => dummyPrefab = dummy;
         public void BindLayouts(RoomLayout[] list) => layouts = list;
         public void BindShop(GameObject table, GameObject bottle, GameObject elixir, GameObject decor)
         {
@@ -131,6 +133,16 @@ namespace Quintessence.Game
             player = FindFirstObjectByType<PlayerController>();
             playerHealth = player.GetComponent<Health>();
             spawner = FindFirstObjectByType<WaveSpawner>();
+            if (GameFlow.Tutorial)
+            {
+                // treino: sem mapa nem ondas; outro diretor cuida da sala
+                Run = new RunState(RunMapGenerator.Generate(1, 3, 0));
+                hud.SetBoons(null);
+                hud.SetFade(0f);
+                gameObject.AddComponent<TutorialDirector>().Begin(player, hud, dummyPrefab);
+                enabled = false;
+                return;
+            }
             Run = new RunState(RunMapGenerator.Generate(GameFlow.Seed, GameFlow.Layers, GameFlow.Shrines));
             player.ResetLoadout(GameFlow.StartElement);
             baseMaxHealth = playerHealth.Max;

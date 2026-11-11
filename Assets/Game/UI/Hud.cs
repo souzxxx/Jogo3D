@@ -427,6 +427,44 @@ namespace Quintessence.UI
 
         public bool ResultVisible => resultPanel.gameObject.activeSelf;
 
+        RectTransform tutorialBox, tutorialFill;
+        Text tutorialTitle, tutorialText;
+
+        /// Caixa do treino no topo: passo atual, o que fazer e quanto falta.
+        public void ShowTutorial(int number, int total, string title, string text, float progress)
+        {
+            if (tutorialBox == null)
+            {
+                tutorialBox = UiKit.Box("Tutorial", canvas.transform, new Vector2(0.5f, 1), new Vector2(0, -110), new Vector2(980, 150), 0.9f);
+                tutorialBox.SetAsFirstSibling(); // fica por baixo da pausa e do resultado
+                tutorialTitle = UiKit.Text(UiKit.Rect("Title", tutorialBox, new Vector2(0.5f, 1), new Vector2(0, -14), new Vector2(900, 44)), "", 34, new Color(0.88f, 0.74f, 0.42f));
+                tutorialText = UiKit.Text(UiKit.Rect("Text", tutorialBox, new Vector2(0.5f, 1), new Vector2(0, -62), new Vector2(900, 64)), "", 25, UiKit.Cream, TextAnchor.MiddleCenter, false);
+                tutorialText.horizontalOverflow = HorizontalWrapMode.Wrap;
+                var track = UiKit.Rect("Track", tutorialBox, new Vector2(0.5f, 0), new Vector2(0, 12), new Vector2(300, 6));
+                UiKit.Image(track, null, new Color(1f, 1f, 1f, 0.12f));
+                tutorialFill = UiKit.Rect("Fill", track, new Vector2(0, 0.5f), Vector2.zero, new Vector2(0, 6));
+                UiKit.Image(tutorialFill, null, new Color(0.88f, 0.74f, 0.42f));
+            }
+            tutorialBox.gameObject.SetActive(true);
+            tutorialTitle.text = $"{number}/{total}  ·  {title}";
+            tutorialText.text = text;
+            tutorialFill.sizeDelta = new Vector2(300f * Mathf.Clamp01(progress), 6);
+        }
+
+        public void ShowTutorialEnd(Action start, Action menu)
+        {
+            if (tutorialBox != null) tutorialBox.gameObject.SetActive(false);
+            resultPanel.gameObject.SetActive(true);
+            foreach (Transform child in resultPanel) Destroy(child.gameObject);
+            var center = new Vector2(0.5f, 0.5f);
+            var title = UiKit.Text(UiKit.Rect("Title", resultPanel, center, new Vector2(0, 200), new Vector2(1500, 120)), "TREINO CONCLUÍDO", 92, new Color(0.9f, 0.76f, 0.42f));
+            title.font = GameFonts.Title;
+            UiKit.Text(UiKit.Rect("Stats", resultPanel, center, new Vector2(0, 70), new Vector2(1400, 120)),
+                "Marque com um elemento, troque e detone com outro.\nNa run você começa com um elemento só e desperta os outros nos Santuários.", 30, UiKit.Cream, TextAnchor.MiddleCenter, false);
+            UiKit.Button(resultPanel, "Começar a run", center, new Vector2(0, -60), new Vector2(380, 70), UiKit.Primary, start);
+            UiKit.Button(resultPanel, "Menu principal", center, new Vector2(0, -150), new Vector2(380, 70), UiKit.Secondary, menu);
+        }
+
         public void ShowResult(bool victory, string stats, Action again, Action menu)
         {
             resultPanel.gameObject.SetActive(true);
