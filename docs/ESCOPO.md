@@ -195,8 +195,9 @@ Sprints sem data até confirmar a entrega. S0 é de todos e destrava o resto.
 - [x] S2 · Portas com ícone de recompensa, transição entre salas (texto no lugar de ícone)
 - [x] S2 · HUD: vida, roda de elementos, cooldowns, medidor de Quintessência
 - [x] S3 · Santuário (despertar elemento) e Descanso
-- [ ] S3 · Mestre (3 bênçãos) e Loja
-- [ ] S3 · ~20 bênçãos em ScriptableObject
+- [x] S3 · Mestre (3 bênçãos); Elite também paga bênção
+- [ ] S3 · Loja (dar uso à Essência)
+- [x] S3 · ~20 bênçãos em ScriptableObject
 - [ ] S4 · Hub com upgrades permanentes + save em PlayerPrefs
 - [ ] S4 · Menus: principal, pausa, opções (volume, tela cheia), créditos
 - [ ] Contínuo · GDD em DDE no Milanote, lore do mundo e do Guardião, página do itch

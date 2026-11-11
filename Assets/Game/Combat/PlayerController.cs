@@ -58,6 +58,8 @@ namespace Quintessence.Combat
         public float Quintessence01 => quint.Normalized;
         public bool QuintessenceActive => quint.Active;
         public bool QuintessenceReady => quint.Ready && loadout.HasAll;
+        public HeroModifiers Modifiers => mods;
+        readonly HeroModifiers mods = new();
 
         /// indice do golpe no combo
         public event Action<int> AttackStarted;
@@ -109,8 +111,10 @@ namespace Quintessence.Combat
 
         void OnReaction(ReactionEvent e)
         {
-            if (e.Source != gameObject || quint.Active) return;
-            quint.AddReaction();
+            if (e.Source != gameObject) return;
+            if (mods.HealOnReaction > 0f) health.Heal(mods.HealOnReaction);
+            if (quint.Active) return;
+            quint.AddMeter(QuintessenceState.PerReaction * mods.QuintessenceGainMult);
             GameEvents.RaiseQuintessenceMeter(quint.Normalized);
         }
 
@@ -130,7 +134,7 @@ namespace Quintessence.Combat
         /// 0 = pronta, 1 = acabou de usar.
         public float SkillCooldown01(ElementType e)
         {
-            float cd = Def(e).skillCooldown;
+            float cd = Def(e).skillCooldown * mods.SkillCooldownMult;
             return cd <= 0f ? 0f : Mathf.Clamp01(skillCd[(int)e] / cd);
         }
 
@@ -138,6 +142,7 @@ namespace Quintessence.Combat
         public void ResetLoadout(ElementType starting)
         {
             loadout = new LoadoutState(starting);
+            mods.Reset();
             dash.SetMaxCharges(Def(starting).dashCharges);
             GameEvents.RaiseElementAwakened(starting);
             GameEvents.RaiseElementSwitched(ElementType.None, starting);
@@ -183,9 +188,10 @@ namespace Quintessence.Combat
                 GameEvents.RaiseQuintessenceMeter(0f);
             }
 
-            float moveMul = 1f;
+            dash.Cooldown = dashCooldown * mods.DashCooldownMult;
+            float moveMul = mods.MoveSpeedMult;
             bool canAct = true;
-            if (TryGetComponent(out StatusHolder status)) { moveMul = status.State.MoveMultiplier; canAct = status.State.CanAct; }
+            if (TryGetComponent(out StatusHolder status)) { moveMul *= status.State.MoveMultiplier; canAct = status.State.CanAct; }
 
             var mv = Input.Move;
             var moveDir = Vector3.ClampMagnitude(new Vector3(mv.x, 0f, mv.y), 1f);
@@ -244,7 +250,7 @@ namespace Quintessence.Combat
                     castLeft = castDef.skillCastTime;
                     castT = 0f;
                     castHit = false;
-                    skillCd[ei] = castDef.skillCooldown;
+                    skillCd[ei] = castDef.skillCooldown * mods.SkillCooldownMult;
                     SkillStarted?.Invoke(Element);
                 }
                 else
@@ -301,7 +307,7 @@ namespace Quintessence.Combat
             var def = Def(Element);
             bool finisher = combo.CurrentIndex == combo.StepCount - 1;
             bool strike = loadout.ConsumeStrike();
-            float damage = step.Damage * def.damageMultiplier * (strike ? LoadoutState.StrikeBonus : 1f);
+            float damage = step.Damage * def.damageMultiplier * (strike ? LoadoutState.StrikeBonus + mods.SwitchStrikeAdd : 1f);
             int hits = ShapedHit(transform.position, AimDirection, attackRange, attackArc, damage, step.Knockback * def.knockbackMultiplier,
                 finisher ? AttackKind.Finisher : AttackKind.Basic, strike, def.critChance,
                 finisher && def.finisherAppliesStatus, def.finisherStatus, def.finisherStatusDuration);
@@ -357,18 +363,19 @@ namespace Quintessence.Combat
                 var to = target.transform.position - from;
                 to.y = 0f;
                 if (arc < 359f && to.sqrMagnitude > 0.6f && Vector3.Angle(direction, to) > arc * 0.5f) continue;
-                bool crit = critChance > 0f && UnityEngine.Random.value < critChance;
-                var info = new DamageInfo(damage * (crit ? critMultiplier : 1f), element, health.Team, gameObject)
+                float chance = critChance + mods.CritChanceAdd;
+                bool crit = chance > 0f && UnityEngine.Random.value < chance;
+                var info = new DamageInfo(damage * mods.Damage(element) * (crit ? critMultiplier : 1f), element, health.Team, gameObject)
                 {
                     Point = overlap[i].ClosestPoint(origin),
                     Direction = to.sqrMagnitude > 0.001f ? to.normalized : direction,
                     Knockback = knockback,
                     IsCrit = crit,
                 };
-                if (ElementCombat.Deliver(target, info, reactions, 1f, force) <= 0f) continue;
+                if (ElementCombat.Deliver(target, info, reactions, mods.ReactionPower, force) <= 0f) continue;
                 hits++;
                 if (applyStatus && !target.IsDead)
-                    StatusHolder.GetOrAdd(target).Apply(statusType, statusDuration, health.Team, gameObject);
+                    StatusHolder.GetOrAdd(target).Apply(statusType, statusDuration * mods.StatusDurationMult, health.Team, gameObject);
             }
             return hits;
         }

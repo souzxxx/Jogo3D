@@ -39,7 +39,20 @@ public static class GameSceneBuilder
         var flat = AssetDatabase.LoadAssetAtPath<Material>("Assets/Game/Feel/Materials/Flat.mat");
         var dir = new GameObject("RunDirector");
         dir.transform.SetParent(root, false);
-        dir.AddComponent<RunDirector>().Bind(melee, ranged, brute, bomber, flat);
+        var director = dir.AddComponent<RunDirector>();
+        director.Bind(melee, ranged, brute, bomber, flat);
+        const string catalogPath = "Assets/Game/Run/Data/Boons.asset";
+        var catalog = AssetDatabase.LoadAssetAtPath<Quintessence.Run.BoonCatalog>(catalogPath);
+        if (catalog == null)
+        {
+            System.IO.Directory.CreateDirectory("Assets/Game/Run/Data");
+            AssetDatabase.Refresh();
+            catalog = ScriptableObject.CreateInstance<Quintessence.Run.BoonCatalog>();
+            catalog.FillDefaults();
+            AssetDatabase.CreateAsset(catalog, catalogPath);
+        }
+        director.BindBoons(catalog);
+        EditorUtility.SetDirty(director);
         var hud = new GameObject("Hud");
         hud.transform.SetParent(root, false);
         hud.AddComponent<Hud>();

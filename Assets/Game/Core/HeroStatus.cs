@@ -16,6 +16,7 @@ namespace Quintessence.Core
         float Quintessence01 { get; }
         bool QuintessenceActive { get; }
         bool QuintessenceReady { get; }
+        HeroModifiers Modifiers { get; }
     }
 
     /// Pausa do jogo. Quem mexe em Time.timeScale (pausa de impacto) consulta aqui antes de devolver o tempo.

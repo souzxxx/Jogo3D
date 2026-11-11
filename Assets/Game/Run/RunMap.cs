@@ -4,8 +4,8 @@ using UnityEngine;
 
 namespace Quintessence.Run
 {
-    public enum RoomType { Combat, Elite, Shrine, Rest, Boss }
-    public enum RewardType { None, Essence, Health, Element }
+    public enum RoomType { Combat, Elite, Shrine, Rest, Boss, Master }
+    public enum RewardType { None, Essence, Health, Element, Boon }
 
     public class MapNode
     {
@@ -36,19 +36,19 @@ namespace Quintessence.Run
         public static string Name(RoomType t) => t switch
         {
             RoomType.Combat => "Combate", RoomType.Elite => "Elite", RoomType.Shrine => "Santuário",
-            RoomType.Rest => "Descanso", RoomType.Boss => "Chefe", _ => t.ToString(),
+            RoomType.Rest => "Descanso", RoomType.Boss => "Chefe", RoomType.Master => "Mestre", _ => t.ToString(),
         };
 
         public static string Name(RewardType r) => r switch
         {
-            RewardType.Essence => "Essência", RewardType.Health => "Vida", RewardType.Element => "Novo elemento", _ => "",
+            RewardType.Essence => "Essência", RewardType.Health => "Vida", RewardType.Element => "Novo elemento", RewardType.Boon => "Bênção", _ => "",
         };
 
         public static Color Color(RoomType t) => t switch
         {
             RoomType.Combat => new Color(0.95f, 0.35f, 0.3f), RoomType.Elite => new Color(0.75f, 0.35f, 1f),
             RoomType.Shrine => new Color(0.5f, 0.95f, 1f), RoomType.Rest => new Color(0.45f, 0.95f, 0.5f),
-            RoomType.Boss => new Color(1f, 0.6f, 0.15f), _ => UnityEngine.Color.white,
+            RoomType.Boss => new Color(1f, 0.6f, 0.15f), RoomType.Master => new Color(1f, 0.85f, 0.4f), _ => UnityEngine.Color.white,
         };
     }
 
@@ -72,7 +72,7 @@ namespace Quintessence.Run
                 bool shrine = shrineLayers.Contains(layer);
                 int width = edge ? 1 : shrine ? 1 + rng.Next(2) : 2 + rng.Next(2);
                 var list = new List<MapNode>();
-                bool restUsed = false;
+                bool restUsed = false, masterUsed = false;
                 for (int lane = 0; lane < width; lane++)
                 {
                     var n = new MapNode { Id = map.Nodes.Count, Layer = layer, Lane = lane };
@@ -83,7 +83,8 @@ namespace Quintessence.Run
                     {
                         int roll = rng.Next(100);
                         if (roll < 20 && !restUsed && lane > 0) { n.Type = RoomType.Rest; n.Reward = RewardType.Health; restUsed = true; }
-                        else if (roll < 40 && layer >= 3) { n.Type = RoomType.Elite; n.Reward = RewardType.Essence; }
+                        else if (roll < 40 && layer >= 3) { n.Type = RoomType.Elite; n.Reward = RewardType.Boon; }
+                        else if (roll >= 40 && roll < 58 && !masterUsed) { n.Type = RoomType.Master; n.Reward = RewardType.Boon; masterUsed = true; }
                         else { n.Type = RoomType.Combat; n.Reward = rng.Next(3) == 0 ? RewardType.Health : RewardType.Essence; }
                     }
                     map.Nodes.Add(n);

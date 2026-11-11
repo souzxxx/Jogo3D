@@ -1,0 +1,135 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2e239377880094b20b9b75e719502c1c, type: 3}
+  m_Name: Boons
+  m_EditorClassIdentifier: Quintessence.Run::Quintessence.Run.BoonCatalog
+  boons:
+  - id: fire_dmg
+    name: Brasa Viva
+    description: +20% de dano de Fogo
+    patron: 1
+    stat: 1
+    value: 0.2
+  - id: fire_react
+    name: "F\xF4lego do Forno"
+    description: "Rea\xE7\xF5es causam +15%"
+    patron: 1
+    stat: 2
+    value: 0.15
+  - id: fire_leech
+    name: Sangue Quente
+    description: "Cura 3 a cada rea\xE7\xE3o"
+    patron: 1
+    stat: 9
+    value: 3
+  - id: water_dmg
+    name: Corrente Fria
+    description: "+20% de dano de \xC1gua"
+    patron: 2
+    stat: 1
+    value: 0.2
+  - id: water_status
+    name: "Mar\xE9 Longa"
+    description: Status duram +30%
+    patron: 2
+    stat: 12
+    value: 0.3
+  - id: water_rest
+    name: Fonte Calma
+    description: Cura 12% ao limpar a sala
+    patron: 2
+    stat: 10
+    value: 0.12
+  - id: earth_dmg
+    name: Punho de Granito
+    description: +20% de dano de Terra
+    patron: 3
+    stat: 1
+    value: 0.2
+  - id: earth_hp
+    name: Casca de Pedra
+    description: "+25 de vida m\xE1xima"
+    patron: 3
+    stat: 7
+    value: 25
+  - id: earth_skill
+    name: Pulso da Montanha
+    description: "Skills recarregam 15% mais r\xE1pido"
+    patron: 3
+    stat: 6
+    value: 0.15
+  - id: air_dmg
+    name: "L\xE2mina do Vento"
+    description: +20% de dano de Ar
+    patron: 4
+    stat: 1
+    value: 0.2
+  - id: air_crit
+    name: "Olho do Falc\xE3o"
+    description: "+10% de chance de cr\xEDtico"
+    patron: 4
+    stat: 3
+    value: 0.1
+  - id: air_speed
+    name: Passo Leve
+    description: +12% de velocidade
+    patron: 4
+    stat: 4
+    value: 0.12
+  - id: air_dash
+    name: Rajada
+    description: "Dash recarrega 25% mais r\xE1pido"
+    patron: 4
+    stat: 5
+    value: 0.25
+  - id: all_dmg
+    name: Golpe Certeiro
+    description: +10% de dano em tudo
+    patron: 0
+    stat: 0
+    value: 0.1
+  - id: all_switch
+    name: "M\xE3o Trocada"
+    description: Golpe de Troca causa +25%
+    patron: 0
+    stat: 11
+    value: 0.25
+  - id: all_quint
+    name: "Centelha Prism\xE1tica"
+    description: "Quintess\xEAncia enche 30% mais r\xE1pido"
+    patron: 0
+    stat: 8
+    value: 0.3
+  - id: all_hp
+    name: "Cora\xE7\xE3o Firme"
+    description: "+15 de vida m\xE1xima"
+    patron: 0
+    stat: 7
+    value: 15
+  - id: all_react
+    name: Eco Elemental
+    description: "Rea\xE7\xF5es causam +10%"
+    patron: 0
+    stat: 2
+    value: 0.1
+  - id: all_skill
+    name: Foco
+    description: "Skills recarregam 10% mais r\xE1pido"
+    patron: 0
+    stat: 6
+    value: 0.1
+  - id: all_crit
+    name: Instinto
+    description: "+6% de chance de cr\xEDtico"
+    patron: 0
+    stat: 3
+    value: 0.06

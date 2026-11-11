@@ -16,7 +16,7 @@ namespace Quintessence.UI
         Canvas canvas;
         IHeroStatus hero;
         Image hpFill, hpLag, quintFill, fade;
-        Text hpText, quintText, essenceText, roomText, promptText;
+        Text hpText, quintText, essenceText, roomText, promptText, boonText;
         RectTransform promptBox, mapPanel, resultPanel, pausePanel, mapContent;
         readonly Slot[] slots = new Slot[4];
         readonly Image[] dashPips = new Image[2];
@@ -90,6 +90,8 @@ namespace Quintessence.UI
             roomText = UiKit.Text(UiKit.Rect("Room", root, new Vector2(0, 1), new Vector2(48, -40), new Vector2(700, 40)), "", 30, UiKit.Paper, TextAnchor.MiddleLeft);
             UiKit.Text(UiKit.Rect("Keys", root, new Vector2(1, 0), new Vector2(-48, 40), new Vector2(700, 26)),
                 "WASD mover · clique ataca · clique dir. skill · Espaço dash · R Quintessência · Tab mapa · Esc pausa", 19, UiKit.Dim, TextAnchor.MiddleRight, false);
+
+            boonText = UiKit.Text(UiKit.Rect("Boons", root, new Vector2(0, 1), new Vector2(48, -78), new Vector2(520, 400)), "", 22, new Color(1f, 0.88f, 0.55f), TextAnchor.UpperLeft, false);
 
             // aviso de interacao
             promptBox = UiKit.Rect("Prompt", root, new Vector2(0.5f, 0), new Vector2(0, 250), new Vector2(560, 54));
@@ -191,6 +193,9 @@ namespace Quintessence.UI
         // ---------- API usada pela run ----------
 
         public void SetRoom(string text) => roomText.text = text;
+
+        /// Lista das bencaos da run, no canto.
+        public void SetBoons(IEnumerable<string> lines) => boonText.text = string.Join("\n", lines);
         public void SetEssence(int amount) => essenceText.text = "Essência " + amount;
         public void SetFade(float alpha) => fade.color = new Color(0, 0, 0, Mathf.Clamp01(alpha));
 

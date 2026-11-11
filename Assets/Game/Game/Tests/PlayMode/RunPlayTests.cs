@@ -57,6 +57,94 @@ namespace Quintessence.Game.PlayTests
             Time.captureFramerate = 0;
         }
 
+        [UnityTest, Timeout(600000)]
+        public IEnumerator Master_Room_Offers_Boons_And_Taking_One_Changes_The_Hero()
+        {
+            GameEvents.Clear();
+            Time.timeScale = 1f;
+            Time.captureFramerate = 30;
+            GameFlow.StartElement = ElementType.Fire;
+            GameFlow.Layers = 5; GameFlow.Shrines = 1;
+            // procura uma semente em que a segunda sala pode ser um Mestre
+            int seed = 0;
+            for (int s = 1; s < 500 && seed == 0; s++)
+            {
+                var m = RunMapGenerator.Generate(s, 5, 1);
+                foreach (int id in m.Start.Next) if (m.Get(id).Type == RoomType.Master) seed = s;
+            }
+            Assert.AreNotEqual(0, seed, "nenhuma semente com Mestre na segunda sala");
+            GameFlow.Seed = seed;
+
+            yield return EditorSceneManager.LoadSceneAsyncInPlayMode("Assets/Scenes/Run.unity", new LoadSceneParameters(LoadSceneMode.Single));
+            yield return null;
+            yield return null;
+            var director = Object.FindFirstObjectByType<RunDirector>();
+            var hud = Object.FindFirstObjectByType<Hud>();
+            player = Object.FindFirstObjectByType<PlayerController>();
+            hp = player.GetComponent<Health>();
+            player.GetComponent<PlayerInputReader>().enabled = false;
+            input = player.gameObject.AddComponent<ScriptedInput>();
+            player.Input = input;
+            cam = Camera.main;
+            hud.UseCamera(cam);
+            GameEvents.TelegraphStarted += ConsiderDodge;
+
+            bool shot = false;
+            float limit = 120f, sinceInteract = 0f;
+            while (director.Run.Boons.Count == 0 && !director.Finished && limit > 0f)
+            {
+                float dt = Time.deltaTime;
+                limit -= dt; sinceInteract += dt;
+                var target = Nearest();
+                input.AttackHeld = false;
+                if (director.Busy) input.Move = Vector2.zero;
+                else if (dodgeLeft > 0f) { dodgeLeft -= dt; input.Move = new Vector2(dodgeDir.x, dodgeDir.z); }
+                else if (target != null)
+                {
+                    var to = target.transform.position - player.transform.position; to.y = 0;
+                    float d = to.magnitude;
+                    input.AimPoint = target.transform.position;
+                    input.Move = d > 2.6f ? new Vector2(to.x / d, to.z / d) : Vector2.zero;
+                    input.AttackHeld = d < 3.6f;
+                }
+                else if (director.Interactables.Count > 0)
+                {
+                    // na primeira sala escolhe a porta do Mestre; na sala do Mestre pega a primeira bencao
+                    var pick = director.Interactables[0];
+                    foreach (var it in director.Interactables) if (it.Prompt.Contains("Mestre")) pick = it;
+                    if (director.Run.Current.Type == RoomType.Master && !shot)
+                    {
+                        shot = true;
+                        input.Move = Vector2.zero;
+                        for (int i = 0; i < 20; i++) yield return null;
+                        Shot(cam, "docs/img/bencaos.png");
+                    }
+                    var to = pick.Position - player.transform.position; to.y = 0;
+                    float d = to.magnitude;
+                    input.Move = d > 1.4f ? new Vector2(to.x / d, to.z / d) : Vector2.zero;
+                    if (d < 2.2f && sinceInteract > 0.4f) { sinceInteract = 0f; input.PressInteract(); }
+                }
+                else input.Move = Vector2.zero;
+                yield return null;
+            }
+            input.Move = Vector2.zero;
+            GameEvents.TelegraphStarted -= ConsiderDodge;
+
+            Assert.IsTrue(shot, "nao chegou a sala do Mestre");
+            Assert.AreEqual(1, director.Run.Boons.Count, "deveria ter aceitado uma bencao");
+            var check = new HeroModifiers();
+            BoonEffects.Apply(check, director.Run.Boons[0]);
+            var mods = player.Modifiers;
+            Assert.IsTrue(mods.DamageAll == check.DamageAll && mods.ReactionPower == check.ReactionPower && mods.MaxHealthAdd == check.MaxHealthAdd
+                && mods.CritChanceAdd == check.CritChanceAdd && mods.Damage(ElementType.Fire) == check.Damage(ElementType.Fire),
+                "os modificadores do heroi deveriam refletir a bencao aceita");
+            Assert.AreEqual(100f + mods.MaxHealthAdd, hp.Max, 0.01f);
+            yield return null;
+            Assert.Greater(director.Interactables.Count, 0, "depois de escolher, as portas abrem");
+            GameFlow.Layers = 8; GameFlow.Shrines = 3;
+            Time.captureFramerate = 0;
+        }
+
         [UnityTest, Timeout(900000)]
         public IEnumerator Short_Run_From_First_Room_To_Victory()
         {
@@ -89,6 +177,9 @@ namespace Quintessence.Game.PlayTests
 
             Assert.AreEqual(1, player.Loadout.Awakened.Count, "a run comeca com um elemento so");
             Assert.AreEqual(RoomType.Combat, director.Run.Current.Type);
+            // Este teste confere o FLUXO da run, nao o balanceamento: a run curta chega ao chefe provisorio com so 2 elementos
+            // e o roteiro joga mal, entao ele leva 40% do dano. Dificuldade se mede jogando de verdade.
+            hp.Pool.ExtraDamageTakenMultiplier = 0.4f;
             for (float t = 1.2f; t > 0f; t -= Time.deltaTime) yield return Step();
 
             // pausa: o tempo para e volta

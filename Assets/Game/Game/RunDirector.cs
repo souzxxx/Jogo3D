@@ -19,6 +19,7 @@ namespace Quintessence.Game
         [SerializeField] GameObject brutePrefab;
         [SerializeField] GameObject bomberPrefab;
         [SerializeField] Material flatMaterial;
+        [SerializeField] BoonCatalog boonCatalog;
         [SerializeField] Vector3 entryPoint = new(0, 0.05f, -5.5f);
         [SerializeField] float doorLine = 5.6f;
         [SerializeField] float interactRange = 2.4f;
@@ -34,8 +35,9 @@ namespace Quintessence.Game
         WaveSpawner spawner;
         Hud hud;
         readonly List<Interactable> interactables = new();
-        float startTime;
+        float startTime, baseMaxHealth;
         bool mapByTab;
+        System.Random rng;
 
         public class Interactable
         {
@@ -49,6 +51,8 @@ namespace Quintessence.Game
         {
             meleePrefab = melee; rangedPrefab = ranged; brutePrefab = brute; bomberPrefab = bomber; flatMaterial = flat;
         }
+
+        public void BindBoons(BoonCatalog catalog) => boonCatalog = catalog;
 
         void Awake()
         {
@@ -76,6 +80,9 @@ namespace Quintessence.Game
             spawner = FindFirstObjectByType<WaveSpawner>();
             Run = new RunState(RunMapGenerator.Generate(GameFlow.Seed, GameFlow.Layers, GameFlow.Shrines));
             player.ResetLoadout(GameFlow.StartElement);
+            baseMaxHealth = playerHealth.Max;
+            rng = new System.Random(GameFlow.Seed);
+            hud.SetBoons(new string[0]);
             startTime = Time.time;
             hud.SetEssence(0);
             StartCoroutine(EnterRoom(Run.Current, true));
@@ -138,6 +145,9 @@ namespace Quintessence.Game
                 case RoomType.Shrine:
                     SetupShrine();
                     break;
+                case RoomType.Master:
+                    if (!SetupBoons()) { Run.RoomCleared(); OpenDoors(); }
+                    break;
                 case RoomType.Rest:
                     playerHealth.Heal(playerHealth.Max * 0.3f);
                     Feel.DamageNumber.Spawn(player.transform.position + Vector3.up * 3.5f, "DESCANSO: +30% DE VIDA", new Color(0.5f, 1f, 0.55f), 1.1f, 1.8f);
@@ -199,9 +209,11 @@ namespace Quintessence.Game
                 Feel.DamageNumber.Spawn(player.transform.position + Vector3.up * 3.2f, "+25% DE VIDA", new Color(0.5f, 1f, 0.55f), 1f, 1.4f);
                 essence /= 2;
             }
+            if (player.Modifiers.HealOnRoomClear > 0f) playerHealth.Heal(playerHealth.Max * player.Modifiers.HealOnRoomClear);
             Run.AddEssence(essence);
             hud.SetEssence(Run.Essence);
             if (node.Type == RoomType.Boss) { StartCoroutine(Finish(true)); return; }
+            if (node.Reward == RewardType.Boon && SetupBoons()) return; // as portas abrem depois de escolher
             OpenDoors();
         }
 
@@ -279,7 +291,7 @@ namespace Quintessence.Game
                 var e = missing[i];
                 var c = ElementColors.Of(e);
                 var root = new GameObject("Shrine_" + e);
-                root.transform.position = new Vector3((i - (missing.Count - 1) / 2f) * 4.5f, 0, 1.5f);
+                root.transform.position = new Vector3((i - (missing.Count - 1) / 2f) * 4.5f, 0, 0f);
                 Block(root.transform, new Vector3(0, 0.5f, 0), new Vector3(1.1f, 1f, 1.1f), new Color(0.3f, 0.3f, 0.38f));
                 var orb = GameObject.CreatePrimitive(PrimitiveType.Sphere);
                 Destroy(orb.GetComponent<Collider>());
@@ -305,9 +317,63 @@ namespace Quintessence.Game
             }
         }
 
+        /// Tres bencaos para escolher uma. Devolve false se nao sobrou nenhuma para oferecer.
+        bool SetupBoons()
+        {
+            if (boonCatalog == null) return false;
+            var offer = BoonPicker.Offer(boonCatalog.boons, Run.BoonIds, player.Loadout.Awakened, rng);
+            if (offer.Count == 0) return false;
+            for (int i = 0; i < offer.Count; i++)
+            {
+                var boon = offer[i];
+                var c = boon.patron == ElementType.None ? new Color(1f, 0.85f, 0.4f) : ElementColors.Of(boon.patron);
+                var root = new GameObject("Boon_" + boon.id);
+                root.transform.position = new Vector3((i - (offer.Count - 1) / 2f) * 5.6f, 0, -0.5f);
+                Block(root.transform, new Vector3(0, 0.4f, 0), new Vector3(1.3f, 0.8f, 1.3f), new Color(0.3f, 0.3f, 0.38f));
+                Block(root.transform, new Vector3(0, 1.5f, 0), new Vector3(0.55f, 0.55f, 0.55f), c).localRotation = Quaternion.Euler(45, 45, 0);
+                Label(root.transform, new Vector3(0, 3.5f, 0), boon.name, c);
+                Label(root.transform, new Vector3(0, 2.6f, 0), Wrap(boon.description, 20), Color.white, 0.62f);
+                Glow(root.transform, new Vector3(0, 1.7f, -0.6f), c);
+                interactables.Add(new Interactable
+                {
+                    Object = root, Prompt = "aceitar " + boon.name,
+                    Use = () =>
+                    {
+                        BoonEffects.Apply(player.Modifiers, boon);
+                        Run.AddBoon(boon);
+                        float max = baseMaxHealth + player.Modifiers.MaxHealthAdd;
+                        if (max > playerHealth.Max) { float gain = max - playerHealth.Max; playerHealth.Pool.SetMax(max); playerHealth.Heal(gain); }
+                        var lines = new List<string>();
+                        foreach (var b in Run.Boons) lines.Add("◆ " + b.name + " — " + b.description);
+                        hud.SetBoons(lines);
+                        Feel.DamageNumber.Spawn(player.transform.position + Vector3.up * 3.6f, boon.name.ToUpperInvariant() + "!", c, 1.2f, 1.6f);
+                        foreach (var it in interactables) if (it.Object != null) Destroy(it.Object);
+                        interactables.Clear();
+                        if (Run.Current.Type == RoomType.Master) Run.RoomCleared();
+                        OpenDoors();
+                    },
+                });
+            }
+            return true;
+        }
+
+        static string Wrap(string text, int width)
+        {
+            var sb = new System.Text.StringBuilder();
+            int line = 0;
+            foreach (var word in text.Split(' '))
+            {
+                if (line > 0 && line + word.Length > width) { sb.Append('\n'); line = 0; }
+                else if (line > 0) { sb.Append(' '); line++; }
+                sb.Append(word);
+                line += word.Length;
+            }
+            return sb.ToString();
+        }
+
         Material Tinted(Color c) => new(flatMaterial) { color = c };
 
-        void Block(Transform parent, Vector3 localPos, Vector3 scale, Color color)
+        Transform Block(Transform parent, Vector3 localPos, Vector3 scale, Color color)
         {
             var go = GameObject.CreatePrimitive(PrimitiveType.Cube);
             Destroy(go.GetComponent<Collider>());
@@ -315,6 +381,7 @@ namespace Quintessence.Game
             go.transform.localPosition = localPos;
             go.transform.localScale = scale;
             go.GetComponent<Renderer>().material = Tinted(color);
+            return go.transform;
         }
 
         void Glow(Transform parent, Vector3 localPos, Color color)
@@ -325,7 +392,7 @@ namespace Quintessence.Game
             l.type = LightType.Point; l.color = color; l.intensity = 3f; l.range = 6f;
         }
 
-        void Label(Transform parent, Vector3 localPos, string text, Color color)
+        void Label(Transform parent, Vector3 localPos, string text, Color color, float scale = 1f)
         {
             var go = new GameObject("Label");
             go.transform.SetParent(parent, false);
@@ -334,21 +401,12 @@ namespace Quintessence.Game
             t.font = GameFonts.Display;
             t.text = text;
             t.fontSize = 80;
-            t.characterSize = 0.075f;
+            t.characterSize = 0.075f * scale;
             t.anchor = TextAnchor.MiddleCenter;
             t.alignment = TextAlignment.Center;
             t.color = Color.Lerp(color, Color.white, 0.55f);
             go.GetComponent<MeshRenderer>().sharedMaterial = GameFonts.Display.material;
             go.AddComponent<FaceCamera>();
-        }
-    }
-
-    public class FaceCamera : MonoBehaviour
-    {
-        void LateUpdate()
-        {
-            var cam = Camera.main;
-            if (cam != null) transform.rotation = cam.transform.rotation;
         }
     }
 }

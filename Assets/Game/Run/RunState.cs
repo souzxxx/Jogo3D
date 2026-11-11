@@ -10,6 +10,10 @@ namespace Quintessence.Run
         public readonly HashSet<int> Visited = new();
         public int Essence { get; private set; }
         public int RoomsCleared { get; private set; }
+        public readonly List<Boon> Boons = new();
+        public readonly HashSet<string> BoonIds = new();
+
+        public void AddBoon(Boon b) { Boons.Add(b); BoonIds.Add(b.id); }
 
         public RunState(RunMap map)
         {
