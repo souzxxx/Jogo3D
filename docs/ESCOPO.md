@@ -199,8 +199,8 @@ Sprints sem data até confirmar a entrega. S0 é de todos e destrava o resto.
 - [x] S3 · Loja (poção, elixir e bênçãos por Essência)
 - [x] S3 · ~20 bênçãos em ScriptableObject
 - [x] S4 · Hub com upgrades permanentes + save em PlayerPrefs (Refúgio: painel no título, não uma sala 3D)
-- [ ] S4 · Menus: principal, pausa, opções (volume, tela cheia), créditos
-- [ ] Contínuo · GDD em DDE no Milanote, lore do mundo e do Guardião, página do itch
+- [x] S4 · Menus: principal, pausa, opções (volume, tela cheia), créditos
+- [x] Contínuo · GDD em DDE: rascunho em `docs/GDD.md` (falta colar no Milanote, aprovar a lore proposta e fazer a página do itch)
 
 ### Miguel — Visual e feedback
 - [ ] S1 · Pipeline URP pra WebGL, luz de crepúsculo, pós-processamento

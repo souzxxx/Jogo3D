@@ -20,12 +20,12 @@ namespace Quintessence.Game
         {
             player = hero; hud = display;
             player.ResetLoadout(GameFlow.StartElement);
-            player.Teleport(new Vector3(0, 0, -4f), Vector3.forward);
+            player.Teleport(new Vector3(0, 0, -4.8f), Vector3.forward);
             lastPos = player.transform.position;
             hud.SetRoom("Treino", RoomType.Rest);
             hud.SetEssence(0);
             if (dummyPrefab != null)
-                foreach (var p in new[] { new Vector3(-4f, 0, 2f), new Vector3(0, 0, 3.5f), new Vector3(4f, 0, 2f) })
+                foreach (var p in new[] { new Vector3(-4f, 0, 0.5f), new Vector3(0, 0, 1.8f), new Vector3(4f, 0, 0.5f) })
                     Instantiate(dummyPrefab, p, Quaternion.Euler(0, 180, 0), transform);
             player.DashStarted += OnDash;
             player.SkillStarted += OnSkill;

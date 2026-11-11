@@ -63,6 +63,14 @@ namespace Quintessence.Game.PlayTests
             yield return null;
             Shot(Camera.main, "docs/img/titulo.png");
 
+            menu.ShowOptions();
+            yield return null; yield return null;
+            Assert.IsTrue(menu.SheetOpen);
+            Shot(Camera.main, "docs/img/opcoes.png");
+            menu.ShowCredits();
+            yield return null; yield return null;
+            Shot(Camera.main, "docs/img/creditos.png");
+
             menu.OnPick(ElementType.Water);
             for (int i = 0; i < 30 && SceneManager.GetActiveScene().name != GameFlow.RunScene; i++) yield return null;
             Assert.AreEqual(GameFlow.RunScene, SceneManager.GetActiveScene().name, "escolher o elemento deveria carregar a run");
@@ -261,6 +269,8 @@ namespace Quintessence.Game.PlayTests
             director.SetPaused(true);
             yield return null;
             Assert.AreEqual(0f, Time.timeScale); Assert.IsTrue(hud.PauseVisible);
+            yield return null;
+            Shot(cam, "docs/img/pausa.png");
             director.SetPaused(false);
             yield return null;
             Assert.AreEqual(1f, Time.timeScale); Assert.IsFalse(hud.PauseVisible);

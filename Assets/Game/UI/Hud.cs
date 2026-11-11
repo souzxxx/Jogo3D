@@ -392,37 +392,31 @@ namespace Quintessence.UI
             if (!show) return;
             foreach (Transform child in pausePanel) Destroy(child.gameObject);
             var center = new Vector2(0.5f, 0.5f);
-            UiKit.Text(UiKit.Rect("Title", pausePanel, center, new Vector2(0, 300), new Vector2(800, 80)), "PAUSADO", 72, UiKit.Cream);
-            UiKit.Button(pausePanel, "Continuar", center, new Vector2(0, 180), new Vector2(380, 70), UiKit.Primary, resume);
-            UiKit.Button(pausePanel, "Menu principal", center, new Vector2(0, 90), new Vector2(380, 70), UiKit.Secondary, menu);
-            if (boons != null && boons.Count > 0)
+            bool hasBoons = boons != null && boons.Count > 0;
+            // com bencaos, o painel sobe um pouco para a lista caber embaixo
+            float top = hasBoons ? 110f : 30f;
+            UiKit.Box("Box", pausePanel, center, new Vector2(0, top), new Vector2(780, 640), 0.94f);
+            var title = UiKit.Text(UiKit.Rect("Title", pausePanel, center, new Vector2(0, top + 250), new Vector2(700, 80)), "PAUSADO", 64, UiKit.Cream);
+            title.font = GameFonts.Title;
+            UiKit.Button(pausePanel, "Continuar", center, new Vector2(0, top + 150), new Vector2(640, 70), UiKit.Primary, resume);
+            UiOptions.Build(pausePanel, new Vector2(0, top - 20));
+            UiKit.Button(pausePanel, "Menu principal", center, new Vector2(0, top - 235), new Vector2(640, 64), UiKit.Secondary, menu);
+            if (hasBoons)
             {
-                UiKit.Text(UiKit.Rect("BoonsTitle", pausePanel, center, new Vector2(0, -10), new Vector2(900, 40)), "BÊNÇÃOS", 30, UiKit.Dim);
+                UiKit.Text(UiKit.Rect("BoonsTitle", pausePanel, center, new Vector2(0, top - 350), new Vector2(900, 36)), "BÊNÇÃOS", 26, UiKit.Dim);
+                bool two = boons.Count > 4;
+                int rows = two ? (boons.Count + 1) / 2 : boons.Count;
                 for (int i = 0; i < boons.Count; i++)
-                    UiKit.Text(UiKit.Rect("Boon" + i, pausePanel, center, new Vector2(0, -56 - i * 34), new Vector2(1100, 32)),
-                        boons[i].name + " — " + boons[i].description, 24, UiKit.Cream, TextAnchor.MiddleCenter, false);
+                {
+                    float x = two ? (i < rows ? -430f : 430f) : 0f;
+                    int row = two && i >= rows ? i - rows : i;
+                    UiKit.Text(UiKit.Rect("Boon" + i, pausePanel, center, new Vector2(x, top - 388 - row * 30), new Vector2(840, 30)),
+                        boons[i].name + " — " + boons[i].description, 22, UiKit.Cream, TextAnchor.MiddleCenter, false);
+                }
             }
-            Volume(new Vector2(-330, 230), "MÚSICA", () => AudioPrefs.Music, v => AudioPrefs.Music = v);
-            Volume(new Vector2(330, 230), "EFEITOS", () => AudioPrefs.Effects, v => AudioPrefs.Effects = v);
-            UiKit.Text(UiKit.Rect("Keys", pausePanel, new Vector2(0.5f, 0), new Vector2(0, 50), new Vector2(1700, 30)),
+            UiKit.Text(UiKit.Rect("Keys", pausePanel, new Vector2(0.5f, 0), new Vector2(0, 18), new Vector2(1700, 30)),
                 "WASD mover · mouse mira · clique ataca · botão direito skill · Espaço dash · Q/E troca elemento · R Quintessência · F interagir · Tab mapa",
-                22, UiKit.Dim, TextAnchor.MiddleCenter, false);
-        }
-
-        /// Controle de volume em dez passos: rotulo, botao de menos, valor, botao de mais.
-        void Volume(Vector2 pos, string label, Func<float> get, Action<float> set)
-        {
-            var center = new Vector2(0.5f, 0.5f);
-            var box = UiKit.Box("Volume_" + label, pausePanel, center, pos, new Vector2(300, 150));
-            UiKit.Text(UiKit.Rect("Label", box, center, new Vector2(0, 44), new Vector2(280, 34)), label, 26, UiKit.Dim);
-            var value = UiKit.Text(UiKit.Rect("Value", box, center, new Vector2(0, -18), new Vector2(100, 50)), AudioPrefs.Step(get()).ToString(), 44, UiKit.Cream);
-            void Change(int delta)
-            {
-                set(Mathf.Clamp(AudioPrefs.Step(get()) + delta, 0, 10) / 10f);
-                value.text = AudioPrefs.Step(get()).ToString();
-            }
-            UiKit.Button(box, "−", center, new Vector2(-96, -18), new Vector2(64, 64), UiKit.Secondary, () => Change(-1));
-            UiKit.Button(box, "+", center, new Vector2(96, -18), new Vector2(64, 64), UiKit.Secondary, () => Change(1));
+                20, UiKit.Dim, TextAnchor.MiddleCenter, false);
         }
 
         public bool ResultVisible => resultPanel.gameObject.activeSelf;

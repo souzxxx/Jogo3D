@@ -51,6 +51,48 @@ namespace Quintessence.UI
             return true;
         }
 
+        RectTransform sheet;
+        public bool SheetOpen => sheet != null && sheet.gameObject.activeSelf;
+
+        /// Painel simples por cima do titulo (opcoes, creditos): titulo, conteudo e Voltar.
+        RectTransform OpenSheet(string heading, float height)
+        {
+            foreach (Transform child in sheet) Destroy(child.gameObject);
+            sheet.gameObject.SetActive(true);
+            UiKit.Image(UiKit.Stretch("Shade", sheet), null, new Color(0.02f, 0.02f, 0.04f, 0.95f), true);
+            var box = UiKit.Box("Box", sheet, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(1000, height), 1f);
+            var title = UiKit.Text(UiKit.Rect("Title", box, new Vector2(0.5f, 1), new Vector2(0, -40), new Vector2(900, 70)), heading, 56, UiKit.Paper);
+            title.font = GameFonts.Title;
+            UiKit.Button(box, "Voltar", new Vector2(0.5f, 0), new Vector2(0, 44), new Vector2(300, 60), UiKit.Primary, () => sheet.gameObject.SetActive(false));
+            return box;
+        }
+
+        public void ShowOptions()
+        {
+            var box = OpenSheet("OPÇÕES", 560);
+            UiOptions.Build(box, new Vector2(0, 10));
+        }
+
+        public void ShowCredits()
+        {
+            var box = OpenSheet("CRÉDITOS", 760);
+            void Line(float y, string text, int size, Color color, bool bold = false) =>
+                UiKit.Text(UiKit.Rect("Line", box, new Vector2(0.5f, 1), new Vector2(0, y), new Vector2(920, size + 10)), text, size, color, TextAnchor.MiddleCenter, bold);
+            Line(-130, "Quintessence 3D", 34, new Color(0.88f, 0.74f, 0.42f), true);
+            Line(-172, "Projeto de Jogos Digitais e Interação · Insper", 24, UiKit.Dim);
+            Line(-236, "EQUIPE", 24, UiKit.Dim, true);
+            Line(-274, "Leonardo · combate e elementos", 26, UiKit.Cream);
+            Line(-308, "Enzo · inimigos, chefe e salas", 26, UiKit.Cream);
+            Line(-342, "Nicolas · run, progresso e interface", 26, UiKit.Cream);
+            Line(-376, "Miguel · visual, feedback e som", 26, UiKit.Cream);
+            Line(-440, "ASSETS", 24, UiKit.Dim, true);
+            Line(-478, "Modelos e animações: KayKit, de Kay Lousberg (CC0)", 24, UiKit.Cream);
+            Line(-510, "Ícones: game-icons.net, de Lorc, Delapouite e outros (CC BY 3.0)", 24, UiKit.Cream);
+            Line(-542, "Fontes: Lilita One, Titillium Web e Cinzel Decorative (OFL)", 24, UiKit.Cream);
+            Line(-574, "Efeitos sonoros e música: sintetizados pela equipe", 24, UiKit.Cream);
+            Line(-622, "Feito com Unity 6", 22, UiKit.Dim);
+        }
+
         void BuildRefuge()
         {
             foreach (Transform child in refuge) Destroy(child.gameObject);
@@ -143,13 +185,19 @@ namespace Quintessence.UI
                 UiKit.Image(UiKit.Rect("Rule", card, new Vector2(0.5f, 1), new Vector2(0, -220), new Vector2(72, 4)), null, Color.Lerp(c, UiKit.Cream, 0.2f));
                 UiKit.Text(UiKit.Rect("Note", card, new Vector2(0.5f, 0), new Vector2(0, 30), new Vector2(240, 68)), notes[i], 24, UiKit.Paper, TextAnchor.MiddleCenter, false);
             }
-            var open = UiKit.Button(root, "REFÚGIO", new Vector2(0.5f, 0), new Vector2(-125, 118), new Vector2(440, 64), UiKit.Primary, () => ShowRefuge(true));
-            UiKit.Button(root, "TREINO", new Vector2(0.5f, 0), new Vector2(235, 118), new Vector2(240, 64), UiKit.Secondary, () => OnTutorial?.Invoke())
-                .transform.Find("Label").GetComponent<UnityEngine.UI.Text>().fontSize = 28;
+            var open = UiKit.Button(root, "REFÚGIO", new Vector2(0.5f, 0), new Vector2(-330, 118), new Vector2(400, 64), UiKit.Primary, () => ShowRefuge(true));
+            void Small(string label, float x, Action act) =>
+                UiKit.Button(root, label, new Vector2(0.5f, 0), new Vector2(x, 118), new Vector2(200, 64), UiKit.Secondary, act)
+                    .transform.Find("Label").GetComponent<UnityEngine.UI.Text>().fontSize = 26;
+            Small("TREINO", -10, () => OnTutorial?.Invoke());
+            Small("OPÇÕES", 210, ShowOptions);
+            Small("CRÉDITOS", 430, ShowCredits);
             refugeLabel = open.transform.Find("Label").GetComponent<UnityEngine.UI.Text>();
-            refugeLabel.fontSize = 28;
+            refugeLabel.fontSize = 26;
             refuge = UiKit.Stretch("Refuge", root);
             refuge.gameObject.SetActive(false);
+            sheet = UiKit.Stretch("Sheet", root);
+            sheet.gameObject.SetActive(false);
             UpdateRefugeLabel();
             UiKit.Text(UiKit.Rect("Keys", root, new Vector2(0.5f, 0), new Vector2(0, 44), new Vector2(1600, 30)),
                 "WASD mover · mouse mira · clique ataca · clique dir. skill · Espaço dash · Q/E troca elemento · R Quintessência · F interagir", 22, UiKit.Dim, TextAnchor.MiddleCenter, false);
