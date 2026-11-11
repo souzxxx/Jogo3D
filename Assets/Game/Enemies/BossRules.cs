@@ -1,0 +1,81 @@
+using System;
+using UnityEngine;
+
+namespace Quintessence.Enemies
+{
+    public enum BossAttack { Slam, Fan, Eruption }
+
+    /// Regras do chefe sem Unity de cena: fases, rodizio de ataques e o escudo da ultima fase.
+    public static class BossRules
+    {
+        public const int Phases = 3;
+
+        /// 0, 1 ou 2 conforme a vida restante (terços).
+        public static int PhaseFor(float healthFraction) =>
+            healthFraction > 2f / 3f ? 0 : healthFraction > 1f / 3f ? 1 : 2;
+
+        static readonly BossAttack[][] cycles =
+        {
+            new[] { BossAttack.Slam, BossAttack.Slam, BossAttack.Fan },
+            new[] { BossAttack.Slam, BossAttack.Fan, BossAttack.Eruption },
+            new[] { BossAttack.Fan, BossAttack.Eruption, BossAttack.Slam, BossAttack.Eruption },
+        };
+
+        /// Ataque numero index da fase. Longe demais para a Pancada, troca pelo Leque.
+        public static BossAttack Next(int phase, int index, bool inSlamRange)
+        {
+            var cycle = cycles[Mathf.Clamp(phase, 0, cycles.Length - 1)];
+            var a = cycle[((index % cycle.Length) + cycle.Length) % cycle.Length];
+            return a == BossAttack.Slam && !inSlamRange ? BossAttack.Fan : a;
+        }
+
+        /// Direcoes do leque, simetricas em torno de forward.
+        public static Vector3[] FanDirections(Vector3 forward, int count, float spreadDegrees)
+        {
+            var dirs = new Vector3[Math.Max(1, count)];
+            for (int i = 0; i < dirs.Length; i++)
+            {
+                float angle = dirs.Length == 1 ? 0f : (i - (dirs.Length - 1) / 2f) * spreadDegrees;
+                dirs[i] = Quaternion.Euler(0f, angle, 0f) * forward;
+            }
+            return dirs;
+        }
+    }
+
+    /// Escudo da ultima fase: so cai com um golpe durante a Quintessencia.
+    /// Se o heroi nao tem como ativa-la (menos de quatro elementos), cai sozinho por tempo: nunca vira beco sem saida.
+    public class BossShield
+    {
+        readonly float timeout;
+        float left;
+        public bool Up { get; private set; }
+        public bool NeedsQuintessence { get; private set; }
+
+        public BossShield(float timeout) { this.timeout = timeout; }
+
+        public void Raise(bool heroCanUseQuintessence)
+        {
+            Up = true;
+            NeedsQuintessence = heroCanUseQuintessence;
+            left = timeout;
+        }
+
+        /// Um golpe acertou o escudo. Devolve true se ele quebrou.
+        public bool Hit(bool quintessenceActive)
+        {
+            if (!Up || !quintessenceActive) return false;
+            Up = false;
+            return true;
+        }
+
+        /// Devolve true se o escudo caiu por tempo neste tick.
+        public bool Tick(float dt)
+        {
+            if (!Up || NeedsQuintessence) return false;
+            left -= dt;
+            if (left > 0f) return false;
+            Up = false;
+            return true;
+        }
+    }
+}

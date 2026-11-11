@@ -1,0 +1,85 @@
+using NUnit.Framework;
+using UnityEngine;
+
+namespace Quintessence.Enemies.Tests
+{
+    public class BossRulesTests
+    {
+        [Test] public void ThreePhasesByThirdsOfHealth()
+        {
+            Assert.AreEqual(0, BossRules.PhaseFor(1f));
+            Assert.AreEqual(0, BossRules.PhaseFor(0.67f));
+            Assert.AreEqual(1, BossRules.PhaseFor(0.66f));
+            Assert.AreEqual(1, BossRules.PhaseFor(0.34f));
+            Assert.AreEqual(2, BossRules.PhaseFor(0.33f));
+            Assert.AreEqual(2, BossRules.PhaseFor(0f));
+        }
+
+        [Test] public void LaterPhasesUseMoreAttackKinds()
+        {
+            bool Uses(int phase, BossAttack a)
+            {
+                for (int i = 0; i < 12; i++) if (BossRules.Next(phase, i, true) == a) return true;
+                return false;
+            }
+            Assert.IsFalse(Uses(0, BossAttack.Eruption), "a primeira fase ensina so Pancada e Leque");
+            Assert.IsTrue(Uses(1, BossAttack.Eruption));
+            Assert.IsTrue(Uses(2, BossAttack.Eruption) && Uses(2, BossAttack.Fan) && Uses(2, BossAttack.Slam));
+        }
+
+        [Test] public void NeverSlamsWhenHeroIsOutOfReach()
+        {
+            for (int phase = 0; phase < 3; phase++)
+                for (int i = 0; i < 12; i++)
+                    Assert.AreNotEqual(BossAttack.Slam, BossRules.Next(phase, i, false));
+        }
+
+        [Test] public void FanIsSymmetricAroundForward()
+        {
+            var dirs = BossRules.FanDirections(Vector3.forward, 5, 20f);
+            Assert.AreEqual(5, dirs.Length);
+            Assert.AreEqual(0f, Vector3.Angle(Vector3.forward, dirs[2]), 0.01f);
+            Assert.AreEqual(40f, Vector3.Angle(Vector3.forward, dirs[0]), 0.01f);
+            Assert.AreEqual(40f, Vector3.Angle(Vector3.forward, dirs[4]), 0.01f);
+            Assert.AreEqual(-dirs[0].x, dirs[4].x, 0.001f);
+        }
+    }
+
+    public class BossShieldTests
+    {
+        [Test] public void OnlyBreaksDuringQuintessence()
+        {
+            var s = new BossShield(12f);
+            s.Raise(true);
+            Assert.IsFalse(s.Hit(false));
+            Assert.IsTrue(s.Up);
+            Assert.IsTrue(s.Hit(true));
+            Assert.IsFalse(s.Up);
+        }
+
+        [Test] public void DoesNotTimeOutWhenHeroCanUseQuintessence()
+        {
+            var s = new BossShield(12f);
+            s.Raise(true);
+            Assert.IsFalse(s.Tick(60f));
+            Assert.IsTrue(s.Up);
+        }
+
+        [Test] public void TimesOutWhenHeroCannotUseQuintessence_NoDeadEnd()
+        {
+            var s = new BossShield(12f);
+            s.Raise(false);
+            Assert.IsFalse(s.Tick(11.9f));
+            Assert.IsTrue(s.Tick(0.2f));
+            Assert.IsFalse(s.Up);
+        }
+
+        [Test] public void HitsOnABrokenShieldDoNothing()
+        {
+            var s = new BossShield(12f);
+            Assert.IsFalse(s.Hit(true), "escudo ainda nao levantou");
+            s.Raise(true); s.Hit(true);
+            Assert.IsFalse(s.Hit(true));
+        }
+    }
+}

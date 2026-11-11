@@ -16,7 +16,12 @@ namespace Quintessence.UI
         Canvas canvas;
         IHeroStatus hero;
         Image hpFill, hpLag, quintFill, fade;
-        Text hpText, quintText, essenceText, roomText, promptText, boonText;
+        Text hpText, quintText, essenceText, roomText, promptText, boonText, bossName, bossHint;
+        Image bossFill;
+        RectTransform bossBox;
+        Health boss;
+        bool bossShield, bossNeedsQuint;
+        int bossPhase = 1;
         RectTransform promptBox, mapPanel, resultPanel, pausePanel, mapContent;
         readonly Slot[] slots = new Slot[4];
         readonly Image[] dashPips = new Image[2];
@@ -32,6 +37,25 @@ namespace Quintessence.UI
         }
 
         void OnDestroy() { if (Instance == this) Instance = null; }
+
+        void OnEnable()
+        {
+            GameEvents.BossSpawned += OnBoss;
+            GameEvents.BossPhaseChanged += OnBossPhase;
+            GameEvents.BossShieldChanged += OnBossShield;
+        }
+
+        void OnDisable()
+        {
+            GameEvents.BossSpawned -= OnBoss;
+            GameEvents.BossPhaseChanged -= OnBossPhase;
+            GameEvents.BossShieldChanged -= OnBossShield;
+        }
+
+        string bossTitle = "";
+        void OnBoss(Health b, string name) { boss = b; bossTitle = name; bossPhase = 1; bossShield = false; }
+        void OnBossPhase(int phase, int total) => bossPhase = phase;
+        void OnBossShield(bool up, bool needsQuintessence) { bossShield = up; bossNeedsQuint = needsQuintessence; }
 
         /// Para gravacoes: desenha o HUD pela camera (o modo Overlay nao aparece em captura de camera).
         public void UseCamera(Camera cam)
@@ -93,6 +117,18 @@ namespace Quintessence.UI
 
             boonText = UiKit.Text(UiKit.Rect("Boons", root, new Vector2(0, 1), new Vector2(48, -78), new Vector2(520, 400)), "", 22, new Color(1f, 0.88f, 0.55f), TextAnchor.UpperLeft, false);
 
+            // chefe, em cima no centro
+            bossBox = UiKit.Rect("Boss", root, new Vector2(0.5f, 1), new Vector2(0, -92), new Vector2(900, 30));
+            UiKit.Image(bossBox, null, UiKit.Ink);
+            bossFill = Bar(bossBox, new Color(1f, 0.45f, 0.12f));
+            for (int i = 1; i < 3; i++) // marcas das fases
+                UiKit.Image(UiKit.Rect("Mark" + i, bossBox, new Vector2(i / 3f, 0.5f), Vector2.zero, new Vector2(4, 30)), null, new Color(0, 0, 0, 0.7f));
+            bossName = UiKit.Text(UiKit.Rect("Name", bossBox, new Vector2(0.5f, 1), new Vector2(0, 6), new Vector2(900, 40)), "", 34, new Color(1f, 0.75f, 0.4f));
+            ((RectTransform)bossName.transform).pivot = new Vector2(0.5f, 0);
+            bossHint = UiKit.Text(UiKit.Rect("Hint", bossBox, new Vector2(0.5f, 0), new Vector2(0, -8), new Vector2(900, 34)), "", 26, new Color(0.75f, 0.85f, 1f));
+            ((RectTransform)bossHint.transform).pivot = new Vector2(0.5f, 1);
+            bossBox.gameObject.SetActive(false);
+
             // aviso de interacao
             promptBox = UiKit.Rect("Prompt", root, new Vector2(0.5f, 0), new Vector2(0, 250), new Vector2(560, 54));
             UiKit.Image(promptBox, null, UiKit.Ink);
@@ -150,6 +186,18 @@ namespace Quintessence.UI
                 var go = GameObject.FindGameObjectWithTag("Player");
                 hero = go != null ? go.GetComponent<IHeroStatus>() : null;
                 if (hero == null) return;
+            }
+
+            bool showBoss = boss != null && !boss.IsDead;
+            if (bossBox.gameObject.activeSelf != showBoss) bossBox.gameObject.SetActive(showBoss);
+            if (showBoss)
+            {
+                SetBar(bossFill, boss.Current / boss.Max);
+                bossFill.color = bossShield ? new Color(0.62f, 0.72f, 0.95f) : new Color(1f, 0.45f, 0.12f);
+                bossName.text = $"{bossTitle.ToUpperInvariant()}  ·  FASE {bossPhase}/3";
+                bossHint.text = !bossShield ? "" : bossNeedsQuint
+                    ? (hero.QuintessenceReady ? "ESCUDO — aperte R e ataque!" : hero.QuintessenceActive ? "ESCUDO — ataque agora!" : "ESCUDO — cause reações nos reforços para encher a Quintessência")
+                    : "ESCUDO — aguente firme, ele vai ceder";
             }
 
             float hp = hero.Health.Max > 0f ? hero.Health.Current / hero.Health.Max : 0f;

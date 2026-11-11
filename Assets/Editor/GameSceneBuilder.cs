@@ -14,6 +14,7 @@ public static class GameSceneBuilder
     [MenuItem("Quintessence/Build cenas do jogo (Title + Run)")]
     public static void Build()
     {
+        EnemyDevSceneBuilder.BuildBossScene();
         BuildRun();
         BuildTitle();
         EditorBuildSettings.scenes = new[]
@@ -52,6 +53,7 @@ public static class GameSceneBuilder
             AssetDatabase.CreateAsset(catalog, catalogPath);
         }
         director.BindBoons(catalog);
+        director.BindBoss(EnemyDevSceneBuilder.BossPrefab(melee, bomber));
         EditorUtility.SetDirty(director);
         var hud = new GameObject("Hud");
         hud.transform.SetParent(root, false);

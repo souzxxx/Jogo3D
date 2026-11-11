@@ -81,6 +81,9 @@ namespace Quintessence.Feel
             GameEvents.EnemySpawned += OnEnemySpawned;
             GameEvents.WaveStarted += OnWave;
             GameEvents.ArmorChanged += OnArmor;
+            GameEvents.BossSpawned += OnBoss;
+            GameEvents.BossPhaseChanged += OnBossPhase;
+            GameEvents.BossShieldChanged += OnBossShield;
             GameEvents.Exploded += OnExploded;
             GameEvents.RoomCleared += OnRoomCleared;
             GameEvents.Shattered += OnShattered;
@@ -106,6 +109,9 @@ namespace Quintessence.Feel
             GameEvents.EnemySpawned -= OnEnemySpawned;
             GameEvents.WaveStarted -= OnWave;
             GameEvents.ArmorChanged -= OnArmor;
+            GameEvents.BossSpawned -= OnBoss;
+            GameEvents.BossPhaseChanged -= OnBossPhase;
+            GameEvents.BossShieldChanged -= OnBossShield;
             GameEvents.Exploded -= OnExploded;
             GameEvents.RoomCleared -= OnRoomCleared;
             GameEvents.Shattered -= OnShattered;
@@ -213,6 +219,36 @@ namespace Quintessence.Feel
         }
 
         static readonly Color Steel = new(0.62f, 0.72f, 0.95f);
+        float lastImmune = -10f;
+        Health boss;
+
+        void OnBoss(Health b, string name)
+        {
+            boss = b;
+            var p = b.transform.position + Vector3.up * 2f;
+            Ring(p, 90, 14f, 0.6f, 1.4f, 0.7f, new Color(1f, 0.45f, 0.1f));
+            LightFlash(p, new Color(1f, 0.5f, 0.15f), 16f, 18f, 0.8f);
+            DamageNumber.Spawn(b.transform.position + Vector3.up * 6.5f, name.ToUpperInvariant(), new Color(1f, 0.7f, 0.3f), 1.7f, 2.4f);
+            CameraShake.Add(0.8f);
+        }
+
+        void OnBossPhase(int phase, int total)
+        {
+            if (phase <= 1 || boss == null) return;
+            var p = boss.transform.position + Vector3.up * 2f;
+            Ring(p, 100, 16f, 0.7f, 1.5f, 0.6f, new Color(1f, 0.35f, 0.1f));
+            Burst(p, Vector3.up, 180f, 120, 4f, 14f, 0.4f, 1.2f, 0.7f, new Color(1f, 0.5f, 0.15f));
+            LightFlash(p, new Color(1f, 0.4f, 0.1f), 18f, 20f, 0.6f);
+            DamageNumber.Spawn(boss.transform.position + Vector3.up * 6.5f, $"FASE {phase}", new Color(1f, 0.6f, 0.25f), 1.6f, 1.8f);
+            CameraShake.Add(0.9f);
+            Stop(0.15f);
+        }
+
+        void OnBossShield(bool up, bool needsQuintessence)
+        {
+            if (boss == null) return;
+            DamageNumber.Spawn(boss.transform.position + Vector3.up * 5.6f, up ? "ESCUDO!" : "ESCUDO QUEBRADO!", Steel, 1.4f, 1.8f);
+        }
 
         void OnArmor(Health enemy, bool armored)
         {
@@ -254,7 +290,11 @@ namespace Quintessence.Feel
         {
             var c = ElementColors.Of(ElementType.Earth);
             Ring(target.transform.position + Vector3.up, 30, 6f, 0.3f, 0.5f, 0.3f, c);
-            DamageNumber.Spawn(target.transform.position + Vector3.up * 3.2f, "BLOQUEOU", Color.Lerp(c, Color.white, 0.4f), 0.8f, 0.7f);
+            bool enemy = target.Team == Team.Enemy;
+            if (enemy && Time.time - lastImmune < 0.5f) return; // inimigo com escudo: nao repete o texto a cada golpe
+            if (enemy) lastImmune = Time.time;
+            DamageNumber.Spawn(target.transform.position + Vector3.up * (enemy ? 5f : 3.2f), enemy ? "IMUNE" : "BLOQUEOU",
+                enemy ? new Color(0.7f, 0.8f, 1f) : Color.Lerp(c, Color.white, 0.4f), enemy ? 1.1f : 0.8f, 0.7f);
         }
 
         void OnShattered(Health target)

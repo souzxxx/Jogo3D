@@ -79,6 +79,12 @@ namespace Quintessence.Core
         public static event Action<Health> EnemySpawned;
         /// (inimigo, tem armadura). A armadura cai com Armadura Quebrada.
         public static event Action<Health, bool> ArmorChanged;
+        /// (vida do chefe, nome)
+        public static event Action<Health, string> BossSpawned;
+        /// (fase atual comecando em 1, total de fases)
+        public static event Action<int, int> BossPhaseChanged;
+        /// (escudo de pe, precisa de Quintessencia para quebrar)
+        public static event Action<bool, bool> BossShieldChanged;
         /// Explosao de um inimigo suicida: (ponto, raio).
         public static event Action<Vector3, float> Exploded;
         /// (indice da onda comecando em 0, total de ondas)
@@ -110,6 +116,9 @@ namespace Quintessence.Core
         public static void RaiseTelegraphCancelled(GameObject source) => TelegraphCancelled?.Invoke(source);
         public static void RaiseAttackMissed(Health source) => AttackMissed?.Invoke(source);
         public static void RaiseEnemySpawned(Health enemy) => EnemySpawned?.Invoke(enemy);
+        public static void RaiseBossSpawned(Health boss, string name) => BossSpawned?.Invoke(boss, name);
+        public static void RaiseBossPhase(int phase, int total) => BossPhaseChanged?.Invoke(phase, total);
+        public static void RaiseBossShield(bool up, bool needsQuintessence) => BossShieldChanged?.Invoke(up, needsQuintessence);
         public static void RaiseArmorChanged(Health enemy, bool armored) => ArmorChanged?.Invoke(enemy, armored);
         public static void RaiseExploded(Vector3 point, float radius) => Exploded?.Invoke(point, radius);
         public static void RaiseWaveStarted(int index, int total) => WaveStarted?.Invoke(index, total);
@@ -129,6 +138,7 @@ namespace Quintessence.Core
             DamageDealt = null; Died = null; HitBlocked = null; Shattered = null; MarkApplied = null; ReactionTriggered = null;
             MarkCleared = null; StatusApplied = null; StatusEnded = null; AttackPerformed = null; ZoneSpawned = null;
             TelegraphStarted = null; TelegraphCancelled = null; AttackMissed = null; EnemySpawned = null; WaveStarted = null; ArmorChanged = null; Exploded = null;
+            BossSpawned = null; BossPhaseChanged = null; BossShieldChanged = null;
             ElementSwitched = null; ElementAwakened = null;
             QuintessenceMeterChanged = null; QuintessenceActiveChanged = null;
             RoomStarted = null; RoomCleared = null; RunStarted = null; RunEnded = null;

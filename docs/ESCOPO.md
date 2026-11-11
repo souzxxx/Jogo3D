@@ -216,6 +216,8 @@ Sprints sem data até confirmar a entrega. S0 é de todos e destrava o resto.
 ---
 
 ### Fila (depois do jogo fechado)
+- [ ] Portas, pedestais e santuários com modelo de verdade (hoje são cubos) — pedido do Leonardo em 11/11
+- [ ] Menu de título com identidade própria (hoje está genérico) — pedido do Leonardo em 11/11
 - [ ] Passada única de animação: trocar as animações genéricas do pack (ataques, skills, dash, inimigos) — combinado em 11/11 deixar pro fim
 - [ ] Trazer os heróis do Quintessence 2D (Rax, Liora, Brann, Vey) para o 3D no lugar do mago do pack — pedido do Leonardo em 11/11
 

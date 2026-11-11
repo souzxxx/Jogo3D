@@ -1,0 +1,46 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7d95e51dfef644a3f9bfcb57deee04ee, type: 3}
+  m_Name: Guardiao
+  m_EditorClassIdentifier: Quintessence.Enemies::Quintessence.Enemies.BossDefinition
+  displayName: "Guardi\xE3o das Cinzas"
+  maxHealth: 600
+  moveSpeed: 2.6
+  cooldownByPhase:
+  - 1.7
+  - 1.3
+  - 1
+  slamDamage: 18
+  slamRadius: 3.2
+  slamOffset: 2.6
+  slamWindup: 0.9
+  slamRange: 5
+  projectilePrefab: {fileID: 2446848762604434031, guid: 6590da6c767a740e79055b4304b1f88e, type: 3}
+  fanDamage: 9
+  fanCount: 3
+  fanCountLastPhase: 5
+  fanSpread: 22
+  fanWindup: 0.8
+  projectileSpeed: 10
+  projectileRange: 18
+  eruptionDamage: 12
+  eruptionRadius: 2
+  eruptionCount: 4
+  eruptionWindup: 1.1
+  eruptionScatter: 4.5
+  shieldTimeout: 12
+  addPrefabs:
+  - {fileID: 153203729657998027, guid: 01a9502a79d5142a9a550647f054284d, type: 3}
+  - {fileID: 1587312657415884433, guid: 9ae595883e24e46d6be1c6d369311017, type: 3}
+  addInterval: 8
+  maxAdds: 4
+  addsPerPhaseChange: 2

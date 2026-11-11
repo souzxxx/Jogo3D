@@ -54,8 +54,8 @@ namespace Quintessence.Run
     {
         public struct WavePlan
         {
-            public int Melee, Ranged, Brute, Bomber;
-            public int Total => Melee + Ranged + Brute + Bomber;
+            public int Melee, Ranged, Brute, Bomber, Boss;
+            public int Total => Melee + Ranged + Brute + Bomber + Boss;
         }
 
         public static List<WavePlan> Plan(RoomType type, int depth)
@@ -72,10 +72,8 @@ namespace Quintessence.Run
                     waves.Add(new WavePlan { Melee = 2 + depth / 3, Ranged = 2 + depth / 3, Brute = 1 });
                     waves.Add(new WavePlan { Melee = 2, Ranged = 2 + depth / 4, Brute = 1 + depth / 5, Bomber = 2 });
                     break;
-                case RoomType.Boss: // provisorio ate o Guardiao das Cinzas existir
-                    waves.Add(new WavePlan { Melee = 4, Ranged = 1, Bomber = 2 });
-                    waves.Add(new WavePlan { Melee = 3, Ranged = 3, Brute = 1 });
-                    waves.Add(new WavePlan { Melee = 3, Ranged = 2, Brute = 2, Bomber = 2 });
+                case RoomType.Boss: // o Guardiao das Cinzas chama os proprios reforcos
+                    waves.Add(new WavePlan { Boss = 1 });
                     break;
             }
             return waves;

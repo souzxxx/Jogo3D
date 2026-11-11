@@ -32,6 +32,58 @@ public static class EnemyDevSceneBuilder
         EditorUtility.SetDirty(spawner);
     });
 
+    public const string BossScenePath = "Assets/Scenes/Dev/Enzo_Boss.unity";
+
+    [MenuItem("Quintessence/Dev/Build cena do chefe")]
+    public static void BuildBossScene() => CombatDevSceneBuilder.BuildPlayable("Enzo_Boss", BossScenePath, root =>
+    {
+        Bake(root, "Assets/Scenes/Dev/Enzo_Boss_NavMesh.asset");
+        Prefabs(out var melee, out _, out _, out var bomber);
+        var boss = BossPrefab(melee, bomber);
+        var go = new GameObject("WaveSpawner");
+        go.transform.SetParent(root, false);
+        go.transform.position = new Vector3(0, 0, 2);
+        var spawner = go.AddComponent<WaveSpawner>();
+        var w = new Wave(); w.entries.Add(new WaveEntry { prefab = boss, count = 1 });
+        spawner.Waves.Add(w);
+        EditorUtility.SetDirty(spawner);
+    });
+
+    /// Guardiao das Cinzas. Precisa de uma cena aberta por LookDevBuilder.BeginArena.
+    public static GameObject BossPrefab(GameObject add1, GameObject add2)
+    {
+        const string fbx = KK + "Skeletons/Characters/Skeleton_Warrior.fbx";
+        CombatDevSceneBuilder.Loop(fbx, "Idle", "Idle_Combat", "Walking_A", "Running_A");
+        var ctrl = CombatDevSceneBuilder.Controller(fbx, Dir + "Animation/Guardiao.controller",
+            ("Idle", "Idle_Combat|Idle", 0f), ("Run", "Walking_A|Running_A", 0f), ("Attack", "2H_Melee_Attack_Chop|1H_Melee_Attack_Chop", 1.3f),
+            ("Cast", "Spellcast_Raise|Cheer|Idle", 1.1f), ("Death", "Death_B|Death_A", 0f), ("Spawn", "Spawn_Ground|Skeletons_Awaken_Standing|Idle", 1.2f));
+        var def = Asset<BossDefinition>("Guardiao", d => { });
+        def.projectilePrefab = ProjectilePrefab();
+        def.addPrefabs = new[] { add1, add2 };
+        EditorUtility.SetDirty(def);
+
+        var ember = LookDevBuilder.Mat("SkeletonEmber", KK + "Skeletons/Characters/skeleton_texture.png", new Color(0.55f, 0.4f, 0.45f), new Color(0.9f, 0.22f, 0.03f), 0f);
+        var go = new GameObject("Guardiao");
+        var col = go.AddComponent<CapsuleCollider>();
+        col.height = 5f; col.radius = 1.3f; col.center = new Vector3(0, 2.5f, 0);
+        go.AddComponent<Health>().Configure(def.maxHealth, Team.Enemy);
+        var agent = go.AddComponent<NavMeshAgent>();
+        agent.radius = 1.3f; agent.height = 5f; agent.angularSpeed = 0f;
+        var model = LookDevBuilder.Spawn("Skeletons/Characters/Skeleton_Warrior.fbx", Vector3.zero, 0, ember);
+        model.name = "Model";
+        model.transform.SetParent(go.transform, false);
+        model.transform.localScale = Vector3.one * 2.3f;
+        var anim = CombatDevSceneBuilder.Animator(model, ctrl);
+        go.AddComponent<BossBrain>().Bind(def, anim);
+        var light = new GameObject("EmberLight").AddComponent<Light>();
+        light.transform.SetParent(go.transform, false);
+        light.transform.localPosition = new Vector3(0, 3.2f, 0.8f);
+        light.type = LightType.Point; light.color = new Color(1f, 0.4f, 0.1f); light.intensity = 6f; light.range = 9f;
+        var prefab = PrefabUtility.SaveAsPrefabAsset(go, Dir + "Prefabs/Guardiao.prefab");
+        Object.DestroyImmediate(go);
+        return prefab;
+    }
+
     /// NavMesh da sala, sem o heroi (senao ele vira um buraco no mapa).
     public static void Bake(Transform root, string navPath)
     {
