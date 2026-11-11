@@ -36,6 +36,40 @@
   <p class="sub">Entrega mais recente no topo. Escopo em <a href="ESCOPO.md">ESCOPO.md</a> · kanban em <a href="https://github.com/users/souzxxx/projects/4">GitHub Projects</a>.</p>
 
   <section>
+    <h2>Loja: a Essência agora compra coisas</h2>
+    <div class="meta"><span class="tag who">Nicolas</span><span class="tag ok">387 testes de regra + 9 testes jogando, todos passando</span></div>
+    <img src="img/loja.png" alt="Sala da Loja">
+    <div class="cols">
+      <div>
+        <h3>Como funciona</h3>
+        <ul>
+          <li>Nova sala no mapa: <b>Loja</b>, da terceira sala em diante, no máximo uma por camada</li>
+          <li>Sempre vende <b>Poção</b> (cura 40%) e <b>Elixir</b> (+15 de vida máxima), mais até <b>duas bênçãos</b> que você ainda não tem</li>
+          <li>Cada item fica numa mesa do pack com nome, efeito e preço; <kbd>F</kbd> compra</li>
+          <li>Sem Essência suficiente: recusa, toca o som de bloqueio e mostra "Essência insuficiente"</li>
+          <li>As portas já estão abertas: dá pra sair sem comprar nada</li>
+          <li>Preços sobem com a profundidade, junto com o que as salas pagam (poção 22, elixir 32 e bênção 38 na sala 3)</li>
+        </ul>
+      </div>
+      <div>
+        <h3>Conferido</h3>
+        <ul>
+          <li>Um teste joga até a Loja, zera a Essência e tenta comprar (nada muda), depois compra tudo e confere: Essência cai, poção cura, elixir aumenta a vida máxima, bênçãos entram na run, itens somem da mesa e as portas continuam</li>
+          <li>Regras: nunca vende bênção que você já tem, gasto nunca deixa a Essência negativa, e com duas salas de combate já dá pra pagar a poção</li>
+        </ul>
+        <h3 style="margin-top:14px">Limites</h3>
+        <ul>
+          <li class="warn">Preços e ganhos são chute inicial: ninguém jogou uma run pra sentir se a Essência sobra ou falta</li>
+          <li class="warn">Nem toda run tem Loja (depende do sorteio do mapa)</li>
+          <li class="warn">No print o herói do roteiro chegou com 9 de vida mesmo levando 40% do dano: mais um sinal de que as salas de combate podem estar duras</li>
+          <li class="warn">A porta atrás mostra "Novo elemento" cortado no topo da tela</li>
+        </ul>
+        <p style="color:var(--dim);margin:10px 0 0">Também corrigi um teste dos inimigos que falhava de vez em quando (o atirador morria antes de disparar e o teste cobrava o tiro).</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
     <h2>Build WebGL rodando no navegador</h2>
     <div class="meta"><span class="tag who">Nicolas</span><span class="tag ok">build sem erros · 18,8 MB · testada no Chrome</span></div>
     <img src="img/webgl_navegador.jpg" alt="O jogo rodando no Chrome">

@@ -57,8 +57,9 @@ public static class GameSceneBuilder
         }
         director.BindBoons(catalog);
         director.BindBoss(EnemyDevSceneBuilder.BossPrefab(melee, bomber));
-        // ordem do enum RoomType: Combat, Elite, Shrine, Rest, Boss, Master
-        string[] banners = { "banner_red", "banner_patternB_brown", "banner_blue", "banner_green", "banner_shield_red", "banner_patternA_yellow" };
+        director.BindShop(Prop("table_small", 1f), Prop("bottle_A_labeled_green", 1.8f));
+        // ordem do enum RoomType: Combat, Elite, Shrine, Rest, Boss, Master, Shop
+        string[] banners = { "banner_red", "banner_patternB_brown", "banner_blue", "banner_green", "banner_shield_red", "banner_patternA_yellow", "banner_patternA_green" };
         var bannerPrefabs = new GameObject[banners.Length];
         for (int i = 0; i < banners.Length; i++) bannerPrefabs[i] = Prop(banners[i], 1f);
         var stone = LookDevBuilder.Mat("Stone", null, new Color(0.33f, 0.34f, 0.42f), Color.black, 0f);

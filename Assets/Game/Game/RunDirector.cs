@@ -27,6 +27,8 @@ namespace Quintessence.Game
         [SerializeField] GameObject[] bannerByRoom = new GameObject[0];
         [SerializeField] GameObject shrinePrefab;
         [SerializeField] GameObject chestPrefab;
+        [SerializeField] GameObject tablePrefab;
+        [SerializeField] GameObject bottlePrefab;
         [SerializeField] Material matteMaterial;
         [Tooltip("Arranjos de cobertura das salas de combate; a run sorteia um por sala.")]
         [SerializeField] RoomLayout[] layouts = new RoomLayout[0];
@@ -73,6 +75,7 @@ namespace Quintessence.Game
         static readonly Color Cream = new(0.93f, 0.88f, 0.78f);
 
         public void BindLayouts(RoomLayout[] list) => layouts = list;
+        public void BindShop(GameObject table, GameObject bottle) { tablePrefab = table; bottlePrefab = bottle; }
         public int LayoutCount => layouts.Length;
         public string CurrentLayout { get; private set; } = "";
         Transform layoutRoot;
@@ -180,6 +183,11 @@ namespace Quintessence.Game
             {
                 case RoomType.Shrine:
                     SetupShrine();
+                    break;
+                case RoomType.Shop:
+                    SetupShop();
+                    Run.RoomCleared();
+                    OpenDoors();
                     break;
                 case RoomType.Master:
                     if (!SetupBoons()) { Run.RoomCleared(); OpenDoors(); }
@@ -362,6 +370,79 @@ namespace Quintessence.Game
             }
         }
 
+        /// Loja: cada item numa mesa do pack, com nome, efeito e preco. Da para sair sem comprar: as portas ja estao abertas.
+        void SetupShop()
+        {
+            var catalog = boonCatalog != null ? boonCatalog.boons : new List<Boon>();
+            var stock = ShopPlanner.Stock(catalog, Run.BoonIds, player.Loadout.Awakened, rng, Run.Depth);
+            for (int i = 0; i < stock.Count; i++)
+            {
+                var item = stock[i];
+                var c = item.Kind == ShopItemKind.Boon && item.Boon.patron != ElementType.None ? ElementColors.Of(item.Boon.patron)
+                    : item.Kind == ShopItemKind.Boon ? new Color(0.85f, 0.72f, 0.4f) : new Color(0.45f, 0.7f, 0.45f);
+                var root = new GameObject("Shop_" + item.Name);
+                root.transform.position = new Vector3((i - (stock.Count - 1) / 2f) * 4.4f, 0, -0.5f);
+                float top = 0.9f;
+                if (tablePrefab != null)
+                {
+                    var table = Instantiate(tablePrefab, root.transform);
+                    table.transform.localPosition = Vector3.zero;
+                    var rs = table.GetComponentsInChildren<Renderer>();
+                    if (rs.Length > 0) { var b = rs[0].bounds; foreach (var x in rs) b.Encapsulate(x.bounds); top = b.max.y; }
+                }
+                if (item.Kind == ShopItemKind.Boon)
+                    Matte(GameObject.CreatePrimitive(PrimitiveType.Cube), root.transform, new Vector3(0, top + 0.4f, 0), Vector3.one * 0.4f, c).localRotation = Quaternion.Euler(45, 45, 0);
+                else if (bottlePrefab != null) Instantiate(bottlePrefab, root.transform).transform.localPosition = new Vector3(0, top, 0);
+                Label(root.transform, new Vector3(0, top + 2.5f, 0), item.Name, Cream, 0.85f);
+                Label(root.transform, new Vector3(0, top + 1.8f, 0), Wrap(item.Description, 20), new Color(0.8f, 0.76f, 0.7f), 0.58f);
+                Label(root.transform, new Vector3(0, top + 1.05f, 0), item.Price + " de Essência", new Color(0.88f, 0.74f, 0.42f), 0.66f);
+                Glow(root.transform, new Vector3(0, top + 0.8f, -0.7f), c, 1.6f);
+                Interactable entry = null;
+                entry = new Interactable
+                {
+                    Object = root, Prompt = $"comprar {item.Name} ({item.Price})",
+                    Use = () =>
+                    {
+                        if (!Run.TrySpend(item.Price))
+                        {
+                            Sfx.Play("block");
+                            Feel.DamageNumber.Spawn(root.transform.position + Vector3.up * 3.6f, "ESSÊNCIA INSUFICIENTE", new Color(0.8f, 0.4f, 0.35f), 0.8f, 1f);
+                            return;
+                        }
+                        Sfx.Play("pickup");
+                        hud.SetEssence(Run.Essence);
+                        switch (item.Kind)
+                        {
+                            case ShopItemKind.Heal: playerHealth.Heal(playerHealth.Max * ShopPlanner.HealFraction); break;
+                            case ShopItemKind.MaxHealth: player.Modifiers.MaxHealthAdd += ShopPlanner.MaxHealthGain; ApplyMaxHealth(); break;
+                            case ShopItemKind.Boon: GrantBoon(item.Boon); break;
+                        }
+                        Feel.DamageNumber.Spawn(player.transform.position + Vector3.up * 3.6f, item.Name.ToUpperInvariant() + "!", c, 1.1f, 1.4f);
+                        interactables.Remove(entry);
+                        Destroy(root);
+                    },
+                };
+                interactables.Add(entry);
+            }
+        }
+
+        void ApplyMaxHealth()
+        {
+            float max = baseMaxHealth + player.Modifiers.MaxHealthAdd;
+            if (max <= playerHealth.Max) return;
+            float gain = max - playerHealth.Max;
+            playerHealth.Pool.SetMax(max);
+            playerHealth.Heal(gain);
+        }
+
+        void GrantBoon(Boon boon)
+        {
+            BoonEffects.Apply(player.Modifiers, boon);
+            Run.AddBoon(boon);
+            ApplyMaxHealth();
+            hud.SetBoons(Run.Boons);
+        }
+
         /// Tres bencaos para escolher uma. Devolve false se nao sobrou nenhuma para oferecer.
         bool SetupBoons()
         {
@@ -386,11 +467,7 @@ namespace Quintessence.Game
                     Use = () =>
                     {
                         Sfx.Play("pickup");
-                        BoonEffects.Apply(player.Modifiers, boon);
-                        Run.AddBoon(boon);
-                        float max = baseMaxHealth + player.Modifiers.MaxHealthAdd;
-                        if (max > playerHealth.Max) { float gain = max - playerHealth.Max; playerHealth.Pool.SetMax(max); playerHealth.Heal(gain); }
-                        hud.SetBoons(Run.Boons);
+                        GrantBoon(boon);
                         Feel.DamageNumber.Spawn(player.transform.position + Vector3.up * 3.6f, boon.name.ToUpperInvariant() + "!", c, 1.2f, 1.6f);
                         foreach (var it in interactables) if (it.Object != null) Destroy(it.Object);
                         interactables.Clear();

@@ -163,7 +163,7 @@ Sprints sem data até confirmar a entrega. S0 é de todos e destrava o resto.
 - [x] Cena de look-dev aprovada pelo time — **Miguel**
 - [x] Contratos entre frentes (eventos, `ElementType`, `DamageInfo`, `Health`) — **Leonardo**
 - [x] Build WebGL gerada e testada no navegador (18,8 MB); falta subir no itch.io — **Nicolas**
-- [ ] Validar pesos da rubrica com o professor — **Nicolas**
+- [ ] Validar pesos da rubrica com o professor — **Nicolas** (fica para a semana de 16/11: não há mais aula nesta semana)
 
 ### Leonardo — Combate e elementos
 - [x] S1 · Movimento, mira no mouse, câmera seguindo
@@ -187,7 +187,7 @@ Sprints sem data até confirmar a entrega. S0 é de todos e destrava o resto.
 - [ ] S3 · Elite com modificadores + mais 2 layouts
 - [x] S4 · Chefe Guardião das Cinzas, 3 fases, escudo que pede Quintessência
 - [ ] S4 · Curva de dificuldade por profundidade da sala
-- [x] S4 · SFX e música (sintetizados por tools/gen_audio.py), volumes na pausa — falta alguém ouvir e aprovar
+- [x] S4 · SFX e música (sintetizados por tools/gen_audio.py), volumes na pausa — ouvidos e aprovados pelo Leonardo em 11/11
 
 ### Nicolas — Run, meta e UI
 - [x] S1 · Fluxo de cenas: título → hub → run → resultado (título → run → resultado; o hub fica no S4)
@@ -196,7 +196,7 @@ Sprints sem data até confirmar a entrega. S0 é de todos e destrava o resto.
 - [x] S2 · HUD: vida, roda de elementos, cooldowns, medidor de Quintessência
 - [x] S3 · Santuário (despertar elemento) e Descanso
 - [x] S3 · Mestre (3 bênçãos); Elite também paga bênção
-- [ ] S3 · Loja (dar uso à Essência)
+- [x] S3 · Loja (poção, elixir e bênçãos por Essência)
 - [x] S3 · ~20 bênçãos em ScriptableObject
 - [ ] S4 · Hub com upgrades permanentes + save em PlayerPrefs
 - [ ] S4 · Menus: principal, pausa, opções (volume, tela cheia), créditos

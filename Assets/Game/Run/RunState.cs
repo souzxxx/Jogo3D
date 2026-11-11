@@ -47,6 +47,14 @@ namespace Quintessence.Run
 
         public void RoomCleared() => RoomsCleared++;
         public void AddEssence(int amount) { if (amount > 0) Essence += amount; }
+
+        /// Gasta essencia se houver o bastante. Nunca fica negativo.
+        public bool TrySpend(int amount)
+        {
+            if (amount < 0 || amount > Essence) return false;
+            Essence -= amount;
+            return true;
+        }
     }
 
     /// Quantos inimigos cada onda de uma sala tem. Cresce com a profundidade.

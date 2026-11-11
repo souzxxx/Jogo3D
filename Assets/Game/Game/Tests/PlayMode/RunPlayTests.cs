@@ -1,6 +1,7 @@
 #if UNITY_EDITOR
 using System.Collections;
 using System.IO;
+using System.Linq;
 using NUnit.Framework;
 using Quintessence.Combat;
 using Quintessence.Core;
@@ -290,6 +291,117 @@ namespace Quintessence.Game.PlayTests
             }
             else stuck = 0f;
             lastPos = pos;
+        }
+
+        [UnityTest, Timeout(600000)]
+        public IEnumerator Shop_Sells_For_Essence_And_Refuses_When_Broke()
+        {
+            GameEvents.Clear();
+            Time.timeScale = 1f;
+            Time.captureFramerate = 30;
+            GameFlow.StartElement = ElementType.Fire;
+            GameFlow.Layers = 5; GameFlow.Shrines = 1;
+            // procura uma semente com o caminho Combate -> Combate -> Loja
+            int seed = 0, first = -1, shop = -1;
+            for (int sd = 1; sd < 3000 && seed == 0; sd++)
+            {
+                var m = RunMapGenerator.Generate(sd, 5, 1);
+                foreach (int a in m.Start.Next)
+                {
+                    if (m.Get(a).Type != RoomType.Combat) continue;
+                    foreach (int b in m.Get(a).Next)
+                        if (m.Get(b).Type == RoomType.Shop && seed == 0) { seed = sd; first = a; shop = b; }
+                }
+            }
+            Assert.AreNotEqual(0, seed, "nenhuma semente com Combate -> Combate -> Loja");
+            GameFlow.Seed = seed;
+
+            yield return EditorSceneManager.LoadSceneAsyncInPlayMode("Assets/Scenes/Run.unity", new LoadSceneParameters(LoadSceneMode.Single));
+            yield return null;
+            yield return null;
+            var director = Object.FindFirstObjectByType<RunDirector>();
+            var hud = Object.FindFirstObjectByType<Hud>();
+            player = Object.FindFirstObjectByType<PlayerController>();
+            hp = player.GetComponent<Health>();
+            hp.Pool.ExtraDamageTakenMultiplier = 0.4f; // confere a loja, nao a dificuldade
+            player.GetComponent<PlayerInputReader>().enabled = false;
+            input = player.gameObject.AddComponent<ScriptedInput>();
+            player.Input = input;
+            cam = Camera.main;
+            hud.UseCamera(cam);
+            GameEvents.TelegraphStarted += ConsiderDodge;
+
+            float limit = 200f, sinceInteract = 0f;
+            while (director.Run.Current.Type != RoomType.Shop && !director.Finished && limit > 0f)
+            {
+                float dt = Time.deltaTime;
+                limit -= dt; sinceInteract += dt;
+                var target = Nearest();
+                input.AttackHeld = false;
+                if (director.Busy) input.Move = Vector2.zero;
+                else if (dodgeLeft > 0f) { dodgeLeft -= dt; input.Move = new Vector2(dodgeDir.x, dodgeDir.z); }
+                else if (target != null)
+                {
+                    var to = target.transform.position - player.transform.position; to.y = 0;
+                    float d = to.magnitude;
+                    input.AimPoint = target.transform.position;
+                    input.Move = d > 2.6f ? new Vector2(to.x / d, to.z / d) : Vector2.zero;
+                    input.AttackHeld = d < 3.6f;
+                }
+                else if (director.Interactables.Count > 0)
+                {
+                    // as portas saem na mesma ordem das escolhas do mapa: pega a que leva ao caminho da loja
+                    int want = director.Run.Depth == 0 ? first : shop;
+                    int idx = director.Run.Choices.FindIndex(n => n.Id == want);
+                    var door = director.Interactables[Mathf.Clamp(idx, 0, director.Interactables.Count - 1)];
+                    var to = door.Position - player.transform.position; to.y = 0;
+                    float d = to.magnitude;
+                    input.Move = d > 1.4f ? new Vector2(to.x / d, to.z / d) : Vector2.zero;
+                    if (d < 2.2f && sinceInteract > 0.4f) { sinceInteract = 0f; input.PressInteract(); }
+                }
+                else input.Move = Vector2.zero;
+                Unstick(dt);
+                yield return null;
+            }
+            input.Move = Vector2.zero; input.AttackHeld = false;
+            GameEvents.TelegraphStarted -= ConsiderDodge;
+            Assert.AreEqual(RoomType.Shop, director.Run.Current.Type, "nao chegou a loja");
+            for (int k = 0; k < 3000 && director.Busy; k++) yield return null;
+            for (int k = 0; k < 20; k++) yield return null;
+            Shot(cam, "docs/img/loja.png");
+
+            var wares = director.Interactables.Where(i => i.Prompt.StartsWith("comprar")).ToList();
+            Assert.GreaterOrEqual(wares.Count, 2, "a loja vende pelo menos pocao e elixir");
+            Assert.Greater(director.Interactables.Count, wares.Count, "as portas ja estao abertas: da para sair sem comprar");
+
+            // sem essencia: recusa e nada muda
+            director.Run.TrySpend(director.Run.Essence);
+            int before = director.Interactables.Count;
+            float maxBefore = hp.Max;
+            wares[0].Use();
+            yield return null;
+            Assert.AreEqual(before, director.Interactables.Count, "sem essencia o item continua a venda");
+            Assert.AreEqual(0, director.Run.Essence);
+
+            // com essencia: compra tudo, a essencia cai pelo preco e os efeitos entram
+            director.Run.AddEssence(500);
+            // parte de vida cheia e tira um pedaco, para a cura ter o que curar sem depender de como a luta foi
+            hp.Heal(hp.Max);
+            hp.TakeDamage(new DamageInfo(100, ElementType.None, Team.Enemy));
+            float hurt = hp.Current;
+            Assert.Greater(hurt, 0f); Assert.Less(hurt, hp.Max);
+            int boonsBefore = director.Run.Boons.Count;
+            foreach (var w in wares) w.Use();
+            yield return null;
+            Assert.Less(director.Run.Essence, 500, "comprar gasta essencia");
+            Assert.Greater(director.Run.Essence, 0);
+            Assert.Greater(hp.Current, hurt, "a pocao cura");
+            Assert.AreEqual(maxBefore + 15f + (player.Modifiers.MaxHealthAdd - 15f), hp.Max, 0.01f, "o elixir aumenta a vida maxima");
+            Assert.AreEqual(boonsBefore + wares.Count - 2, director.Run.Boons.Count, "cada bencao comprada entra na run");
+            Assert.AreEqual(0, director.Interactables.Count(i => i.Prompt.StartsWith("comprar")), "item comprado sai da mesa");
+            Assert.Greater(director.Interactables.Count, 0, "as portas continuam la");
+            GameFlow.Layers = 8; GameFlow.Shrines = 3;
+            Time.captureFramerate = 0;
         }
 
         [UnityTest, Timeout(600000)]

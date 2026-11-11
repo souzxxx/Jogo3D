@@ -54,7 +54,8 @@ namespace Quintessence.Enemies.PlayTests
 
             int telegraphs = 0, telegraphsBeforeFirstHit = -1, waves = 0, spawned = 0;
             bool cleared = false, started = false, sawProjectile = false;
-            GameEvents.TelegraphStarted += e => { telegraphs++; if (dodging) ConsiderDodge(e); };
+            // o tiro em si pode nao sair se o atirador morrer no meio do aviso; o aviso em linha sempre vem antes
+            GameEvents.TelegraphStarted += e => { telegraphs++; if (e.IsLine) sawProjectile = true; if (dodging) ConsiderDodge(e); };
             GameEvents.DamageDealt += (target, _, _) => { if (target == hp && telegraphsBeforeFirstHit < 0) telegraphsBeforeFirstHit = telegraphs; };
             GameEvents.WaveStarted += (_, _) => waves++;
             GameEvents.EnemySpawned += _ => spawned++;
@@ -116,7 +117,7 @@ namespace Quintessence.Enemies.PlayTests
             Assert.AreEqual(12, spawned, "3 + 4 + 5 (Bruto, 2 Explosivos, 2 Rastejantes)");
             Assert.IsTrue(sawArmor, "o Bruto nasce com armadura");
             Assert.IsTrue(sawExplosion, "Explosivo deveria explodir (ou ser morto antes: entao este teste precisa de outro roteiro)");
-            Assert.IsTrue(sawProjectile, "o atirador deveria ter atirado");
+            Assert.IsTrue(sawProjectile, "o atirador deveria ter avisado ou disparado um tiro");
             for (float t = 1.8f; t > 0f; t -= Time.deltaTime) yield return Step();
             Assert.IsNull(Object.FindFirstObjectByType<EnemyBrain>(), "inimigos mortos somem da cena");
 
