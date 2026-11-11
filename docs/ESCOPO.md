@@ -166,9 +166,9 @@ Sprints sem data até confirmar a entrega. S0 é de todos e destrava o resto.
 - [ ] Validar pesos da rubrica com o professor — **Nicolas**
 
 ### Leonardo — Combate e elementos
-- [ ] S1 · Movimento, mira no mouse, câmera seguindo
-- [ ] S1 · Ataque básico com combo, hitbox/hurtbox, `Health`, dano
-- [ ] S1 · Dash com i-frames
+- [x] S1 · Movimento, mira no mouse, câmera seguindo
+- [x] S1 · Ataque básico com combo, hitbox/hurtbox, `Health`, dano
+- [x] S1 · Dash com i-frames
 - [ ] S2 · Fogo e Água completos (modificador, skill, dash)
 - [ ] S2 · Troca de elemento + Golpe de Troca
 - [ ] S2 · Marcas + resolvedor de reações (tabela em ScriptableObject)

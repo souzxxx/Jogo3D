@@ -9,6 +9,7 @@ Action roguelite 3D de câmera top-down: você começa a run com um elemento, de
 
 - [`docs/ESCOPO.md`](docs/ESCOPO.md): escopo, direção visual, rubricas, divisão do time e kanban
 - [`docs/ARQUITETURA.md`](docs/ARQUITETURA.md): pastas, assemblies e contratos entre as frentes
+- [`docs/progresso.html`](docs/progresso.html): o que já foi entregue, com vídeo (abra no navegador)
 - [`docs/lookdev.html`](docs/lookdev.html): prints do alvo visual (abra no navegador)
 - Kanban: https://github.com/users/souzxxx/projects/4
 

@@ -38,6 +38,45 @@ public static class LookDevBuilder
         File.WriteAllText("Logs/lookdev_builder.txt", log.ToString());
     }
 
+    /// Sala vazia (cenario, luz, pos e colisores) numa cena nova, para as cenas de teste das frentes.
+    public static Transform BeginArena(string rootName)
+    {
+        toon = false;
+        cache.Clear();
+        particles.Clear();
+        matDir = Out + "Materials_B_Lit/";
+        Directory.CreateDirectory(matDir);
+        AssetDatabase.Refresh();
+        EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
+        root = new GameObject(rootName).transform;
+        Environment();
+        Room();
+        PostVolume();
+        AddColliders();
+        return root;
+    }
+
+    static void AddColliders()
+    {
+        foreach (Transform child in root)
+        {
+            string n = child.name;
+            if (n.StartsWith("floor") || n.StartsWith("Ember") || n.StartsWith("torch")) continue;
+            foreach (var mf in child.GetComponentsInChildren<MeshFilter>())
+                if (mf.GetComponent<Collider>() == null) mf.gameObject.AddComponent<MeshCollider>();
+        }
+        Box("FloorCollider", new Vector3(0, -0.5f, 0), new Vector3(24, 1, 20));
+        Box("FrontLimit", new Vector3(0, 2, -8.3f), new Vector3(24, 6, 0.6f));
+    }
+
+    static void Box(string name, Vector3 center, Vector3 size)
+    {
+        var go = new GameObject(name);
+        go.transform.SetParent(root, false);
+        go.transform.position = center;
+        go.AddComponent<BoxCollider>().size = size;
+    }
+
     static void Build(bool useToon)
     {
         toon = useToon;
@@ -74,9 +113,11 @@ public static class LookDevBuilder
 
     // ---------- materials ----------
 
-    static Material Mat(string key, string texPath, Color baseColor, Color emission, float outline)
+    public static Material Mat(string key, string texPath, Color baseColor, Color emission, float outline)
     {
         if (cache.TryGetValue(key, out var m)) return m;
+        m = AssetDatabase.LoadAssetAtPath<Material>(matDir + key + ".mat");
+        if (m != null) { cache[key] = m; return m; }
         if (toon)
         {
             m = new Material(Shader.Find("Quintessence/Toon"));
@@ -127,7 +168,7 @@ public static class LookDevBuilder
 
     // ---------- helpers ----------
 
-    static GameObject Spawn(string path, Vector3 pos, float yRot, Material mat, float scale = 1f)
+    public static GameObject Spawn(string path, Vector3 pos, float yRot, Material mat, float scale = 1f)
     {
         var asset = AssetDatabase.LoadAssetAtPath<GameObject>(KK + path);
         if (asset == null) { log.AppendLine("MISSING " + path); return new GameObject("missing_" + path); }
@@ -220,7 +261,7 @@ public static class LookDevBuilder
         }
     }
 
-    static void Hide(GameObject go, params string[] names)
+    public static void Hide(GameObject go, params string[] names)
     {
         foreach (var r in go.GetComponentsInChildren<Renderer>(true))
             if (names.Any(n => r.name.ToLower().Contains(n.ToLower()))) r.gameObject.SetActive(false);
@@ -428,7 +469,7 @@ public static class LookDevBuilder
             ParticleSystemShapeType.Sphere, 0.3f, 0, gravity * 0.3f);
     }
 
-    static Camera MakeCamera()
+    public static Camera MakeCamera()
     {
         var go = new GameObject("Main Camera") { tag = "MainCamera" };
         go.transform.SetParent(root, false);

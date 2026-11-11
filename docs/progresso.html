@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quintessence 3D — Progresso</title>
+<style>
+  :root { --bg:#0e0c16; --panel:#181524; --line:#2c2740; --text:#e9e6f2; --dim:#9a94b3; --ok:#6fdc8c; --warn:#ffb454; --acc:#4fc3ff; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--text); font:16px/1.55 system-ui,-apple-system,sans-serif; }
+  main { max-width:1100px; margin:0 auto; padding:28px 16px 70px; }
+  h1 { font-size:26px; margin:0 0 4px; }
+  p.sub { color:var(--dim); margin:0 0 26px; }
+  a { color:var(--acc); }
+  section { background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:18px 20px; margin-bottom:18px; }
+  section h2 { font-size:19px; margin:0 0 2px; }
+  .meta { color:var(--dim); font-size:14px; margin-bottom:14px; }
+  .tag { display:inline-block; font-size:12px; font-weight:600; padding:2px 9px; border-radius:20px; background:#ffffff14; margin-right:6px; }
+  .tag.ok { color:var(--ok); } .tag.who { color:var(--acc); }
+  video, section img { display:block; width:100%; height:auto; border-radius:8px; border:1px solid var(--line); background:#000; }
+  .cols { display:grid; grid-template-columns:1fr 1fr; gap:18px; margin-top:14px; }
+  @media (max-width:800px){ .cols { grid-template-columns:1fr; } }
+  h3 { font-size:14px; margin:0 0 6px; color:var(--dim); text-transform:uppercase; letter-spacing:.04em; }
+  ul { margin:0; padding-left:20px; } li { margin:3px 0; }
+  li.warn::marker { color:var(--warn); }
+  code { background:#ffffff12; padding:1px 5px; border-radius:4px; font-size:.9em; }
+  kbd { background:#ffffff1c; border:1px solid var(--line); border-bottom-width:2px; padding:0 6px; border-radius:5px; font-size:.85em; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Quintessence 3D — Progresso</h1>
+  <p class="sub">Entrega mais recente no topo. Escopo em <a href="ESCOPO.md">ESCOPO.md</a> · kanban em <a href="https://github.com/users/souzxxx/projects/4">GitHub Projects</a>.</p>
+
+  <section>
+    <h2>S1 · Herói jogável: movimento, mira, combo e dash</h2>
+    <div class="meta"><span class="tag who">Leonardo</span><span class="tag ok">20 testes de regra + 1 teste jogando, todos passando</span></div>
+    <video src="img/s1_combate.mp4" controls autoplay loop muted playsinline></video>
+    <div class="cols">
+      <div>
+        <h3>O que o vídeo mostra</h3>
+        <ul>
+          <li>Gravado pelo próprio teste: um roteiro joga a cena e confere as regras</li>
+          <li>Herói corre até o boneco, mirando nele</li>
+          <li>Combo de 3 golpes (6 + 6 + 10 de dano), o último empurra mais</li>
+          <li>Dash de 4 m com invulnerabilidade durante a dash</li>
+          <li>Vai ao segundo boneco e bate, avançando, até ele cair</li>
+          <li>Câmera segue com suavização e olha um pouco pra onde o herói mira</li>
+        </ul>
+      </div>
+      <div>
+        <h3>Como jogar você mesmo</h3>
+        <ul>
+          <li>Abra <code>Assets/Scenes/Dev/Leonardo_Combat.unity</code> e dê Play</li>
+          <li><kbd>WASD</kbd> anda · mouse mira · clique esquerdo (segurar) ataca · <kbd>Espaço</kbd> dash</li>
+        </ul>
+        <h3 style="margin-top:14px">Ainda não tem</h3>
+        <ul>
+          <li class="warn">Feedback de impacto (flash, número de dano, faísca): é a frente do Miguel, hoje o boneco só amassa e recua</li>
+          <li class="warn">Elementos, marcas e reações: S2</li>
+          <li class="warn">Animações de ataque são as genéricas do pack, aceleradas pra caber no tempo do golpe</li>
+          <li class="warn">A cena de teste ficou mais escura que o look-dev (sem as luzes dos santuários)</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>S0 · Contratos entre as frentes</h2>
+    <div class="meta"><span class="tag who">Leonardo</span><span class="tag ok">10 testes passando</span></div>
+    <ul>
+      <li><code>ElementType</code>, <code>Team</code>, <code>DamageInfo</code>, <code>IDamageable</code>, <code>Health</code> e o barramento <code>GameEvents</code></li>
+      <li>Regras em <a href="ARQUITETURA.md">ARQUITETURA.md</a>: cada frente só referencia o Core</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>S0 · Direção visual (variação B escolhida)</h2>
+    <div class="meta"><span class="tag who">Miguel</span><span class="tag ok">aprovada</span> comparação A × B em <a href="lookdev.html">lookdev.html</a></div>
+    <img src="img/lookdev_v1.png" alt="Look-dev v1">
+  </section>
+</main>
+</body>
+</html>
