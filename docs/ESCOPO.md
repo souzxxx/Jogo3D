@@ -175,7 +175,7 @@ Sprints sem data até confirmar a entrega. S0 é de todos e destrava o resto.
 - [x] S3 · Terra e Ar completos, as 6 reações e status (Queimadura, Encharcado, Congelado, Enraizado, Atordoado, Armadura Quebrada)
 - [x] S3 · Quintessência (medidor + estado)
 - [x] S4 · Morte, fim de run e pausa (feitos junto com a run do Nicolas)
-- [ ] S4 · Caça a dead ends e recuperação de erro (rubrica Estados e Erros)
+- [x] S4 · Caça a dead ends e recuperação de erro (resgate de inimigo e herói fora da sala, luta travada, pausa ao perder o foco; um teste provoca cada caso). Falta olhar a build WebGL em si
 - [x] S4 · Sala de treino/tutorial que ensina marca → reação (botão Treino no título, sete passos, opcional)
 
 ### Enzo — Inimigos e salas
