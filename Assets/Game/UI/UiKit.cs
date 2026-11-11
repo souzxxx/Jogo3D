@@ -13,9 +13,8 @@ namespace Quintessence.UI
         public static readonly Color Paper = new(0.93f, 0.91f, 0.96f);
         public static readonly Color Dim = new(0.62f, 0.59f, 0.72f);
 
-        static Font font;
         static Sprite circle, ring;
-        public static Font Font => font != null ? font : font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        public static Font Font => Quintessence.Core.GameFonts.Display;
         public static Sprite Circle => circle != null ? circle : circle = MakeCircle(96, 0f);
         public static Sprite Ring => ring != null ? ring : ring = MakeCircle(96, 0.8f);
 
@@ -94,18 +93,19 @@ namespace Quintessence.UI
         public static Text Text(RectTransform rt, string text, int size, Color color, TextAnchor align = TextAnchor.MiddleCenter, bool bold = true)
         {
             var t = rt.gameObject.AddComponent<Text>();
-            t.font = Font;
+            // bold = fonte de destaque (numeros, titulos, rotulos); false = fonte de texto corrido
+            t.font = bold ? Quintessence.Core.GameFonts.Display : Quintessence.Core.GameFonts.Body;
             t.text = text;
             t.fontSize = size;
             t.color = color;
             t.alignment = align;
-            t.fontStyle = bold ? FontStyle.Bold : FontStyle.Normal;
+            t.fontStyle = FontStyle.Normal;
             t.horizontalOverflow = HorizontalWrapMode.Overflow;
             t.verticalOverflow = VerticalWrapMode.Overflow;
             t.raycastTarget = false;
             var o = rt.gameObject.AddComponent<Outline>();
-            o.effectColor = new Color(0.02f, 0.02f, 0.05f, 0.85f);
-            o.effectDistance = new Vector2(1.5f, -1.5f);
+            o.effectColor = new Color(0.02f, 0.02f, 0.05f, 0.9f);
+            o.effectDistance = new Vector2(2f, -2f);
             return t;
         }
 

@@ -32,5 +32,8 @@ A cena `Assets/Scenes/LookDev/LookDev_B_Lit.unity` é gerada por `Assets/Editor/
 | [KayKit Dungeon Remastered](https://github.com/KayKit-Game-Assets/KayKit-Dungeon-Remastered-1.0) | Kay Lousberg (kaylousberg.com) | CC0 |
 | [KayKit Adventurers](https://github.com/KayKit-Game-Assets/KayKit-Character-Pack-Adventures-1.0) | Kay Lousberg | CC0 |
 | [KayKit Skeletons](https://github.com/KayKit-Game-Assets/KayKit-Character-Pack-Skeletons-1.0) | Kay Lousberg | CC0 |
+| [Lilita One](https://fonts.google.com/specimen/Lilita+One) | Juan Montoreano | OFL 1.1 |
+| [Titillium Web](https://fonts.google.com/specimen/Titillium+Web) | Accademia di Belle Arti di Urbino | OFL 1.1 |
+| [Cinzel Decorative](https://fonts.google.com/specimen/Cinzel+Decorative) | Natanael Gama | OFL 1.1 |
 
 Ferramentas de IA: Claude Code (Anthropic) no planejamento, na montagem da cena de look-dev e no código.

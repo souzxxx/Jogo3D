@@ -16,10 +16,11 @@ namespace Quintessence.UI
             canvas = UiKit.Canvas("TitleCanvas", 10, transform);
             var root = canvas.transform;
             UiKit.Image(UiKit.Stretch("Shade", root), null, new Color(0.03f, 0.02f, 0.06f, 0.55f));
-            UiKit.Text(UiKit.Rect("Title", root, new Vector2(0.5f, 1), new Vector2(0, -150), new Vector2(1400, 130)), "QUINTESSENCE", 124, UiKit.Paper);
+            var logo = UiKit.Text(UiKit.Rect("Title", root, new Vector2(0.5f, 1), new Vector2(0, -150), new Vector2(1600, 150)), "QUINTESSENCE", 128, UiKit.Paper);
+            logo.font = GameFonts.Title;
             UiKit.Text(UiKit.Rect("Sub", root, new Vector2(0.5f, 1), new Vector2(0, -330), new Vector2(1400, 50)),
-                "Comece com um elemento. Desperte os outros três. Alcance o quinto estado.", 30, UiKit.Dim, TextAnchor.MiddleCenter, false);
-            UiKit.Text(UiKit.Rect("Pick", root, new Vector2(0.5f, 0.5f), new Vector2(0, 40), new Vector2(1000, 50)), "ESCOLHA O ELEMENTO INICIAL", 30, UiKit.Paper);
+                "Comece com um elemento. Desperte os outros três. Alcance o quinto estado.", 34, UiKit.Dim, TextAnchor.MiddleCenter, false);
+            UiKit.Text(UiKit.Rect("Pick", root, new Vector2(0.5f, 0.5f), new Vector2(0, 40), new Vector2(1000, 50)), "ESCOLHA O ELEMENTO INICIAL", 34, UiKit.Paper);
 
             string[] names = { "Fogo", "Água", "Terra", "Ar" };
             string[] notes = { "Agressivo\ndano contínuo", "Alcance\ne controle", "Pesado\nquebra armadura", "Mobilidade\ne crítico" };
@@ -34,10 +35,10 @@ namespace Quintessence.UI
                 var label = (RectTransform)b.transform.Find("Label");
                 label.offsetMin = new Vector2(0, 60); label.offsetMax = new Vector2(0, -110);
                 label.GetComponent<UnityEngine.UI.Text>().fontSize = 40;
-                UiKit.Text(UiKit.Rect("Note", b.transform, new Vector2(0.5f, 0), new Vector2(0, 16), new Vector2(240, 64)), notes[i], 21, UiKit.Paper, TextAnchor.MiddleCenter, false);
+                UiKit.Text(UiKit.Rect("Note", b.transform, new Vector2(0.5f, 0), new Vector2(0, 16), new Vector2(240, 64)), notes[i], 23, UiKit.Paper, TextAnchor.MiddleCenter, false);
             }
             UiKit.Text(UiKit.Rect("Keys", root, new Vector2(0.5f, 0), new Vector2(0, 60), new Vector2(1600, 30)),
-                "WASD mover · mouse mira · clique ataca · clique dir. skill · Espaço dash · Q/E troca elemento · R Quintessência · F interagir", 20, UiKit.Dim, TextAnchor.MiddleCenter, false);
+                "WASD mover · mouse mira · clique ataca · clique dir. skill · Espaço dash · Q/E troca elemento · R Quintessência · F interagir", 22, UiKit.Dim, TextAnchor.MiddleCenter, false);
         }
 
         public void UseCamera(Camera cam)

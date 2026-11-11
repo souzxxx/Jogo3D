@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using Quintessence.Core;
 using UnityEngine;
 
 namespace Quintessence.Feel
@@ -6,6 +8,8 @@ namespace Quintessence.Feel
     public class DamageNumber : MonoBehaviour
     {
         static Font font;
+        // textos recentes, para empilhar em vez de sobrepor quando saem varios no mesmo lugar
+        static readonly List<(Vector3 pos, float time)> recent = new();
         TextMesh front, shadow;
         Vector3 velocity;
         float life, total, baseSize;
@@ -13,14 +17,20 @@ namespace Quintessence.Feel
 
         public static void Spawn(Vector3 position, string text, Color color, float size = 1f, float seconds = 0.75f)
         {
-            if (font == null) font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+            if (font == null) font = GameFonts.Display;
+            float now = Time.unscaledTime;
+            recent.RemoveAll(x => now - x.time > 0.45f);
+            int stack = 0;
+            foreach (var r in recent)
+                if (Mathf.Abs(r.pos.x - position.x) < 1.6f && Mathf.Abs(r.pos.z - position.z) < 1.6f) stack++;
+            recent.Add((position, now));
             var go = new GameObject("DamageNumber");
-            go.transform.position = position + new Vector3(Random.Range(-0.35f, 0.35f), 0f, 0f);
+            go.transform.position = position + new Vector3(Random.Range(-0.25f, 0.25f) + (stack % 2 == 0 ? 0.35f : -0.35f) * Mathf.Min(stack, 1), 0.62f * stack * size, 0f);
             var n = go.AddComponent<DamageNumber>();
-            n.shadow = Make(go.transform, text, new Vector3(0.035f, -0.035f, 0.02f));
+            n.shadow = Make(go.transform, text, new Vector3(0.05f, -0.05f, 0.02f));
             n.front = Make(go.transform, text, Vector3.zero);
             n.color = color; n.total = n.life = seconds; n.baseSize = size;
-            n.velocity = new Vector3(Random.Range(-0.5f, 0.5f), 2.6f, 0f);
+            n.velocity = new Vector3(Random.Range(-0.3f, 0.3f), 2.2f, 0f);
             n.Apply();
         }
 
@@ -32,9 +42,8 @@ namespace Quintessence.Feel
             var t = go.AddComponent<TextMesh>();
             t.font = font;
             t.text = text;
-            t.fontSize = 72;
-            t.characterSize = 0.075f;
-            t.fontStyle = FontStyle.Bold;
+            t.fontSize = 96;
+            t.characterSize = 0.06f;
             t.anchor = TextAnchor.MiddleCenter;
             t.alignment = TextAlignment.Center;
             go.GetComponent<MeshRenderer>().sharedMaterial = font.material;

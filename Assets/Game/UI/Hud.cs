@@ -54,7 +54,7 @@ namespace Quintessence.UI
             hpText = UiKit.Text(UiKit.Stretch("Text", hp), "", 22, UiKit.Paper);
             var hpLabel = UiKit.Rect("Label", hp, new Vector2(0, 1), new Vector2(2, 6), new Vector2(200, 24));
             hpLabel.pivot = new Vector2(0, 0);
-            UiKit.Text(hpLabel, "VIDA", 18, UiKit.Dim, TextAnchor.LowerLeft);
+            UiKit.Text(hpLabel, "VIDA", 20, UiKit.Dim, TextAnchor.LowerLeft);
 
             // roda de elementos, embaixo no centro
             var wheel = UiKit.Rect("Elements", root, new Vector2(0.5f, 0), new Vector2(0, 44), new Vector2(420, 96));
@@ -89,7 +89,7 @@ namespace Quintessence.UI
             essenceText = UiKit.Text(UiKit.Rect("Essence", root, new Vector2(1, 1), new Vector2(-48, -40), new Vector2(360, 40)), "Essência 0", 30, new Color(1f, 0.85f, 0.45f), TextAnchor.MiddleRight);
             roomText = UiKit.Text(UiKit.Rect("Room", root, new Vector2(0, 1), new Vector2(48, -40), new Vector2(700, 40)), "", 30, UiKit.Paper, TextAnchor.MiddleLeft);
             UiKit.Text(UiKit.Rect("Keys", root, new Vector2(1, 0), new Vector2(-48, 40), new Vector2(700, 26)),
-                "WASD mover · clique ataca · clique dir. skill · Espaço dash · R Quintessência · Tab mapa · Esc pausa", 17, UiKit.Dim, TextAnchor.MiddleRight, false);
+                "WASD mover · clique ataca · clique dir. skill · Espaço dash · R Quintessência · Tab mapa · Esc pausa", 19, UiKit.Dim, TextAnchor.MiddleRight, false);
 
             // aviso de interacao
             promptBox = UiKit.Rect("Prompt", root, new Vector2(0.5f, 0), new Vector2(0, 250), new Vector2(560, 54));
@@ -185,7 +185,7 @@ namespace Quintessence.UI
                 : hero.QuintessenceReady ? "R — QUINTESSÊNCIA"
                 : all ? "" : $"Quintessência: desperte os 4 elementos ({awakened.Count}/4)";
             quintText.color = hero.QuintessenceReady || hero.QuintessenceActive ? prism : UiKit.Dim;
-            quintText.fontSize = hero.QuintessenceReady || hero.QuintessenceActive ? 24 : 17;
+            quintText.fontSize = hero.QuintessenceReady || hero.QuintessenceActive ? 26 : 19;
         }
 
         // ---------- API usada pela run ----------
@@ -237,7 +237,7 @@ namespace Quintessence.UI
                 if (here) UiKit.Image(UiKit.Rect("Here", node, new Vector2(0.5f, 0.5f), Vector2.zero, node.sizeDelta + Vector2.one * 26), UiKit.Ring, Color.white);
                 var label = UiKit.Rect("Label", node, new Vector2(0.5f, 0), new Vector2(0, -8), new Vector2(220, 26));
                 label.pivot = new Vector2(0.5f, 1);
-                UiKit.Text(label, here ? "VOCÊ · " + RoomInfo.Name(n.Type) : RoomInfo.Name(n.Type), 19, new Color(1, 1, 1, Mathf.Max(alpha, 0.45f)));
+                UiKit.Text(label, here ? "VOCÊ · " + RoomInfo.Name(n.Type) : RoomInfo.Name(n.Type), 21, new Color(1, 1, 1, Mathf.Max(alpha, 0.45f)));
             }
         }
 
