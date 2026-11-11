@@ -33,6 +33,49 @@
   <p class="sub">Entrega mais recente no topo. Escopo em <a href="ESCOPO.md">ESCOPO.md</a> · kanban em <a href="https://github.com/users/souzxxx/projects/4">GitHub Projects</a>.</p>
 
   <section>
+    <h2>Run S1 + S2 · Do título à vitória: mapa, portas, santuário e HUD</h2>
+    <div class="meta"><span class="tag who">Nicolas</span><span class="tag ok">258 testes de regra + 5 testes jogando, todos passando</span></div>
+    <video src="img/run_completa.mp4" controls autoplay loop muted playsinline></video>
+    <div class="cols">
+      <div><img src="img/titulo.png" alt="Tela de título"></div>
+      <div><img src="img/mapa.png" alt="Mapa da run"></div>
+    </div>
+    <div class="cols">
+      <div>
+        <h3>O jogo agora tem começo, meio e fim</h3>
+        <ul>
+          <li><b>Título:</b> escolher o elemento inicial começa a run</li>
+          <li><b>Mapa ramificado</b> de 8 salas gerado por semente: começa em Combate, termina no Chefe, e todo caminho passa por 3 Santuários (começa com 1 elemento, termina com 4)</li>
+          <li><b>Portas:</b> sala resolvida abre uma porta por caminho, com o tipo da próxima sala e a recompensa escritos em cima. <kbd>F</kbd> entra</li>
+          <li><b>Santuário:</b> um orbe por elemento que falta; você escolhe qual despertar</li>
+          <li><b>Descanso</b> cura 30%; sala de Combate paga Essência ou Vida; <b>Elite</b> tem mais ondas e paga o dobro</li>
+          <li><b>Fim:</b> vitória ao limpar o Chefe, derrota se o herói cai; tela com resumo, "Jogar de novo" e "Menu"</li>
+          <li><b>Pausa</b> no <kbd>Esc</kbd>, <b>mapa</b> segurando <kbd>Tab</kbd></li>
+        </ul>
+      </div>
+      <div>
+        <h3>HUD</h3>
+        <ul>
+          <li>Vida com rastro do dano recente</li>
+          <li>Roda dos 4 elementos: apagado se não desperto, anel no atual, recarga da skill girando por cima</li>
+          <li>Cargas de dash, medidor de Quintessência (prismático quando pronto), Essência e "Sala 3/8 · Combate"</li>
+        </ul>
+        <h3 style="margin-top:14px">Ainda não está bom</h3>
+        <ul>
+          <li class="warn">O "Chefe" são três ondas grandes; o Guardião das Cinzas não existe</li>
+          <li class="warn">Toda sala é a mesma arena; a porta troca os inimigos, não o cenário</li>
+          <li class="warn">Essência não compra nada: sem loja, sem bênçãos, sem hub</li>
+          <li class="warn">O vídeo é uma run curta de teste (5 salas, 1 santuário) jogada por um roteiro que venceu em 1:29; a de 8 salas não foi jogada até o fim</li>
+          <li class="warn">Textos do mundo ("ONDA 1/2") aparecem por cima do mapa; HUD é texto e círculos, sem arte</li>
+          <li class="warn">Nenhuma opção de volume ou tela; sem som</li>
+          <li class="warn">Dificuldade sem balanceamento nenhum</li>
+        </ul>
+      </div>
+    </div>
+    <p style="margin:14px 0 0;color:var(--dim)">Pra jogar: abra <code>Assets/Scenes/Title.unity</code> e dê Play.</p>
+  </section>
+
+  <section>
     <h2>Inimigos S1 + S2 · IA, aviso de ataque, dois tipos e ondas</h2>
     <div class="meta"><span class="tag who">Enzo</span><span class="tag ok">49 testes de regra + 3 testes jogando, todos passando</span></div>
     <video src="img/inimigos_ondas.mp4" controls autoplay loop muted playsinline></video>

@@ -7,7 +7,7 @@ namespace Quintessence.Combat
 {
     /// Heroi: anda, mira livre do movimento, combo, skill e dash do elemento atual, troca de elemento e Quintessencia.
     [RequireComponent(typeof(CharacterController), typeof(Health))]
-    public class PlayerController : MonoBehaviour
+    public class PlayerController : MonoBehaviour, IHeroStatus
     {
         [Header("Movimento")]
         [SerializeField] float moveSpeed = 7f;
@@ -48,6 +48,16 @@ namespace Quintessence.Combat
         public LoadoutState Loadout => loadout;
         public QuintessenceState Quintessence => quint;
         public ElementType Element => loadout.Current;
+
+        // IHeroStatus
+        public Health Health => health;
+        public ElementType CurrentElement => loadout.Current;
+        public IReadOnlyList<ElementType> AwakenedElements => loadout.Awakened;
+        public int DashCharges => dash.Charges;
+        public int DashMaxCharges => dash.MaxCharges;
+        public float Quintessence01 => quint.Normalized;
+        public bool QuintessenceActive => quint.Active;
+        public bool QuintessenceReady => quint.Ready && loadout.HasAll;
 
         /// indice do golpe no combo
         public event Action<int> AttackStarted;
@@ -122,6 +132,26 @@ namespace Quintessence.Combat
         {
             float cd = Def(e).skillCooldown;
             return cd <= 0f ? 0f : Mathf.Clamp01(skillCd[(int)e] / cd);
+        }
+
+        /// Comeco de run: o heroi volta a ter so o elemento inicial.
+        public void ResetLoadout(ElementType starting)
+        {
+            loadout = new LoadoutState(starting);
+            dash.SetMaxCharges(Def(starting).dashCharges);
+            GameEvents.RaiseElementAwakened(starting);
+            GameEvents.RaiseElementSwitched(ElementType.None, starting);
+        }
+
+        /// Move o heroi de uma vez (troca de sala).
+        public void Teleport(Vector3 position, Vector3 facing)
+        {
+            body.enabled = false;
+            transform.SetPositionAndRotation(position, Quaternion.LookRotation(facing));
+            body.enabled = true;
+            AimDirection = facing;
+            combo.Cancel();
+            castLeft = 0f;
         }
 
         /// Desperta um elemento (santuario).

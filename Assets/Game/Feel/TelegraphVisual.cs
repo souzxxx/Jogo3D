@@ -79,8 +79,8 @@ namespace Quintessence.Feel
                 fill.localPosition = new Vector3(0f, 0.01f, 0f);
             }
             // pisca claro no instante do golpe
-            float flash = Mathf.InverseLerp(0.85f, 1f, k);
-            fillMat.color = Color.Lerp(new Color(1f, 0.12f, 0.08f, 0.42f), new Color(1f, 0.9f, 0.8f, 0.8f), flash);
+            float flash = Mathf.InverseLerp(0.9f, 1f, k);
+            fillMat.color = Color.Lerp(new Color(1f, 0.12f, 0.08f, 0.42f), new Color(1f, 0.55f, 0.4f, 0.6f), flash);
         }
 
         void OnDestroy()

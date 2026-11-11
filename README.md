@@ -13,6 +13,14 @@ Action roguelite 3D de câmera top-down: você começa a run com um elemento, de
 - [`docs/lookdev.html`](docs/lookdev.html): prints do alvo visual (abra no navegador)
 - Kanban: https://github.com/users/souzxxx/projects/4
 
+## Jogar
+
+Abra `Assets/Scenes/Title.unity` no Unity e dê Play.
+
+WASD move · mouse mira · clique esquerdo ataca · clique direito skill · Espaço dash · Q/E troca elemento · R Quintessência · F interage · Tab mapa · Esc pausa
+
+Testes: `unity test . --mode EditMode` e `unity test . --mode PlayMode` (os de PlayMode jogam as cenas com um roteiro e gravam quadros em `Logs/frames`).
+
 ## Look-dev
 
 A cena `Assets/Scenes/LookDev/LookDev_B_Lit.unity` é gerada por `Assets/Editor/LookDevBuilder.cs` (menu **Quintessence > Look-dev > Build A + B**), que também salva os prints em `docs/img/`.

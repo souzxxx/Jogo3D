@@ -9,11 +9,14 @@ Cada frente tem a sua pasta e o seu assembly em `Assets/Game/`, e **só referenc
 | `Assets/Game/Core` | `Quintessence.Core` | Leonardo | Contratos: `ElementType`, `Team`, `DamageInfo`, `IDamageable`, `Health`, `GameEvents` |
 | `Assets/Game/Combat` | `Quintessence.Combat` | Leonardo | Herói, ataques, elementos, marcas, reações, Quintessência |
 | `Assets/Game/Enemies` | `Quintessence.Enemies` | Enzo | IA, inimigos, ondas, chefe, layouts de sala |
-| `Assets/Game/Run` | `Quintessence.Run` | Nicolas | Mapa, portas, recompensas, bênçãos, hub, save |
-| `Assets/Game/UI` | `Quintessence.UI` | Nicolas | HUD e menus |
+| `Assets/Game/Run` | `Quintessence.Run` | Nicolas | Regras da run sem Unity: mapa, estado, plano de ondas, recompensas |
+| `Assets/Game/UI` | `Quintessence.UI` | Nicolas | HUD, mapa, pausa, resultado, título. Pode referenciar `Run` além do Core |
+| `Assets/Game/Game` | `Quintessence.Game` | todos | **Composição:** o único assembly que referencia todas as frentes. `GameFlow` (cenas) e `RunDirector` (monta cada sala, portas, santuário, fim de run) |
 | `Assets/Game/Feel` | `Quintessence.Feel` | Miguel | VFX, luz, câmera, shake, feedback |
 
-Só o Core existe por enquanto; cada pessoa cria a pasta e o `.asmdef` da sua frente no primeiro card (referenciando `Quintessence.Core`).
+O HUD lê o herói pela interface `IHeroStatus` do Core, sem conhecer o combate. Pausa passa por `GameClock.SetPaused`.
+
+Cenas do jogo: `Assets/Scenes/Title.unity` e `Assets/Scenes/Run.unity`, geradas por `GameSceneBuilder` (menu Quintessence > Build cenas do jogo). A run inteira acontece na cena Run; trocar de sala não recarrega a cena.
 
 ## Contratos
 

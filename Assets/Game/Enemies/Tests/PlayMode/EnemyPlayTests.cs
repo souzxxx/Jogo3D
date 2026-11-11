@@ -36,6 +36,7 @@ namespace Quintessence.Enemies.PlayTests
             if (Directory.Exists(FrameDir)) Directory.Delete(FrameDir, true);
             Directory.CreateDirectory(FrameDir);
 
+            GameEvents.Clear(); // assinantes de testes anteriores apontam para objetos ja destruidos
             yield return EditorSceneManager.LoadSceneAsyncInPlayMode(Scene, new LoadSceneParameters(LoadSceneMode.Single));
             yield return null;
 

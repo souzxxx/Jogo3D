@@ -92,7 +92,7 @@ namespace Quintessence.Enemies
                     GameEvents.RaiseTelegraph(new TelegraphEvent
                     {
                         Point = line ? transform.position : strikePoint, Direction = strikeDir,
-                        Radius = line ? 0.35f : definition.strikeRadius, Length = definition.projectileRange,
+                        Radius = line ? 0.35f : definition.strikeRadius, Length = line ? ClearDistance(strikeDir, definition.projectileRange) : 0f,
                         Duration = definition.telegraphTime, IsLine = line, Source = gameObject,
                     });
                     Play("Attack", 0.08f);
@@ -162,6 +162,21 @@ namespace Quintessence.Enemies
             {
                 Point = target.transform.position + Vector3.up * 1.2f, Direction = strikeDir, Knockback = definition.knockback,
             });
+        }
+
+        static readonly RaycastHit[] rayHits = new RaycastHit[16];
+
+        /// Ate onde o tiro vai antes de bater em parede ou objeto do cenario (para o aviso nao atravessar a sala).
+        float ClearDistance(Vector3 dir, float max)
+        {
+            int n = Physics.RaycastNonAlloc(transform.position + Vector3.up * 1.3f, dir, rayHits, max, ~0, QueryTriggerInteraction.Ignore);
+            float best = max;
+            for (int i = 0; i < n; i++)
+            {
+                if (rayHits[i].collider.GetComponentInParent<Health>() != null) continue;
+                if (rayHits[i].distance < best) best = rayHits[i].distance;
+            }
+            return best;
         }
 
         void Play(string state, float fade)

@@ -106,7 +106,7 @@ namespace Quintessence.Feel
             GameEvents.RoomCleared -= OnRoomCleared;
             GameEvents.Shattered -= OnShattered;
             GameEvents.QuintessenceActiveChanged -= OnQuintessence;
-            Time.timeScale = 1f;
+            if (!GameClock.Paused) Time.timeScale = 1f;
         }
 
         // ---------- eventos ----------
@@ -408,7 +408,7 @@ namespace Quintessence.Feel
 
         void Stop(float seconds)
         {
-            if (!hitStop) return;
+            if (!hitStop || GameClock.Paused) return;
             if (stop != null) StopCoroutine(stop);
             stop = StartCoroutine(StopRoutine(seconds));
         }
@@ -417,7 +417,7 @@ namespace Quintessence.Feel
         {
             Time.timeScale = 0.05f;
             while (seconds > 0f) { seconds -= Time.unscaledDeltaTime; yield return null; }
-            Time.timeScale = 1f;
+            Time.timeScale = GameClock.Paused ? 0f : 1f;
             stop = null;
         }
 

@@ -1,0 +1,9 @@
+{
+    "name": "Quintessence.Game.PlayTests",
+    "rootNamespace": "Quintessence.Game.PlayTests",
+    "references": ["Quintessence.Core", "Quintessence.Combat", "Quintessence.Enemies", "Quintessence.Run", "Quintessence.UI", "Quintessence.Game", "UnityEngine.TestRunner"],
+    "overrideReferences": true,
+    "precompiledReferences": ["nunit.framework.dll"],
+    "autoReferenced": false,
+    "defineConstraints": ["UNITY_INCLUDE_TESTS"]
+}

@@ -14,6 +14,7 @@ namespace Quintessence.Combat
         bool ConsumeDash();
         bool ConsumeSkill();
         bool ConsumeQuintessence();
+        bool ConsumeInteract();
         /// -1 = elemento anterior, +1 = proximo, 0 = nada.
         int ConsumeSwitch();
     }

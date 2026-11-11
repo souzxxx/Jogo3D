@@ -33,6 +33,7 @@ namespace Quintessence.Combat.PlayTests
             if (Directory.Exists(frameDir)) Directory.Delete(frameDir, true);
             Directory.CreateDirectory(frameDir);
 
+            GameEvents.Clear(); // assinantes de testes anteriores apontam para objetos ja destruidos
             yield return EditorSceneManager.LoadSceneAsyncInPlayMode(Scene, new LoadSceneParameters(LoadSceneMode.Single));
             yield return null;
 

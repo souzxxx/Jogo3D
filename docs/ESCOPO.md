@@ -174,7 +174,8 @@ Sprints sem data até confirmar a entrega. S0 é de todos e destrava o resto.
 - [x] S2 · Marcas + resolvedor de reações (tabela em ScriptableObject)
 - [x] S3 · Terra e Ar completos, as 6 reações e status (Queimadura, Encharcado, Congelado, Enraizado, Atordoado, Armadura Quebrada)
 - [x] S3 · Quintessência (medidor + estado)
-- [ ] S4 · Morte, fim de run, pausa, sem dead ends (rubrica Estados e Erros)
+- [x] S4 · Morte, fim de run e pausa (feitos junto com a run do Nicolas)
+- [ ] S4 · Caça a dead ends e recuperação de erro (rubrica Estados e Erros)
 - [ ] S4 · Sala de treino/tutorial que ensina marca → reação
 
 ### Enzo — Inimigos e salas
@@ -189,11 +190,12 @@ Sprints sem data até confirmar a entrega. S0 é de todos e destrava o resto.
 - [ ] S4 · SFX e música (biblioteca livre), mixer com volumes
 
 ### Nicolas — Run, meta e UI
-- [ ] S1 · Fluxo de cenas: título → hub → run → resultado
-- [ ] S1 · Gerador do mapa ramificado + tela de mapa
-- [ ] S2 · Portas com ícone de recompensa, transição entre salas
-- [ ] S2 · HUD: vida, roda de elementos, cooldowns, medidor de Quintessência
-- [ ] S3 · Santuário (despertar elemento), Mestre (3 bênçãos), Loja, Descanso
+- [x] S1 · Fluxo de cenas: título → hub → run → resultado (título → run → resultado; o hub fica no S4)
+- [x] S1 · Gerador do mapa ramificado + tela de mapa
+- [x] S2 · Portas com ícone de recompensa, transição entre salas (texto no lugar de ícone)
+- [x] S2 · HUD: vida, roda de elementos, cooldowns, medidor de Quintessência
+- [x] S3 · Santuário (despertar elemento) e Descanso
+- [ ] S3 · Mestre (3 bênçãos) e Loja
 - [ ] S3 · ~20 bênçãos em ScriptableObject
 - [ ] S4 · Hub com upgrades permanentes + save em PlayerPrefs
 - [ ] S4 · Menus: principal, pausa, opções (volume, tela cheia), créditos

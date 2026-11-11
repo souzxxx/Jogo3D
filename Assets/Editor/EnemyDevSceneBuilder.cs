@@ -17,21 +17,40 @@ public static class EnemyDevSceneBuilder
     [MenuItem("Quintessence/Dev/Build cena de inimigos")]
     public static void Build() => CombatDevSceneBuilder.BuildPlayable("Enzo_Enemies", ScenePath, root =>
     {
-        Directory.CreateDirectory(Dir + "Data");
-        Directory.CreateDirectory(Dir + "Prefabs");
-        Directory.CreateDirectory(Dir + "Animation");
-        AssetDatabase.Refresh();
+        Bake(root, NavPath);
+        Prefabs(out var melee, out var ranged);
+        var go = new GameObject("WaveSpawner");
+        go.transform.SetParent(root, false);
+        go.transform.position = new Vector3(1, 0, 0);
+        var spawner = go.AddComponent<WaveSpawner>();
+        var w1 = new Wave(); w1.entries.Add(new WaveEntry { prefab = melee, count = 3 });
+        var w2 = new Wave(); w2.entries.Add(new WaveEntry { prefab = melee, count = 2 }); w2.entries.Add(new WaveEntry { prefab = ranged, count = 2 });
+        spawner.Waves.Add(w1);
+        spawner.Waves.Add(w2);
+        EditorUtility.SetDirty(spawner);
+    });
 
-        // NavMesh da sala, sem o heroi (senao ele vira um buraco no mapa)
+    /// NavMesh da sala, sem o heroi (senao ele vira um buraco no mapa).
+    public static void Bake(Transform root, string navPath)
+    {
         var player = GameObject.FindGameObjectWithTag("Player");
-        player.SetActive(false);
+        if (player != null) player.SetActive(false);
         var surface = root.gameObject.AddComponent<NavMeshSurface>();
         surface.collectObjects = CollectObjects.Children;
         surface.useGeometry = NavMeshCollectGeometry.PhysicsColliders;
         surface.BuildNavMesh();
-        AssetDatabase.DeleteAsset(NavPath);
-        AssetDatabase.CreateAsset(surface.navMeshData, NavPath);
-        player.SetActive(true);
+        AssetDatabase.DeleteAsset(navPath);
+        AssetDatabase.CreateAsset(surface.navMeshData, navPath);
+        if (player != null) player.SetActive(true);
+    }
+
+    /// Definicoes, animacoes e prefabs dos inimigos. Precisa de uma cena aberta por LookDevBuilder.BeginArena.
+    public static void Prefabs(out GameObject melee, out GameObject ranged)
+    {
+        Directory.CreateDirectory(Dir + "Data");
+        Directory.CreateDirectory(Dir + "Prefabs");
+        Directory.CreateDirectory(Dir + "Animation");
+        AssetDatabase.Refresh();
 
         const string minionFbx = KK + "Skeletons/Characters/Skeleton_Minion.fbx";
         const string mageFbx = KK + "Skeletons/Characters/Skeleton_Mage.fbx";
@@ -63,19 +82,9 @@ public static class EnemyDevSceneBuilder
         });
         if (rangedDef.projectilePrefab == null) { rangedDef.projectilePrefab = shot; EditorUtility.SetDirty(rangedDef); }
 
-        var melee = EnemyPrefab("Rastejante", "Skeletons/Characters/Skeleton_Minion.fbx", meleeDef, meleeCtrl, skel);
-        var ranged = EnemyPrefab("Atirador", "Skeletons/Characters/Skeleton_Mage.fbx", rangedDef, rangedCtrl, skel);
-
-        var go = new GameObject("WaveSpawner");
-        go.transform.SetParent(root, false);
-        go.transform.position = new Vector3(1, 0, 0);
-        var spawner = go.AddComponent<WaveSpawner>();
-        var w1 = new Wave(); w1.entries.Add(new WaveEntry { prefab = melee, count = 3 });
-        var w2 = new Wave(); w2.entries.Add(new WaveEntry { prefab = melee, count = 2 }); w2.entries.Add(new WaveEntry { prefab = ranged, count = 2 });
-        spawner.Waves.Add(w1);
-        spawner.Waves.Add(w2);
-        EditorUtility.SetDirty(spawner);
-    });
+        melee = EnemyPrefab("Rastejante", "Skeletons/Characters/Skeleton_Minion.fbx", meleeDef, meleeCtrl, skel);
+        ranged = EnemyPrefab("Atirador", "Skeletons/Characters/Skeleton_Mage.fbx", rangedDef, rangedCtrl, skel);
+    }
 
     static T Asset<T>(string name, System.Action<T> init) where T : ScriptableObject
     {
