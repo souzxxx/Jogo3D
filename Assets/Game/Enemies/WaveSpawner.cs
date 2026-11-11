@@ -33,6 +33,8 @@ namespace Quintessence.Enemies
 
         public WaveState State { get; private set; }
         public List<Wave> Waves => waves;
+        /// Vale para quem nascer daqui em diante. A run define antes de cada sala.
+        public EnemyScaling Scaling { get; set; } = EnemyScaling.None;
         bool announcedClear;
         Transform player;
 

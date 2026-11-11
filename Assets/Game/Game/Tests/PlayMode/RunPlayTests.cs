@@ -505,6 +505,69 @@ namespace Quintessence.Game.PlayTests
         }
 
         [UnityTest, Timeout(600000)]
+        public IEnumerator Elite_Room_Applies_Its_Trait_And_Depth_Scales_Enemies()
+        {
+            GameEvents.Clear();
+            Time.timeScale = 1f;
+            Time.captureFramerate = 30;
+            GameFlow.StartElement = ElementType.Fire;
+            GameFlow.Seed = 3; GameFlow.Layers = 5; GameFlow.Shrines = 1;
+            yield return EditorSceneManager.LoadSceneAsyncInPlayMode("Assets/Scenes/Run.unity", new LoadSceneParameters(LoadSceneMode.Single));
+            yield return null;
+            yield return null;
+            var director = Object.FindFirstObjectByType<RunDirector>();
+            var hud = Object.FindFirstObjectByType<Hud>();
+            player = Object.FindFirstObjectByType<PlayerController>();
+            player.GetComponent<Health>().Pool.Invulnerable = true; // confere os numeros dos inimigos, nao a luta
+            cam = Camera.main;
+            hud.UseCamera(cam);
+            for (int k = 0; k < 2000 && director.Busy; k++) yield return null;
+
+            // primeira sala (profundidade 0): inimigos abaixo da ficha
+            for (int k = 0; k < 90 && Object.FindObjectsByType<EnemyBrain>(FindObjectsSortMode.None).Length == 0; k++) yield return null;
+            var early = Object.FindObjectsByType<EnemyBrain>(FindObjectsSortMode.None);
+            Assert.Greater(early.Length, 0, "a primeira sala deveria ter inimigos");
+            foreach (var e in early)
+            {
+                Assert.AreEqual(e.Definition.maxHealth * 0.85f, e.GetComponent<Health>().Max, 0.01f, "sala 1: 85% da vida da ficha");
+                Assert.AreEqual(0.8f, e.Scaling.Damage, 0.001f);
+            }
+
+            // Elite Resistentes na profundidade 4
+            foreach (var e in early) Object.Destroy(e.gameObject);
+            yield return null;
+            director.StartEncounter(RoomType.Elite, 4, EliteModifier.Sturdy);
+            for (int k = 0; k < 90 && Object.FindObjectsByType<EnemyBrain>(FindObjectsSortMode.None).Length == 0; k++) yield return null;
+            for (int k = 0; k < 25; k++) yield return null;
+            var elite = Object.FindObjectsByType<EnemyBrain>(FindObjectsSortMode.None);
+            Assert.Greater(elite.Length, 0);
+            float want = (0.85f + 0.07f * 4) * 1.5f;
+            foreach (var e in elite)
+            {
+                Assert.AreEqual(e.Definition.maxHealth * want, e.GetComponent<Health>().Max, 0.05f, "Resistentes: +50% sobre a vida da profundidade");
+                Assert.AreEqual(1f, e.Scaling.Speed, 0.001f);
+            }
+            Assert.AreEqual(EliteModifier.Sturdy, director.CurrentTrait);
+            Shot(cam, "docs/img/elite.png");
+
+            // Elite Velozes: mais rapidos, mesma vida da profundidade
+            foreach (var e in elite) Object.Destroy(e.gameObject);
+            yield return null;
+            director.StartEncounter(RoomType.Elite, 4, EliteModifier.Swift);
+            for (int k = 0; k < 90 && Object.FindObjectsByType<EnemyBrain>(FindObjectsSortMode.None).Length == 0; k++) yield return null;
+            var swift = Object.FindObjectsByType<EnemyBrain>(FindObjectsSortMode.None);
+            Assert.Greater(swift.Length, 0);
+            foreach (var e in swift)
+            {
+                Assert.AreEqual(1.25f, e.Scaling.Speed, 0.001f);
+                Assert.AreEqual(e.Definition.moveSpeed * 1.25f, e.GetComponent<UnityEngine.AI.NavMeshAgent>().speed, 0.3f);
+                Assert.AreEqual(e.Definition.maxHealth * (0.85f + 0.07f * 4), e.GetComponent<Health>().Max, 0.05f);
+            }
+            GameFlow.Layers = 8; GameFlow.Shrines = 3;
+            Time.captureFramerate = 0;
+        }
+
+        [UnityTest, Timeout(600000)]
         public IEnumerator Every_Layout_Loads_With_Its_Pieces()
         {
             GameEvents.Clear();

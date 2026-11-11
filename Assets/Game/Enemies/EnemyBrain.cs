@@ -30,8 +30,13 @@ namespace Quintessence.Enemies
             health = GetComponent<Health>();
             agent = GetComponent<NavMeshAgent>();
             body = GetComponent<Collider>();
-            fsm = new EnemyFsm(definition.telegraphTime, definition.recoverTime, definition.cooldown, definition.attackRange);
-            agent.speed = definition.moveSpeed;
+            // a sala (WaveSpawner pai) pode escalar os numeros da ficha: profundidade e traco de Elite
+            var spawner = GetComponentInParent<WaveSpawner>();
+            Scaling = spawner != null ? spawner.Scaling : EnemyScaling.None;
+            if (Scaling.Health != 1f) health.Pool.SetMax(health.Max * Scaling.Health);
+            if (Scaling.Size != 1f) transform.localScale *= Scaling.Size;
+            fsm = new EnemyFsm(definition.telegraphTime, definition.recoverTime, definition.cooldown * Scaling.Cooldown, definition.attackRange);
+            agent.speed = definition.moveSpeed * Scaling.Speed;
             agent.updateRotation = false;
             agent.acceleration = 40f;
             agent.stoppingDistance = 0f;
@@ -41,6 +46,8 @@ namespace Quintessence.Enemies
         }
 
         public bool Armored { get; private set; }
+        public EnemyScaling Scaling { get; private set; } = EnemyScaling.None;
+        float Damage => definition.damage * Scaling.Damage;
 
         void OnStatusApplied(Health target, StatusType type, float duration)
         {
@@ -143,7 +150,7 @@ namespace Quintessence.Enemies
         {
             if (!agent.enabled || !agent.isOnNavMesh) return;
             bool move = fsm.CanMove && canAct && hasTarget && moveMul > 0f;
-            agent.speed = definition.moveSpeed * moveMul;
+            agent.speed = definition.moveSpeed * Scaling.Speed * moveMul;
             if (!move) { agent.isStopped = true; agent.velocity = Vector3.zero; return; }
 
             Vector3 goal = target.transform.position;
@@ -169,7 +176,7 @@ namespace Quintessence.Enemies
             if (definition.attack == EnemyAttackKind.Projectile)
             {
                 Projectile.Spawn(definition.projectilePrefab, transform.position + Vector3.up * 1.3f + strikeDir * 0.8f, strikeDir,
-                    definition.projectileSpeed, definition.projectileRange, definition.damage, definition.knockback,
+                    definition.projectileSpeed, definition.projectileRange, Damage, definition.knockback,
                     definition.element, health.Team, gameObject);
                 return;
             }
@@ -177,7 +184,7 @@ namespace Quintessence.Enemies
             var d = target.transform.position - strikePoint;
             d.y = 0f;
             if (d.magnitude > definition.strikeRadius + 0.4f) return; // o heroi saiu da area avisada
-            target.TakeDamage(new DamageInfo(definition.damage, definition.element, health.Team, gameObject)
+            target.TakeDamage(new DamageInfo(Damage, definition.element, health.Team, gameObject)
             {
                 Point = target.transform.position + Vector3.up * 1.2f, Direction = strikeDir, Knockback = definition.knockback,
             });
@@ -199,7 +206,7 @@ namespace Quintessence.Enemies
                 dir = dir.sqrMagnitude > 0.01f ? dir.normalized : transform.forward;
                 bool ally = h.Team == health.Team;
                 // contra aliados o dano entra como se fosse do heroi: da pra usar o Explosivo contra o proprio bando
-                h.TakeDamage(new DamageInfo(ally ? definition.explosionDamageToEnemies : definition.damage, definition.element,
+                h.TakeDamage(new DamageInfo(ally ? definition.explosionDamageToEnemies : Damage, definition.element,
                     ally ? Team.Player : health.Team, gameObject)
                 {
                     Point = h.transform.position + Vector3.up * 1.2f, Direction = dir, Knockback = definition.knockback, IsReaction = true,

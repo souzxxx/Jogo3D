@@ -91,6 +91,7 @@ namespace Quintessence.Game
         }
         public int LayoutCount => layouts.Length;
         public int ShardsEarned { get; private set; }
+        public EliteModifier CurrentTrait { get; private set; }
         public string CurrentLayout { get; private set; } = "";
         Transform layoutRoot;
 
@@ -218,11 +219,26 @@ namespace Quintessence.Game
                     OpenDoors();
                     break;
                 default:
-                    spawner.Run(BuildWaves(EncounterPlanner.Plan(node.Type, Run.Depth)));
+                    StartEncounter(node.Type, Run.Depth, node.Type == RoomType.Elite ? DifficultyCurve.PickElite(GameFlow.Seed, node.Id) : EliteModifier.None);
                     break;
             }
             yield return Fade(1f, 0f, 0.35f);
             Busy = false;
+        }
+
+        /// Comeca as ondas de uma sala com a dificuldade da profundidade e, em Elite, o traco. Publico para os testes e as capturas.
+        public void StartEncounter(RoomType type, int depth, EliteModifier trait)
+        {
+            var diff = DifficultyCurve.For(type, depth, trait);
+            spawner.Scaling = new EnemyScaling { Health = diff.Health, Damage = diff.Damage, Speed = diff.Speed, Cooldown = diff.Cooldown, Size = diff.Size };
+            CurrentTrait = trait;
+            if (trait != EliteModifier.None)
+            {
+                hud.SetRoom($"Sala {depth + 1}/{Run.Map.LayerCount} · Elite: {DifficultyCurve.Name(trait)}", type);
+                Feel.DamageNumber.Spawn(player.transform.position + Vector3.up * 3.6f,
+                    $"ELITE {DifficultyCurve.Name(trait).ToUpperInvariant()}: {DifficultyCurve.Describe(trait)}", new Color(0.86f, 0.62f, 0.34f), 1f, 2.6f);
+            }
+            spawner.Run(BuildWaves(EncounterPlanner.Plan(type, depth)));
         }
 
         IEnumerator Fade(float from, float to, float seconds)
@@ -315,7 +331,9 @@ namespace Quintessence.Game
                 var node = choices[i];
                 float x = (i - (choices.Count - 1) / 2f) * 6f;
                 string reward = RoomInfo.Name(node.Reward);
-                string label = RoomInfo.Name(node.Type) + (reward.Length > 0 ? "\n" + reward : "");
+                string kind = RoomInfo.Name(node.Type);
+                if (node.Type == RoomType.Elite) kind += ": " + DifficultyCurve.Name(DifficultyCurve.PickElite(GameFlow.Seed, node.Id));
+                string label = kind + (reward.Length > 0 ? "\n" + reward : "");
                 var go = BuildDoor(new Vector3(x, 0, doorLine), node.Type, label);
                 interactables.Add(new Interactable
                 {

@@ -184,9 +184,9 @@ Sprints sem data até confirmar a entrega. S0 é de todos e destrava o resto.
 - [x] S2 · Rastejante e Atirador
 - [x] S2 · 6 layouts de sala de combate com cobertura e perigo (respiradouro de brasa)
 - [x] S3 · Bruto (armadura) e Explosivo
-- [ ] S3 · Elite com modificadores + mais 2 layouts
+- [x] S3 · Elite com modificadores (Velozes, Resistentes, Ferozes; o traço aparece na porta). Os layouts ficaram em seis
 - [x] S4 · Chefe Guardião das Cinzas, 3 fases, escudo que pede Quintessência
-- [ ] S4 · Curva de dificuldade por profundidade da sala
+- [x] S4 · Curva de dificuldade por profundidade da sala (85%→134% de vida, 80%→115% de dano; números a calibrar jogando)
 - [x] S4 · SFX e música (sintetizados por tools/gen_audio.py), volumes na pausa — ouvidos e aprovados pelo Leonardo em 11/11
 
 ### Nicolas — Run, meta e UI
