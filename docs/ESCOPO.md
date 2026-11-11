@@ -182,9 +182,9 @@ Sprints sem data até confirmar a entrega. S0 é de todos e destrava o resto.
 - [x] S1 · Inimigo base: NavMesh, perseguir, telegrafar, atacar, morrer
 - [x] S1 · Spawner de ondas + "sala limpa"
 - [x] S2 · Rastejante e Atirador
-- [ ] S2 · 4 layouts de sala de combate com cobertura e perigos
+- [x] S2 · 6 layouts de sala de combate com cobertura e perigo (respiradouro de brasa)
 - [x] S3 · Bruto (armadura) e Explosivo
-- [ ] S3 · Elite (modificadores) + mais 4 layouts
+- [ ] S3 · Elite com modificadores + mais 2 layouts
 - [x] S4 · Chefe Guardião das Cinzas, 3 fases, escudo que pede Quintessência
 - [ ] S4 · Curva de dificuldade por profundidade da sala
 - [x] S4 · SFX e música (sintetizados por tools/gen_audio.py), volumes na pausa — falta alguém ouvir e aprovar

@@ -28,6 +28,8 @@ namespace Quintessence.Game
         [SerializeField] GameObject shrinePrefab;
         [SerializeField] GameObject chestPrefab;
         [SerializeField] Material matteMaterial;
+        [Tooltip("Arranjos de cobertura das salas de combate; a run sorteia um por sala.")]
+        [SerializeField] RoomLayout[] layouts = new RoomLayout[0];
         [SerializeField] Vector3 entryPoint = new(0, 0.05f, -5.5f);
         [SerializeField] float doorLine = 7.15f;
         [SerializeField] float interactRange = 2.4f;
@@ -69,6 +71,23 @@ namespace Quintessence.Game
         }
 
         static readonly Color Cream = new(0.93f, 0.88f, 0.78f);
+
+        public void BindLayouts(RoomLayout[] list) => layouts = list;
+        public int LayoutCount => layouts.Length;
+        public string CurrentLayout { get; private set; } = "";
+        Transform layoutRoot;
+
+        /// Troca o arranjo da sala. index < 0 = sala vazia. Publico para a cena de teste e as capturas.
+        public void ApplyLayout(int index)
+        {
+            if (layoutRoot != null) Destroy(layoutRoot.gameObject);
+            layoutRoot = new GameObject("Layout").transform;
+            CurrentLayout = "";
+            if (index < 0 || index >= layouts.Length || layouts[index] == null) return;
+            CurrentLayout = layouts[index].displayName;
+            foreach (var p in layouts[index].pieces)
+                if (p.prefab != null) Instantiate(p.prefab, p.position, Quaternion.Euler(0, p.rotation, 0), layoutRoot);
+        }
 
         void Awake()
         {
@@ -152,6 +171,7 @@ namespace Quintessence.Game
                 Run.Advance(node.Id);
             }
             Cleanup();
+            ApplyLayout(LayoutPicker.UsesLayout(node.Type) ? LayoutPicker.Pick(GameFlow.Seed, node.Id, layouts.Length) : -1);
             player.Teleport(entryPoint, Vector3.forward);
             hud.SetRoom($"Sala {Run.Depth + 1}/{Run.Map.LayerCount} · {RoomInfo.Name(node.Type)}", node.Type);
             yield return null;

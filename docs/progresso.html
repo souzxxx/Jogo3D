@@ -36,6 +36,49 @@
   <p class="sub">Entrega mais recente no topo. Escopo em <a href="ESCOPO.md">ESCOPO.md</a> · kanban em <a href="https://github.com/users/souzxxx/projects/4">GitHub Projects</a>.</p>
 
   <section>
+    <h2>Seis layouts de sala, com cobertura e perigo</h2>
+    <div class="meta"><span class="tag who">Enzo</span><span class="tag ok">322 testes de regra + 8 testes jogando, todos passando</span></div>
+    <img src="img/layouts.png" alt="Os seis layouts de sala">
+    <div class="cols">
+      <div>
+        <h3>Os layouts (da esquerda pra direita, de cima pra baixo)</h3>
+        <ul>
+          <li><b>Pilares:</b> quatro pilares altos; bloqueiam tiro</li>
+          <li><b>Corredor:</b> três muretas que cortam a sala em faixas</li>
+          <li><b>Praça:</b> monte de caixas e barris no centro, bom contra atirador</li>
+          <li><b>Ruínas:</b> entulho espalhado, um pilar e uma coluna</li>
+          <li><b>Fornalha:</b> três respiradouros de brasa e duas colunas</li>
+          <li><b>Cruz:</b> muretas em cruz com dois respiradouros no fundo</li>
+        </ul>
+        <h3 style="margin-top:14px">Como funciona</h3>
+        <ul>
+          <li>Cada sala de Combate e Elite sorteia um layout pela semente da run; a mesma semente dá sempre os mesmos</li>
+          <li>Peças são modelos do pack com colisor; os inimigos desviam delas sozinhos</li>
+          <li><b>Respiradouro de brasa:</b> a cada 4,5 s avisa um círculo e entra em erupção, 8 de dano em quem estiver em cima, <b>herói ou inimigo</b></li>
+          <li>Cada layout é um asset: dá pra mover peça no Inspector sem tocar em código</li>
+          <li>Chefe, Santuário, Mestre e Descanso continuam em sala vazia</li>
+        </ul>
+      </div>
+      <div>
+        <h3>O que foi conferido</h3>
+        <ul>
+          <li>Teste automático nos assets: nenhuma peça em cima da entrada, na faixa das portas ou fora da sala; toda cobertura tem colisor e recorte de navegação</li>
+          <li>Um teste carrega os seis e tira os prints acima</li>
+          <li>As runs de teste continuam chegando à vitória com os layouts no caminho</li>
+        </ul>
+        <h3 style="margin-top:14px">O que não foi</h3>
+        <ul>
+          <li class="warn">Se os layouts são <b>bons de jogar</b>: ninguém jogou neles; as posições são um primeiro chute</li>
+          <li class="warn">O respiradouro ferir inimigos e herói foi escrito, mas não há teste jogando que confira o dano dele</li>
+          <li class="warn">O roteiro de teste ganhou um "passo de lado" pra não ficar preso numa mureta; um jogador de verdade não precisa disso, mas mostra que dá pra encostar e travar o movimento reto</li>
+          <li class="warn">São 6 de 8 planejados, e as paredes e o piso são sempre os mesmos</li>
+          <li class="warn">A marca do respiradouro no chão ainda parece um disco pintado</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section>
     <h2>Som: 32 efeitos e 2 músicas</h2>
     <div class="meta"><span class="tag who">Enzo</span><span class="tag ok">306 testes de regra + 7 jogando passando</span> <span class="tag" style="color:var(--warn)">eu não consigo ouvir: preciso do seu ouvido aqui</span></div>
     <div class="cols">

@@ -125,6 +125,7 @@ namespace Quintessence.Game.PlayTests
                     if (d < 2.2f && sinceInteract > 0.4f) { sinceInteract = 0f; input.PressInteract(); }
                 }
                 else input.Move = Vector2.zero;
+                Unstick(dt);
                 yield return null;
             }
             input.Move = Vector2.zero;
@@ -244,6 +245,7 @@ namespace Quintessence.Game.PlayTests
                     if (d < 2.2f && sinceInteract > 0.4f) { sinceInteract = 0f; input.PressInteract(); }
                 }
                 else input.Move = Vector2.zero;
+                Unstick(dt);
                 yield return Step();
             }
             input.Move = Vector2.zero; input.AttackHeld = false;
@@ -264,6 +266,68 @@ namespace Quintessence.Game.PlayTests
             GameFlow.Layers = 8; GameFlow.Shrines = 3;
             Time.captureFramerate = 0;
             Time.timeScale = 1f;
+        }
+
+        Vector3 lastPos;
+        float stuck, sidestep;
+        Vector2 sideDir;
+
+        /// O roteiro anda em linha reta ate o alvo; com cobertura na sala ele pode encostar numa peca.
+        /// Se ficar parado tentando andar, da um passo de lado e tenta de novo.
+        void Unstick(float dt)
+        {
+            var pos = player.transform.position;
+            bool trying = input.Move.sqrMagnitude > 0.2f;
+            if (sidestep > 0f) { sidestep -= dt; input.Move = sideDir; }
+            else if (trying && (pos - lastPos).magnitude < 0.03f)
+            {
+                stuck += dt;
+                if (stuck > 0.35f)
+                {
+                    stuck = 0f; sidestep = 0.55f;
+                    sideDir = (Random.value < 0.5f ? 1f : -1f) * new Vector2(-input.Move.y, input.Move.x);
+                }
+            }
+            else stuck = 0f;
+            lastPos = pos;
+        }
+
+        [UnityTest, Timeout(600000)]
+        public IEnumerator Every_Layout_Loads_With_Its_Pieces()
+        {
+            GameEvents.Clear();
+            Time.timeScale = 1f;
+            Time.captureFramerate = 30;
+            GameFlow.StartElement = ElementType.Fire;
+            GameFlow.Seed = 3; GameFlow.Layers = 5; GameFlow.Shrines = 1;
+            yield return EditorSceneManager.LoadSceneAsyncInPlayMode("Assets/Scenes/Run.unity", new LoadSceneParameters(LoadSceneMode.Single));
+            yield return null;
+            yield return null;
+            var director = Object.FindFirstObjectByType<RunDirector>();
+            var hud = Object.FindFirstObjectByType<Hud>();
+            cam = Camera.main;
+            hud.UseCamera(cam);
+            // sem inimigos atrapalhando a foto
+            Object.FindFirstObjectByType<WaveSpawner>().enabled = false;
+            Assert.GreaterOrEqual(director.LayoutCount, 6);
+            // espera a sala terminar de abrir (o escurecimento de entrada usa tempo real)
+            for (int k = 0; k < 2000 && director.Busy; k++) yield return null;
+            Assert.IsFalse(director.Busy, "a primeira sala nao terminou de abrir");
+            for (int i = 0; i < director.LayoutCount; i++)
+            {
+                director.ApplyLayout(i);
+                for (int k = 0; k < 12; k++) yield return null;
+                Assert.IsNotEmpty(director.CurrentLayout);
+                var root = GameObject.Find("Layout");
+                Assert.IsNotNull(root);
+                Assert.GreaterOrEqual(root.transform.childCount, 3, director.CurrentLayout);
+                Shot(cam, $"docs/img/layout_{i + 1}.png");
+            }
+            director.ApplyLayout(-1);
+            yield return null;
+            Assert.AreEqual("", director.CurrentLayout);
+            GameFlow.Layers = 8; GameFlow.Shrines = 3;
+            Time.captureFramerate = 0;
         }
 
         void ConsiderDodge(TelegraphEvent e)

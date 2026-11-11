@@ -30,6 +30,7 @@ Cenas do jogo: `Assets/Scenes/Title.unity` e `Assets/Scenes/Run.unity`, geradas 
 - **Sala:** `WaveSpawner` levanta `RoomStarted`, `WaveStarted` e `RoomCleared`. A sala precisa de NavMesh (ver `EnemyDevSceneBuilder`).
 - **Bênção/upgrade:** escreve em `IHeroStatus.Modifiers` (`HeroModifiers`, no Core); o combate lê de lá. Bênção nova = uma linha no asset `Boons.asset`; atributo novo = um campo em `HeroModifiers` + um caso em `BoonEffects`.
 - **Um componente por arquivo**, com o mesmo nome do arquivo. Classe `MonoBehaviour`/`ScriptableObject` em arquivo de outro nome perde a referência na cena (já aconteceu com `ReactionTable` e `TitleController`).
+- **Layout de sala:** um asset `RoomLayout` em `Assets/Game/Game/Layouts` (lista de peças com posição). Peça de cobertura precisa de colisor e `NavMeshObstacle` com carving; `LayoutAssetTests` confere isso e que nada bloqueia entrada ou portas.
 - Evento novo entra no `GameEvents` no mesmo commit de quem precisa dele.
 
 ## Dados
