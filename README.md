@@ -21,6 +21,10 @@ WASD move · mouse mira · clique esquerdo ataca · clique direito skill · Espa
 
 Testes: `unity test . --mode EditMode` e `unity test . --mode PlayMode` (os de PlayMode jogam as cenas com um roteiro e gravam quadros em `Logs/frames`).
 
+## Build WebGL
+
+Menu **Quintessence > Build WebGL (itch.io)** ou `unity build --target WebGL --execute-method BuildTools.BuildWebGL -o Builds/WebGL`. A pasta `Builds/` não vai pro git; para o itch.io, compacte o conteúdo de `Builds/WebGL` com o `index.html` na raiz.
+
 ## Look-dev
 
 A cena `Assets/Scenes/LookDev/LookDev_B_Lit.unity` é gerada por `Assets/Editor/LookDevBuilder.cs` (menu **Quintessence > Look-dev > Build A + B**), que também salva os prints em `docs/img/`.

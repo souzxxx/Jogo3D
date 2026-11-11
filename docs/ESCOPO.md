@@ -162,7 +162,7 @@ Sprints sem data até confirmar a entrega. S0 é de todos e destrava o resto.
 - [x] Import dos packs CC0 + créditos no README — **Miguel**
 - [x] Cena de look-dev aprovada pelo time — **Miguel**
 - [x] Contratos entre frentes (eventos, `ElementType`, `DamageInfo`, `Health`) — **Leonardo**
-- [ ] Build WebGL vazia rodando no itch (prova o pipeline cedo) — **Nicolas**
+- [x] Build WebGL gerada e testada no navegador (18,8 MB); falta subir no itch.io — **Nicolas**
 - [ ] Validar pesos da rubrica com o professor — **Nicolas**
 
 ### Leonardo — Combate e elementos

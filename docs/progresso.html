@@ -36,6 +36,43 @@
   <p class="sub">Entrega mais recente no topo. Escopo em <a href="ESCOPO.md">ESCOPO.md</a> · kanban em <a href="https://github.com/users/souzxxx/projects/4">GitHub Projects</a>.</p>
 
   <section>
+    <h2>Build WebGL rodando no navegador</h2>
+    <div class="meta"><span class="tag who">Nicolas</span><span class="tag ok">build sem erros · 18,8 MB · testada no Chrome</span></div>
+    <img src="img/webgl_navegador.jpg" alt="O jogo rodando no Chrome">
+    <div class="cols">
+      <div>
+        <h3>O que foi provado</h3>
+        <ul>
+          <li>A build WebGL compila sem erros em 3,7 min e pesa <b>18,8 MB</b> (o limite que pusemos no escopo era ~80 MB)</li>
+          <li>Servida localmente e aberta no Chrome: o <b>título carrega</b>, com fontes e ícones</li>
+          <li>Clicar em Fogo <b>começa a run</b>: sala, layout, inimigos atacando, HUD (o print acima é do navegador, sala 1/8, herói com 76 de vida)</li>
+          <li>Nenhum erro no console; só avisos de efeitos de pós-processamento que o jogo não usa</li>
+          <li>O zip pronto pro itch.io está em <code>Builds/Quintessence-WebGL.zip</code> (18,5 MB, com <code>index.html</code> na raiz)</li>
+        </ul>
+        <h3 style="margin-top:14px">Como refazer</h3>
+        <ul>
+          <li>Menu <b>Quintessence &gt; Build WebGL (itch.io)</b>, ou <code>unity build --target WebGL --execute-method BuildTools.BuildWebGL -o Builds/WebGL</code></li>
+        </ul>
+      </div>
+      <div>
+        <h3>O que não foi provado</h3>
+        <ul>
+          <li class="warn">Só olhei o título e os primeiros segundos da primeira sala. Não joguei uma run inteira no navegador</li>
+          <li class="warn">Não ouvi o som no navegador nem medi a taxa de quadros</li>
+          <li class="warn">Testado só no Chrome, neste Mac. Não testei Firefox, Safari nem máquina mais fraca</li>
+          <li class="warn">Não subi no itch.io: precisa da conta e da página do jogo</li>
+          <li class="warn">Na página padrão do Unity o jogo aparece numa janela de 1280×720 com barra embaixo; no itch isso se ajusta nas opções de embed</li>
+        </ul>
+        <h3 style="margin-top:14px">Pra subir no itch</h3>
+        <ul>
+          <li>Criar o projeto, tipo "HTML", enviar o zip e marcar "This file will be played in the browser"</li>
+          <li>Tamanho do embed 1280×720 e ligar o botão de tela cheia</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section>
     <h2>Seis layouts de sala, com cobertura e perigo</h2>
     <div class="meta"><span class="tag who">Enzo</span><span class="tag ok">322 testes de regra + 8 testes jogando, todos passando</span></div>
     <img src="img/layouts.png" alt="Os seis layouts de sala">
