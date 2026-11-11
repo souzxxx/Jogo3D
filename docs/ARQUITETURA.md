@@ -9,7 +9,7 @@ Cada frente tem a sua pasta e o seu assembly em `Assets/Game/`, e **só referenc
 | `Assets/Game/Core` | `Quintessence.Core` | Leonardo | Contratos: `ElementType`, `Team`, `DamageInfo`, `IDamageable`, `Health`, `GameEvents` |
 | `Assets/Game/Combat` | `Quintessence.Combat` | Leonardo | Herói, ataques, elementos, marcas, reações, Quintessência |
 | `Assets/Game/Enemies` | `Quintessence.Enemies` | Enzo | IA, inimigos, ondas, chefe, layouts de sala |
-| `Assets/Game/Run` | `Quintessence.Run` | Nicolas | Regras da run sem Unity: mapa, estado, plano de ondas, recompensas |
+| `Assets/Game/Run` | `Quintessence.Run` | Nicolas | Regras da run sem Unity: mapa, estado, plano de ondas, recompensas, loja e progresso permanente (`MetaProgress`; quem grava é `MetaStore`, em `Game`) |
 | `Assets/Game/UI` | `Quintessence.UI` | Nicolas | HUD, mapa, pausa, resultado, título. Pode referenciar `Run` além do Core |
 | `Assets/Game/Game` | `Quintessence.Game` | todos | **Composição:** o único assembly que referencia todas as frentes. `GameFlow` (cenas) e `RunDirector` (monta cada sala, portas, santuário, fim de run) |
 | `Assets/Game/Feel` | `Quintessence.Feel` | Miguel | VFX, luz, câmera, shake, feedback |

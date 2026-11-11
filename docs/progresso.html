@@ -36,6 +36,40 @@
   <p class="sub">Entrega mais recente no topo. Escopo em <a href="ESCOPO.md">ESCOPO.md</a> · kanban em <a href="https://github.com/users/souzxxx/projects/4">GitHub Projects</a>.</p>
 
   <section>
+    <h2>Refúgio: melhorias permanentes e save</h2>
+    <div class="meta"><span class="tag who">Nicolas</span><span class="tag ok">401 testes de regra + 11 testes jogando, todos passando</span></div>
+    <img src="img/refugio.png" alt="Painel do Refúgio">
+    <img src="img/titulo.png" alt="Título com o botão do Refúgio">
+    <div class="cols">
+      <div>
+        <h3>Como funciona</h3>
+        <ul>
+          <li>Toda run rende <b>Fragmentos</b>: 3 por sala vencida e mais 15 ao vencer o Guardião. Aparecem na tela de resultado</li>
+          <li>No título, o botão <b>Refúgio</b> mostra quantos você tem e abre o painel</li>
+          <li>Cinco melhorias que valem para todas as runs: <b>Vigor</b> (+8 de vida por nível), <b>Força</b> (+4% de dano), <b>Bolsa</b> (começa com Essência), <b>Foco</b> (Quintessência mais rápida) e <b>Fôlego</b> (cura ao limpar a sala)</li>
+          <li>Cada nível custa mais que o anterior; o painel mostra o efeito atual e o próximo</li>
+          <li>O progresso é <b>salvo sozinho</b> a cada compra e a cada fim de run (no navegador, fica no armazenamento do site)</li>
+          <li>"Apagar progresso" pede uma segunda confirmação</li>
+        </ul>
+      </div>
+      <div>
+        <h3>Conferido</h3>
+        <ul>
+          <li>Um teste ganha 39 Fragmentos, compra Vigor, Bolsa e Força pelo painel, relê o save do disco e começa uma run: 108 de vida, 8 de Essência e +4% de dano</li>
+          <li>Save vazio, cortado ou adulterado nunca derruba o jogo: vira progresso zerado ou valores dentro dos limites</li>
+          <li>Os testes usam um save separado, então rodar teste não mexe no progresso de quem joga na máquina</li>
+        </ul>
+        <h3 style="margin-top:14px">Limites</h3>
+        <ul>
+          <li class="warn">É um painel no título, não uma sala 3D para andar</li>
+          <li class="warn">Preços e ganhos são chute: uma run que morre na 4ª sala paga um nível</li>
+          <li class="warn">Não testei o save na build WebGL; o zip em <code>Builds/</code> é de antes desta entrega</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section>
     <h2>Loja com cara de loja, e ícone próprio para cada bênção</h2>
     <div class="meta"><span class="tag who">Nicolas</span><span class="tag ok">387 testes de regra + 10 testes jogando, todos passando</span></div>
     <img src="img/loja_banca.png" alt="Loja com banca, mercador e ouro">

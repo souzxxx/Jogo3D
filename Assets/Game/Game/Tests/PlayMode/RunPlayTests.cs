@@ -29,6 +29,23 @@ namespace Quintessence.Game.PlayTests
         Vector3 dodgeDir;
         float dodgeLeft;
 
+        const string TestSaveKey = "quintessence.meta.test";
+
+        // todo teste daqui usa um save proprio e zerado: nao le nem grava o progresso de quem joga nesta maquina
+        [SetUp]
+        public void UseTestSave()
+        {
+            PlayerPrefs.DeleteKey(TestSaveKey);
+            MetaStore.UseKey(TestSaveKey);
+        }
+
+        [TearDown]
+        public void RestoreSave()
+        {
+            PlayerPrefs.DeleteKey(TestSaveKey);
+            MetaStore.UseKey(MetaStore.DefaultKey);
+        }
+
         [UnityTest, Timeout(600000)]
         public IEnumerator Title_Starts_A_Run_With_The_Picked_Element()
         {
@@ -55,6 +72,62 @@ namespace Quintessence.Game.PlayTests
             Assert.AreEqual(1, p.Loadout.Awakened.Count, "a run comeca com um elemento so");
             var director = Object.FindFirstObjectByType<RunDirector>();
             Assert.AreEqual(8, director.Run.Map.LayerCount);
+            Time.captureFramerate = 0;
+        }
+
+        [UnityTest, Timeout(600000)]
+        public IEnumerator Refuge_Upgrades_Are_Saved_And_Change_The_Next_Run()
+        {
+            Time.timeScale = 1f;
+            Time.captureFramerate = 30;
+            GameFlow.Layers = 5; GameFlow.Shrines = 1;
+            GameEvents.Clear();
+            // save proprio do teste: o do jogador nao e tocado
+            const string key = TestSaveKey;
+            PlayerPrefs.DeleteKey(key);
+            MetaStore.UseKey(key);
+            MetaStore.Current.EndRun(8, true); // 39 Fragmentos
+            MetaStore.Save();
+
+            yield return EditorSceneManager.LoadSceneAsyncInPlayMode("Assets/Scenes/Title.unity", new LoadSceneParameters(LoadSceneMode.Single));
+            yield return null;
+            yield return null;
+            var menu = Object.FindFirstObjectByType<TitleMenu>();
+            menu.UseCamera(Camera.main);
+            menu.ShowRefuge(true);
+            Assert.IsTrue(menu.RefugeOpen);
+            Assert.IsTrue(menu.Buy(MetaUpgrade.Vigor), "39 Fragmentos pagam o primeiro Vigor");
+            Assert.IsTrue(menu.Buy(MetaUpgrade.Purse));
+            Assert.IsTrue(menu.Buy(MetaUpgrade.Power));
+            Assert.IsFalse(menu.Buy(MetaUpgrade.Recovery), "sobraram 9: nao paga o Fôlego");
+            yield return null;
+            yield return null;
+            Shot(Camera.main, "docs/img/refugio.png");
+            menu.ShowRefuge(false);
+
+            // como se o jogo tivesse sido fechado e aberto: le de novo do disco
+            MetaStore.UseKey(key);
+            Assert.AreEqual(1, MetaStore.Current.Level(MetaUpgrade.Vigor), "a compra ficou salva");
+            Assert.AreEqual(9, MetaStore.Current.Shards);
+
+            menu.OnPick(ElementType.Fire);
+            for (int i = 0; i < 30 && SceneManager.GetActiveScene().name != GameFlow.RunScene; i++) yield return null;
+            for (int i = 0; i < 10; i++) yield return null;
+            var director = Object.FindFirstObjectByType<RunDirector>();
+            var p = Object.FindFirstObjectByType<PlayerController>();
+            var health = p.GetComponent<Health>();
+            Assert.AreEqual(108f, health.Max, 0.01f, "Vigor 1: +8 de vida maxima");
+            Assert.AreEqual(108f, health.Current, 0.01f);
+            Assert.AreEqual(8, director.Run.Essence, "Bolsa 1: comeca com 8 de Essencia");
+            Assert.AreEqual(1.04f, p.Modifiers.DamageAll, 0.001f);
+
+            // save estragado nao derruba o jogo: volta zerado
+            PlayerPrefs.SetString(key, "v1;###;;quebrado");
+            MetaStore.UseKey(key);
+            Assert.AreEqual(0, MetaStore.Current.Shards);
+            PlayerPrefs.DeleteKey(key);
+            MetaStore.UseKey(key);
+            GameFlow.Layers = 8; GameFlow.Shrines = 3;
             Time.captureFramerate = 0;
         }
 

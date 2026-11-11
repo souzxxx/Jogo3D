@@ -90,6 +90,7 @@ namespace Quintessence.Game
             SetupShop();
         }
         public int LayoutCount => layouts.Length;
+        public int ShardsEarned { get; private set; }
         public string CurrentLayout { get; private set; } = "";
         Transform layoutRoot;
 
@@ -135,7 +136,11 @@ namespace Quintessence.Game
             rng = new System.Random(GameFlow.Seed);
             hud.SetBoons(Run.Boons);
             startTime = Time.time;
-            hud.SetEssence(0);
+            // melhorias permanentes do Refugio entram antes da primeira sala
+            MetaStore.Current.ApplyTo(player.Modifiers);
+            ApplyMaxHealth();
+            Run.AddEssence(MetaStore.Current.StartEssence);
+            hud.SetEssence(Run.Essence);
             StartCoroutine(EnterRoom(Run.Current, true));
         }
 
@@ -291,7 +296,11 @@ namespace Quintessence.Game
             hud.ShowMap(Run, false);
             yield return new WaitForSecondsRealtime(victory ? 1.6f : 1.2f);
             int seconds = Mathf.RoundToInt(Time.time - startTime);
-            string stats = $"Salas vencidas: {Run.RoomsCleared}   ·   Essência: {Run.Essence}   ·   Elementos: {player.Loadout.Awakened.Count}/4   ·   Tempo: {seconds / 60}:{seconds % 60:00}";
+            int shards = MetaStore.Current.EndRun(Run.RoomsCleared, victory);
+            MetaStore.Save();
+            ShardsEarned = shards;
+            string stats = $"Salas vencidas: {Run.RoomsCleared}   ·   Essência: {Run.Essence}   ·   Elementos: {player.Loadout.Awakened.Count}/4   ·   Tempo: {seconds / 60}:{seconds % 60:00}"
+                + $"\n+{shards} Fragmentos para o Refúgio (total: {MetaStore.Current.Shards})";
             Sfx.Play(victory ? "victory" : "defeat");
             hud.ShowResult(victory, stats, GameFlow.RestartRun, GameFlow.ToTitle);
         }

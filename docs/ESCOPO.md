@@ -113,7 +113,7 @@ Itens marcados com **[DECIDIR]** dependem do time ou do professor.
 **Run:** mapa ramificado de ~8 salas. Cada porta mostra a recompensa.
 Tipos de sala: Combate (2–3 ondas) · Santuário (desperta elemento) · Mestre (escolhe 1 de 3 bênçãos) · Loja · Descanso · Elite · Chefe (**Guardião das Cinzas**, 3 fases).
 **Inimigos:** Rastejante (corpo a corpo), Atirador (projétil), Bruto (armadura, pede Terra), Explosivo (suicida) + variação Elite + Chefe.
-**Meta:** Fragmentos de Espírito ganhos na run compram upgrades permanentes no hub (**Santuário**).
+**Meta:** Fragmentos ganhos na run (3 por sala vencida, +15 ao vencer o Guardião) compram upgrades permanentes no hub, o **Refúgio** (painel no título; "Santuário" ficou sendo a sala que desperta elemento). Cinco melhorias: Vigor, Força, Bolsa, Foco e Fôlego. Save em `PlayerPrefs`.
 
 ---
 
@@ -198,7 +198,7 @@ Sprints sem data até confirmar a entrega. S0 é de todos e destrava o resto.
 - [x] S3 · Mestre (3 bênçãos); Elite também paga bênção
 - [x] S3 · Loja (poção, elixir e bênçãos por Essência)
 - [x] S3 · ~20 bênçãos em ScriptableObject
-- [ ] S4 · Hub com upgrades permanentes + save em PlayerPrefs
+- [x] S4 · Hub com upgrades permanentes + save em PlayerPrefs (Refúgio: painel no título, não uma sala 3D)
 - [ ] S4 · Menus: principal, pausa, opções (volume, tela cheia), créditos
 - [ ] Contínuo · GDD em DDE no Milanote, lore do mundo e do Guardião, página do itch
 
@@ -216,6 +216,9 @@ Sprints sem data até confirmar a entrega. S0 é de todos e destrava o resto.
 ---
 
 ### Fila (depois do jogo fechado)
+
+- Loja: "melhorou muito, mas dá pra deixar melhor depois" (Leonardo, 11/11). Pendências conhecidas: estantes somem no fundo, mercador não reage, modelo próprio para ele.
+- Refúgio como sala 3D de verdade (hoje é um painel no título).
 - [x] Portas, baús de bênção e santuários com modelos do pack (11/11). Falta: estandarte por tipo de sala visível na porta
 - [ ] Regra de estilo (pedido do Leonardo em 11/11): tudo que criarmos espelha os assets do pack — fosco, cor contida, nada de neon
 - [ ] Personalizar o chefe (hoje é o esqueleto guerreiro do pack ampliado) — pedido do Leonardo em 11/11
