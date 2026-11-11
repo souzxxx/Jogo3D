@@ -178,9 +178,9 @@ Sprints sem data até confirmar a entrega. S0 é de todos e destrava o resto.
 - [ ] S4 · Sala de treino/tutorial que ensina marca → reação
 
 ### Enzo — Inimigos e salas
-- [ ] S1 · Inimigo base: NavMesh, perseguir, telegrafar, atacar, morrer
-- [ ] S1 · Spawner de ondas + "sala limpa"
-- [ ] S2 · Rastejante e Atirador
+- [x] S1 · Inimigo base: NavMesh, perseguir, telegrafar, atacar, morrer
+- [x] S1 · Spawner de ondas + "sala limpa"
+- [x] S2 · Rastejante e Atirador
 - [ ] S2 · 4 layouts de sala de combate com cobertura e perigos
 - [ ] S3 · Bruto (armadura) e Explosivo
 - [ ] S3 · Elite (modificadores) + mais 4 layouts
@@ -204,7 +204,7 @@ Sprints sem data até confirmar a entrega. S0 é de todos e destrava o resto.
 - [ ] S1 · Flash de hit e destaque de inimigo marcado (sem toon/outline)
 - [ ] S2 · VFX de Fogo e Água (ataque, skill, dash, marca)
 - [x] S2 · Feedback de combate: hit stop, shake, números de dano, flash, anel de marca, barra de vida (primeira versão feita junto com o S2 do Leonardo)
-- [ ] S2 · Telegrafia no chão dos ataques inimigos
+- [x] S2 · Telegrafia no chão dos ataques inimigos
 - [ ] S3 · VFX de Terra e Ar + as 6 reações
 - [ ] S3 · Kit de cenário do Planalto das Cinzas (chão, paredes, braseiros, rachaduras de brasa, cristais)
 - [ ] S4 · VFX de Quintessência e do chefe
@@ -213,6 +213,7 @@ Sprints sem data até confirmar a entrega. S0 é de todos e destrava o resto.
 ---
 
 ### Fila (depois do jogo fechado)
+- [ ] Passada única de animação: trocar as animações genéricas do pack (ataques, skills, dash, inimigos) — combinado em 11/11 deixar pro fim
 - [ ] Trazer os heróis do Quintessence 2D (Rax, Liora, Brann, Vey) para o 3D no lugar do mago do pack — pedido do Leonardo em 11/11
 
 ## 9. Riscos

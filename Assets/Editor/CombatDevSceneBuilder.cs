@@ -11,14 +11,27 @@ using UnityEngine;
 /// Monta a cena de teste da frente de combate: sala, heroi jogavel e bonecos de treino.
 public static class CombatDevSceneBuilder
 {
-    const string KK = "Assets/ThirdParty/KayKit/";
+    public const string KK = "Assets/ThirdParty/KayKit/";
     const string HeroFbx = KK + "Adventurers/Characters/Mage.fbx";
     const string MinionFbx = KK + "Skeletons/Characters/Skeleton_Minion.fbx";
     const string AnimDir = "Assets/Game/Combat/Animation/";
     public const string ScenePath = "Assets/Scenes/Dev/Leonardo_Combat.unity";
 
     [MenuItem("Quintessence/Dev/Build cena de combate")]
-    public static void Build()
+    public static void Build() => BuildPlayable("Leonardo_Combat", ScenePath, root =>
+    {
+        var skelMat = LookDevBuilder.Mat("Skeleton", KK + "Skeletons/Characters/skeleton_texture.png", Color.white, Color.black, 0f);
+        Dummy(root, new Vector3(0, 0, -1), 250, skelMat, dummyCtrl);
+        Dummy(root, new Vector3(4, 0, 2.5f), 200, skelMat, dummyCtrl);
+        Dummy(root, new Vector3(-3, 0, 4), 160, skelMat, dummyCtrl);
+        Dummy(root, new Vector3(5.5f, 0, -4), 300, skelMat, dummyCtrl);
+        Dummy(root, new Vector3(7, 0, -2.5f), 270, skelMat, dummyCtrl);
+    });
+
+    static RuntimeAnimatorController dummyCtrl;
+
+    /// Sala + heroi jogavel + feedback + camera. extra monta o resto da cena (bonecos, inimigos) antes de salvar.
+    public static void BuildPlayable(string rootName, string scenePath, System.Action<Transform> extra)
     {
         Directory.CreateDirectory(AnimDir);
         Directory.CreateDirectory("Assets/Scenes/Dev");
@@ -30,9 +43,9 @@ public static class CombatDevSceneBuilder
             ("Idle", "Idle", 0f), ("Run", "Running_A", 0f), ("Dash", "Dodge_Forward", 0.3f),
             ("Attack0", "Spellcast_Shoot", 0.34f), ("Attack1", "Spellcast_Shoot", 0.34f),
             ("Attack2", "Spellcast_Long", 0.5f), ("Skill", "Spellcast_Raise", 0.4f));
-        var dummyCtrl = Controller(MinionFbx, AnimDir + "Dummy.controller", ("Idle", "Idle_Combat", 0f));
+        dummyCtrl = Controller(MinionFbx, AnimDir + "Dummy.controller", ("Idle", "Idle_Combat", 0f));
 
-        var root = LookDevBuilder.BeginArena("Leonardo_Combat");
+        var root = LookDevBuilder.BeginArena(rootName);
         // depois de abrir a cena nova: criar antes deixa as referencias nulas
         var defs = new[] { FireDef(), WaterDef(), EarthDef(PillarPrefab()), AirDef() };
         var table = Reactions();
@@ -74,14 +87,6 @@ public static class CombatDevSceneBuilder
         light.transform.localPosition = new Vector3(0, 2.4f, 0);
         light.type = LightType.Point; light.color = new Color(1f, 0.8f, 0.6f); light.intensity = 1.6f; light.range = 6f;
 
-        // bonecos de treino
-        var skelMat = LookDevBuilder.Mat("Skeleton", KK + "Skeletons/Characters/skeleton_texture.png", Color.white, Color.black, 0f);
-        Dummy(root, new Vector3(0, 0, -1), 250, skelMat, dummyCtrl);
-        Dummy(root, new Vector3(4, 0, 2.5f), 200, skelMat, dummyCtrl);
-        Dummy(root, new Vector3(-3, 0, 4), 160, skelMat, dummyCtrl);
-        Dummy(root, new Vector3(5.5f, 0, -4), 300, skelMat, dummyCtrl);
-        Dummy(root, new Vector3(7, 0, -2.5f), 270, skelMat, dummyCtrl);
-
         var fb = new GameObject("CombatFeedback");
         fb.transform.SetParent(root, false);
         fb.AddComponent<CombatFeedback>().Configure(LookDevBuilder.Additive(), flat);
@@ -97,7 +102,8 @@ public static class CombatDevSceneBuilder
         so.FindProperty("target").objectReferenceValue = player.transform;
         so.ApplyModifiedPropertiesWithoutUndo();
 
-        EditorSceneManager.SaveScene(EditorSceneManager.GetActiveScene(), ScenePath);
+        extra?.Invoke(root);
+        EditorSceneManager.SaveScene(EditorSceneManager.GetActiveScene(), scenePath);
         AssetDatabase.SaveAssets();
     }
 
@@ -228,7 +234,7 @@ public static class CombatDevSceneBuilder
         Animator(model, ctrl);
     }
 
-    static Animator Animator(GameObject model, RuntimeAnimatorController ctrl)
+    public static Animator Animator(GameObject model, RuntimeAnimatorController ctrl)
     {
         var a = model.GetComponent<Animator>();
         if (a == null) a = model.AddComponent<Animator>();
@@ -238,7 +244,7 @@ public static class CombatDevSceneBuilder
         return a;
     }
 
-    static void Loop(string fbx, params string[] names)
+    public static void Loop(string fbx, params string[] names)
     {
         var mi = (ModelImporter)AssetImporter.GetAtPath(fbx);
         var clips = mi.clipAnimations.Length > 0 ? mi.clipAnimations : mi.defaultClipAnimations;
@@ -251,7 +257,7 @@ public static class CombatDevSceneBuilder
     }
 
     /// states: (nome do estado, nome do clip, duracao desejada em segundos; 0 = velocidade normal)
-    static RuntimeAnimatorController Controller(string fbx, string path, params (string state, string clip, float fit)[] states)
+    public static RuntimeAnimatorController Controller(string fbx, string path, params (string state, string clip, float fit)[] states)
     {
         var clips = AssetDatabase.LoadAllAssetsAtPath(fbx).OfType<AnimationClip>()
             .Where(c => !c.name.StartsWith("__preview__")).ToDictionary(c => c.name);
@@ -261,8 +267,11 @@ public static class CombatDevSceneBuilder
         foreach (var (state, clip, fit) in states)
         {
             var st = sm.AddState(state);
-            st.motion = clips[clip];
-            st.speed = fit > 0f ? Mathf.Clamp(clips[clip].length / fit, 0.5f, 3f) : 1f;
+            // "A|B|C": usa o primeiro clip que existir no modelo
+            var found = clip.Split('|').Select(n => clips.TryGetValue(n, out var c) ? c : null).FirstOrDefault(c => c != null);
+            if (found == null) { Debug.LogWarning($"{fbx}: nenhum clip de '{clip}' para o estado {state}"); continue; }
+            st.motion = found;
+            st.speed = fit > 0f ? Mathf.Clamp(found.length / fit, 0.5f, 3f) : 1f;
         }
         EditorUtility.SetDirty(ctrl);
         return ctrl;

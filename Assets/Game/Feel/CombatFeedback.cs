@@ -16,6 +16,8 @@ namespace Quintessence.Feel
 
         public Material FlatMaterial => flatMaterial;
         public static Mesh RingMesh { get; private set; }
+        public static Mesh DiscMesh { get; private set; }
+        readonly Dictionary<GameObject, TelegraphVisual> telegraphs = new();
 
         ParticleSystem fx;
         readonly Dictionary<Health, TargetDisplay> displays = new();
@@ -36,6 +38,7 @@ namespace Quintessence.Feel
         void Awake()
         {
             if (RingMesh == null) RingMesh = BuildRing(0.82f, 1f, 40);
+            if (DiscMesh == null) DiscMesh = BuildRing(0f, 1f, 40);
             var go = new GameObject("FxParticles");
             go.transform.SetParent(transform, false);
             fx = go.AddComponent<ParticleSystem>();
@@ -72,6 +75,12 @@ namespace Quintessence.Feel
             GameEvents.ElementSwitched += OnSwitch;
             GameEvents.ZoneSpawned += OnZone;
             GameEvents.HitBlocked += OnBlocked;
+            GameEvents.TelegraphStarted += OnTelegraph;
+            GameEvents.TelegraphCancelled += OnTelegraphCancelled;
+            GameEvents.AttackMissed += OnMissed;
+            GameEvents.EnemySpawned += OnEnemySpawned;
+            GameEvents.WaveStarted += OnWave;
+            GameEvents.RoomCleared += OnRoomCleared;
             GameEvents.Shattered += OnShattered;
             GameEvents.QuintessenceActiveChanged += OnQuintessence;
         }
@@ -89,6 +98,12 @@ namespace Quintessence.Feel
             GameEvents.ElementSwitched -= OnSwitch;
             GameEvents.ZoneSpawned -= OnZone;
             GameEvents.HitBlocked -= OnBlocked;
+            GameEvents.TelegraphStarted -= OnTelegraph;
+            GameEvents.TelegraphCancelled -= OnTelegraphCancelled;
+            GameEvents.AttackMissed -= OnMissed;
+            GameEvents.EnemySpawned -= OnEnemySpawned;
+            GameEvents.WaveStarted -= OnWave;
+            GameEvents.RoomCleared -= OnRoomCleared;
             GameEvents.Shattered -= OnShattered;
             GameEvents.QuintessenceActiveChanged -= OnQuintessence;
             Time.timeScale = 1f;
@@ -164,6 +179,47 @@ namespace Quintessence.Feel
             StatusType.Stun => new Color(1.5f, 1.4f, 0.6f),
             _ => null,
         };
+
+        void OnTelegraph(TelegraphEvent e)
+        {
+            if (e.Source != null && telegraphs.TryGetValue(e.Source, out var old) && old != null) Destroy(old.gameObject);
+            var v = TelegraphVisual.Create(e, flatMaterial, RingMesh, DiscMesh);
+            v.transform.SetParent(transform, true);
+            if (e.Source != null) telegraphs[e.Source] = v;
+        }
+
+        void OnTelegraphCancelled(GameObject source)
+        {
+            if (source == null || !telegraphs.TryGetValue(source, out var v)) return;
+            if (v != null) Destroy(v.gameObject);
+            telegraphs.Remove(source);
+        }
+
+        void OnMissed(Health source) =>
+            DamageNumber.Spawn(source.transform.position + Vector3.up * 3.2f, "ERROU", new Color(0.8f, 0.85f, 0.9f), 0.75f, 0.7f);
+
+        void OnEnemySpawned(Health enemy)
+        {
+            var p = enemy.transform.position;
+            var c = new Color(0.7f, 0.3f, 1f);
+            Ring(p + Vector3.up * 0.2f, 30, 5f, 0.3f, 0.6f, 0.4f, c);
+            Burst(p + Vector3.up * 0.3f, Vector3.up, 25f, 24, 2f, 7f, 0.3f, 0.7f, 0.55f, c);
+        }
+
+        void OnWave(int index, int total)
+        {
+            FindPlayer();
+            if (player != null)
+                DamageNumber.Spawn(player.position + Vector3.up * 4.2f, $"ONDA {index + 1}/{total}", Color.white, 1.1f, 1.3f);
+        }
+
+        void OnRoomCleared()
+        {
+            FindPlayer();
+            if (player == null) return;
+            DamageNumber.Spawn(player.position + Vector3.up * 4.2f, "SALA LIMPA!", new Color(1f, 0.9f, 0.5f), 1.5f, 1.8f);
+            Ring(player.position + Vector3.up * 0.4f, 60, 10f, 0.4f, 0.8f, 0.6f, new Color(1f, 0.85f, 0.4f));
+        }
 
         void OnBlocked(Health target, DamageInfo info)
         {

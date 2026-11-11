@@ -33,6 +33,43 @@
   <p class="sub">Entrega mais recente no topo. Escopo em <a href="ESCOPO.md">ESCOPO.md</a> · kanban em <a href="https://github.com/users/souzxxx/projects/4">GitHub Projects</a>.</p>
 
   <section>
+    <h2>Inimigos S1 + S2 · IA, aviso de ataque, dois tipos e ondas</h2>
+    <div class="meta"><span class="tag who">Enzo</span><span class="tag ok">49 testes de regra + 3 testes jogando, todos passando</span></div>
+    <video src="img/inimigos_ondas.mp4" controls autoplay loop muted playsinline></video>
+    <div class="cols">
+      <div>
+        <h3>O que existe</h3>
+        <ul>
+          <li><b>Inimigo base:</b> nasce, persegue pelo NavMesh (desvia de pilar e caixa), avisa o golpe, golpeia, recupera, morre</li>
+          <li><b>Todo golpe é avisado no chão:</b> círculo vermelho que enche (corpo a corpo) ou linha (tiro). Saiu da área, não leva dano</li>
+          <li><b>Rastejante:</b> corpo a corpo, 30 de vida, 8 de dano</li>
+          <li><b>Atirador:</b> mantém distância, recua se você chega perto, dispara projétil (7 de dano)</li>
+          <li><b>Ondas:</b> a próxima só vem quando a anterior morre; no fim, "SALA LIMPA!" e o evento que a porta vai escutar</li>
+          <li><b>Status valem:</b> Atordoado/Congelado param o inimigo e <b>cancelam o golpe avisado</b>, Enraizado prende, Encharcado deixa lento, Cego (Vapor) faz errar</li>
+          <li>O Pilar de Pedra do herói bloqueia projétil; empurrão move o inimigo</li>
+        </ul>
+      </div>
+      <div>
+        <h3>O que o vídeo mostra</h3>
+        <ul>
+          <li>Herói parado: os três rastejantes chegam, avisam e acertam</li>
+          <li>Depois um roteiro joga: desvia dos avisos com dash, bate, troca de elemento, usa skill</li>
+          <li>Segunda onda com dois atiradores; sala limpa no fim</li>
+        </ul>
+        <h3 style="margin-top:14px">Ainda não está bom</h3>
+        <ul>
+          <li class="warn">O teste não confere que o desvio evita o dano (com vários inimigos ao mesmo tempo ficaria instável); a regra "saiu da área, não leva" está só no código do golpe</li>
+          <li class="warn">A linha de aviso do tiro atravessa a parede e fica pra fora da sala</li>
+          <li class="warn">Sem layouts de sala: é a mesma arena do look-dev</li>
+          <li class="warn">O herói pode morrer, mas não existe tela de derrota nem recomeço (S4)</li>
+          <li class="warn">Números (vida, dano, tempos) são chute inicial, sem balanceamento</li>
+          <li class="warn">Bruto, Explosivo, Elite e Chefe ainda não existem</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section>
     <h2>S3 · Terra, Ar, as seis reações e a Quintessência</h2>
     <div class="meta"><span class="tag who">Leonardo</span><span class="tag ok">40 testes de regra + 2 testes jogando, todos passando</span></div>
     <video src="img/s3_terra_ar_quintessencia.mp4" controls autoplay loop muted playsinline></video>

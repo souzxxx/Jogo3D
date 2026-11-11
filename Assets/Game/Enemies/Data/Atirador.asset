@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a9cf8aada748e4833867add4efcb33fc, type: 3}
+  m_Name: Atirador
+  m_EditorClassIdentifier: Quintessence.Enemies::Quintessence.Enemies.EnemyDefinition
+  displayName: Atirador
+  maxHealth: 22
+  moveSpeed: 3.4
+  attack: 1
+  damage: 7
+  knockback: 2
+  attackRange: 11
+  telegraphTime: 0.7
+  recoverTime: 0.4
+  cooldown: 2.2
+  element: 0
+  strikeOffset: 1.5
+  strikeRadius: 1.5
+  projectilePrefab: {fileID: 2446848762604434031, guid: 6590da6c767a740e79055b4304b1f88e, type: 3}
+  projectileSpeed: 11
+  projectileRange: 16
+  keepDistance: 6

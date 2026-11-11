@@ -23,6 +23,8 @@ Só o Core existe por enquanto; cada pessoa cria a pasta e o `.asmdef` da sua fr
 - **Golpe elemental:** use `ElementCombat.Deliver(alvo, info, tabela)` em vez de `TakeDamage` direto; ele aplica a marca e dispara a reação. Dano de reação e de Queimadura vai com `IsReaction = true` e não marca.
 - **Status:** `StatusHolder.GetOrAdd(health).Apply(tipo, duração, time)`. Inimigos leem `State.MoveMultiplier`, `State.CanAct` e `State.MissChance`.
 - **Feedback:** a frente Feel só escuta `GameEvents` (`AttackPerformed`, `DamageDealt`, `MarkApplied`, `ReactionTriggered`, `StatusApplied`, `ZoneSpawned`...). Quem causa o efeito não chama VFX direto.
+- **Inimigo novo:** um `EnemyDefinition` (números) + um prefab com `Health`, `NavMeshAgent`, colisor e `EnemyBrain`. Ataque sempre avisado com `GameEvents.RaiseTelegraph` (mínimo 0,4 s).
+- **Sala:** `WaveSpawner` levanta `RoomStarted`, `WaveStarted` e `RoomCleared`. A sala precisa de NavMesh (ver `EnemyDevSceneBuilder`).
 - Evento novo entra no `GameEvents` no mesmo commit de quem precisa dele.
 
 ## Dados

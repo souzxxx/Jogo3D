@@ -30,6 +30,20 @@ namespace Quintessence.Core
         public GameObject Source;
     }
 
+    /// Aviso no chao de um ataque que vai sair (circulo ou linha).
+    public struct TelegraphEvent
+    {
+        public Vector3 Point;
+        public Vector3 Direction;
+        /// Circulo: raio. Linha: meia largura.
+        public float Radius;
+        /// So para linha.
+        public float Length;
+        public float Duration;
+        public bool IsLine;
+        public GameObject Source;
+    }
+
     /// Area de efeito que fica no chao (rastro de fogo, poca de lava...).
     public struct ZoneEvent
     {
@@ -57,6 +71,14 @@ namespace Quintessence.Core
         public static event Action<Health, StatusType> StatusEnded;
         public static event Action<AttackEvent> AttackPerformed;
         public static event Action<ZoneEvent> ZoneSpawned;
+        public static event Action<TelegraphEvent> TelegraphStarted;
+        /// O ataque avisado foi interrompido (inimigo morreu ou foi atordoado).
+        public static event Action<GameObject> TelegraphCancelled;
+        /// Um ataque errou por causa de Cego (Vapor).
+        public static event Action<Health> AttackMissed;
+        public static event Action<Health> EnemySpawned;
+        /// (indice da onda comecando em 0, total de ondas)
+        public static event Action<int, int> WaveStarted;
         /// (anterior, novo)
         public static event Action<ElementType, ElementType> ElementSwitched;
         public static event Action<ElementType> ElementAwakened;
@@ -80,6 +102,11 @@ namespace Quintessence.Core
         public static void RaiseStatusEnded(Health target, StatusType type) => StatusEnded?.Invoke(target, type);
         public static void RaiseAttackPerformed(AttackEvent e) => AttackPerformed?.Invoke(e);
         public static void RaiseZoneSpawned(ZoneEvent e) => ZoneSpawned?.Invoke(e);
+        public static void RaiseTelegraph(TelegraphEvent e) => TelegraphStarted?.Invoke(e);
+        public static void RaiseTelegraphCancelled(GameObject source) => TelegraphCancelled?.Invoke(source);
+        public static void RaiseAttackMissed(Health source) => AttackMissed?.Invoke(source);
+        public static void RaiseEnemySpawned(Health enemy) => EnemySpawned?.Invoke(enemy);
+        public static void RaiseWaveStarted(int index, int total) => WaveStarted?.Invoke(index, total);
         public static void RaiseElementSwitched(ElementType from, ElementType to) => ElementSwitched?.Invoke(from, to);
         public static void RaiseElementAwakened(ElementType element) => ElementAwakened?.Invoke(element);
         public static void RaiseQuintessenceMeter(float normalized) => QuintessenceMeterChanged?.Invoke(normalized);
@@ -95,6 +122,7 @@ namespace Quintessence.Core
         {
             DamageDealt = null; Died = null; HitBlocked = null; Shattered = null; MarkApplied = null; ReactionTriggered = null;
             MarkCleared = null; StatusApplied = null; StatusEnded = null; AttackPerformed = null; ZoneSpawned = null;
+            TelegraphStarted = null; TelegraphCancelled = null; AttackMissed = null; EnemySpawned = null; WaveStarted = null;
             ElementSwitched = null; ElementAwakened = null;
             QuintessenceMeterChanged = null; QuintessenceActiveChanged = null;
             RoomStarted = null; RoomCleared = null; RunStarted = null; RunEnded = null;
