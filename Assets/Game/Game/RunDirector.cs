@@ -166,6 +166,7 @@ namespace Quintessence.Game
                     break;
                 case RoomType.Rest:
                     playerHealth.Heal(playerHealth.Max * 0.3f);
+                    Sfx.Play("heal");
                     Feel.DamageNumber.Spawn(player.transform.position + Vector3.up * 3.5f, "DESCANSO: +30% DE VIDA", new Color(0.5f, 1f, 0.55f), 1.1f, 1.8f);
                     Run.RoomCleared();
                     OpenDoors();
@@ -224,6 +225,7 @@ namespace Quintessence.Game
             if (node.Reward == RewardType.Health)
             {
                 playerHealth.Heal(playerHealth.Max * 0.25f);
+                Sfx.Play("heal");
                 Feel.DamageNumber.Spawn(player.transform.position + Vector3.up * 3.2f, "+25% DE VIDA", new Color(0.5f, 1f, 0.55f), 1f, 1.4f);
                 essence /= 2;
             }
@@ -249,6 +251,7 @@ namespace Quintessence.Game
             yield return new WaitForSecondsRealtime(victory ? 1.6f : 1.2f);
             int seconds = Mathf.RoundToInt(Time.time - startTime);
             string stats = $"Salas vencidas: {Run.RoomsCleared}   ·   Essência: {Run.Essence}   ·   Elementos: {player.Loadout.Awakened.Count}/4   ·   Tempo: {seconds / 60}:{seconds % 60:00}";
+            Sfx.Play(victory ? "victory" : "defeat");
             hud.ShowResult(victory, stats, GameFlow.RestartRun, GameFlow.ToTitle);
         }
 
@@ -267,7 +270,7 @@ namespace Quintessence.Game
                 interactables.Add(new Interactable
                 {
                     Object = go, Prompt = "entrar: " + RoomInfo.Name(node.Type),
-                    Use = () => { if (!Busy) StartCoroutine(EnterRoom(node)); },
+                    Use = () => { if (!Busy) { Sfx.Play("door"); StartCoroutine(EnterRoom(node)); } },
                 });
             }
         }
@@ -328,6 +331,7 @@ namespace Quintessence.Game
                     Use = () =>
                     {
                         if (!player.Awaken(e)) return;
+                        Sfx.Play("pickup");
                         Feel.DamageNumber.Spawn(player.transform.position + Vector3.up * 3.6f, names[(int)e].ToUpperInvariant() + " DESPERTO!", c, 1.3f, 1.8f);
                         foreach (var it in interactables) if (it.Object != null) Destroy(it.Object);
                         interactables.Clear();
@@ -361,6 +365,7 @@ namespace Quintessence.Game
                     Object = root, Prompt = "aceitar " + boon.name,
                     Use = () =>
                     {
+                        Sfx.Play("pickup");
                         BoonEffects.Apply(player.Modifiers, boon);
                         Run.AddBoon(boon);
                         float max = baseMaxHealth + player.Modifiers.MaxHealthAdd;

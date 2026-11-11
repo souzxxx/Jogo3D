@@ -402,9 +402,27 @@ namespace Quintessence.UI
                     UiKit.Text(UiKit.Rect("Boon" + i, pausePanel, center, new Vector2(0, -56 - i * 34), new Vector2(1100, 32)),
                         boons[i].name + " — " + boons[i].description, 24, UiKit.Cream, TextAnchor.MiddleCenter, false);
             }
+            Volume(new Vector2(-330, 230), "MÚSICA", () => AudioPrefs.Music, v => AudioPrefs.Music = v);
+            Volume(new Vector2(330, 230), "EFEITOS", () => AudioPrefs.Effects, v => AudioPrefs.Effects = v);
             UiKit.Text(UiKit.Rect("Keys", pausePanel, new Vector2(0.5f, 0), new Vector2(0, 50), new Vector2(1700, 30)),
                 "WASD mover · mouse mira · clique ataca · botão direito skill · Espaço dash · Q/E troca elemento · R Quintessência · F interagir · Tab mapa",
                 22, UiKit.Dim, TextAnchor.MiddleCenter, false);
+        }
+
+        /// Controle de volume em dez passos: rotulo, botao de menos, valor, botao de mais.
+        void Volume(Vector2 pos, string label, Func<float> get, Action<float> set)
+        {
+            var center = new Vector2(0.5f, 0.5f);
+            var box = UiKit.Box("Volume_" + label, pausePanel, center, pos, new Vector2(300, 150));
+            UiKit.Text(UiKit.Rect("Label", box, center, new Vector2(0, 44), new Vector2(280, 34)), label, 26, UiKit.Dim);
+            var value = UiKit.Text(UiKit.Rect("Value", box, center, new Vector2(0, -18), new Vector2(100, 50)), AudioPrefs.Step(get()).ToString(), 44, UiKit.Cream);
+            void Change(int delta)
+            {
+                set(Mathf.Clamp(AudioPrefs.Step(get()) + delta, 0, 10) / 10f);
+                value.text = AudioPrefs.Step(get()).ToString();
+            }
+            UiKit.Button(box, "−", center, new Vector2(-96, -18), new Vector2(64, 64), new Color(0.3f, 0.28f, 0.36f), () => Change(-1));
+            UiKit.Button(box, "+", center, new Vector2(96, -18), new Vector2(64, 64), new Color(0.3f, 0.28f, 0.36f), () => Change(1));
         }
 
         public bool ResultVisible => resultPanel.gameObject.activeSelf;

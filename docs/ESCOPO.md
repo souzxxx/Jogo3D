@@ -187,7 +187,7 @@ Sprints sem data até confirmar a entrega. S0 é de todos e destrava o resto.
 - [ ] S3 · Elite (modificadores) + mais 4 layouts
 - [x] S4 · Chefe Guardião das Cinzas, 3 fases, escudo que pede Quintessência
 - [ ] S4 · Curva de dificuldade por profundidade da sala
-- [ ] S4 · SFX e música (biblioteca livre), mixer com volumes
+- [x] S4 · SFX e música (sintetizados por tools/gen_audio.py), volumes na pausa — falta alguém ouvir e aprovar
 
 ### Nicolas — Run, meta e UI
 - [x] S1 · Fluxo de cenas: título → hub → run → resultado (título → run → resultado; o hub fica no S4)

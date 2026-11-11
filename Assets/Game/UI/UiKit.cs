@@ -166,7 +166,7 @@ namespace Quintessence.UI
             colors.highlightedColor = new Color(1.25f, 1.25f, 1.25f);
             colors.pressedColor = new Color(0.8f, 0.8f, 0.8f);
             b.colors = colors;
-            b.onClick.AddListener(() => onClick?.Invoke());
+            b.onClick.AddListener(() => { Quintessence.Core.Sfx.Play("ui_click"); onClick?.Invoke(); });
             var txt = Stretch("Label", rt);
             Text(txt, label, 30, Paper);
             return b;

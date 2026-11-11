@@ -37,4 +37,6 @@ A cena `Assets/Scenes/LookDev/LookDev_B_Lit.unity` é gerada por `Assets/Editor/
 | [Cinzel Decorative](https://fonts.google.com/specimen/Cinzel+Decorative) | Natanael Gama | OFL 1.1 |
 | Ícones de [game-icons.net](https://game-icons.net) (21 ícones em `Assets/Resources/Icons`) | Lorc, Carl Olsen, Skoll | CC BY 3.0 |
 
+Som: todos os efeitos e as músicas são sintetizados pelo script `tools/gen_audio.py` (ffmpeg), sem arquivos de terceiros.
+
 Ferramentas de IA: Claude Code (Anthropic) no planejamento, na montagem da cena de look-dev e no código.

@@ -24,6 +24,9 @@
   ul { margin:0; padding-left:20px; } li { margin:3px 0; }
   li.warn::marker { color:var(--warn); }
   code { background:#ffffff12; padding:1px 5px; border-radius:4px; font-size:.9em; }
+  .sounds { display:grid; grid-template-columns:repeat(auto-fill,minmax(250px,1fr)); gap:8px 14px; }
+  .sounds label { display:flex; flex-direction:column; gap:3px; font-size:14px; color:var(--dim); }
+  .sounds audio { width:100%; height:32px; }
   kbd { background:#ffffff1c; border:1px solid var(--line); border-bottom-width:2px; padding:0 6px; border-radius:5px; font-size:.85em; }
 </style>
 </head>
@@ -31,6 +34,79 @@
 <main>
   <h1>Quintessence 3D — Progresso</h1>
   <p class="sub">Entrega mais recente no topo. Escopo em <a href="ESCOPO.md">ESCOPO.md</a> · kanban em <a href="https://github.com/users/souzxxx/projects/4">GitHub Projects</a>.</p>
+
+  <section>
+    <h2>Som: 32 efeitos e 2 músicas</h2>
+    <div class="meta"><span class="tag who">Enzo</span><span class="tag ok">306 testes de regra + 7 jogando passando</span> <span class="tag" style="color:var(--warn)">eu não consigo ouvir: preciso do seu ouvido aqui</span></div>
+    <div class="cols">
+      <div>
+        <h3>Como foi feito</h3>
+        <ul>
+          <li>Tudo <b>sintetizado</b> por um script do projeto (<code>tools/gen_audio.py</code>, usa só o ffmpeg): ondas, ruído filtrado e eco curto. Não há arquivo de terceiros, então não há licença pra creditar</li>
+          <li>Pra mudar um som: edita a receita no script e roda de novo</li>
+          <li>O jogo toca sozinho a partir dos eventos: cada elemento tem som de ataque e de skill, e há sons de acerto, dano, morte, reação, aviso de ataque, explosão, bloqueio, onda, sala limpa, porta, bênção, cura, chefe, vitória e derrota</li>
+          <li>Música de ambiente em loop; cruza pra música do chefe quando ele aparece e volta no fim</li>
+          <li><b>Volume</b> de música e de efeitos na tela de pausa, de 0 a 10, guardado entre sessões</li>
+        </ul>
+      </div>
+      <div>
+        <h3>O que eu não sei</h3>
+        <ul>
+          <li class="warn"><b>Se soa bem.</b> Conferi que os arquivos existem, têm duração e volume plausíveis e que o jogo os dispara sem erro. Nunca ouvi nenhum</li>
+          <li class="warn">Som sintetizado tende a soar "de sintetizador"; pode destoar do visual do pack do mesmo jeito que o neon destoava</li>
+          <li class="warn">A mixagem (o que fica alto demais junto) só dá pra acertar jogando</li>
+          <li class="warn">No navegador (WebGL) o áudio só começa depois do primeiro clique; não testei numa build</li>
+        </ul>
+        <p style="color:var(--dim);margin:10px 0 0">Ouça abaixo e me diga o que trocar. Se a música não servir, a saída é buscar faixas livres prontas.</p>
+      </div>
+    </div>
+      <h3 style="margin-top:14px">Música</h3>
+      <div class="sounds">
+        <label>Ambiente (loop de 32 s)<audio controls preload="none" src="../Assets/Resources/Audio/music_ambient.wav"></audio></label>
+        <label>Chefe (loop de 16 s)<audio controls preload="none" src="../Assets/Resources/Audio/music_boss.wav"></audio></label>
+      </div>
+      <h3 style="margin-top:14px">Ataques e skills</h3>
+      <div class="sounds">
+        <label>Ataque de Fogo<audio controls preload="none" src="../Assets/Resources/Audio/cast_fire.wav"></audio></label>
+        <label>Ataque de Água<audio controls preload="none" src="../Assets/Resources/Audio/cast_water.wav"></audio></label>
+        <label>Ataque de Terra<audio controls preload="none" src="../Assets/Resources/Audio/cast_earth.wav"></audio></label>
+        <label>Ataque de Ar<audio controls preload="none" src="../Assets/Resources/Audio/cast_air.wav"></audio></label>
+        <label>Labareda<audio controls preload="none" src="../Assets/Resources/Audio/skill_fire.wav"></audio></label>
+        <label>Maré<audio controls preload="none" src="../Assets/Resources/Audio/skill_water.wav"></audio></label>
+        <label>Pilar de Pedra<audio controls preload="none" src="../Assets/Resources/Audio/skill_earth.wav"></audio></label>
+        <label>Vendaval<audio controls preload="none" src="../Assets/Resources/Audio/skill_air.wav"></audio></label>
+        <label>Dash<audio controls preload="none" src="../Assets/Resources/Audio/dash.wav"></audio></label>
+        <label>Troca de elemento<audio controls preload="none" src="../Assets/Resources/Audio/switch.wav"></audio></label>
+      </div>
+      <h3 style="margin-top:14px">Combate</h3>
+      <div class="sounds">
+        <label>Acerto<audio controls preload="none" src="../Assets/Resources/Audio/hit.wav"></audio></label>
+        <label>Acerto forte<audio controls preload="none" src="../Assets/Resources/Audio/hit_heavy.wav"></audio></label>
+        <label>Herói apanha<audio controls preload="none" src="../Assets/Resources/Audio/hurt.wav"></audio></label>
+        <label>Inimigo morre<audio controls preload="none" src="../Assets/Resources/Audio/enemy_die.wav"></audio></label>
+        <label>Reação<audio controls preload="none" src="../Assets/Resources/Audio/reaction.wav"></audio></label>
+        <label>Aviso de ataque<audio controls preload="none" src="../Assets/Resources/Audio/telegraph.wav"></audio></label>
+        <label>Explosão<audio controls preload="none" src="../Assets/Resources/Audio/explode.wav"></audio></label>
+        <label>Bloqueio<audio controls preload="none" src="../Assets/Resources/Audio/block.wav"></audio></label>
+        <label>Estilhaço<audio controls preload="none" src="../Assets/Resources/Audio/shatter.wav"></audio></label>
+        <label>Quintessência liga<audio controls preload="none" src="../Assets/Resources/Audio/quint_on.wav"></audio></label>
+        <label>Quintessência acaba<audio controls preload="none" src="../Assets/Resources/Audio/quint_off.wav"></audio></label>
+      </div>
+      <h3 style="margin-top:14px">Run e chefe</h3>
+      <div class="sounds">
+        <label>Nova onda<audio controls preload="none" src="../Assets/Resources/Audio/wave.wav"></audio></label>
+        <label>Sala limpa<audio controls preload="none" src="../Assets/Resources/Audio/room_clear.wav"></audio></label>
+        <label>Porta<audio controls preload="none" src="../Assets/Resources/Audio/door.wav"></audio></label>
+        <label>Bênção / elemento<audio controls preload="none" src="../Assets/Resources/Audio/pickup.wav"></audio></label>
+        <label>Cura<audio controls preload="none" src="../Assets/Resources/Audio/heal.wav"></audio></label>
+        <label>Chefe aparece<audio controls preload="none" src="../Assets/Resources/Audio/boss_spawn.wav"></audio></label>
+        <label>Chefe muda de fase<audio controls preload="none" src="../Assets/Resources/Audio/boss_phase.wav"></audio></label>
+        <label>Escudo do chefe<audio controls preload="none" src="../Assets/Resources/Audio/shield.wav"></audio></label>
+        <label>Vitória<audio controls preload="none" src="../Assets/Resources/Audio/victory.wav"></audio></label>
+        <label>Derrota<audio controls preload="none" src="../Assets/Resources/Audio/defeat.wav"></audio></label>
+        <label>Clique de botão<audio controls preload="none" src="../Assets/Resources/Audio/ui_click.wav"></audio></label>
+      </div>
+  </section>
 
   <section>
     <h2>UI refeita: ícones de verdade e barra de habilidades</h2>
