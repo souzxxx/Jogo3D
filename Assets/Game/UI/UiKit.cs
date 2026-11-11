@@ -12,8 +12,55 @@ namespace Quintessence.UI
         public static readonly Color Ink = new(0.05f, 0.04f, 0.09f, 0.88f);
         public static readonly Color Paper = new(0.93f, 0.91f, 0.96f);
         public static readonly Color Dim = new(0.62f, 0.59f, 0.72f);
+        public static readonly Color Cream = new(0.93f, 0.88f, 0.78f);
 
-        static Sprite circle, ring;
+        static Sprite circle, ring, panel, frame;
+        static readonly System.Collections.Generic.Dictionary<string, Sprite> icons = new();
+
+        /// Painel de cantos arredondados (9-slice) e o contorno dele.
+        public static Sprite Panel => panel != null ? panel : panel = MakeRounded(64, 16, 0f);
+        public static Sprite Frame => frame != null ? frame : frame = MakeRounded(64, 16, 3f);
+
+        /// Icone de Assets/Resources/Icons (silhueta branca, para tingir).
+        public static Sprite Icon(string name)
+        {
+            if (icons.TryGetValue(name, out var s)) return s;
+            var tex = Resources.Load<Texture2D>("Icons/" + name);
+            s = tex != null ? Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), new Vector2(0.5f, 0.5f), 100f) : Circle;
+            icons[name] = s;
+            return s;
+        }
+
+        static Sprite MakeRounded(int size, float radius, float outline)
+        {
+            var tex = new Texture2D(size, size, TextureFormat.RGBA32, false) { wrapMode = TextureWrapMode.Clamp };
+            float h = size / 2f;
+            var px = new Color32[size * size];
+            for (int y = 0; y < size; y++)
+            for (int x = 0; x < size; x++)
+            {
+                // distancia com sinal ate a borda de uma caixa arredondada
+                float qx = Mathf.Abs(x + 0.5f - h) - (h - radius), qy = Mathf.Abs(y + 0.5f - h) - (h - radius);
+                float d = Mathf.Sqrt(Mathf.Max(qx, 0) * Mathf.Max(qx, 0) + Mathf.Max(qy, 0) * Mathf.Max(qy, 0)) + Mathf.Min(Mathf.Max(qx, qy), 0f) - radius;
+                float a = Mathf.Clamp01(-d);
+                if (outline > 0f) a *= Mathf.Clamp01(d + outline);
+                px[y * size + x] = new Color(1, 1, 1, a);
+            }
+            tex.SetPixels32(px);
+            tex.Apply();
+            return Sprite.Create(tex, new Rect(0, 0, size, size), new Vector2(0.5f, 0.5f), 100f, 0, SpriteMeshType.FullRect, Vector4.one * (radius + 4));
+        }
+
+        /// Painel escuro arredondado com contorno claro discreto.
+        public static RectTransform Box(string name, Transform parent, Vector2 anchor, Vector2 pos, Vector2 size, float alpha = 0.82f)
+        {
+            var rt = Rect(name, parent, anchor, pos, size);
+            var bg = Image(rt, Panel, new Color(0.07f, 0.06f, 0.1f, alpha));
+            bg.type = UnityEngine.UI.Image.Type.Sliced;
+            var edge = Image(Stretch("Edge", rt), Frame, new Color(0.85f, 0.8f, 0.7f, 0.22f));
+            edge.type = UnityEngine.UI.Image.Type.Sliced;
+            return rt;
+        }
         public static Font Font => Quintessence.Core.GameFonts.Display;
         public static Sprite Circle => circle != null ? circle : circle = MakeCircle(96, 0f);
         public static Sprite Ring => ring != null ? ring : ring = MakeCircle(96, 0.8f);

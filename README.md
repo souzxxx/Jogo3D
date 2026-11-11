@@ -35,5 +35,6 @@ A cena `Assets/Scenes/LookDev/LookDev_B_Lit.unity` é gerada por `Assets/Editor/
 | [Lilita One](https://fonts.google.com/specimen/Lilita+One) | Juan Montoreano | OFL 1.1 |
 | [Titillium Web](https://fonts.google.com/specimen/Titillium+Web) | Accademia di Belle Arti di Urbino | OFL 1.1 |
 | [Cinzel Decorative](https://fonts.google.com/specimen/Cinzel+Decorative) | Natanael Gama | OFL 1.1 |
+| Ícones de [game-icons.net](https://game-icons.net) (21 ícones em `Assets/Resources/Icons`) | Lorc, Carl Olsen, Skoll | CC BY 3.0 |
 
 Ferramentas de IA: Claude Code (Anthropic) no planejamento, na montagem da cena de look-dev e no código.

@@ -39,6 +39,12 @@ namespace Quintessence.Run
             RoomType.Rest => "Descanso", RoomType.Boss => "Chefe", RoomType.Master => "Mestre", _ => t.ToString(),
         };
 
+        public static string Icon(RoomType t) => t switch
+        {
+            RoomType.Combat => "room_combat", RoomType.Elite => "room_elite", RoomType.Shrine => "room_shrine",
+            RoomType.Rest => "room_rest", RoomType.Boss => "room_boss", RoomType.Master => "room_master", _ => "room_combat",
+        };
+
         public static string Name(RewardType r) => r switch
         {
             RewardType.Essence => "Essência", RewardType.Health => "Vida", RewardType.Element => "Novo elemento", RewardType.Boon => "Bênção", _ => "",

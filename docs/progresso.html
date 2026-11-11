@@ -33,6 +33,45 @@
   <p class="sub">Entrega mais recente no topo. Escopo em <a href="ESCOPO.md">ESCOPO.md</a> · kanban em <a href="https://github.com/users/souzxxx/projects/4">GitHub Projects</a>.</p>
 
   <section>
+    <h2>UI refeita: ícones de verdade e barra de habilidades</h2>
+    <div class="meta"><span class="tag who">Nicolas</span> pedido: "a UI tá péssima, esses ícones das habilidades tá muito ruim" · <span class="tag ok">302 testes de regra + 7 jogando passando</span></div>
+    <div class="cols">
+      <div><img src="img/hud_novo.jpg" alt="HUD novo"></div>
+      <div><img src="img/mapa.png" alt="Mapa com ícones"></div>
+    </div>
+    <div class="cols">
+      <div>
+        <h3>O que mudou</h3>
+        <ul>
+          <li><b>Ícones desenhados</b> no lugar dos círculos coloridos: chama, gota, pedra e redemoinho nos elementos; um ícone próprio pra cada skill (Labareda, Maré, Pilar de Pedra, Vendaval), dash, Quintessência, vida e essência</li>
+          <li><b>Barra de habilidades</b> num painel só: os quatro elementos entre <kbd>Q</kbd> e <kbd>E</kbd>, depois skill, dash e Quintessência, cada um com a tecla embaixo</li>
+          <li>Elemento não desperto mostra <b>cadeado</b>; o atual cresce e ganha aro; a recarga escurece o ícone girando</li>
+          <li>A skill mostra o ícone e o nome do elemento atual; a Quintessência enche como um relógio e diz "2/4 elementos" enquanto está travada</li>
+          <li>Painéis arredondados em vida, sala, essência e aviso de interação (com a tecla <kbd>F</kbd> desenhada)</li>
+          <li><b>Mapa</b> com ícone por tipo de sala (espadas, caveira coroada, portal, fogueira, mestre, chefe)</li>
+          <li>Bênçãos viram medalhas no canto; os nomes e a lista de teclas foram pra tela de pausa</li>
+          <li>Título com os ícones dos elementos nos botões</li>
+        </ul>
+      </div>
+      <div>
+        <h3>Ainda ruim</h3>
+        <ul>
+          <li class="warn">Os prints estão em 960×540; em tela cheia tudo fica com o dobro do tamanho, mas não conferi a leitura em resolução real</li>
+          <li class="warn">O ícone da Labareda é confuso de ler</li>
+          <li class="warn">"SALA LIMPA!" e os números do mundo passam por cima dos rótulos das portas</li>
+          <li class="warn">Botões de pausa, resultado e título continuam retângulos lisos; o título segue genérico</li>
+          <li class="warn">Sem animação de entrada, sem som de clique</li>
+        </ul>
+        <h3 style="margin-top:14px">De onde vêm os ícones</h3>
+        <ul>
+          <li>game-icons.net, licença CC BY 3.0 (exige crédito, que está no README): Lorc, Carl Olsen e Skoll</li>
+          <li>São silhuetas brancas que o jogo tinge; convertidas de SVG pra PNG aqui</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section>
     <h2>Chefe: Guardião das Cinzas</h2>
     <div class="meta"><span class="tag who">Enzo</span><span class="tag ok">302 testes de regra + 7 testes jogando, todos passando</span></div>
     <video src="img/chefe.mp4" controls autoplay loop muted playsinline></video>

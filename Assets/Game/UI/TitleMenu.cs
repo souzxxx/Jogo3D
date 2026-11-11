@@ -32,6 +32,8 @@ namespace Quintessence.UI
                 var b = UiKit.Button(root, names[i], new Vector2(0.5f, 0.5f), pos, new Vector2(260, 260), new Color(c.r * 0.55f, c.g * 0.55f, c.b * 0.55f, 0.95f), () => OnPick?.Invoke(e));
                 var orb = UiKit.Rect("Orb", b.transform, new Vector2(0.5f, 1), new Vector2(0, -22), new Vector2(92, 92));
                 UiKit.Image(orb, UiKit.Circle, c);
+                string[] iconNames = { "fire", "water", "earth", "air" };
+                UiKit.Image(UiKit.Rect("Icon", orb, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(60, 60)), UiKit.Icon(iconNames[i]), UiKit.Cream);
                 var label = (RectTransform)b.transform.Find("Label");
                 label.offsetMin = new Vector2(0, 60); label.offsetMax = new Vector2(0, -110);
                 label.GetComponent<UnityEngine.UI.Text>().fontSize = 40;

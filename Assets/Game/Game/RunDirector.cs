@@ -98,7 +98,7 @@ namespace Quintessence.Game
             player.ResetLoadout(GameFlow.StartElement);
             baseMaxHealth = playerHealth.Max;
             rng = new System.Random(GameFlow.Seed);
-            hud.SetBoons(new string[0]);
+            hud.SetBoons(Run.Boons);
             startTime = Time.time;
             hud.SetEssence(0);
             StartCoroutine(EnterRoom(Run.Current, true));
@@ -153,7 +153,7 @@ namespace Quintessence.Game
             }
             Cleanup();
             player.Teleport(entryPoint, Vector3.forward);
-            hud.SetRoom($"Sala {Run.Depth + 1}/{Run.Map.LayerCount} · {RoomInfo.Name(node.Type)}");
+            hud.SetRoom($"Sala {Run.Depth + 1}/{Run.Map.LayerCount} · {RoomInfo.Name(node.Type)}", node.Type);
             yield return null;
 
             switch (node.Type)
@@ -365,9 +365,7 @@ namespace Quintessence.Game
                         Run.AddBoon(boon);
                         float max = baseMaxHealth + player.Modifiers.MaxHealthAdd;
                         if (max > playerHealth.Max) { float gain = max - playerHealth.Max; playerHealth.Pool.SetMax(max); playerHealth.Heal(gain); }
-                        var lines = new List<string>();
-                        foreach (var b in Run.Boons) lines.Add("◆ " + b.name + " — " + b.description);
-                        hud.SetBoons(lines);
+                        hud.SetBoons(Run.Boons);
                         Feel.DamageNumber.Spawn(player.transform.position + Vector3.up * 3.6f, boon.name.ToUpperInvariant() + "!", c, 1.2f, 1.6f);
                         foreach (var it in interactables) if (it.Object != null) Destroy(it.Object);
                         interactables.Clear();
