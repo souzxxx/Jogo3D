@@ -79,6 +79,24 @@ namespace Quintessence.Enemies
             health.Died -= OnDied;
         }
 
+        /// Traz o inimigo de volta para um ponto valido do chao perto de around. Usado quando ele sai da sala,
+        /// cai do NavMesh ou a luta trava: inimigo preso fora de alcance nunca pode segurar a sala.
+        public bool Rescue(Vector3 around)
+        {
+            if (health.IsDead) return false;
+            var want = Arena.Clamp(around);
+            if (!NavMesh.SamplePosition(want, out var hit, 6f, NavMesh.AllAreas) &&
+                !NavMesh.SamplePosition(Vector3.zero, out hit, 12f, NavMesh.AllAreas)) return false;
+            knock = Vector3.zero;
+            if (!agent.enabled) agent.enabled = true;
+            if (!agent.Warp(hit.position)) transform.position = hit.position;
+            Rescues++;
+            return true;
+        }
+
+        public int Rescues { get; private set; }
+        float safetyCheck;
+
         void OnDamaged(DamageInfo info, float applied) => knock += info.Direction * info.Knockback;
 
         void OnDied(DamageInfo info)
@@ -94,6 +112,11 @@ namespace Quintessence.Enemies
         {
             if (health.IsDead) return;
             float dt = Time.deltaTime;
+            if ((safetyCheck -= dt) <= 0f)
+            {
+                safetyCheck = 0.5f;
+                if (!Arena.Contains(transform.position) || !agent.enabled || !agent.isOnNavMesh) Rescue(transform.position);
+            }
 
             float moveMul = 1f, miss = 0f;
             bool canAct = true;

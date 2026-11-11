@@ -126,6 +126,16 @@ namespace Quintessence.Enemies.PlayTests
             Assert.AreEqual(3, waves, "tres ondas");
             Assert.AreEqual(12, spawned, "3 + 4 + 5 (Bruto, 2 Explosivos, 2 Rastejantes)");
             Assert.IsTrue(sawArmor, "o Bruto nasce com armadura");
+            if (!sawExplosion)
+            {
+                // o roteiro matou os Explosivos antes da hora: solta um ao lado do heroi parado e espera ele estourar
+                var prefab = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Game/Enemies/Prefabs/Explosivo.prefab");
+                float keepDamage = hp.Pool.ExtraDamageTakenMultiplier;
+                hp.Pool.ExtraDamageTakenMultiplier = 0.02f;
+                Object.Instantiate(prefab, player.transform.position + new Vector3(3f, 0, 0), Quaternion.identity);
+                for (float t = 10f; t > 0f && !sawExplosion; t -= Time.deltaTime) yield return Step();
+                hp.Pool.ExtraDamageTakenMultiplier = keepDamage;
+            }
             Assert.IsTrue(sawExplosion, "Explosivo deveria explodir (ou ser morto antes: entao este teste precisa de outro roteiro)");
             Assert.IsTrue(sawProjectile, "o atirador deveria ter avisado ou disparado um tiro");
             for (float t = 1.8f; t > 0f; t -= Time.deltaTime) yield return Step();

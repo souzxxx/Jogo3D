@@ -98,6 +98,7 @@ namespace Quintessence.Game
                 hud.ShowPause(pause, () => { GameClock.SetPaused(false); hud.ShowPause(false); }, GameFlow.ToTitle);
             }
             if (GameClock.Paused) return;
+            if (!Arena.Contains(player.transform.position)) player.Teleport(new Vector3(0, 0, -4f), Vector3.forward);
             var pos = player.transform.position;
             float moved = Vector3.Distance(pos, lastPos);
             lastPos = pos;

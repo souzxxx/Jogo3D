@@ -676,6 +676,104 @@ namespace Quintessence.Game.PlayTests
         }
 
         [UnityTest, Timeout(600000)]
+        public IEnumerator Nothing_Traps_The_Player()
+        {
+            GameEvents.Clear();
+            Time.timeScale = 1f;
+            Time.captureFramerate = 30;
+            GameFlow.Tutorial = false;
+            GameFlow.StartElement = ElementType.Fire;
+            GameFlow.Seed = 3; GameFlow.Layers = 5; GameFlow.Shrines = 1;
+            yield return EditorSceneManager.LoadSceneAsyncInPlayMode("Assets/Scenes/Run.unity", new LoadSceneParameters(LoadSceneMode.Single));
+            yield return null;
+            yield return null;
+            var director = Object.FindFirstObjectByType<RunDirector>();
+            var hud = Object.FindFirstObjectByType<Hud>();
+            var spawner = Object.FindFirstObjectByType<WaveSpawner>();
+            player = Object.FindFirstObjectByType<PlayerController>();
+            hp = player.GetComponent<Health>();
+            hp.Pool.Invulnerable = true;
+            player.GetComponent<PlayerInputReader>().enabled = false;
+            player.Input = player.gameObject.AddComponent<ScriptedInput>();
+            for (int k = 0; k < 2000 && director.Busy; k++) yield return null;
+            for (int k = 0; k < 90 && Object.FindObjectsByType<EnemyBrain>(FindObjectsSortMode.None).Length == 0; k++) yield return null;
+            for (int k = 0; k < 40; k++) yield return null; // termina a animacao de nascer
+
+            // 1) heroi cai para fora da sala: volta para a entrada
+            player.Teleport(new Vector3(0, -30f, 0), Vector3.forward);
+            for (int k = 0; k < 5; k++) yield return null;
+            Assert.IsTrue(Arena.Contains(player.transform.position), "heroi fora da sala deveria voltar");
+            Assert.AreEqual(1, director.HeroRescues);
+
+            // 2) inimigo jogado para fora da sala e do NavMesh: volta sozinho
+            var enemies = Object.FindObjectsByType<EnemyBrain>(FindObjectsSortMode.None);
+            Assert.Greater(enemies.Length, 0);
+            var lost = enemies[0];
+            lost.GetComponent<UnityEngine.AI.NavMeshAgent>().enabled = false;
+            lost.transform.position = new Vector3(60, 0, 60);
+            for (int k = 0; k < 40; k++) yield return null;
+            Assert.IsTrue(Arena.Contains(lost.transform.position), "inimigo fora da sala deveria voltar");
+            Assert.IsTrue(lost.GetComponent<UnityEngine.AI.NavMeshAgent>().isOnNavMesh);
+            Assert.GreaterOrEqual(lost.Rescues, 1);
+
+            // 3) luta travada (inimigos parados longe, ninguem leva dano): sao trazidos para perto do heroi
+            spawner.SetStallSeconds(3f);
+            foreach (var e in enemies)
+            {
+                e.enabled = false; // nem anda, nem ataca, nem se resgata sozinho
+                e.GetComponent<UnityEngine.AI.NavMeshAgent>().enabled = false;
+                e.transform.position = new Vector3(9.5f, 0, 7.5f);
+            }
+            player.Teleport(new Vector3(-7f, 0, -6f), Vector3.forward);
+            for (int k = 0; k < 150 && spawner.StallRescues == 0; k++) yield return null;
+            Assert.GreaterOrEqual(spawner.StallRescues, 1, "luta parada deveria disparar o resgate");
+            yield return null;
+            foreach (var e in enemies)
+                Assert.Less(Vector3.Distance(e.transform.position, player.transform.position), 9f, "inimigo deveria ter vindo para perto do heroi");
+            spawner.SetStallSeconds(25f);
+
+            // 4) perder o foco da janela pausa; continuar devolve o tempo
+            director.SendMessage("OnApplicationFocus", false);
+            Assert.IsTrue(GameClock.Paused, "perder o foco deveria pausar");
+            Assert.AreEqual(0f, Time.timeScale);
+            director.SetPaused(false);
+            Assert.IsFalse(GameClock.Paused);
+            Assert.AreEqual(1f, Time.timeScale);
+
+            // 5) Santuario sem elemento para despertar: abre as portas e paga Essencia em vez de travar
+            foreach (var e in Elements.All) player.Awaken(e);
+            int essence = director.Run.Essence;
+            director.ShowShrine();
+            yield return null;
+            Assert.Greater(director.Interactables.Count, 0, "sem elemento para despertar, as portas abrem");
+            Assert.IsTrue(director.Interactables.All(i => i.Prompt.StartsWith("entrar")));
+            Assert.Greater(director.Run.Essence, essence);
+
+            // 6) morrer mostra o resultado, e jogar de novo comeca limpo
+            hp.Pool.Invulnerable = false;
+            hp.TakeDamage(new DamageInfo(99999, ElementType.None, Team.Enemy));
+            Assert.IsTrue(hp.IsDead);
+            Assert.IsTrue(director.Finished, "a morte do heroi deveria encerrar a run");
+            for (float t = 5f; t > 0f && !hud.ResultVisible; t -= Time.unscaledDeltaTime) yield return null;
+            Assert.IsTrue(hud.ResultVisible, "morrer deveria levar a tela de resultado");
+            Assert.IsFalse(director.Victory);
+            GameFlow.RestartRun();
+            yield return null;
+            for (int k = 0; k < 60 && Object.FindFirstObjectByType<RunDirector>() == director; k++) yield return null;
+            for (int k = 0; k < 10; k++) yield return null;
+            var again = Object.FindFirstObjectByType<RunDirector>();
+            var hero = Object.FindFirstObjectByType<PlayerController>().GetComponent<Health>();
+            Assert.IsFalse(again.Finished);
+            Assert.IsFalse(hero.IsDead);
+            Assert.AreEqual(hero.Max, hero.Current, 0.01f);
+            Assert.IsFalse(GameClock.Paused);
+            Assert.AreEqual(1f, Time.timeScale);
+            Assert.AreEqual(0, again.Run.RoomsCleared);
+            GameFlow.Layers = 8; GameFlow.Shrines = 3;
+            Time.captureFramerate = 0;
+        }
+
+        [UnityTest, Timeout(600000)]
         public IEnumerator Every_Layout_Loads_With_Its_Pieces()
         {
             GameEvents.Clear();

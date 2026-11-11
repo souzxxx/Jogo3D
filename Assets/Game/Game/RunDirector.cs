@@ -94,6 +94,21 @@ namespace Quintessence.Game
         public int LayoutCount => layouts.Length;
         public int ShardsEarned { get; private set; }
         public EliteModifier CurrentTrait { get; private set; }
+        public int HeroRescues { get; private set; }
+
+        /// Perdeu o foco (trocou de aba ou de janela) no meio da sala: pausa em vez de deixar o heroi apanhar sozinho.
+        void OnApplicationFocus(bool focused)
+        {
+            if (!focused && enabled && !Finished && !Busy && !GameClock.Paused && Run != null) SetPaused(true);
+        }
+
+        /// Monta um Santuario na sala atual sem passar pelo mapa. Para os testes e as capturas.
+        public void ShowShrine()
+        {
+            Cleanup();
+            ApplyLayout(-1);
+            SetupShrine();
+        }
         public string CurrentLayout { get; private set; } = "";
         Transform layoutRoot;
 
@@ -172,6 +187,8 @@ namespace Quintessence.Game
                 }
             }
             if (GameClock.Paused || Busy) { hud.HidePrompt(); return; }
+            // heroi fora da sala (atravessou parede, caiu): volta para a entrada
+            if (!Arena.Contains(player.transform.position)) { player.Teleport(entryPoint, Vector3.forward); HeroRescues++; }
 
             Interactable near = null;
             float best = interactRange;

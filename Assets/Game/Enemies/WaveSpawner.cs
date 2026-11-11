@@ -36,6 +36,16 @@ namespace Quintessence.Enemies
         /// Vale para quem nascer daqui em diante. A run define antes de cada sala.
         public EnemyScaling Scaling { get; set; } = EnemyScaling.None;
         bool announcedClear;
+        [Tooltip("Segundos de luta sem ninguem levar dano ate os inimigos serem trazidos para perto do heroi.")]
+        [SerializeField] float stallSeconds = 25f;
+        StallTimer stall;
+        public int StallRescues => stall != null ? stall.Fired : 0;
+        public void SetStallSeconds(float seconds) { stallSeconds = seconds; stall = new StallTimer(seconds); }
+
+        void OnEnable() => GameEvents.DamageDealt += OnAnyDamage;
+        void OnDisable() => GameEvents.DamageDealt -= OnAnyDamage;
+        void OnAnyDamage(Health target, DamageInfo info, float applied) => stall?.NoteProgress();
+
         Transform player;
 
         void Start()
@@ -74,6 +84,14 @@ namespace Quintessence.Enemies
             if (State == null || waves.Count == 0) return;
             int wave = State.Tick(Time.deltaTime);
             if (wave >= 0) SpawnWave(wave);
+            // luta parada: alguem ficou fora de alcance. Traz os vivos para perto do heroi em vez de prender o jogador na sala
+            stall ??= new StallTimer(stallSeconds);
+            if (stall.Tick(Time.deltaTime, State.Alive > 0 && !GameClock.Paused) && player != null)
+            {
+                int k = 0;
+                foreach (var brain in GetComponentsInChildren<EnemyBrain>())
+                    brain.Rescue(player.position + Quaternion.Euler(0, 70f * k++, 0) * Vector3.forward * 5f);
+            }
             if (State.Cleared && !announcedClear)
             {
                 announcedClear = true;

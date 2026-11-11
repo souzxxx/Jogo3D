@@ -36,6 +36,42 @@
   <p class="sub">Entrega mais recente no topo. Escopo em <a href="ESCOPO.md">ESCOPO.md</a> · kanban em <a href="https://github.com/users/souzxxx/projects/4">GitHub Projects</a>.</p>
 
   <section>
+    <h2>Estados e erros: nada prende o jogador na sala</h2>
+    <div class="meta"><span class="tag who">Leonardo</span><span class="tag ok">429 testes de regra + 14 testes jogando, todos passando</span></div>
+    <div class="cols">
+      <div>
+        <h3>Redes de segurança novas</h3>
+        <ul>
+          <li><b>Inimigo fora da sala ou fora do chão navegável</b> volta sozinho em meio segundo. Antes ele ficava parado para sempre e a sala nunca limpava</li>
+          <li><b>Luta travada:</b> 25 segundos de combate sem ninguém levar dano trazem os inimigos vivos para perto do herói</li>
+          <li><b>Herói fora da sala</b> (atravessou parede, caiu) volta para a entrada</li>
+          <li><b>Perder o foco</b> da janela ou trocar de aba pausa o jogo em vez de deixar o herói apanhar sozinho</li>
+        </ul>
+        <h3 style="margin-top:14px">O que já existia e agora tem teste</h3>
+        <ul>
+          <li>Santuário sem elemento para despertar abre as portas e paga Essência</li>
+          <li>Morrer leva ao resultado; "Jogar de novo" começa com vida cheia, tempo normal e sem pausa presa</li>
+          <li>Save estragado vira progresso zerado; loja sem Essência deixa sair; sala do Mestre sem bênção sobrando abre as portas</li>
+        </ul>
+      </div>
+      <div>
+        <h3>Conferido</h3>
+        <ul>
+          <li>Um teste provoca cada situação numa sala de verdade: joga o herói 30 m para baixo, arremessa um inimigo para fora do mapa, congela todos num canto, tira o foco, abre o Santuário com os quatro elementos e mata o herói</li>
+        </ul>
+        <h3 style="margin-top:14px">Limites</h3>
+        <ul>
+          <li class="warn">Sem print: esta entrega não tem nada novo para ver na tela</li>
+          <li class="warn">A pausa por perda de foco foi testada simulando o aviso do Unity, não trocando de aba num navegador</li>
+          <li class="warn">O Guardião não tem o resgate automático dos inimigos comuns</li>
+          <li class="warn">Não procurei travas na build WebGL em si (tela cheia, redimensionar, áudio bloqueado pelo navegador)</li>
+        </ul>
+        <p style="color:var(--dim);margin:10px 0 0">O teste do Explosivo, que dependia da sorte do roteiro, agora solta um ao lado do herói quando nenhum explodiu durante a luta.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
     <h2>Treino: sala que ensina marca → troca → reação</h2>
     <div class="meta"><span class="tag who">Leonardo</span><span class="tag ok">417 testes de regra + 13 testes jogando, todos passando</span></div>
     <img src="img/treino.png" alt="Treino, passo do dash">
