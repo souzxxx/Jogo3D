@@ -42,6 +42,14 @@ namespace Quintessence.Combat
         }
 
         public void Clear() { Element = ElementType.None; timeLeft = 0f; }
+
+        /// Para reacoes forcadas (Quintessencia): respeita a mesma trava de 0,5 s por alvo.
+        public bool TryLock()
+        {
+            if (lockLeft > 0f) return false;
+            lockLeft = ReactionLock;
+            return true;
+        }
     }
 
     /// Marca elemental de um alvo. Adicionada sozinha no primeiro golpe elemental.

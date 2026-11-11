@@ -34,7 +34,11 @@ namespace Quintessence.Core
         {
             if (info.SourceTeam == team) return 0f;
             float applied = Pool.Damage(info.Amount);
-            if (applied <= 0f) return 0f;
+            if (applied <= 0f)
+            {
+                if (Pool.LastBlocked) GameEvents.RaiseHitBlocked(this, info);
+                return 0f;
+            }
             Damaged?.Invoke(info, applied);
             GameEvents.RaiseDamageDealt(this, info, applied);
             if (Pool.IsDead)

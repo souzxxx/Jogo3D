@@ -13,6 +13,7 @@ namespace Quintessence.Combat
         /// True uma vez por aperto.
         bool ConsumeDash();
         bool ConsumeSkill();
+        bool ConsumeQuintessence();
         /// -1 = elemento anterior, +1 = proximo, 0 = nada.
         int ConsumeSwitch();
     }

@@ -42,6 +42,8 @@ namespace Quintessence.Combat
 
         public bool ConsumeSkill() => Mouse.current != null && Mouse.current.rightButton.wasPressedThisFrame;
 
+        public bool ConsumeQuintessence() => Keyboard.current != null && Keyboard.current.rKey.wasPressedThisFrame;
+
         public int ConsumeSwitch()
         {
             var k = Keyboard.current;

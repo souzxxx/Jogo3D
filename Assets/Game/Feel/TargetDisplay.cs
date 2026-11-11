@@ -11,7 +11,7 @@ namespace Quintessence.Feel
         Transform ring, bar, fill;
         Material ringMat, fillMat, backMat;
         ElementType mark;
-        bool burning, soaked;
+        bool burning, soaked, frozen;
         float shown = 1f, emit, barTimer;
 
         public static TargetDisplay Create(Health health, CombatFeedback feedback)
@@ -60,10 +60,16 @@ namespace Quintessence.Feel
             if (e != ElementType.None) { var c = ElementColors.Of(e); ringMat.color = new Color(c.r, c.g, c.b, 0.95f); }
         }
 
-        public void SetStatus(StatusType type, bool on)
+        readonly System.Collections.Generic.HashSet<StatusType> active = new();
+
+        /// Devolve true se o status acabou de ligar (nao era so renovacao).
+        public bool SetStatus(StatusType type, bool on)
         {
+            bool changed = on ? active.Add(type) : active.Remove(type);
             if (type == StatusType.Burn) burning = on;
             if (type == StatusType.Soaked) soaked = on;
+            if (type == StatusType.Frozen) frozen = on;
+            return changed && on;
         }
 
         public void Touch() => barTimer = 4f;
@@ -96,12 +102,14 @@ namespace Quintessence.Feel
             }
             else shown = hp;
 
-            if (!alive || (!burning && !soaked)) return;
+            if (!alive || (!burning && !soaked && !frozen)) return;
             emit -= Time.deltaTime;
             if (emit > 0f) return;
             emit = 0.07f;
             if (burning)
                 feedback.Burst(pos + Vector3.up * Random.Range(0.6f, 2f), Vector3.up, 35f, 2, 1f, 2.4f, 0.25f, 0.5f, 0.45f, ElementColors.Of(ElementType.Fire));
+            if (frozen)
+                feedback.Burst(pos + Vector3.up * Random.Range(0.3f, 2.2f) + Random.insideUnitSphere * 0.5f, Vector3.up, 180f, 1, 0.1f, 0.5f, 0.2f, 0.4f, 0.6f, new Color(0.7f, 0.95f, 1f));
             if (soaked)
                 feedback.Burst(pos + Vector3.up * Random.Range(1.4f, 2.2f), Vector3.down, 25f, 1, 1.2f, 2.2f, 0.12f, 0.2f, 0.5f, ElementColors.Of(ElementType.Water));
         }

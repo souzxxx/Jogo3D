@@ -16,6 +16,17 @@ namespace Quintessence.Combat
         public bool appliesStatus;
         public StatusType status;
         public float statusDuration = 3f;
+        [Header("Segundo status (ex.: Lama enraiza e encharca)")]
+        public bool appliesSecondStatus;
+        public StatusType secondStatus;
+        public float secondStatusDuration = 3f;
+        [Header("Area que fica no chao (ex.: poca de Magma, nuvem de Vapor)")]
+        public float zoneDuration;
+        public float zoneInterval = 0.5f;
+        public float zoneDamage;
+        public bool zoneAppliesStatus;
+        public StatusType zoneStatus;
+        public float zoneStatusDuration = 1f;
     }
 
     /// Tabela de reacoes. Simetrica: Fogo+Agua = Agua+Fogo.

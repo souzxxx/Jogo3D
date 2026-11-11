@@ -26,7 +26,9 @@ namespace Quintessence.Feel
         Material playerRingMat;
         Light presence;
         Color presenceTarget = Color.white;
-        float zoneEmit;
+        float zoneEmit, presenceBase = 1.6f, quintEmit;
+        bool quintessence;
+        ElementType current;
         Coroutine stop;
 
         public void Configure(Material particle, Material flat) { particleMaterial = particle; flatMaterial = flat; }
@@ -69,6 +71,9 @@ namespace Quintessence.Feel
             GameEvents.AttackPerformed += OnAttack;
             GameEvents.ElementSwitched += OnSwitch;
             GameEvents.ZoneSpawned += OnZone;
+            GameEvents.HitBlocked += OnBlocked;
+            GameEvents.Shattered += OnShattered;
+            GameEvents.QuintessenceActiveChanged += OnQuintessence;
         }
 
         void OnDisable()
@@ -83,6 +88,9 @@ namespace Quintessence.Feel
             GameEvents.AttackPerformed -= OnAttack;
             GameEvents.ElementSwitched -= OnSwitch;
             GameEvents.ZoneSpawned -= OnZone;
+            GameEvents.HitBlocked -= OnBlocked;
+            GameEvents.Shattered -= OnShattered;
+            GameEvents.QuintessenceActiveChanged -= OnQuintessence;
             Time.timeScale = 1f;
         }
 
@@ -94,7 +102,8 @@ namespace Quintessence.Feel
             bool enemy = target.Team == Team.Enemy;
             Flash(target).Flash(enemy ? new Color(3f, 0.35f, 0.3f) : new Color(3f, 3f, 3f), 0.16f);
             float size = applied >= 15f ? 1.5f : applied >= 8f ? 1.15f : applied <= 3f ? 0.7f : 0.95f;
-            DamageNumber.Spawn(target.transform.position + Vector3.up * 2.7f, Mathf.RoundToInt(applied).ToString(),
+            if (info.IsCrit) size *= 1.3f;
+            DamageNumber.Spawn(target.transform.position + Vector3.up * 2.7f, Mathf.RoundToInt(applied) + (info.IsCrit ? "!" : ""),
                 enemy ? Color.Lerp(c, Color.white, 0.35f) : new Color(1f, 0.25f, 0.25f), size);
             var p = info.Point.sqrMagnitude > 0.001f ? info.Point : target.transform.position + Vector3.up * 1.2f;
             Burst(p, info.Direction.sqrMagnitude > 0.01f ? info.Direction : Vector3.up, 70f, applied >= 8f ? 16 : 8, 3f, 9f, 0.12f, 0.3f, 0.3f, Color.Lerp(c, Color.white, 0.3f));
@@ -109,7 +118,7 @@ namespace Quintessence.Feel
             Burst(p, Vector3.up, 180f, 46, 3f, 11f, 0.2f, 0.55f, 0.55f, Color.Lerp(ElementColors.Of(info.Element), Color.white, 0.5f));
             LightFlash(p, Color.white, 6f, 6f, 0.25f);
             CameraShake.Add(0.3f);
-            if (displays.TryGetValue(target, out var d)) { d.SetMark(ElementType.None); d.SetStatus(StatusType.Burn, false); d.SetStatus(StatusType.Soaked, false); }
+            if (displays.TryGetValue(target, out var d)) { d.SetMark(ElementType.None); foreach (StatusType t in System.Enum.GetValues(typeof(StatusType))) d.SetStatus(t, false); }
             Flash(target).SetTint(Color.white);
         }
 
@@ -133,16 +142,75 @@ namespace Quintessence.Feel
         void OnStatus(Health target, StatusType type, float duration)
         {
             if (target.Team != Team.Enemy) return;
-            Display(target).SetStatus(type, true);
-            if (type == StatusType.Soaked) Flash(target).SetTint(new Color(0.6f, 0.8f, 1.5f));
-            if (type == StatusType.Burn) Flash(target).SetTint(new Color(1.35f, 0.8f, 0.65f));
+            var d = Display(target);
+            bool isNew = d.SetStatus(type, true);
+            var tint = StatusTint(type);
+            if (tint.HasValue) Flash(target).SetTint(tint.Value);
+            string label = type switch
+            {
+                StatusType.Stun => "ATORDOADO", StatusType.Frozen => "CONGELADO", StatusType.Rooted => "ENRAIZADO",
+                StatusType.ArmorBroken => "ARMADURA QUEBRADA", StatusType.Blinded => "CEGO", _ => null,
+            };
+            if (isNew && label != null)
+                DamageNumber.Spawn(target.transform.position + Vector3.up * 3.3f, label, tint ?? Color.white, 0.62f, 0.9f);
+        }
+
+        static Color? StatusTint(StatusType type) => type switch
+        {
+            StatusType.Soaked => new Color(0.6f, 0.8f, 1.5f),
+            StatusType.Burn => new Color(1.35f, 0.8f, 0.65f),
+            StatusType.Frozen => new Color(0.75f, 1.35f, 2.2f),
+            StatusType.Rooted => new Color(0.95f, 0.7f, 0.4f),
+            StatusType.Stun => new Color(1.5f, 1.4f, 0.6f),
+            _ => null,
+        };
+
+        void OnBlocked(Health target, DamageInfo info)
+        {
+            var c = ElementColors.Of(ElementType.Earth);
+            Ring(target.transform.position + Vector3.up, 30, 6f, 0.3f, 0.5f, 0.3f, c);
+            DamageNumber.Spawn(target.transform.position + Vector3.up * 3.2f, "BLOQUEOU", Color.Lerp(c, Color.white, 0.4f), 0.8f, 0.7f);
+        }
+
+        void OnShattered(Health target)
+        {
+            var p = target.transform.position + Vector3.up * 1.2f;
+            var c = new Color(0.7f, 0.95f, 1f);
+            Burst(p, Vector3.up, 180f, 60, 4f, 12f, 0.25f, 0.6f, 0.45f, c);
+            LightFlash(p, c, 8f, 6f, 0.25f);
+            DamageNumber.Spawn(target.transform.position + Vector3.up * 3.5f, "ESTILHACOU!", c, 0.9f, 0.9f);
+            CameraShake.Add(0.35f);
+        }
+
+        void OnQuintessence(bool active)
+        {
+            FindPlayer();
+            quintessence = active;
+            if (player == null) return;
+            var p = player.position + Vector3.up * 1.2f;
+            if (active)
+            {
+                foreach (var e in Elements.All) Ring(p + Vector3.up * (0.2f * (int)e), 50, 6f + 2f * (int)e, 0.4f, 0.8f, 0.6f, ElementColors.Of(e));
+                LightFlash(p, Color.white, 16f, 14f, 0.6f);
+                DamageNumber.Spawn(player.position + Vector3.up * 4f, "QUINTESSENCIA!", Color.white, 1.5f, 1.4f);
+                CameraShake.Add(0.7f);
+                Stop(0.12f);
+            }
+            else
+            {
+                Ring(p, 40, 8f, 0.3f, 0.5f, 0.4f, Color.white);
+                var c = ElementColors.Of(current);
+                presenceTarget = Color.Lerp(c, Color.white, 0.35f);
+                if (playerRingMat != null) playerRingMat.color = new Color(c.r, c.g, c.b, 0.9f);
+                if (presence != null) presence.intensity = presenceBase;
+            }
         }
 
         void OnStatusEnded(Health target, StatusType type)
         {
             if (target == null || !displays.TryGetValue(target, out var d)) return;
             d.SetStatus(type, false);
-            if (type == StatusType.Soaked || type == StatusType.Burn) Flash(target).SetTint(Color.white);
+            if (StatusTint(type).HasValue) Flash(target).SetTint(Color.white);
         }
 
         void OnAttack(AttackEvent e)
@@ -159,6 +227,14 @@ namespace Quintessence.Feel
                     Burst(o, e.Direction, e.Arc * 0.42f, 120, e.Range * 1.6f, e.Range * 4.8f, 0.9f, 2.0f, 0.36f, c);
                     Burst(o, e.Direction, e.Arc * 0.2f, 20, e.Range * 3f, e.Range * 5f, 0.3f, 0.5f, 0.22f, Color.Lerp(c, Color.white, 0.6f));
                     LightFlash(o + e.Direction, c, 6f, 7f, 0.2f);
+                    break;
+                case AttackKind.Skill when e.Arc >= 300f:
+                    var center = e.Origin + Vector3.up * 0.6f;
+                    Ring(center, 90, e.Range / 0.28f, 0.7f, 1.6f, 0.4f, c);
+                    Ring(center + Vector3.up * 0.5f, 60, e.Range / 0.4f, 0.4f, 0.9f, 0.5f, Color.Lerp(c, Color.white, 0.5f));
+                    Burst(center, Vector3.up, 50f, 60, 2f, 9f, 0.4f, 1f, 0.6f, c);
+                    LightFlash(center + Vector3.up, c, 10f, e.Range * 2.5f, 0.35f);
+                    CameraShake.Add(0.4f);
                     break;
                 case AttackKind.Skill:
                     Burst(o, e.Direction, e.Arc * 0.5f, 260, e.Range * 1.0f, e.Range * 3.6f, 1.0f, 2.6f, 0.5f, c);
@@ -180,6 +256,8 @@ namespace Quintessence.Feel
         void OnSwitch(ElementType from, ElementType to)
         {
             FindPlayer();
+            current = to;
+            if (quintessence) return;
             var c = ElementColors.Of(to);
             presenceTarget = Color.Lerp(c, Color.white, 0.35f);
             if (playerRingMat != null) playerRingMat.color = new Color(c.r, c.g, c.b, 0.9f);
@@ -211,6 +289,7 @@ namespace Quintessence.Feel
             if (go == null) return;
             player = go.transform;
             presence = go.GetComponentInChildren<Light>();
+            if (presence != null) presenceBase = presence.intensity;
             var r = new GameObject("PlayerElementRing");
             r.transform.SetParent(transform, false);
             r.AddComponent<MeshFilter>().sharedMesh = RingMesh;
@@ -306,6 +385,23 @@ namespace Quintessence.Feel
                     playerRing.localScale = Vector3.one * 1.05f;
                 }
                 if (presence != null) presence.color = Color.Lerp(presence.color, presenceTarget, dt * 8f);
+                if (quintessence)
+                {
+                    // prismatico: o anel e a luz giram pelas cores dos quatro elementos
+                    var prism = Color.HSVToRGB(Mathf.Repeat(Time.time * 0.9f, 1f), 0.55f, 1f);
+                    if (playerRingMat != null) playerRingMat.color = prism;
+                    if (playerRing != null) playerRing.localScale = Vector3.one * (1.35f + 0.12f * Mathf.Sin(Time.time * 12f));
+                    presenceTarget = Color.Lerp(prism, Color.white, 0.5f);
+                    if (presence != null) presence.intensity = presenceBase * 2.6f;
+                    quintEmit -= dt;
+                    if (quintEmit <= 0f)
+                    {
+                        quintEmit = 0.03f;
+                        var e = Elements.All[Random.Range(0, 4)];
+                        var off = Random.insideUnitCircle.normalized * 0.9f;
+                        Burst(player.position + new Vector3(off.x, Random.Range(0.2f, 1.2f), off.y), Vector3.up, 15f, 2, 2f, 5f, 0.25f, 0.55f, 0.6f, ElementColors.Of(e));
+                    }
+                }
             }
 
             zoneEmit -= dt;

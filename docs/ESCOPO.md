@@ -172,8 +172,8 @@ Sprints sem data até confirmar a entrega. S0 é de todos e destrava o resto.
 - [x] S2 · Fogo e Água completos (modificador, skill, dash)
 - [x] S2 · Troca de elemento + Golpe de Troca
 - [x] S2 · Marcas + resolvedor de reações (tabela em ScriptableObject)
-- [ ] S3 · Terra e Ar completos, as 6 reações e status (Queimadura, Encharcado, Congelado, Enraizado, Atordoado, Armadura Quebrada)
-- [ ] S3 · Quintessência (medidor + estado)
+- [x] S3 · Terra e Ar completos, as 6 reações e status (Queimadura, Encharcado, Congelado, Enraizado, Atordoado, Armadura Quebrada)
+- [x] S3 · Quintessência (medidor + estado)
 - [ ] S4 · Morte, fim de run, pausa, sem dead ends (rubrica Estados e Erros)
 - [ ] S4 · Sala de treino/tutorial que ensina marca → reação
 
@@ -211,6 +211,9 @@ Sprints sem data até confirmar a entrega. S0 é de todos e destrava o resto.
 - [ ] S4 · Passada de performance WebGL (draw calls, tamanho da build)
 
 ---
+
+### Fila (depois do jogo fechado)
+- [ ] Trazer os heróis do Quintessence 2D (Rax, Liora, Brann, Vey) para o 3D no lugar do mago do pack — pedido do Leonardo em 11/11
 
 ## 9. Riscos
 

@@ -45,6 +45,10 @@ namespace Quintessence.Core
     {
         public static event Action<Health, DamageInfo, float> DamageDealt;
         public static event Action<Health, DamageInfo> Died;
+        /// Um golpe foi anulado por bloqueio (armadura da dash de Terra).
+        public static event Action<Health, DamageInfo> HitBlocked;
+        /// Alvo Congelado levou um golpe e estilhacou.
+        public static event Action<Health> Shattered;
         public static event Action<ElementType, Health> MarkApplied;
         public static event Action<Health> MarkCleared;
         public static event Action<ReactionEvent> ReactionTriggered;
@@ -67,6 +71,8 @@ namespace Quintessence.Core
 
         public static void RaiseDamageDealt(Health target, DamageInfo info, float applied) => DamageDealt?.Invoke(target, info, applied);
         public static void RaiseDied(Health target, DamageInfo info) => Died?.Invoke(target, info);
+        public static void RaiseHitBlocked(Health target, DamageInfo info) => HitBlocked?.Invoke(target, info);
+        public static void RaiseShattered(Health target) => Shattered?.Invoke(target);
         public static void RaiseMarkApplied(ElementType element, Health target) => MarkApplied?.Invoke(element, target);
         public static void RaiseMarkCleared(Health target) => MarkCleared?.Invoke(target);
         public static void RaiseReaction(ReactionEvent e) => ReactionTriggered?.Invoke(e);
@@ -87,7 +93,7 @@ namespace Quintessence.Core
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         public static void Clear()
         {
-            DamageDealt = null; Died = null; MarkApplied = null; ReactionTriggered = null;
+            DamageDealt = null; Died = null; HitBlocked = null; Shattered = null; MarkApplied = null; ReactionTriggered = null;
             MarkCleared = null; StatusApplied = null; StatusEnded = null; AttackPerformed = null; ZoneSpawned = null;
             ElementSwitched = null; ElementAwakened = null;
             QuintessenceMeterChanged = null; QuintessenceActiveChanged = null;

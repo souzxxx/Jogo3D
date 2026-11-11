@@ -10,6 +10,12 @@ namespace Quintessence.Core
         public bool Invulnerable { get; set; }
         /// Multiplicador de dano recebido (ex.: Armadura Quebrada = 1.25, Quintessencia = 0.5).
         public float DamageTakenMultiplier { get; set; } = 1f;
+        /// Segundo multiplicador, independente do de status (ex.: Quintessencia = 0.5).
+        public float ExtraDamageTakenMultiplier { get; set; } = 1f;
+        /// Golpes que serao totalmente bloqueados (dash de Terra da 1).
+        public int Blocks { get; set; }
+        /// O ultimo Damage() foi anulado por um bloqueio.
+        public bool LastBlocked { get; private set; }
         public bool IsDead => Current <= 0f;
         public float Normalized => Max <= 0f ? 0f : Current / Max;
 
@@ -22,8 +28,10 @@ namespace Quintessence.Core
         /// Devolve o dano aplicado. Nunca passa da vida atual; morto ou invulneravel devolve 0.
         public float Damage(float amount)
         {
+            LastBlocked = false;
             if (IsDead || Invulnerable || amount <= 0f) return 0f;
-            float applied = Math.Min(Current, amount * Math.Max(0f, DamageTakenMultiplier));
+            if (Blocks > 0) { Blocks--; LastBlocked = true; return 0f; }
+            float applied = Math.Min(Current, amount * Math.Max(0f, DamageTakenMultiplier) * Math.Max(0f, ExtraDamageTakenMultiplier));
             Current -= applied;
             return applied;
         }

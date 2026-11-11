@@ -22,24 +22,51 @@ MonoBehaviour:
     appliesStatus: 1
     status: 0
     statusDuration: 3
+    appliesSecondStatus: 0
+    secondStatus: 0
+    secondStatusDuration: 3
+    zoneDuration: 0
+    zoneInterval: 0.5
+    zoneDamage: 0
+    zoneAppliesStatus: 0
+    zoneStatus: 0
+    zoneStatusDuration: 1
   - name: Vapor
     a: 1
     b: 2
     damage: 8
     radius: 3
     knockback: 2
-    appliesStatus: 1
-    status: 6
-    statusDuration: 4
+    appliesStatus: 0
+    status: 0
+    statusDuration: 3
+    appliesSecondStatus: 0
+    secondStatus: 0
+    secondStatusDuration: 3
+    zoneDuration: 4
+    zoneInterval: 0.5
+    zoneDamage: 0
+    zoneAppliesStatus: 1
+    zoneStatus: 6
+    zoneStatusDuration: 0.8
   - name: Magma
     a: 1
     b: 3
     damage: 10
     radius: 2
     knockback: 2
-    appliesStatus: 1
+    appliesStatus: 0
     status: 0
-    statusDuration: 4
+    statusDuration: 3
+    appliesSecondStatus: 0
+    secondStatus: 0
+    secondStatusDuration: 3
+    zoneDuration: 4
+    zoneInterval: 0.5
+    zoneDamage: 6
+    zoneAppliesStatus: 0
+    zoneStatus: 0
+    zoneStatusDuration: 1
   - name: Lama
     a: 2
     b: 3
@@ -49,6 +76,15 @@ MonoBehaviour:
     appliesStatus: 1
     status: 4
     statusDuration: 2
+    appliesSecondStatus: 1
+    secondStatus: 1
+    secondStatusDuration: 5
+    zoneDuration: 0
+    zoneInterval: 0.5
+    zoneDamage: 0
+    zoneAppliesStatus: 0
+    zoneStatus: 0
+    zoneStatusDuration: 1
   - name: Nevasca
     a: 2
     b: 4
@@ -58,12 +94,30 @@ MonoBehaviour:
     appliesStatus: 1
     status: 3
     statusDuration: 2
+    appliesSecondStatus: 0
+    secondStatus: 0
+    secondStatusDuration: 3
+    zoneDuration: 0
+    zoneInterval: 0.5
+    zoneDamage: 0
+    zoneAppliesStatus: 0
+    zoneStatus: 0
+    zoneStatusDuration: 1
   - name: Estilhacos
     a: 3
     b: 4
     damage: 14
-    radius: 3
-    knockback: 8
+    radius: 3.5
+    knockback: 9
     appliesStatus: 0
     status: 0
-    statusDuration: 0
+    statusDuration: 3
+    appliesSecondStatus: 0
+    secondStatus: 0
+    secondStatusDuration: 3
+    zoneDuration: 0
+    zoneInterval: 0.5
+    zoneDamage: 0
+    zoneAppliesStatus: 0
+    zoneStatus: 0
+    zoneStatusDuration: 1

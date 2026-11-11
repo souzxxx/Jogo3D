@@ -15,6 +15,9 @@ namespace Quintessence.Combat
         int sw;
         public void PressSkill() => skill = true;
         public void PressSwitch(int dir) => sw = dir;
+        bool quint;
+        public void PressQuintessence() => quint = true;
+        public bool ConsumeQuintessence() { bool d = quint; quint = false; return d; }
         public bool ConsumeSkill() { bool d = skill; skill = false; return d; }
         public int ConsumeSwitch() { int d = sw; sw = 0; return d; }
     }

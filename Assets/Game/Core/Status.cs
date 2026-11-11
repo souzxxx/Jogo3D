@@ -100,6 +100,13 @@ namespace Quintessence.Core
             GameEvents.RaiseStatusApplied(health, type, duration);
         }
 
+        public void Clear(StatusType type)
+        {
+            if (!State.Clear(type)) return;
+            health.Pool.DamageTakenMultiplier = State.DamageTakenMultiplier;
+            GameEvents.RaiseStatusEnded(health, type);
+        }
+
         public void ClearNegative()
         {
             foreach (StatusType t in Enum.GetValues(typeof(StatusType)))

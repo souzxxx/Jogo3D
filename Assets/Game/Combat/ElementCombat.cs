@@ -7,22 +7,43 @@ namespace Quintessence.Combat
     /// Entrega um golpe elemental: dano, marca e, se a marca for de outro elemento, a reacao.
     public static class ElementCombat
     {
+        public const float ShatterBonus = 1.3f;
         static readonly Collider[] buffer = new Collider[48];
         static readonly HashSet<Health> seen = new();
 
         /// Devolve o dano aplicado ao alvo direto.
-        public static float Deliver(Health target, DamageInfo info, ReactionTable table, float reactionPower = 1f)
+        /// forceReactionWith: na Quintessencia o golpe reage como se o alvo ja estivesse marcado com esse elemento.
+        public static float Deliver(Health target, DamageInfo info, ReactionTable table, float reactionPower = 1f,
+            ElementType forceReactionWith = ElementType.None)
         {
+            // Congelado: o proximo golpe direto estilhaca (+30%) e encerra o gelo
+            if (!info.IsReaction && target.TryGetComponent(out StatusHolder st) && st.State.Has(StatusType.Frozen))
+            {
+                info.Amount *= ShatterBonus;
+                st.Clear(StatusType.Frozen);
+                GameEvents.RaiseShattered(target);
+            }
+
             float applied = target.TakeDamage(info);
             if (applied <= 0f || info.Element == ElementType.None || info.IsReaction) return applied;
 
             if (!target.TryGetComponent(out ElementMark mark))
             {
-                if (target.IsDead) return applied;
+                if (target.IsDead && forceReactionWith == ElementType.None) return applied;
                 mark = target.gameObject.AddComponent<ElementMark>();
             }
-            if (target.IsDead && !mark.State.HasMark) return applied;
 
+            if (forceReactionWith != ElementType.None && forceReactionWith != info.Element)
+            {
+                if (mark.State.TryLock())
+                {
+                    if (mark.State.HasMark) { mark.State.Clear(); GameEvents.RaiseMarkCleared(target); }
+                    React(target, forceReactionWith, info, table, reactionPower);
+                }
+                return applied;
+            }
+
+            if (target.IsDead && !mark.State.HasMark) return applied;
             switch (mark.State.Hit(info.Element, out var consumed))
             {
                 case MarkOutcome.Applied:
@@ -62,9 +83,15 @@ namespace Quintessence.Combat
                 {
                     IsReaction = true, Point = h.transform.position + Vector3.up * 1.2f, Direction = dir, Knockback = r.knockback,
                 });
-                if (r.appliesStatus && !h.IsDead)
-                    StatusHolder.GetOrAdd(h).Apply(r.status, r.statusDuration, info.SourceTeam, info.Source);
+                if (h.IsDead) continue;
+                if (r.appliesStatus) StatusHolder.GetOrAdd(h).Apply(r.status, r.statusDuration, info.SourceTeam, info.Source);
+                if (r.appliesSecondStatus) StatusHolder.GetOrAdd(h).Apply(r.secondStatus, r.secondStatusDuration, info.SourceTeam, info.Source);
             }
+
+            if (r.zoneDuration <= 0f) return;
+            var zone = DamageZone.Spawn(center, r.radius, r.zoneDuration, r.zoneInterval, r.zoneDamage * power,
+                info.Element, info.SourceTeam, info.Source, table, fromReaction: true);
+            if (r.zoneAppliesStatus) zone.WithStatus(r.zoneStatus, r.zoneStatusDuration);
         }
     }
 }

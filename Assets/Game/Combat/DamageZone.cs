@@ -4,27 +4,35 @@ using UnityEngine;
 
 namespace Quintessence.Combat
 {
-    /// Area no chao que causa dano elemental em intervalos (rastro de fogo, poca de lava).
+    /// Area no chao que causa dano elemental e/ou status em intervalos (rastro de fogo, poca de Magma, nuvem de Vapor).
     public class DamageZone : MonoBehaviour
     {
-        float radius, life, interval, damage, tick;
+        float radius, life, interval, damage, tick, statusDuration;
         ElementType element;
         Team team;
         GameObject source;
         ReactionTable table;
+        bool fromReaction, appliesStatus;
+        StatusType status;
         static readonly Collider[] buffer = new Collider[32];
         static readonly HashSet<Health> seen = new();
 
         public static DamageZone Spawn(Vector3 point, float radius, float duration, float interval, float damage,
-            ElementType element, Team team, GameObject source, ReactionTable table)
+            ElementType element, Team team, GameObject source, ReactionTable table, bool fromReaction = false)
         {
             var go = new GameObject("Zone_" + element);
             go.transform.position = point;
             var z = go.AddComponent<DamageZone>();
             z.radius = radius; z.life = duration; z.interval = interval; z.damage = damage; z.tick = 0.1f;
-            z.element = element; z.team = team; z.source = source; z.table = table;
+            z.element = element; z.team = team; z.source = source; z.table = table; z.fromReaction = fromReaction;
             GameEvents.RaiseZoneSpawned(new ZoneEvent { Point = point, Radius = radius, Duration = duration, Element = element });
             return z;
+        }
+
+        public DamageZone WithStatus(StatusType type, float duration)
+        {
+            appliesStatus = true; status = type; statusDuration = duration;
+            return this;
         }
 
         void Update()
@@ -44,8 +52,10 @@ namespace Quintessence.Combat
             {
                 var h = buffer[i].GetComponentInParent<Health>();
                 if (h == null || h.Team == team || h.IsDead || !seen.Add(h)) continue;
-                ElementCombat.Deliver(h, new DamageInfo(damage, element, team, source)
-                    { Point = h.transform.position + Vector3.up * 1.2f }, table);
+                if (damage > 0f)
+                    ElementCombat.Deliver(h, new DamageInfo(damage, element, team, source)
+                        { Point = h.transform.position + Vector3.up * 1.2f, IsReaction = fromReaction }, table);
+                if (appliesStatus && !h.IsDead) StatusHolder.GetOrAdd(h).Apply(status, statusDuration, team, source);
             }
         }
     }

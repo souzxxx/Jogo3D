@@ -34,7 +34,7 @@ public static class CombatDevSceneBuilder
 
         var root = LookDevBuilder.BeginArena("Leonardo_Combat");
         // depois de abrir a cena nova: criar antes deixa as referencias nulas
-        var defs = new[] { FireDef(), WaterDef() };
+        var defs = new[] { FireDef(), WaterDef(), EarthDef(PillarPrefab()), AirDef() };
         var table = Reactions();
         var flat = FlatMaterial();
         AssetDatabase.SaveAssets();
@@ -57,8 +57,10 @@ public static class CombatDevSceneBuilder
         for (int i = 0; i < defs.Length; i++) arr.GetArrayElementAtIndex(i).objectReferenceValue = defs[i];
         pso.FindProperty("reactions").objectReferenceValue = table;
         var also = pso.FindProperty("alsoAwakened");
-        also.arraySize = 1;
+        also.arraySize = 3;
         also.GetArrayElementAtIndex(0).intValue = (int)ElementType.Water;
+        also.GetArrayElementAtIndex(1).intValue = (int)ElementType.Earth;
+        also.GetArrayElementAtIndex(2).intValue = (int)ElementType.Air;
         pso.ApplyModifiedPropertiesWithoutUndo();
         var heroMat = LookDevBuilder.Mat("Hero", KK + "Adventurers/Characters/mage_texture.png", Color.white, Color.black, 0f);
         var model = LookDevBuilder.Spawn("Adventurers/Characters/Mage.fbx", Vector3.zero, 0, heroMat);
@@ -77,6 +79,8 @@ public static class CombatDevSceneBuilder
         Dummy(root, new Vector3(0, 0, -1), 250, skelMat, dummyCtrl);
         Dummy(root, new Vector3(4, 0, 2.5f), 200, skelMat, dummyCtrl);
         Dummy(root, new Vector3(-3, 0, 4), 160, skelMat, dummyCtrl);
+        Dummy(root, new Vector3(5.5f, 0, -4), 300, skelMat, dummyCtrl);
+        Dummy(root, new Vector3(7, 0, -2.5f), 270, skelMat, dummyCtrl);
 
         var fb = new GameObject("CombatFeedback");
         fb.transform.SetParent(root, false);
@@ -130,17 +134,71 @@ public static class CombatDevSceneBuilder
         d.dash = DashVariant.Cleanse;
     });
 
+    static ElementDefinition EarthDef(GameObject pillar) => Asset<ElementDefinition>("Earth", d =>
+    {
+        d.element = ElementType.Earth;
+        d.damageMultiplier = 1.15f;
+        d.finisherAppliesStatus = true; d.finisherStatus = StatusType.ArmorBroken; d.finisherStatusDuration = 4f;
+        d.skillName = "Pilar de Pedra"; d.skillShape = SkillShape.Summon; d.skillSummonPrefab = pillar; d.skillSummonDistance = 3.5f;
+        d.skillDamage = 16f; d.skillCooldown = 6f; d.skillRange = 3.4f; d.skillKnockback = 6f;
+        d.skillAppliesStatus = true; d.skillStatus = StatusType.Stun; d.skillStatusDuration = 0.8f;
+        d.dash = DashVariant.Armor; d.dashDistanceMultiplier = 0.67f;
+    });
+
+    static ElementDefinition AirDef() => Asset<ElementDefinition>("Air", d =>
+    {
+        d.element = ElementType.Air;
+        d.critChance = 0.2f;
+        d.skillName = "Vendaval"; d.skillShape = SkillShape.Radial;
+        d.skillDamage = 10f; d.skillCooldown = 4f; d.skillRange = 4f; d.skillKnockback = 16f;
+        d.dash = DashVariant.Plain; d.dashCharges = 2;
+    });
+
+    static GameObject PillarPrefab()
+    {
+        const string path = "Assets/Game/Combat/Prefabs/StonePillar.prefab";
+        var existing = AssetDatabase.LoadAssetAtPath<GameObject>(path);
+        if (existing != null) return existing;
+        Directory.CreateDirectory("Assets/Game/Combat/Prefabs");
+        AssetDatabase.Refresh();
+        var go = new GameObject("StonePillar");
+        var col = go.AddComponent<CapsuleCollider>();
+        col.height = 2.6f; col.radius = 0.75f; col.center = new Vector3(0, 1.3f, 0);
+        go.AddComponent<Health>().Configure(40, Team.Player);
+        go.AddComponent<TimedLife>();
+        var stone = LookDevBuilder.Mat("EarthStone", KK + "Dungeon/dungeon_texture.png", new Color(1.1f, 0.85f, 0.6f), Color.black, 0f);
+        var model = LookDevBuilder.Spawn("Dungeon/pillar.fbx", Vector3.zero, 0, stone, 0.6f);
+        model.name = "Model";
+        model.transform.SetParent(go.transform, false);
+        var prefab = PrefabUtility.SaveAsPrefabAsset(go, path);
+        Object.DestroyImmediate(go);
+        return prefab;
+    }
+
     static ReactionTable Reactions() => Asset<ReactionTable>("Reactions", t =>
     {
-        void Add(string n, ElementType a, ElementType b, float dmg, float rad, float kb, StatusType? st, float dur) =>
-            t.reactions.Add(new Reaction { name = n, a = a, b = b, damage = dmg, radius = rad, knockback = kb,
-                appliesStatus = st.HasValue, status = st ?? StatusType.Burn, statusDuration = dur });
-        Add("Tempestade de Fogo", ElementType.Fire, ElementType.Air, 20, 2.5f, 6, StatusType.Burn, 3);
-        Add("Vapor", ElementType.Fire, ElementType.Water, 8, 3f, 2, StatusType.Blinded, 4);
-        Add("Magma", ElementType.Fire, ElementType.Earth, 10, 2f, 2, StatusType.Burn, 4);
-        Add("Lama", ElementType.Water, ElementType.Earth, 8, 2f, 0, StatusType.Rooted, 2);
-        Add("Nevasca", ElementType.Water, ElementType.Air, 10, 2f, 0, StatusType.Frozen, 2);
-        Add("Estilhacos", ElementType.Earth, ElementType.Air, 14, 3f, 8, null, 0);
+        Reaction Add(string n, ElementType a, ElementType b, float dmg, float rad, float kb)
+        {
+            var r = new Reaction { name = n, a = a, b = b, damage = dmg, radius = rad, knockback = kb };
+            t.reactions.Add(r);
+            return r;
+        }
+        var storm = Add("Tempestade de Fogo", ElementType.Fire, ElementType.Air, 20, 2.5f, 6);
+        storm.appliesStatus = true; storm.status = StatusType.Burn; storm.statusDuration = 3;
+        // nuvem que fica 4 s: quem esta dentro erra metade dos ataques
+        var steam = Add("Vapor", ElementType.Fire, ElementType.Water, 8, 3f, 2);
+        steam.zoneDuration = 4; steam.zoneInterval = 0.5f; steam.zoneAppliesStatus = true; steam.zoneStatus = StatusType.Blinded; steam.zoneStatusDuration = 0.8f;
+        // poca de lava: 6 a cada 0,5 s por 4 s
+        var magma = Add("Magma", ElementType.Fire, ElementType.Earth, 10, 2f, 2);
+        magma.zoneDuration = 4; magma.zoneInterval = 0.5f; magma.zoneDamage = 6;
+        // enraiza 2 s e deixa Encharcado (dura 3 s alem da raiz)
+        var mud = Add("Lama", ElementType.Water, ElementType.Earth, 8, 2f, 0);
+        mud.appliesStatus = true; mud.status = StatusType.Rooted; mud.statusDuration = 2;
+        mud.appliesSecondStatus = true; mud.secondStatus = StatusType.Soaked; mud.secondStatusDuration = 5;
+        var blizzard = Add("Nevasca", ElementType.Water, ElementType.Air, 10, 2f, 0);
+        blizzard.appliesStatus = true; blizzard.status = StatusType.Frozen; blizzard.statusDuration = 2;
+        // simplificado: explosao de lascas em area maior, em vez de 6 projeteis
+        Add("Estilhacos", ElementType.Earth, ElementType.Air, 14, 3.5f, 9);
     });
 
     static Material FlatMaterial()
