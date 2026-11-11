@@ -35,8 +35,8 @@ namespace Quintessence.Feel
 
             bar = new GameObject("HealthBar").transform;
             bar.SetParent(transform, false);
-            backMat = new Material(feedback.FlatMaterial) { color = new Color(0.04f, 0.03f, 0.08f, 0.85f) };
-            fillMat = new Material(feedback.FlatMaterial) { color = new Color(0.95f, 0.2f, 0.2f, 1f) };
+            backMat = new Material(feedback.FlatMaterial) { color = new Color(0.07f, 0.06f, 0.09f, 0.85f) };
+            fillMat = new Material(feedback.FlatMaterial) { color = new Color(0.72f, 0.22f, 0.2f, 1f) };
             Quad("Back", new Vector3(1.5f, 0.2f, 1f), 0f, backMat);
             fill = Quad("Fill", new Vector3(1.42f, 0.13f, 1f), -0.01f, fillMat);
             bar.gameObject.SetActive(false);
@@ -57,7 +57,7 @@ namespace Quintessence.Feel
         public void SetMark(ElementType e)
         {
             mark = e;
-            if (e != ElementType.None) { var c = ElementColors.Of(e); ringMat.color = new Color(c.r, c.g, c.b, 0.95f); }
+            if (e != ElementType.None) { var c = ElementColors.Of(e); ringMat.color = new Color(c.r * 0.9f, c.g * 0.9f, c.b * 0.9f, 0.8f); }
         }
 
         readonly System.Collections.Generic.HashSet<StatusType> active = new();
@@ -78,13 +78,13 @@ namespace Quintessence.Feel
         public void SetArmored(bool on)
         {
             Armored = on;
-            fillMat.color = on ? new Color(0.62f, 0.72f, 0.95f, 1f) : new Color(0.95f, 0.2f, 0.2f, 1f);
+            fillMat.color = on ? new Color(0.55f, 0.62f, 0.75f, 1f) : new Color(0.72f, 0.22f, 0.2f, 1f);
             if (armorRing == null)
             {
                 armorRing = new GameObject("ArmorRing").transform;
                 armorRing.SetParent(transform, false);
                 armorRing.gameObject.AddComponent<MeshFilter>().sharedMesh = CombatFeedback.RingMesh;
-                armorRing.gameObject.AddComponent<MeshRenderer>().sharedMaterial = new Material(feedback.FlatMaterial) { color = new Color(0.62f, 0.72f, 0.95f, 0.9f) };
+                armorRing.gameObject.AddComponent<MeshRenderer>().sharedMaterial = new Material(feedback.FlatMaterial) { color = new Color(0.55f, 0.62f, 0.75f, 0.75f) };
             }
             armorRing.gameObject.SetActive(on);
             barTimer = 9999f;

@@ -21,8 +21,15 @@ namespace Quintessence.Game
         [SerializeField] GameObject bossPrefab;
         [SerializeField] Material flatMaterial;
         [SerializeField] BoonCatalog boonCatalog;
+        [Header("Pecas do cenario (modelos do pack)")]
+        [SerializeField] GameObject doorPrefab;
+        [Tooltip("Estandarte por tipo de sala, na ordem do enum RoomType.")]
+        [SerializeField] GameObject[] bannerByRoom = new GameObject[0];
+        [SerializeField] GameObject shrinePrefab;
+        [SerializeField] GameObject chestPrefab;
+        [SerializeField] Material matteMaterial;
         [SerializeField] Vector3 entryPoint = new(0, 0.05f, -5.5f);
-        [SerializeField] float doorLine = 5.6f;
+        [SerializeField] float doorLine = 7.15f;
         [SerializeField] float interactRange = 2.4f;
 
         public RunState Run { get; private set; }
@@ -55,6 +62,13 @@ namespace Quintessence.Game
 
         public void BindBoons(BoonCatalog catalog) => boonCatalog = catalog;
         public void BindBoss(GameObject boss) => bossPrefab = boss;
+
+        public void BindProps(GameObject door, GameObject[] banners, GameObject shrine, GameObject chest, Material matte)
+        {
+            doorPrefab = door; bannerByRoom = banners; shrinePrefab = shrine; chestPrefab = chest; matteMaterial = matte;
+        }
+
+        static readonly Color Cream = new(0.93f, 0.88f, 0.78f);
 
         void Awake()
         {
@@ -247,10 +261,9 @@ namespace Quintessence.Game
             {
                 var node = choices[i];
                 float x = (i - (choices.Count - 1) / 2f) * 6f;
-                var c = RoomInfo.Color(node.Type);
                 string reward = RoomInfo.Name(node.Reward);
                 string label = RoomInfo.Name(node.Type) + (reward.Length > 0 ? "\n" + reward : "");
-                var go = BuildDoor(new Vector3(x, 0, doorLine), c, label);
+                var go = BuildDoor(new Vector3(x, 0, doorLine), node.Type, label);
                 interactables.Add(new Interactable
                 {
                     Object = go, Prompt = "entrar: " + RoomInfo.Name(node.Type),
@@ -259,16 +272,22 @@ namespace Quintessence.Game
             }
         }
 
-        GameObject BuildDoor(Vector3 pos, Color color, string label)
+        /// Porta: vao de pedra do pack encostado na parede do fundo, com o estandarte do tipo da sala em cima.
+        GameObject BuildDoor(Vector3 pos, RoomType type, string label)
         {
             var root = new GameObject("Door");
             root.transform.position = pos;
-            Block(root.transform, new Vector3(-1.1f, 1.5f, 0), new Vector3(0.3f, 3f, 0.3f), color);
-            Block(root.transform, new Vector3(1.1f, 1.5f, 0), new Vector3(0.3f, 3f, 0.3f), color);
-            Block(root.transform, new Vector3(0, 3.1f, 0), new Vector3(2.5f, 0.3f, 0.3f), color);
-            Block(root.transform, new Vector3(0, 1.5f, 0.1f), new Vector3(1.9f, 2.9f, 0.05f), new Color(color.r, color.g, color.b, 0.28f));
-            Label(root.transform, new Vector3(0, 4.3f, 0), label, color);
-            Glow(root.transform, new Vector3(0, 1.6f, -0.8f), color);
+            if (doorPrefab != null) Instantiate(doorPrefab, root.transform).transform.localPosition = Vector3.zero;
+            // fundo escuro do vao
+            Matte(GameObject.CreatePrimitive(PrimitiveType.Cube), root.transform, new Vector3(0, 1.45f, 0.35f), new Vector3(1.9f, 2.9f, 0.1f), new Color(0.03f, 0.03f, 0.05f));
+            int t = (int)type;
+            if (t < bannerByRoom.Length && bannerByRoom[t] != null)
+            {
+                var banner = Instantiate(bannerByRoom[t], root.transform);
+                banner.transform.localPosition = new Vector3(0, 3.55f, -0.42f);
+            }
+            Label(root.transform, new Vector3(0, 1.9f, -1.5f), label, Cream, 0.62f);
+            Glow(root.transform, new Vector3(0, 2.2f, -1.4f), new Color(1f, 0.82f, 0.6f), 1.5f);
             return root;
         }
 
@@ -296,15 +315,13 @@ namespace Quintessence.Game
                 var c = ElementColors.Of(e);
                 var root = new GameObject("Shrine_" + e);
                 root.transform.position = new Vector3((i - (missing.Count - 1) / 2f) * 4.5f, 0, 0f);
-                Block(root.transform, new Vector3(0, 0.5f, 0), new Vector3(1.1f, 1f, 1.1f), new Color(0.3f, 0.3f, 0.38f));
-                var orb = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-                Destroy(orb.GetComponent<Collider>());
-                orb.transform.SetParent(root.transform, false);
-                orb.transform.localPosition = new Vector3(0, 1.7f, 0);
-                orb.transform.localScale = Vector3.one * 0.8f;
-                orb.GetComponent<Renderer>().material = Tinted(c);
-                Label(root.transform, new Vector3(0, 3.2f, 0), names[(int)e], c);
-                Glow(root.transform, new Vector3(0, 1.8f, -0.6f), c);
+                float top = 1.25f;
+                if (shrinePrefab != null) Instantiate(shrinePrefab, root.transform).transform.localPosition = Vector3.zero;
+                else Matte(GameObject.CreatePrimitive(PrimitiveType.Cube), root.transform, new Vector3(0, 0.6f, 0), new Vector3(1f, 1.2f, 1f), new Color(0.4f, 0.4f, 0.45f));
+                // o elemento aparece como uma pedra fosca sobre o pedestal e na luz que ela joga em volta
+                Matte(GameObject.CreatePrimitive(PrimitiveType.Sphere), root.transform, new Vector3(0, top + 0.45f, 0), Vector3.one * 0.7f, c);
+                Label(root.transform, new Vector3(0, top + 1.7f, 0), names[(int)e], Cream, 0.8f);
+                Glow(root.transform, new Vector3(0, top + 0.7f, -0.7f), c, 2.2f);
                 interactables.Add(new Interactable
                 {
                     Object = root, Prompt = "despertar " + names[(int)e],
@@ -333,11 +350,12 @@ namespace Quintessence.Game
                 var c = boon.patron == ElementType.None ? new Color(1f, 0.85f, 0.4f) : ElementColors.Of(boon.patron);
                 var root = new GameObject("Boon_" + boon.id);
                 root.transform.position = new Vector3((i - (offer.Count - 1) / 2f) * 5.6f, 0, -0.5f);
-                Block(root.transform, new Vector3(0, 0.4f, 0), new Vector3(1.3f, 0.8f, 1.3f), new Color(0.3f, 0.3f, 0.38f));
-                Block(root.transform, new Vector3(0, 1.5f, 0), new Vector3(0.55f, 0.55f, 0.55f), c).localRotation = Quaternion.Euler(45, 45, 0);
-                Label(root.transform, new Vector3(0, 3.5f, 0), boon.name, c);
-                Label(root.transform, new Vector3(0, 2.6f, 0), Wrap(boon.description, 20), Color.white, 0.62f);
-                Glow(root.transform, new Vector3(0, 1.7f, -0.6f), c);
+                // bau do pack com uma pedra fosca na cor do mestre que oferece
+                if (chestPrefab != null) Instantiate(chestPrefab, root.transform).transform.localPosition = Vector3.zero;
+                Matte(GameObject.CreatePrimitive(PrimitiveType.Cube), root.transform, new Vector3(0, 1.75f, 0), Vector3.one * 0.42f, c).localRotation = Quaternion.Euler(45, 45, 0);
+                Label(root.transform, new Vector3(0, 3.5f, 0), boon.name, Cream, 0.9f);
+                Label(root.transform, new Vector3(0, 2.7f, 0), Wrap(boon.description, 20), new Color(0.8f, 0.76f, 0.7f), 0.6f);
+                Glow(root.transform, new Vector3(0, 1.9f, -0.7f), c, 1.8f);
                 interactables.Add(new Interactable
                 {
                     Object = root, Prompt = "aceitar " + boon.name,
@@ -377,6 +395,20 @@ namespace Quintessence.Game
 
         Material Tinted(Color c) => new(flatMaterial) { color = c };
 
+        /// Peca de cor chapada mas iluminada pela cena (fosca), como os modelos do pack.
+        Transform Matte(GameObject go, Transform parent, Vector3 localPos, Vector3 scale, Color color)
+        {
+            Destroy(go.GetComponent<Collider>());
+            go.transform.SetParent(parent, false);
+            go.transform.localPosition = localPos;
+            go.transform.localScale = scale;
+            var m = new Material(matteMaterial != null ? matteMaterial : flatMaterial);
+            m.color = color;
+            if (m.HasProperty("_BaseColor")) m.SetColor("_BaseColor", color);
+            go.GetComponent<Renderer>().material = m;
+            return go.transform;
+        }
+
         Transform Block(Transform parent, Vector3 localPos, Vector3 scale, Color color)
         {
             var go = GameObject.CreatePrimitive(PrimitiveType.Cube);
@@ -388,12 +420,12 @@ namespace Quintessence.Game
             return go.transform;
         }
 
-        void Glow(Transform parent, Vector3 localPos, Color color)
+        void Glow(Transform parent, Vector3 localPos, Color color, float intensity = 3f)
         {
             var l = new GameObject("Glow").AddComponent<Light>();
             l.transform.SetParent(parent, false);
             l.transform.localPosition = localPos;
-            l.type = LightType.Point; l.color = color; l.intensity = 3f; l.range = 6f;
+            l.type = LightType.Point; l.color = color; l.intensity = intensity; l.range = 5.5f;
         }
 
         void Label(Transform parent, Vector3 localPos, string text, Color color, float scale = 1f)
@@ -408,7 +440,7 @@ namespace Quintessence.Game
             t.characterSize = 0.075f * scale;
             t.anchor = TextAnchor.MiddleCenter;
             t.alignment = TextAlignment.Center;
-            t.color = Color.Lerp(color, Color.white, 0.55f);
+            t.color = color;
             go.GetComponent<MeshRenderer>().sharedMaterial = GameFonts.Display.material;
             go.AddComponent<FaceCamera>();
         }

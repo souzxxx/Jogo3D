@@ -196,7 +196,7 @@ namespace Quintessence.Game.PlayTests
             Shot(cam, "docs/img/mapa.png");
             hud.ShowMap(director.Run, false);
 
-            bool sawDoors = false, sawShrine = false;
+            bool sawDoors = false, sawShrine = false, shrineShot = false;
             int maxDepth = 0;
             float limit = 420f, sinceSwitch = 0f, sinceInteract = 0f;
             while (!director.Finished && limit > 0f)
@@ -214,13 +214,27 @@ namespace Quintessence.Game.PlayTests
                     var to = target.transform.position - player.transform.position; to.y = 0;
                     float d = to.magnitude;
                     input.AimPoint = target.transform.position;
-                    input.Move = d > 2.6f ? new Vector2(to.x / d, to.z / d) : Vector2.zero;
-                    input.AttackHeld = d < 3.6f;
-                    if (d < 4.5f && player.SkillCooldown01(player.Element) <= 0f) input.PressSkill();
+                    float reach = target.GetComponent<BossBrain>() != null ? 1f : 0f; // o chefe e largo
+                    input.Move = d > 2.6f + reach ? new Vector2(to.x / d, to.z / d) : Vector2.zero;
+                    input.AttackHeld = d < 3.6f + reach;
+                    if (d < 4.5f + reach && player.SkillCooldown01(player.Element) <= 0f) input.PressSkill();
                     if (sinceSwitch > 1.3f) { sinceSwitch = 0f; input.PressSwitch(1); }
                 }
                 else if (director.Interactables.Count > 0)
                 {
+                    if (!sawDoors)
+                    {
+                        input.Move = Vector2.zero;
+                        for (int i = 0; i < 25; i++) yield return Step();
+                        Shot(cam, "docs/img/portas.png");
+                    }
+                    if (director.Run.Current.Type == RoomType.Shrine && !shrineShot)
+                    {
+                        shrineShot = true;
+                        input.Move = Vector2.zero;
+                        for (int i = 0; i < 25; i++) yield return Step();
+                        Shot(cam, "docs/img/santuario.png");
+                    }
                     sawDoors = true;
                     var goal = director.Interactables[0].Position;
                     var to = goal - player.transform.position; to.y = 0;
@@ -275,6 +289,8 @@ namespace Quintessence.Game.PlayTests
         {
             Health best = null;
             float bestD = float.MaxValue;
+            var boss = Object.FindFirstObjectByType<BossBrain>();
+            if (boss != null && !boss.GetComponent<Health>().IsDead) return boss.GetComponent<Health>();
             foreach (var e in Object.FindObjectsByType<EnemyBrain>(FindObjectsSortMode.None))
             {
                 var h = e.GetComponent<Health>();

@@ -10,10 +10,11 @@ namespace Quintessence.Core
     {
         public static Color Of(ElementType e) => e switch
         {
-            ElementType.Fire => new Color(1f, 0.38f, 0.08f),
-            ElementType.Water => new Color(0.15f, 0.6f, 1f),
-            ElementType.Earth => new Color(0.72f, 0.5f, 0.2f),
-            ElementType.Air => new Color(0.65f, 1f, 0.85f),
+            // tons contidos, no mesmo registro dos modelos do pack (nada de neon)
+            ElementType.Fire => new Color(0.86f, 0.38f, 0.18f),
+            ElementType.Water => new Color(0.27f, 0.52f, 0.74f),
+            ElementType.Earth => new Color(0.63f, 0.47f, 0.27f),
+            ElementType.Air => new Color(0.6f, 0.8f, 0.68f),
             _ => Color.white,
         };
     }

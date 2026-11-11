@@ -185,7 +185,7 @@ Sprints sem data até confirmar a entrega. S0 é de todos e destrava o resto.
 - [ ] S2 · 4 layouts de sala de combate com cobertura e perigos
 - [x] S3 · Bruto (armadura) e Explosivo
 - [ ] S3 · Elite (modificadores) + mais 4 layouts
-- [ ] S4 · Chefe Guardião das Cinzas, 3 fases, escudo que pede Quintessência
+- [x] S4 · Chefe Guardião das Cinzas, 3 fases, escudo que pede Quintessência
 - [ ] S4 · Curva de dificuldade por profundidade da sala
 - [ ] S4 · SFX e música (biblioteca livre), mixer com volumes
 
@@ -216,7 +216,8 @@ Sprints sem data até confirmar a entrega. S0 é de todos e destrava o resto.
 ---
 
 ### Fila (depois do jogo fechado)
-- [ ] Portas, pedestais e santuários com modelo de verdade (hoje são cubos) — pedido do Leonardo em 11/11
+- [x] Portas, baús de bênção e santuários com modelos do pack (11/11). Falta: estandarte por tipo de sala visível na porta
+- [ ] Regra de estilo (pedido do Leonardo em 11/11): tudo que criarmos espelha os assets do pack — fosco, cor contida, nada de neon
 - [ ] Menu de título com identidade própria (hoje está genérico) — pedido do Leonardo em 11/11
 - [ ] Passada única de animação: trocar as animações genéricas do pack (ataques, skills, dash, inimigos) — combinado em 11/11 deixar pro fim
 - [ ] Trazer os heróis do Quintessence 2D (Rax, Liora, Brann, Vey) para o 3D no lugar do mago do pack — pedido do Leonardo em 11/11

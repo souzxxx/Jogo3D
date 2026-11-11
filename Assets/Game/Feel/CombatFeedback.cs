@@ -37,7 +37,7 @@ namespace Quintessence.Feel
 
         void Awake()
         {
-            if (RingMesh == null) RingMesh = BuildRing(0.82f, 1f, 40);
+            if (RingMesh == null) RingMesh = BuildRing(0.9f, 1f, 48);
             if (DiscMesh == null) DiscMesh = BuildRing(0f, 1f, 40);
             var go = new GameObject("FxParticles");
             go.transform.SetParent(transform, false);
@@ -125,7 +125,7 @@ namespace Quintessence.Feel
         {
             var c = ElementColors.Of(info.Element);
             bool enemy = target.Team == Team.Enemy;
-            Flash(target).Flash(enemy ? new Color(3f, 0.35f, 0.3f) : new Color(3f, 3f, 3f), 0.16f);
+            Flash(target).Flash(enemy ? new Color(1.9f, 0.5f, 0.42f) : new Color(2.2f, 2.2f, 2.2f), 0.16f);
             float size = applied >= 15f ? 1.5f : applied >= 8f ? 1.15f : applied <= 3f ? 0.7f : 0.95f;
             if (info.IsCrit) size *= 1.3f;
             bool resisted = enemy && displays.TryGetValue(target, out var shown) && shown != null && shown.Armored && !info.IsReaction;
@@ -385,7 +385,7 @@ namespace Quintessence.Feel
             if (quintessence) return;
             var c = ElementColors.Of(to);
             presenceTarget = Color.Lerp(c, Color.white, 0.35f);
-            if (playerRingMat != null) playerRingMat.color = new Color(c.r, c.g, c.b, 0.9f);
+            if (playerRingMat != null) playerRingMat.color = new Color(c.r * 0.85f, c.g * 0.85f, c.b * 0.85f, 0.7f);
             if (player == null || from == ElementType.None) return;
             Ring(player.position + Vector3.up * 0.25f, 44, 7f, 0.25f, 0.5f, 0.35f, c);
             Burst(player.position + Vector3.up * 1.2f, Vector3.up, 60f, 26, 2f, 6f, 0.25f, 0.5f, 0.4f, c);

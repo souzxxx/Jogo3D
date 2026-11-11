@@ -16,8 +16,9 @@ namespace Quintessence.Feel
             var go = new GameObject("Telegraph");
             var v = go.AddComponent<TelegraphVisual>();
             v.data = e;
-            v.outlineMat = new Material(flat) { color = new Color(1f, 0.16f, 0.1f, e.IsLine ? 0.22f : 0.95f) };
-            v.fillMat = new Material(flat) { color = new Color(1f, 0.12f, 0.08f, 0.42f) };
+            // vermelho-tijolo fosco: le como perigo sem brilhar mais que o cenario
+            v.outlineMat = new Material(flat) { color = new Color(0.66f, 0.17f, 0.13f, e.IsLine ? 0.2f : 0.85f) };
+            v.fillMat = new Material(flat) { color = new Color(0.66f, 0.15f, 0.11f, 0.3f) };
             var dir = e.Direction.sqrMagnitude > 0.01f ? e.Direction.normalized : Vector3.forward;
             if (e.IsLine)
             {
@@ -80,7 +81,7 @@ namespace Quintessence.Feel
             }
             // pisca claro no instante do golpe
             float flash = Mathf.InverseLerp(0.9f, 1f, k);
-            fillMat.color = Color.Lerp(new Color(1f, 0.12f, 0.08f, 0.42f), new Color(1f, 0.55f, 0.4f, 0.6f), flash);
+            fillMat.color = Color.Lerp(new Color(0.66f, 0.15f, 0.11f, 0.3f), new Color(0.85f, 0.4f, 0.28f, 0.5f), flash);
         }
 
         void OnDestroy()

@@ -28,7 +28,7 @@ public static class LookDevBuilder
     static readonly Color Earth = new(0.6f, 0.34f, 0.1f);
     static readonly Color Air = new(0.6f, 1f, 0.85f);
     static readonly Color Ember = new(1f, 0.16f, 0.02f);
-    static readonly Color Amber = new(1f, 0.45f, 0.05f);
+    static readonly Color Amber = new(0.85f, 0.5f, 0.16f);
 
     [MenuItem("Quintessence/Look-dev/Build A + B")]
     public static void BuildAll()
@@ -353,7 +353,7 @@ public static class LookDevBuilder
     static void Crack(Vector3 start, float heading, int segments, int seed)
     {
         var rng = new System.Random(seed);
-        var mat = Glow("Ember", Ember, 1.7f);
+        var mat = Glow("Ember", Ember, 1.15f);
         var p = start;
         for (int i = 0; i < segments; i++)
         {
@@ -373,7 +373,7 @@ public static class LookDevBuilder
     static void Crystals(Vector3 center, int seed)
     {
         var rng = new System.Random(seed);
-        var mat = Glow("Amber", Amber, 1.25f);
+        var mat = Glow("Amber", Amber, 0.55f);
         for (int i = 0; i < 5; i++)
         {
             float h = 0.5f + (float)rng.NextDouble() * 1.1f;

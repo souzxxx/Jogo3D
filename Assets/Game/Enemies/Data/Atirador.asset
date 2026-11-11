@@ -15,6 +15,8 @@ MonoBehaviour:
   displayName: Atirador
   maxHealth: 22
   moveSpeed: 3.4
+  armored: 0
+  armoredDamageTaken: 0.4
   attack: 1
   damage: 7
   knockback: 2
@@ -25,7 +27,8 @@ MonoBehaviour:
   element: 0
   strikeOffset: 1.5
   strikeRadius: 1.5
-  projectilePrefab: {fileID: 2446848762604434031, guid: 6590da6c767a740e79055b4304b1f88e, type: 3}
+  explosionDamageToEnemies: 12
+  projectilePrefab: {fileID: 5285576411816299366, guid: 6590da6c767a740e79055b4304b1f88e, type: 3}
   projectileSpeed: 11
   projectileRange: 16
   keepDistance: 6

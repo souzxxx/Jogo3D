@@ -62,7 +62,7 @@ public static class EnemyDevSceneBuilder
         def.addPrefabs = new[] { add1, add2 };
         EditorUtility.SetDirty(def);
 
-        var ember = LookDevBuilder.Mat("SkeletonEmber", KK + "Skeletons/Characters/skeleton_texture.png", new Color(0.55f, 0.4f, 0.45f), new Color(0.9f, 0.22f, 0.03f), 0f);
+        var ember = LookDevBuilder.Mat("SkeletonAsh", KK + "Skeletons/Characters/skeleton_texture.png", new Color(0.62f, 0.5f, 0.5f), Color.black, 0f);
         var go = new GameObject("Guardiao");
         var col = go.AddComponent<CapsuleCollider>();
         col.height = 5f; col.radius = 1.3f; col.center = new Vector3(0, 2.5f, 0);
@@ -78,7 +78,7 @@ public static class EnemyDevSceneBuilder
         var light = new GameObject("EmberLight").AddComponent<Light>();
         light.transform.SetParent(go.transform, false);
         light.transform.localPosition = new Vector3(0, 3.2f, 0.8f);
-        light.type = LightType.Point; light.color = new Color(1f, 0.4f, 0.1f); light.intensity = 6f; light.range = 9f;
+        light.type = LightType.Point; light.color = new Color(1f, 0.5f, 0.25f); light.intensity = 2.6f; light.range = 7f;
         var prefab = PrefabUtility.SaveAsPrefabAsset(go, Dir + "Prefabs/Guardiao.prefab");
         Object.DestroyImmediate(go);
         return prefab;
@@ -164,7 +164,7 @@ public static class EnemyDevSceneBuilder
             d.attackRange = 1.9f; d.telegraphTime = 0.75f; d.recoverTime = 0.2f; d.cooldown = 1f;
             d.strikeOffset = 0f; d.strikeRadius = 2.7f; d.element = ElementType.Fire;
         });
-        var hot = LookDevBuilder.Mat("SkeletonExplosive", KK + "Skeletons/Characters/skeleton_texture.png", new Color(1.5f, 0.75f, 0.4f), Color.black, 0f);
+        var hot = LookDevBuilder.Mat("SkeletonExplosive2", KK + "Skeletons/Characters/skeleton_texture.png", new Color(1.1f, 0.72f, 0.5f), Color.black, 0f);
         brute = EnemyPrefab("Bruto", "Skeletons/Characters/Skeleton_Warrior.fbx", bruteDef, bruteCtrl, skel, 1.3f);
         bomber = EnemyPrefab("Explosivo", "Skeletons/Characters/Skeleton_Rogue.fbx", bomberDef, bomberCtrl, hot, 0.9f);
     }
@@ -185,14 +185,14 @@ public static class EnemyDevSceneBuilder
         string path = Dir + "Prefabs/Projetil.prefab";
         var existing = AssetDatabase.LoadAssetAtPath<GameObject>(path);
         if (existing != null) return existing;
-        var c = new Color(0.75f, 0.3f, 1f);
+        var c = new Color(0.58f, 0.34f, 0.7f);
         var go = GameObject.CreatePrimitive(PrimitiveType.Sphere);
         Object.DestroyImmediate(go.GetComponent<Collider>());
         go.name = "Projetil";
         go.transform.localScale = Vector3.one * 0.5f;
-        go.GetComponent<Renderer>().sharedMaterial = LookDevBuilder.Mat("Glow_Projectile", null, c * 0.6f, c * 2.2f, 0f);
+        go.GetComponent<Renderer>().sharedMaterial = LookDevBuilder.Mat("Glow_Projectile", null, c * 0.6f, c * 0.9f, 0f);
         var light = go.AddComponent<Light>();
-        light.type = LightType.Point; light.color = c; light.intensity = 3f; light.range = 4f;
+        light.type = LightType.Point; light.color = c; light.intensity = 1.6f; light.range = 3.5f;
         go.AddComponent<Projectile>();
         var prefab = PrefabUtility.SaveAsPrefabAsset(go, path);
         Object.DestroyImmediate(go);

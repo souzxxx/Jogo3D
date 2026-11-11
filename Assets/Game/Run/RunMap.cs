@@ -46,9 +46,9 @@ namespace Quintessence.Run
 
         public static Color Color(RoomType t) => t switch
         {
-            RoomType.Combat => new Color(0.95f, 0.35f, 0.3f), RoomType.Elite => new Color(0.75f, 0.35f, 1f),
-            RoomType.Shrine => new Color(0.5f, 0.95f, 1f), RoomType.Rest => new Color(0.45f, 0.95f, 0.5f),
-            RoomType.Boss => new Color(1f, 0.6f, 0.15f), RoomType.Master => new Color(1f, 0.85f, 0.4f), _ => UnityEngine.Color.white,
+            RoomType.Combat => new Color(0.72f, 0.3f, 0.26f), RoomType.Elite => new Color(0.55f, 0.38f, 0.62f),
+            RoomType.Shrine => new Color(0.38f, 0.6f, 0.72f), RoomType.Rest => new Color(0.42f, 0.66f, 0.42f),
+            RoomType.Boss => new Color(0.82f, 0.52f, 0.2f), RoomType.Master => new Color(0.82f, 0.7f, 0.38f), _ => UnityEngine.Color.white,
         };
     }
 

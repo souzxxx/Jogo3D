@@ -33,6 +33,75 @@
   <p class="sub">Entrega mais recente no topo. Escopo em <a href="ESCOPO.md">ESCOPO.md</a> · kanban em <a href="https://github.com/users/souzxxx/projects/4">GitHub Projects</a>.</p>
 
   <section>
+    <h2>Chefe: Guardião das Cinzas</h2>
+    <div class="meta"><span class="tag who">Enzo</span><span class="tag ok">302 testes de regra + 7 testes jogando, todos passando</span></div>
+    <video src="img/chefe.mp4" controls autoplay loop muted playsinline></video>
+    <div class="cols">
+      <div>
+        <h3>A luta</h3>
+        <ul>
+          <li>600 de vida em <b>três fases</b> (terços da barra, marcados no HUD)</li>
+          <li><b>Pancada:</b> círculo grande à frente · <b>Leque de brasas:</b> 3 projéteis em leque (5 na última fase) · <b>Erupção:</b> vários círculos em volta de você, a partir da fase 2</li>
+          <li>Todo ataque é avisado no chão; a cada fase ele fica mais rápido e chama reforços</li>
+          <li><b>Fase 3: escudo.</b> O chefe fica imune até levar um golpe <b>durante a Quintessência</b>. É o momento em que dominar os quatro elementos vira a chave da luta</li>
+          <li>O HUD diz o que fazer: "cause reações nos reforços para encher a Quintessência" → "aperte R e ataque!"</li>
+          <li>Ao morrer, os reforços caem junto e a sala fecha</li>
+        </ul>
+      </div>
+      <div>
+        <h3>Sem beco sem saída</h3>
+        <ul>
+          <li>Com o escudo de pé o chefe continua chamando reforços, que são onde você faz reações pra encher o medidor</li>
+          <li>Se o herói não tem os quatro elementos (não dá pra usar Quintessência), o escudo cai sozinho em 12 s</li>
+        </ul>
+        <h3 style="margin-top:14px">Limites</h3>
+        <ul>
+          <li class="warn">O modelo é o esqueleto guerreiro do pack ampliado e escurecido; não é um modelo próprio de chefe</li>
+          <li class="warn">No vídeo o roteiro leva 35% do dano e o medidor de Quintessência é completado por fora no momento do escudo; encher o medidor só com reações nos reforços não foi conferido jogando</li>
+          <li class="warn">A queda do escudo por tempo foi testada como regra, não numa luta</li>
+          <li class="warn">Números de vida e dano sem balanceamento</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Passada de estilo: menos neon, mais pack</h2>
+    <div class="meta"><span class="tag who">Leonardo</span> pedido: "o círculo no chão, porta etc. estão muito coloridos e neon, os assets não são assim"</div>
+    <div class="cols">
+      <div><img src="img/portas.png" alt="Portas com modelo do pack"></div>
+      <div><img src="img/santuario.png" alt="Santuário com colunas do pack"></div>
+    </div>
+    <div class="cols">
+      <div>
+        <h3>O que mudou</h3>
+        <ul>
+          <li><b>Portas:</b> saíram os arcos de cubo colorido; agora é a porta de madeira do próprio pack, na parede do fundo, com rótulo creme</li>
+          <li><b>Santuário:</b> coluna de pedra do pack com uma pedra fosca na cor do elemento</li>
+          <li><b>Bênçãos:</b> baú do pack no lugar do pedestal de cubo</li>
+          <li><b>Cores dos elementos</b> dessaturadas (terracota, azul-ardósia, ocre, verde-sálvia) em anéis, HUD, partículas e números</li>
+          <li><b>Anéis no chão</b> mais finos e opacos; <b>aviso de ataque</b> virou vermelho-tijolo fosco</li>
+          <li>Chefe, Explosivo, projétil e cristais sem o brilho estourado</li>
+        </ul>
+      </div>
+      <div>
+        <h3>Ainda destoa</h3>
+        <ul>
+          <li class="warn">As rachaduras de brasa e os cristais do chão continuam sendo o ponto mais brilhante da sala</li>
+          <li class="warn">O estandarte que diferencia o tipo de sala não aparece na porta (ficou atrás ou fora do quadro); hoje só o texto diz pra onde ela leva</li>
+          <li class="warn">Partículas de feitiço ainda são bolinhas aditivas; o menu de título segue genérico</li>
+          <li class="warn">A pedra do elemento no santuário e na bênção é esfera/cubo liso</li>
+        </ul>
+        <h3 style="margin-top:14px">Sobre o atlas de pixel art que você mandou</h3>
+        <ul>
+          <li>São 1,4 milhão de sprites 16×16 gerados por IA, licença CC0, 694 MB</li>
+          <li>Dá pra usar, mas pixel art não conversa com o low-poly do pack no mundo 3D. Onde pode caber: ícones pequenos de HUD (bênçãos, tipo de sala). Não baixei nada ainda</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section>
     <h2>Bênçãos · sala do Mestre e recompensa de Elite</h2>
     <div class="meta"><span class="tag who">Nicolas</span><span class="tag ok">294 testes de regra + 6 testes jogando, todos passando</span></div>
     <img src="img/bencaos.png" alt="Escolha de bênçãos na sala do Mestre">
