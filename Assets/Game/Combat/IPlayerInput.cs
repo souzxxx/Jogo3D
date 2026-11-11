@@ -12,5 +12,8 @@ namespace Quintessence.Combat
         bool AttackHeld { get; }
         /// True uma vez por aperto.
         bool ConsumeDash();
+        bool ConsumeSkill();
+        /// -1 = elemento anterior, +1 = proximo, 0 = nada.
+        int ConsumeSwitch();
     }
 }

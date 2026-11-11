@@ -3,7 +3,7 @@ using UnityEngine.InputSystem;
 
 namespace Quintessence.Combat
 {
-    /// Teclado + mouse: WASD move, mouse mira, clique esquerdo ataca, Espaco da dash.
+    /// Teclado + mouse: WASD move, mouse mira, clique esquerdo ataca, clique direito skill, Espaco dash, Q/E troca elemento.
     public class PlayerInputReader : MonoBehaviour, IPlayerInput
     {
         Camera cam;
@@ -39,5 +39,14 @@ namespace Quintessence.Combat
         public bool AttackHeld => Mouse.current != null && Mouse.current.leftButton.isPressed;
 
         public bool ConsumeDash() => Keyboard.current != null && Keyboard.current.spaceKey.wasPressedThisFrame;
+
+        public bool ConsumeSkill() => Mouse.current != null && Mouse.current.rightButton.wasPressedThisFrame;
+
+        public int ConsumeSwitch()
+        {
+            var k = Keyboard.current;
+            if (k == null) return 0;
+            return (k.eKey.wasPressedThisFrame ? 1 : 0) - (k.qKey.wasPressedThisFrame ? 1 : 0);
+        }
     }
 }

@@ -11,5 +11,11 @@ namespace Quintessence.Combat
         bool dash;
         public void PressDash() => dash = true;
         public bool ConsumeDash() { bool d = dash; dash = false; return d; }
+        bool skill;
+        int sw;
+        public void PressSkill() => skill = true;
+        public void PressSwitch(int dir) => sw = dir;
+        public bool ConsumeSkill() { bool d = skill; skill = false; return d; }
+        public int ConsumeSwitch() { int d = sw; sw = 0; return d; }
     }
 }

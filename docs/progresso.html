@@ -33,6 +33,62 @@
   <p class="sub">Entrega mais recente no topo. Escopo em <a href="ESCOPO.md">ESCOPO.md</a> · kanban em <a href="https://github.com/users/souzxxx/projects/4">GitHub Projects</a>.</p>
 
   <section>
+    <h2>S2 · Fogo e Água, reações e feedback de combate</h2>
+    <div class="meta"><span class="tag who">Leonardo</span><span class="tag ok">34 testes de regra + 1 teste jogando, todos passando</span></div>
+    <video src="img/s2_fogo_agua.mp4" controls autoplay loop muted playsinline></video>
+    <div class="cols">
+      <div>
+        <h3>Feedback que você pediu</h3>
+        <ul>
+          <li>Inimigo pisca vermelho ao apanhar</li>
+          <li>Número de dano sobe do alvo, na cor do elemento, maior em golpe forte</li>
+          <li>Anel no chão do inimigo mostra a marca (laranja = Fogo, azul = Água)</li>
+          <li>Barra de vida aparece em quem apanhou</li>
+          <li>Ataque virou rajada de feitiço na cor do elemento, com clarão de luz</li>
+          <li>Tremor de câmera e micro-pausa nos golpes fortes e nas reações</li>
+          <li>Queimadura solta chamas no alvo; Encharcado deixa o alvo azulado e pingando</li>
+        </ul>
+      </div>
+      <div>
+        <h3>Regras novas</h3>
+        <ul>
+          <li><b>Marca e reação:</b> Fogo marca, Água em cima detona <b>Vapor</b> em área (e vice-versa)</li>
+          <li><b>Troca</b> com <kbd>Q</kbd>/<kbd>E</kbd>; trocar logo depois de acertar dá o <b>Golpe de Troca</b> (+50%)</li>
+          <li><b>Skill</b> no clique direito: Labareda (cone, Queimadura) e Maré (onda que empurra, Encharcado)</li>
+          <li><b>Dash:</b> a de Fogo deixa rastro que queima; a de Água limpa status negativos</li>
+          <li>Finalizador do combo aplica o status do elemento</li>
+          <li>Comando apertado no meio do golpe fica guardado 0,25 s em vez de se perder</li>
+          <li>O anel sob o herói mostra o elemento atual</li>
+        </ul>
+      </div>
+    </div>
+    <div class="cols">
+      <div>
+        <h3>O que o vídeo mostra, em ordem</h3>
+        <ul>
+          <li>Combo de Fogo, finalizador queima</li>
+          <li>Troca pra Água e bate: TROCA! e VAPOR!</li>
+          <li>Maré empurra dois bonecos</li>
+          <li>Volta pro Fogo, Labareda no segundo boneco</li>
+          <li>Dash de Fogo com rastro</li>
+          <li>Alterna elementos no terceiro boneco, reações em sequência</li>
+        </ul>
+      </div>
+      <div>
+        <h3>Ainda não está bom</h3>
+        <ul>
+          <li class="warn">Vapor é só dano em área + status de errar ataque; a nuvem que fica no chão não existe</li>
+          <li class="warn">As outras cinco reações têm número na tabela, mas Terra e Ar ainda não são jogáveis (S3)</li>
+          <li class="warn">Sem som nenhum</li>
+          <li class="warn">A Maré empurra o boneco pra dentro do pilar; o empurrão precisa respeitar parede</li>
+          <li class="warn">Sem HUD: cooldown da skill não aparece em lugar nenhum</li>
+          <li class="warn">Números de dano se sobrepõem quando saem vários juntos</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section>
     <h2>S1 · Herói jogável: movimento, mira, combo e dash</h2>
     <div class="meta"><span class="tag who">Leonardo</span><span class="tag ok">20 testes de regra + 1 teste jogando, todos passando</span></div>
     <video src="img/s1_combate.mp4" controls autoplay loop muted playsinline></video>

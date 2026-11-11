@@ -169,9 +169,9 @@ Sprints sem data até confirmar a entrega. S0 é de todos e destrava o resto.
 - [x] S1 · Movimento, mira no mouse, câmera seguindo
 - [x] S1 · Ataque básico com combo, hitbox/hurtbox, `Health`, dano
 - [x] S1 · Dash com i-frames
-- [ ] S2 · Fogo e Água completos (modificador, skill, dash)
-- [ ] S2 · Troca de elemento + Golpe de Troca
-- [ ] S2 · Marcas + resolvedor de reações (tabela em ScriptableObject)
+- [x] S2 · Fogo e Água completos (modificador, skill, dash)
+- [x] S2 · Troca de elemento + Golpe de Troca
+- [x] S2 · Marcas + resolvedor de reações (tabela em ScriptableObject)
 - [ ] S3 · Terra e Ar completos, as 6 reações e status (Queimadura, Encharcado, Congelado, Enraizado, Atordoado, Armadura Quebrada)
 - [ ] S3 · Quintessência (medidor + estado)
 - [ ] S4 · Morte, fim de run, pausa, sem dead ends (rubrica Estados e Erros)
@@ -203,7 +203,8 @@ Sprints sem data até confirmar a entrega. S0 é de todos e destrava o resto.
 - [ ] S1 · Pipeline URP pra WebGL, luz de crepúsculo, pós-processamento
 - [ ] S1 · Flash de hit e destaque de inimigo marcado (sem toon/outline)
 - [ ] S2 · VFX de Fogo e Água (ataque, skill, dash, marca)
-- [ ] S2 · Feedback de combate: hit stop, shake, números de dano, telegrafia no chão
+- [x] S2 · Feedback de combate: hit stop, shake, números de dano, flash, anel de marca, barra de vida (primeira versão feita junto com o S2 do Leonardo)
+- [ ] S2 · Telegrafia no chão dos ataques inimigos
 - [ ] S3 · VFX de Terra e Ar + as 6 reações
 - [ ] S3 · Kit de cenário do Planalto das Cinzas (chão, paredes, braseiros, rachaduras de brasa, cristais)
 - [ ] S4 · VFX de Quintessência e do chefe

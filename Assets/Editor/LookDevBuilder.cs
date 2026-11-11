@@ -147,7 +147,7 @@ public static class LookDevBuilder
     static Material Glow(string key, Color c, float intensity) => Mat("Glow_" + key, null, c * 0.6f, c * intensity, 0f);
 
     static Material additive;
-    static Material Additive()
+    public static Material Additive()
     {
         if (additive != null) return additive;
         const string path = Out + "ParticleAdditive.mat";

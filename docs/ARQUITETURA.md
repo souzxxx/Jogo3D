@@ -20,6 +20,9 @@ Só o Core existe por enquanto; cada pessoa cria a pasta e o `.asmdef` da sua fr
 - **Causar dano:** monte um `DamageInfo` e chame `IDamageable.TakeDamage`. O `Health` ignora dano do mesmo `Team`, de quem já morreu e de invulnerável, e devolve o dano aplicado.
 - **Reagir a algo de outra frente:** assine `GameEvents` (`DamageDealt`, `Died`, `MarkApplied`, `ReactionTriggered`, `ElementSwitched`, `ElementAwakened`, `QuintessenceMeterChanged`, `QuintessenceActiveChanged`, `RoomStarted`, `RoomCleared`, `RunStarted`, `RunEnded`). Desassine em `OnDisable`.
 - **Avisar as outras frentes:** chame o `GameEvents.Raise*` correspondente. Ex.: o spawner do Enzo chama `RaiseRoomCleared()`, a porta do Nicolas escuta.
+- **Golpe elemental:** use `ElementCombat.Deliver(alvo, info, tabela)` em vez de `TakeDamage` direto; ele aplica a marca e dispara a reação. Dano de reação e de Queimadura vai com `IsReaction = true` e não marca.
+- **Status:** `StatusHolder.GetOrAdd(health).Apply(tipo, duração, time)`. Inimigos leem `State.MoveMultiplier`, `State.CanAct` e `State.MissChance`.
+- **Feedback:** a frente Feel só escuta `GameEvents` (`AttackPerformed`, `DamageDealt`, `MarkApplied`, `ReactionTriggered`, `StatusApplied`, `ZoneSpawned`...). Quem causa o efeito não chama VFX direto.
 - Evento novo entra no `GameEvents` no mesmo commit de quem precisa dele.
 
 ## Dados

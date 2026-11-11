@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1e3a9b34353cf40f88d0b57a5a589167, type: 3}
+  m_Name: Fire
+  m_EditorClassIdentifier: Quintessence.Combat::Quintessence.Combat.ElementDefinition
+  element: 1
+  damageMultiplier: 1
+  knockbackMultiplier: 1
+  finisherAppliesStatus: 1
+  finisherStatus: 0
+  finisherStatusDuration: 3
+  skillName: Labareda
+  skillDamage: 18
+  skillCooldown: 4
+  skillRange: 5.5
+  skillArc: 70
+  skillKnockback: 3
+  skillAppliesStatus: 1
+  skillStatus: 0
+  skillStatusDuration: 3
+  skillCastTime: 0.35
+  skillHitTime: 0.15
+  dash: 1
+  dashCharges: 1
