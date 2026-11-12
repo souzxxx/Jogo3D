@@ -117,7 +117,7 @@ namespace Quintessence.Enemies
             if (agent.enabled) agent.enabled = false;
             if (body != null) body.enabled = false;
             Play("Death", 0.05f);
-            if (Scaling.Volatile && definition.attack != EnemyAttackKind.Explode) VolatileBurst.Spawn(transform.position, 2f, 0.85f, Damage * 0.9f);
+            if (Scaling.Volatile && definition.attack != EnemyAttackKind.Explode) VolatileBurst.Spawn(transform.position, 2f, 0.85f, Damage * 0.7f);
             Destroy(gameObject, 1.5f);
         }
 

@@ -37,14 +37,14 @@ namespace Quintessence.Enemies
         public float eruptionScatter = 4.5f;
 
         [Header("Investida: linha larga, depois ele atravessa por ela")]
-        public float chargeDamage = 20f;
+        public float chargeDamage = 16f;
         public float chargeWidth = 1.7f;
         public float chargeLength = 13f;
         public float chargeWindup = 1.05f;
         public float chargeSpeed = 26f;
 
         [Header("Anel de cinzas: circulos em volta dele")]
-        public float ringDamage = 14f;
+        public float ringDamage = 11f;
         public float ringCircleRadius = 2.1f;
         public float ringRadius = 5.7f;
         public int ringCount = 8;

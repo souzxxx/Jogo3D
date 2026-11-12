@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Carrasco
   m_EditorClassIdentifier: Quintessence.Enemies::Quintessence.Enemies.BossDefinition
   displayName: Carrasco
-  maxHealth: 240
+  maxHealth: 200
   moveSpeed: 3.3
   cooldownByPhase:
   - 1.6
@@ -37,7 +37,7 @@ MonoBehaviour:
   eruptionCount: 3
   eruptionWindup: 1.1
   eruptionScatter: 4.5
-  chargeDamage: 15
+  chargeDamage: 12
   chargeWidth: 1.3
   chargeLength: 11
   chargeWindup: 0.95
@@ -53,5 +53,5 @@ MonoBehaviour:
   - {fileID: 153203729657998027, guid: 01a9502a79d5142a9a550647f054284d, type: 3}
   - {fileID: 1575718338667721007, guid: b3aabecb4c30743689de5a140b4e6dde, type: 3}
   addInterval: 12
-  maxAdds: 2
+  maxAdds: 1
   addsPerPhaseChange: 1

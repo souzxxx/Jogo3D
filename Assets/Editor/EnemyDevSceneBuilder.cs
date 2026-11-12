@@ -108,14 +108,14 @@ public static class EnemyDevSceneBuilder
             ("Roar", "Taunt|Cheer|Idle", 0.8f), ("Hit", "Hit_B|Hit_A", 0.3f), ("Death", "Death_B|Death_A", 0f), ("Spawn", "Spawn_Ground|Skeletons_Awaken_Standing|Idle", 1f));
         var def = Asset<BossDefinition>("Carrasco", d =>
         {
-            d.displayName = "Carrasco"; d.maxHealth = 240f; d.moveSpeed = 3.3f;
+            d.displayName = "Carrasco"; d.maxHealth = 200f; d.moveSpeed = 3.3f;
             d.cooldownByPhase = new[] { 1.6f, 1.3f, 1.05f };
             d.slamDamage = 13f; d.slamRadius = 2.6f; d.slamOffset = 2.1f; d.slamWindup = 0.8f; d.slamRange = 4.2f;
             d.fanDamage = 7f; d.fanCount = 3; d.fanCountLastPhase = 4;
             d.eruptionDamage = 9f; d.eruptionCount = 3; d.eruptionRadius = 1.8f;
-            d.chargeDamage = 15f; d.chargeWidth = 1.3f; d.chargeLength = 11f; d.chargeWindup = 0.95f; d.chargeSpeed = 24f;
+            d.chargeDamage = 12f; d.chargeWidth = 1.3f; d.chargeLength = 11f; d.chargeWindup = 0.95f; d.chargeSpeed = 24f;
             d.ringDamage = 10f; d.ringCount = 6; d.ringRadius = 4.6f; d.ringCircleRadius = 1.8f;
-            d.lastPhaseShield = false; d.maxAdds = 2; d.addsPerPhaseChange = 1; d.addInterval = 12f;
+            d.lastPhaseShield = false; d.maxAdds = 1; d.addsPerPhaseChange = 1; d.addInterval = 12f;
         });
         def.projectilePrefab = ProjectilePrefab();
         def.addPrefabs = new[] { add1, add2 };
