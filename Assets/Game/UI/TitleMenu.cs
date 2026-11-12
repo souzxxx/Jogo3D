@@ -195,11 +195,11 @@ namespace Quintessence.UI
             UiKit.Image(quintPip, UiKit.Ring, UiKit.Paper);
             UiKit.Image(UiKit.Rect("Core", quintPip, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(16, 16)), UiKit.Circle, UiKit.Paper);
             UiKit.Text(UiKit.Rect("Sub", root, new Vector2(0.5f, 1), new Vector2(0, -222), new Vector2(1400, 44)),
-                "Comece com uma skill. Desperte as outras três. Alcance o quinto estado.", 28, UiKit.Cream, TextAnchor.MiddleCenter, false);
-            UiKit.Text(UiKit.Rect("Pick", root, new Vector2(0.5f, 0.5f), new Vector2(0, -52), new Vector2(1000, 40)), "ESCOLHA A PRIMEIRA SKILL", 26, UiKit.Dim);
+                "Quatro heróis, quatro elementos. Desperte os outros três e alcance o quinto estado.", 28, UiKit.Cream, TextAnchor.MiddleCenter, false);
+            UiKit.Text(UiKit.Rect("Pick", root, new Vector2(0.5f, 0.5f), new Vector2(0, -138), new Vector2(1000, 40)), "ESCOLHA SEU HERÓI", 26, UiKit.Dim);
 
-            string[] names = { "Fogo", "Água", "Terra", "Ar" };
-            string[] notes = { "Labareda\no ataque", "Maré\ncura e controle", "Pilar de Pedra\nproteção", "Vendaval\na fuga" };
+            string[] names = { "Rax", "Liora", "Brann", "Vey" };
+            string[] notes = { "Fogo · Labareda\no ataque", "Água · Maré\ncura e controle", "Terra · Pilar de Pedra\nproteção", "Ar · Vendaval\na fuga" };
             string[] iconNames = { "fire", "water", "earth", "air" };
             var mid = new Vector2(0.5f, 0.5f);
             for (int i = 0; i < 4; i++)
@@ -208,20 +208,20 @@ namespace Quintessence.UI
                 var c = ElementColors.Of(e);
                 // carta escura com o elemento so no contorno, no medalhao e no filete: a cor entra como acento
                 var body = Color.Lerp(new Color(0.09f, 0.08f, 0.12f), c, 0.16f);
-                var b = UiKit.Button(root, "", mid, new Vector2((i - 1.5f) * 290f, -232), new Vector2(256, 290), body, () => OnPick?.Invoke(e), Color.Lerp(c, UiKit.Cream, 0.15f));
+                var b = UiKit.Button(root, "", mid, new Vector2((i - 1.5f) * 290f, -268), new Vector2(256, 216), body, () => OnPick?.Invoke(e), Color.Lerp(c, UiKit.Cream, 0.15f));
                 b.name = "Card_" + names[i];
                 b.GetComponent<UiHover>().hoverScale = 1.06f;
                 cards[i] = b.GetComponent<UiHover>();
                 Destroy(b.transform.Find("Sheen").gameObject); // o brilho de botao nao cabe numa carta alta
                 var card = b.transform;
-                UiKit.Image(UiKit.Rect("Halo", card, new Vector2(0.5f, 1), new Vector2(0, -14), new Vector2(120, 120)), UiKit.Circle, new Color(c.r, c.g, c.b, 0.16f));
-                var orb = UiKit.Rect("Orb", card, new Vector2(0.5f, 1), new Vector2(0, -22), new Vector2(104, 104));
+                UiKit.Image(UiKit.Rect("Halo", card, new Vector2(0.5f, 1), new Vector2(0, -8), new Vector2(84, 84)), UiKit.Circle, new Color(c.r, c.g, c.b, 0.16f));
+                var orb = UiKit.Rect("Orb", card, new Vector2(0.5f, 1), new Vector2(0, -14), new Vector2(72, 72));
                 UiKit.Image(orb, UiKit.Circle, Color.Lerp(c, new Color(0.05f, 0.04f, 0.08f), 0.35f));
                 UiKit.Image(UiKit.Stretch("Rim", orb), UiKit.Ring, Color.Lerp(c, UiKit.Cream, 0.45f));
-                UiKit.Image(UiKit.Rect("Icon", orb, mid, Vector2.zero, new Vector2(62, 62)), UiKit.Icon(iconNames[i]), UiKit.Cream);
-                UiKit.Text(UiKit.Rect("Name", card, new Vector2(0.5f, 1), new Vector2(0, -136), new Vector2(240, 52)), names[i], 42, UiKit.Cream);
-                UiKit.Image(UiKit.Rect("Rule", card, new Vector2(0.5f, 1), new Vector2(0, -190), new Vector2(72, 4)), null, Color.Lerp(c, UiKit.Cream, 0.2f));
-                UiKit.Text(UiKit.Rect("Note", card, new Vector2(0.5f, 0), new Vector2(0, 22), new Vector2(240, 64)), notes[i], 23, UiKit.Paper, TextAnchor.MiddleCenter, false);
+                UiKit.Image(UiKit.Rect("Icon", orb, mid, Vector2.zero, new Vector2(44, 44)), UiKit.Icon(iconNames[i]), UiKit.Cream);
+                UiKit.Text(UiKit.Rect("Name", card, new Vector2(0.5f, 1), new Vector2(0, -90), new Vector2(240, 48)), names[i], 38, UiKit.Cream);
+                UiKit.Image(UiKit.Rect("Rule", card, new Vector2(0.5f, 1), new Vector2(0, -148), new Vector2(72, 4)), null, Color.Lerp(c, UiKit.Cream, 0.2f));
+                UiKit.Text(UiKit.Rect("Note", card, new Vector2(0.5f, 0), new Vector2(0, 12), new Vector2(240, 58)), notes[i], 21, UiKit.Paper, TextAnchor.MiddleCenter, false);
             }
             var open = UiKit.Button(root, "REFÚGIO", new Vector2(0.5f, 0), new Vector2(-330, 74), new Vector2(400, 58), UiKit.Primary, () => ShowRefuge(true));
             void Small(string label, float x, Action act) =>

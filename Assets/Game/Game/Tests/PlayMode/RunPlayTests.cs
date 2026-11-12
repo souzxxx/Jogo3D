@@ -69,13 +69,13 @@ namespace Quintessence.Game.PlayTests
             var title = Object.FindFirstObjectByType<TitleController>();
             Assert.AreEqual(-1, menu.HoveredElement);
             float before = title.LightOf(0);
-            GameObject.Find("Card_Fogo").GetComponent<UiHover>().OnPointerEnter(null);
+            GameObject.Find("Card_Rax").GetComponent<UiHover>().OnPointerEnter(null);
             Assert.AreEqual(0, menu.HoveredElement);
             for (int i = 0; i < 40; i++) yield return null;
             Assert.Greater(title.LightOf(0), before + 2f, "o pedestal de Fogo deveria acender");
             Assert.Less(title.LightOf(1), before + 1f, "os outros ficam como estavam");
             Shot(Camera.main, "docs/img/titulo_fogo.png");
-            GameObject.Find("Card_Fogo").GetComponent<UiHover>().OnPointerExit(null);
+            GameObject.Find("Card_Rax").GetComponent<UiHover>().OnPointerExit(null);
 
             menu.ShowOptions();
             yield return null; yield return null;
@@ -94,6 +94,7 @@ namespace Quintessence.Game.PlayTests
             Assert.AreEqual(1, p.Loadout.Awakened.Count, "a run comeca com um elemento so");
             var director = Object.FindFirstObjectByType<RunDirector>();
             Assert.AreEqual(8, director.Run.Map.LayerCount);
+            Assert.AreEqual(ElementType.Water, p.GetComponent<HeroSkin>().Shown, "escolher a carta da Liora traz a Liora");
             Time.captureFramerate = 0;
         }
 
@@ -609,6 +610,63 @@ namespace Quintessence.Game.PlayTests
             Assert.Greater(hero.Health.Max, before, "Vigor aumenta a vida maxima");
             Assert.AreEqual(2, hero.DashMaxCharges, "Asas da a segunda carga de dash");
             GameFlow.AutoPickTalents = true;
+            GameFlow.Layers = 8; GameFlow.Shrines = 3;
+            Time.captureFramerate = 0;
+        }
+
+        [UnityTest, Timeout(600000)]
+        public IEnumerator Each_Starting_Element_Brings_Its_Own_Hero()
+        {
+            Time.timeScale = 1f;
+            Time.captureFramerate = 30;
+            GameFlow.Seed = 3; GameFlow.Layers = 5; GameFlow.Shrines = 1;
+            foreach (var e in Elements.All)
+            {
+                GameEvents.Clear();
+                GameFlow.StartElement = e;
+                yield return EditorSceneManager.LoadSceneAsyncInPlayMode("Assets/Scenes/Run.unity", new LoadSceneParameters(LoadSceneMode.Single));
+                yield return null;
+                yield return null;
+                var director = Object.FindFirstObjectByType<RunDirector>();
+                var hud = Object.FindFirstObjectByType<Hud>();
+                cam = Camera.main;
+                hud.UseCamera(cam);
+                Object.FindFirstObjectByType<WaveSpawner>().enabled = false;
+                for (int k = 0; k < 2000 && director.Busy; k++) yield return null;
+                var hero = Object.FindFirstObjectByType<PlayerController>();
+                var skin = hero.GetComponent<HeroSkin>();
+                Assert.IsNotNull(skin, "o heroi tem os quatro modelos");
+                Assert.AreEqual(e, skin.Shown, "o modelo e o do elemento inicial");
+                Assert.AreEqual("Model_" + HeroSkin.NameOf(e), skin.Model.name);
+                Assert.IsTrue(skin.Model.activeInHierarchy);
+                Assert.AreEqual(1, hero.GetComponentsInChildren<Animator>().Length, "so um modelo visivel por vez");
+                Assert.Greater(skin.MagicParts, 0, HeroSkin.NameOf(e) + " tem uma parte magica que muda de cor");
+                Assert.AreEqual(skin.Model.GetComponent<Animator>(), hero.GetComponentInChildren<Animator>());
+                hero.Teleport(new Vector3(0, 0.05f, -1f), new Vector3(0.35f, 0, -1f).normalized);
+                var scripted = hero.gameObject.AddComponent<ScriptedInput>();
+                hero.GetComponent<PlayerInputReader>().enabled = false;
+                hero.Input = scripted;
+                scripted.AimPoint = hero.transform.position + new Vector3(0.35f, 0, -1f);
+                for (int k = 0; k < 20; k++) yield return null;
+                Shot(cam, $"docs/img/heroi_{HeroSkin.NameOf(e).ToLowerInvariant()}.png");
+                // de perto, para conferir o encaixe das pecas
+                var follow = cam.GetComponent<FollowCamera>();
+                if (follow != null) follow.enabled = false;
+                var home = (cam.transform.position, cam.transform.rotation, cam.fieldOfView);
+                cam.transform.position = hero.transform.position + new Vector3(1.6f, 2.6f, -4.6f);
+                cam.transform.LookAt(hero.transform.position + Vector3.up * 1.3f);
+                cam.fieldOfView = 40f;
+                yield return null;
+                Shot(cam, $"docs/img/heroi_{HeroSkin.NameOf(e).ToLowerInvariant()}_perto.png");
+                // ataque e corrida: as pecas acompanham os ossos
+                scripted.AttackHeld = true;
+                for (int k = 0; k < 9; k++) yield return null;
+                Shot(cam, $"docs/img/heroi_{HeroSkin.NameOf(e).ToLowerInvariant()}_golpe.png");
+                scripted.AttackHeld = false;
+                (cam.transform.position, cam.transform.rotation, cam.fieldOfView) = home;
+                if (follow != null) follow.enabled = true;
+            }
+            GameFlow.StartElement = ElementType.Fire;
             GameFlow.Layers = 8; GameFlow.Shrines = 3;
             Time.captureFramerate = 0;
         }

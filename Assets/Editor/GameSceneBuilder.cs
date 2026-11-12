@@ -354,7 +354,7 @@ public static class GameSceneBuilder
         var root = LookDevBuilder.BeginArena("Title");
         var cam = LookDevBuilder.MakeCamera();
         cam.fieldOfView = 38;
-        cam.transform.SetPositionAndRotation(new Vector3(0, 5.6f, -11.5f), Quaternion.Euler(18, 0, 0));
+        cam.transform.SetPositionAndRotation(new Vector3(0, 6.6f, -11.5f), Quaternion.Euler(27, 0, 0));
         // o bau decorativo do look-dev sai: o centro do palco e do altar
         foreach (Transform child in root) if (child.name.StartsWith("chest")) { Object.DestroyImmediate(child.gameObject); break; }
         var prop = LookDevBuilder.Mat("DungeonProp", CombatDevSceneBuilder.KK + "Dungeon/dungeon_texture.png", Color.white, Color.black, 0f);
@@ -395,12 +395,17 @@ public static class GameSceneBuilder
         // o aprendiz diante do altar, de costas para a camera
         const string heroFbx = CombatDevSceneBuilder.KK + "Adventurers/Characters/Mage.fbx";
         CombatDevSceneBuilder.Loop(heroFbx, "Idle");
-        var heroMat = LookDevBuilder.Mat("Hero", CombatDevSceneBuilder.KK + "Adventurers/Characters/mage_texture.png", Color.white, Color.black, 0f);
-        var hero = LookDevBuilder.Spawn("Adventurers/Characters/Mage.fbx", new Vector3(0, 0, 0.5f), 0, heroMat);
-        hero.name = "TitleHero";
-        LookDevBuilder.Hide(hero, "Spellbook", "1H_Wand");
-        var idle = CombatDevSceneBuilder.Controller(heroFbx, "Assets/Game/Game/Prefabs/TitleHero.controller", ("Idle", "Idle", 0f));
-        CombatDevSceneBuilder.Animator(hero, idle);
+        var idle = CombatDevSceneBuilder.Controller(heroFbx, "Assets/Game/Game/Prefabs/TitleHero.controller", ("Idle", "Idle", 0f), ("Cheer", "Cheer|Interact|Idle", 0f));
+        // os quatro herois, cada um diante do pedestal do seu elemento, de frente para quem escolhe
+        HeroBuilder.Prepare();
+        for (int i = 0; i < 4; i++)
+        {
+            var hero = HeroBuilder.Build(i, idle);
+            hero.name = "TitleHero" + i;
+            hero.transform.SetParent(root, false);
+            float hx = (i - 1.5f) * 2.6f, hz = 3.4f - Mathf.Abs(i - 1.5f) * 0.7f - 1.9f;
+            hero.transform.SetPositionAndRotation(new Vector3(hx, 0, hz), Quaternion.Euler(0, 180 + (1.5f - i) * 9f, 0));
+        }
         var go = new GameObject("TitleController");
         go.transform.SetParent(root, false);
         go.AddComponent<TitleController>();
