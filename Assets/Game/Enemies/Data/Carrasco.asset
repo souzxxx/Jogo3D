@@ -1,0 +1,57 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7d95e51dfef644a3f9bfcb57deee04ee, type: 3}
+  m_Name: Carrasco
+  m_EditorClassIdentifier: Quintessence.Enemies::Quintessence.Enemies.BossDefinition
+  displayName: Carrasco
+  maxHealth: 240
+  moveSpeed: 3.3
+  cooldownByPhase:
+  - 1.6
+  - 1.3
+  - 1.05
+  slamDamage: 13
+  slamRadius: 2.6
+  slamOffset: 2.1
+  slamWindup: 0.8
+  slamRange: 4.2
+  projectilePrefab: {fileID: 5285576411816299366, guid: 6590da6c767a740e79055b4304b1f88e, type: 3}
+  fanDamage: 7
+  fanCount: 3
+  fanCountLastPhase: 4
+  fanSpread: 22
+  fanWindup: 0.8
+  projectileSpeed: 10
+  projectileRange: 18
+  eruptionDamage: 9
+  eruptionRadius: 1.8
+  eruptionCount: 3
+  eruptionWindup: 1.1
+  eruptionScatter: 4.5
+  chargeDamage: 15
+  chargeWidth: 1.3
+  chargeLength: 11
+  chargeWindup: 0.95
+  chargeSpeed: 24
+  ringDamage: 10
+  ringCircleRadius: 1.8
+  ringRadius: 4.6
+  ringCount: 6
+  ringWindup: 1.15
+  lastPhaseShield: 0
+  shieldTimeout: 12
+  addPrefabs:
+  - {fileID: 153203729657998027, guid: 01a9502a79d5142a9a550647f054284d, type: 3}
+  - {fileID: 1575718338667721007, guid: b3aabecb4c30743689de5a140b4e6dde, type: 3}
+  addInterval: 12
+  maxAdds: 2
+  addsPerPhaseChange: 1

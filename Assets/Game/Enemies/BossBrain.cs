@@ -168,7 +168,7 @@ namespace Quintessence.Enemies
             // rugido na troca de fase: ele para um instante, e e a deixa para o jogador se reposicionar
             Play("Roar", 0.08f);
             busy = Mathf.Max(busy, 0.9f);
-            if (phase < BossRules.Phases - 1) return;
+            if (phase < BossRules.Phases - 1 || !definition.lastPhaseShield) return;
             bool canUse = hero != null && hero.AwakenedElements.Count >= 4;
             Shield.Raise(canUse);
             health.Pool.Blocks = 9999;

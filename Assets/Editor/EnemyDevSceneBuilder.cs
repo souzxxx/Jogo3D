@@ -96,6 +96,62 @@ public static class EnemyDevSceneBuilder
         return prefab;
     }
 
+    /// Carrasco: mini-chefe do meio da run. O esqueleto guerreiro do pack com o capuz e a foice do Ceifador,
+    /// ampliado; usa o cerebro do chefe com numeros menores e sem o escudo da ultima fase.
+    public static GameObject MiniBossPrefab(GameObject add1, GameObject add2)
+    {
+        const string fbx = KK + "Skeletons/Characters/Skeleton_Warrior.fbx";
+        CombatDevSceneBuilder.Loop(fbx, "Idle", "Idle_Combat", "Walking_A", "Running_A");
+        var ctrl = CombatDevSceneBuilder.Controller(fbx, Dir + "Animation/Carrasco.controller",
+            ("Idle", "Idle_Combat|Idle", 0f), ("Run", "Running_A|Walking_A", 0f), ("Attack", "2H_Melee_Attack_Chop|1H_Melee_Attack_Jump_Chop", 1.1f),
+            ("Cast", "Throw|Spellcast_Shoot|Idle", 1f), ("Summon", "Spellcast_Raise|Cheer|Idle", 1.3f),
+            ("Roar", "Taunt|Cheer|Idle", 0.8f), ("Hit", "Hit_B|Hit_A", 0.3f), ("Death", "Death_B|Death_A", 0f), ("Spawn", "Spawn_Ground|Skeletons_Awaken_Standing|Idle", 1f));
+        var def = Asset<BossDefinition>("Carrasco", d =>
+        {
+            d.displayName = "Carrasco"; d.maxHealth = 240f; d.moveSpeed = 3.3f;
+            d.cooldownByPhase = new[] { 1.6f, 1.3f, 1.05f };
+            d.slamDamage = 13f; d.slamRadius = 2.6f; d.slamOffset = 2.1f; d.slamWindup = 0.8f; d.slamRange = 4.2f;
+            d.fanDamage = 7f; d.fanCount = 3; d.fanCountLastPhase = 4;
+            d.eruptionDamage = 9f; d.eruptionCount = 3; d.eruptionRadius = 1.8f;
+            d.chargeDamage = 15f; d.chargeWidth = 1.3f; d.chargeLength = 11f; d.chargeWindup = 0.95f; d.chargeSpeed = 24f;
+            d.ringDamage = 10f; d.ringCount = 6; d.ringRadius = 4.6f; d.ringCircleRadius = 1.8f;
+            d.lastPhaseShield = false; d.maxAdds = 2; d.addsPerPhaseChange = 1; d.addInterval = 12f;
+        });
+        def.projectilePrefab = ProjectilePrefab();
+        def.addPrefabs = new[] { add1, add2 };
+        EditorUtility.SetDirty(def);
+
+        AssetDatabase.Refresh();
+        HeroBuilder.MatteParts("Assets/Art/Enemies");
+        var skin = LookDevBuilder.Mat("SkeletonExecutioner", KK + "Skeletons/Characters/skeleton_texture.png", new Color(0.74f, 0.6f, 0.58f), Color.black, 0f);
+        var go = new GameObject("Carrasco");
+        var col = go.AddComponent<CapsuleCollider>();
+        col.height = 3.8f; col.radius = 0.95f; col.center = new Vector3(0, 1.9f, 0);
+        go.AddComponent<Health>().Configure(def.maxHealth, Team.Enemy);
+        var agent = go.AddComponent<NavMeshAgent>();
+        agent.radius = 0.95f; agent.height = 3.8f; agent.angularSpeed = 0f;
+        var model = LookDevBuilder.Spawn("Skeletons/Characters/Skeleton_Warrior.fbx", Vector3.zero, 0, skin);
+        model.name = "Model";
+        model.transform.SetParent(null, false);
+        model.transform.SetPositionAndRotation(Vector3.zero, Quaternion.identity);
+        model.transform.localScale = Vector3.one;
+        foreach (var r in model.GetComponentsInChildren<Renderer>(true))
+            if (r.name == "Skeleton_Warrior_Helmet" || r.name == "Skeleton_Warrior_Cloak") r.gameObject.SetActive(false);
+        foreach (var (file, bone) in new[] { ("ceifador_head", "head"), ("ceifador_weapon", "handslot.r"), ("ceifador_back", "chest") })
+            HeroBuilder.Attach(model, "Assets/Art/Enemies/" + file + ".fbx", bone);
+        model.transform.SetParent(go.transform, false);
+        model.transform.localScale = Vector3.one * 1.7f;
+        var anim = CombatDevSceneBuilder.Animator(model, ctrl);
+        go.AddComponent<BossBrain>().Bind(def, anim);
+        var light = new GameObject("EmberLight").AddComponent<Light>();
+        light.transform.SetParent(go.transform, false);
+        light.transform.localPosition = new Vector3(0, 2.6f, 0.6f);
+        light.type = LightType.Point; light.color = new Color(0.7f, 0.75f, 1f); light.intensity = 1.6f; light.range = 5f;
+        var prefab = PrefabUtility.SaveAsPrefabAsset(go, Dir + "Prefabs/Carrasco.prefab");
+        Object.DestroyImmediate(go);
+        return prefab;
+    }
+
     /// O que faz do esqueleto do pack o Guardiao das Cinzas: machado e escudo do pack nas maos e os cristais ambar
     /// da corrupcao crescendo nas costas e nos ombros.
     static void DressGuardian(Transform model)

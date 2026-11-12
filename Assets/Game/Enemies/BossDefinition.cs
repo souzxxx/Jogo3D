@@ -51,6 +51,8 @@ namespace Quintessence.Enemies
         public float ringWindup = 1.15f;
 
         [Header("Escudo da ultima fase")]
+        [Tooltip("Desligado no mini-chefe: a ultima fase so acelera, sem escudo.")]
+        public bool lastPhaseShield = true;
         [Tooltip("Sem os quatro elementos nao ha Quintessencia: o escudo cai sozinho depois deste tempo, para nao travar a luta.")]
         public float shieldTimeout = 12f;
         public GameObject[] addPrefabs;
