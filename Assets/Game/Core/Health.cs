@@ -41,6 +41,7 @@ namespace Quintessence.Core
             {
                 if (Pool.LastBlocked) GameEvents.RaiseHitBlocked(this, info);
                 else if (Pool.LastEvaded) GameEvents.RaiseEvaded(this);
+                else if (Pool.LastDodged) GameEvents.RaiseDodged(this, info);
                 return 0f;
             }
             Damaged?.Invoke(info, applied);

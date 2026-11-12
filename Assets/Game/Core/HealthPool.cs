@@ -20,6 +20,8 @@ namespace Quintessence.Core
         public float Evasion { get; set; }
         /// O ultimo Damage() foi esquivado.
         public bool LastEvaded { get; private set; }
+        /// O ultimo Damage() bateu na invulnerabilidade (dash do heroi): esquiva perfeita.
+        public bool LastDodged { get; private set; }
         static readonly Random dice = new();
         /// Testes: forca o resultado do proximo sorteio de esquiva (null = sorteio normal).
         public static bool? ForceEvade;
@@ -40,8 +42,9 @@ namespace Quintessence.Core
         /// Devolve o dano aplicado. Nunca passa da vida atual; morto ou invulneravel devolve 0.
         public float Damage(float amount)
         {
-            LastBlocked = false; LastEvaded = false;
-            if (IsDead || Invulnerable || amount <= 0f) return 0f;
+            LastBlocked = false; LastEvaded = false; LastDodged = false;
+            if (IsDead || amount <= 0f) return 0f;
+            if (Invulnerable) { LastDodged = true; return 0f; }
             if (Evasion > 0f && (ForceEvade ?? dice.NextDouble() < Evasion)) { LastEvaded = true; return 0f; }
             if (Blocks > 0) { Blocks--; LastBlocked = true; return 0f; }
             float applied = Math.Min(Current, amount * Math.Max(0f, DamageTakenMultiplier) * Math.Max(0f, ExtraDamageTakenMultiplier) * Math.Max(0f, CurseMultiplier) * Math.Max(0f, AssistMultiplier));

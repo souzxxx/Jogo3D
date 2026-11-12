@@ -127,6 +127,7 @@ namespace Quintessence.Combat
         {
             GameEvents.ReactionTriggered += OnReaction;
             GameEvents.QuintessenceCharge += OnCharge;
+            GameEvents.Dodged += OnDodged;
             GameEvents.HitBlocked += OnBlocked;
             GameEvents.Died += OnAnyDied;
         }
@@ -136,6 +137,7 @@ namespace Quintessence.Combat
             ElementMark.SpreadRadius = 0f;
             GameEvents.ReactionTriggered -= OnReaction;
             GameEvents.QuintessenceCharge -= OnCharge;
+            GameEvents.Dodged -= OnDodged;
             GameEvents.HitBlocked -= OnBlocked;
             GameEvents.Died -= OnAnyDied;
         }
@@ -206,6 +208,28 @@ namespace Quintessence.Combat
         }
 
         /// Comeco de run: o heroi volta a ter so o elemento inicial.
+        /// Esquiva perfeita: um golpe atravessado no meio do dash enche a Quintessencia e deixa o proximo golpe basico critico.
+        public const float PerfectDodgeCharge = 8f;
+        public int PerfectDodges { get; private set; }
+        public bool PerfectCritReady => perfectCrit;
+        bool perfectCrit;
+        float lastPerfect = -9f;
+
+        void OnDodged(Health target, DamageInfo info)
+        {
+            if (target != health || !dash.IsDashing || info.SourceTeam == health.Team) return;
+            if (Time.time - lastPerfect < 0.8f) return; // varios projeteis do mesmo golpe contam uma vez
+            lastPerfect = Time.time;
+            PerfectDodges++;
+            perfectCrit = true;
+            if (!quint.Active)
+            {
+                quint.AddMeter(PerfectDodgeCharge * mods.QuintessenceGainMult);
+                GameEvents.RaiseQuintessenceMeter(quint.Normalized);
+            }
+            GameEvents.RaisePerfectDodge(transform.position);
+        }
+
         ElementType hero;
         /// Quantas explosoes de despertar sairam (para os testes).
         public int Bursts { get; private set; }
@@ -510,7 +534,7 @@ namespace Quintessence.Combat
                 to.y = 0f;
                 if (arc < 359f && to.sqrMagnitude > 0.6f && Vector3.Angle(direction, to) > arc * 0.5f) continue;
                 float chance = critChance + mods.CritChanceAdd;
-                bool crit = chance > 0f && UnityEngine.Random.value < chance;
+                bool crit = (basic && perfectCrit) || (chance > 0f && UnityEngine.Random.value < chance);
                 float marked = basic && target.TryGetComponent(out ElementMark m) && m.State.HasMark ? 1f + markedTargetBonus + mods.SwitchStrikeAdd : 1f;
                 if (mods.BurningBonus > 0f && target.TryGetComponent(out StatusHolder burning) && burning.State.Has(StatusType.Burn)) marked *= 1f + mods.BurningBonus;
                 // Flanqueador: o heroi esta atras de quem ele acerta (medido do heroi, nao do ponto da skill: o Pilar nasce longe)
@@ -535,6 +559,7 @@ namespace Quintessence.Combat
                 if (applySecond && !target.IsDead)
                     StatusHolder.GetOrAdd(target).Apply(secondType, secondDuration * mods.StatusDurationMult, health.Team, gameObject);
             }
+            if (basic && hits > 0) perfectCrit = false; // o critico garantido da esquiva perfeita vale um golpe
             return hits;
         }
     }

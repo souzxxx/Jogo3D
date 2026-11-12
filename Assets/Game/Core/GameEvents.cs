@@ -102,6 +102,10 @@ namespace Quintessence.Core
         public static event Action<int, int> WaveStarted;
         /// Um golpe foi esquivado (passiva do Vey).
         public static event Action<Health> Evaded;
+        /// Um golpe passou por quem estava invulneravel (o heroi no meio do dash): esquiva perfeita.
+        public static event Action<Health, DamageInfo> Dodged;
+        /// O heroi fez uma esquiva perfeita (o combate ja deu a recompensa): so o aviso visual.
+        public static event Action<Vector3> PerfectDodge;
         /// Carga de Quintessencia que nao vem de reacao (golpe no escudo do chefe).
         public static event Action<float> QuintessenceCharge;
         /// A run entrou num trecho novo: indice da musica de ambiente (0 = Saloes de Cinza).
@@ -145,6 +149,8 @@ namespace Quintessence.Core
         public static void RaisePuddleLanded(Vector3 point, float radius, ElementType element, float seconds) => PuddleLanded?.Invoke(point, radius, element, seconds);
         public static void RaiseQuintessenceBurst(string name, Vector3 point, float radius, ElementType hero) => QuintessenceBurst?.Invoke(name, point, radius, hero);
         public static void RaiseEvaded(Health target) => Evaded?.Invoke(target);
+        public static void RaiseDodged(Health target, DamageInfo info) => Dodged?.Invoke(target, info);
+        public static void RaisePerfectDodge(Vector3 at) => PerfectDodge?.Invoke(at);
         public static void RaiseQuintessenceCharge(float amount) => QuintessenceCharge?.Invoke(amount);
         public static void RaiseAmbient(int index) => AmbientChanged?.Invoke(index);
         public static void RaiseChampionSpawned(Health champion) => ChampionSpawned?.Invoke(champion);
@@ -166,7 +172,7 @@ namespace Quintessence.Core
             DamageDealt = null; Died = null; HitBlocked = null; Shattered = null; MarkApplied = null; ReactionTriggered = null;
             MarkCleared = null; StatusApplied = null; StatusEnded = null; AttackPerformed = null; ZoneSpawned = null;
             TelegraphStarted = null; TelegraphCancelled = null; AttackMissed = null; EnemySpawned = null; WaveStarted = null; ArmorChanged = null; Exploded = null; PuddleLanded = null; QuintessenceBurst = null;
-            EnemyHealed = null; ChampionSpawned = null; AmbientChanged = null; QuintessenceCharge = null; Evaded = null;
+            EnemyHealed = null; ChampionSpawned = null; AmbientChanged = null; QuintessenceCharge = null; Evaded = null; Dodged = null; PerfectDodge = null;
             BossSpawned = null; BossPhaseChanged = null; BossShieldChanged = null;
             ElementSwitched = null; ElementAwakened = null;
             QuintessenceMeterChanged = null; QuintessenceActiveChanged = null;
