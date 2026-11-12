@@ -695,9 +695,9 @@ namespace Quintessence.UI
             var title = UiKit.Text(UiKit.Rect("Title", resultPanel, center, new Vector2(0, 200), new Vector2(1400, 120)),
                 victory ? "VITÓRIA" : "VOCÊ CAIU", 104, victory ? new Color(0.9f, 0.76f, 0.42f) : new Color(0.78f, 0.3f, 0.28f));
             title.font = GameFonts.Title;
-            UiKit.Text(UiKit.Rect("Stats", resultPanel, center, new Vector2(0, 70), new Vector2(1400, 120)), stats, 30, UiKit.Cream, TextAnchor.MiddleCenter, false);
-            UiKit.Focus(UiKit.Button(resultPanel, "Jogar de novo", center, new Vector2(0, -60), new Vector2(380, 70), UiKit.Primary, again).gameObject);
-            UiKit.Button(resultPanel, "Menu principal", center, new Vector2(0, -150), new Vector2(380, 70), UiKit.Secondary, menu);
+            UiKit.Text(UiKit.Rect("Stats", resultPanel, center, new Vector2(0, 62), new Vector2(1500, 180)), stats, 28, UiKit.Cream, TextAnchor.MiddleCenter, false);
+            UiKit.Focus(UiKit.Button(resultPanel, "Jogar de novo", center, new Vector2(0, -95), new Vector2(380, 70), UiKit.Primary, again).gameObject);
+            UiKit.Button(resultPanel, "Menu principal", center, new Vector2(0, -185), new Vector2(380, 70), UiKit.Secondary, menu);
         }
     }
 }

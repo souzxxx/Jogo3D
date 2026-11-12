@@ -448,6 +448,8 @@ namespace Quintessence.Game
 
         /// Quem derrubou o heroi (para a tela de derrota e os testes).
         public string KilledBy { get; private set; } = "";
+        /// Nivel de Ascensao que esta vitoria liberou (0 = nenhum).
+        public int NewAscension { get; private set; }
 
         static string Plural(int n, string one, string many) => n == 1 ? $"1 {one}" : $"{n} {many}";
 
@@ -470,13 +472,17 @@ namespace Quintessence.Game
             hud.ShowMap(Run, false);
             yield return new WaitForSecondsRealtime(victory ? 1.6f : 1.2f);
             int seconds = Mathf.RoundToInt(Time.time - startTime);
+            int unlockedBefore = Ascension.Unlocked(MetaStore.Current.Wins);
             int shards = MetaStore.Current.EndRun(Run.RoomsCleared, victory, Ascension.ShardMult(GameFlow.Ascension));
+            int unlockedNow = Ascension.Unlocked(MetaStore.Current.Wins);
+            NewAscension = unlockedNow > unlockedBefore ? unlockedNow : 0;
             MetaStore.Save();
             ShardsEarned = shards;
             string stats = (GameFlow.Ascension > 0 ? $"Ascensão {GameFlow.Ascension}   ·   " : "") + $"{HeroPassives.HeroName(GameFlow.StartElement)}   ·   Nível {Run.Progress.Level}   ·   {Plural(Run.Kills, "inimigo derrotado", "inimigos derrotados")}   ·   {Plural(Run.Talents.Count, "talento", "talentos")} e {Plural(Run.Boons.Count, "bênção", "bênçãos")}"
                 + (!victory && KilledBy.Length > 0 ? $"\nDerrubado por: {KilledBy}" : "")
                 + $"\nSalas vencidas: {Run.RoomsCleared}   ·   Essência: {Run.Essence}   ·   Elementos: {player.Loadout.Awakened.Count}/4   ·   Tempo: {seconds / 60}:{seconds % 60:00}"
-                + $"\n+{shards} Fragmentos para o Refúgio (total: {MetaStore.Current.Shards})";
+                + $"\n+{shards} Fragmentos para o Refúgio (total: {MetaStore.Current.Shards})"
+                + (NewAscension > 0 ? $"\nAscensão {NewAscension} liberada: escolha no título para enfrentar inimigos mais fortes" : "");
             Sfx.Play(victory ? "victory" : "defeat");
             hud.ShowResult(victory, stats, GameFlow.RestartRun, GameFlow.ToTitle);
         }

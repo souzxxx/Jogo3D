@@ -382,6 +382,7 @@ namespace Quintessence.Game.PlayTests
             Assert.Greater(director.Run.Essence, 0);
             for (float t = 3f; t > 0f; t -= Time.unscaledDeltaTime) yield return Step();
             Assert.IsTrue(hud.ResultVisible, "a tela de resultado deveria aparecer");
+            Assert.AreEqual(1, director.NewAscension, "a primeira vitoria libera a Ascensao 1");
             Shot(cam, "docs/img/vitoria.png");
 
             GameFlow.Layers = 8; GameFlow.Shrines = 3;
