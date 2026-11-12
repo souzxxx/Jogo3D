@@ -62,8 +62,8 @@ namespace Quintessence.Run.Tests
             var fierce = DifficultyCurve.For(RoomType.Elite, 3, EliteModifier.Fierce);
             Assert.Greater(swift.Speed, 1f); Assert.Less(swift.Cooldown, 1f);
             Assert.AreEqual(plain.Health, swift.Health, 0.001f); Assert.AreEqual(plain.Damage, swift.Damage, 0.001f);
-            Assert.AreEqual(plain.Health * 1.5f, sturdy.Health, 0.001f); Assert.AreEqual(plain.Damage, sturdy.Damage, 0.001f);
-            Assert.AreEqual(plain.Damage * 1.3f, fierce.Damage, 0.001f); Assert.AreEqual(plain.Health, fierce.Health, 0.001f);
+            Assert.AreEqual(plain.Health * DifficultyCurve.SturdyHealth, sturdy.Health, 0.001f); Assert.AreEqual(plain.Damage, sturdy.Damage, 0.001f);
+            Assert.AreEqual(plain.Damage * DifficultyCurve.FierceDamage, fierce.Damage, 0.001f); Assert.AreEqual(plain.Health, fierce.Health, 0.001f);
             Assert.Greater(swift.Size, 1f, "inimigo de elite e um pouco maior, para dar para ver");
         }
 

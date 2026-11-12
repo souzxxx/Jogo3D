@@ -18,6 +18,8 @@ namespace Quintessence.Run
 
     public static class DifficultyCurve
     {
+        public const float SturdyHealth = 1.35f, FierceDamage = 1.2f, SwiftSpeed = 1.2f, SwiftCooldown = 0.85f;
+
         /// Vida e dano dos inimigos crescem com a profundidade: a primeira sala usa a ficha do inimigo e cada camada
         /// soma 9% de vida e 6,5% de dano. O tempo de aviso dos golpes nunca muda.
         public const float HealthPerLayer = 0.09f, DamagePerLayer = 0.065f;
@@ -33,9 +35,9 @@ namespace Quintessence.Run
             d.Size = 1.12f;
             switch (modifier)
             {
-                case EliteModifier.Swift: d.Speed = 1.25f; d.Cooldown = 0.8f; break;
-                case EliteModifier.Sturdy: d.Health *= 1.5f; break;
-                case EliteModifier.Fierce: d.Damage *= 1.3f; break;
+                case EliteModifier.Swift: d.Speed = SwiftSpeed; d.Cooldown = SwiftCooldown; break;
+                case EliteModifier.Sturdy: d.Health *= SturdyHealth; break;
+                case EliteModifier.Fierce: d.Damage *= FierceDamage; break;
                 case EliteModifier.Volatile: d.Volatile = true; break;
                 case EliteModifier.Warded: d.Wards = 1; d.Health *= 1.15f; break;
             }
@@ -66,8 +68,8 @@ namespace Quintessence.Run
         public static string Describe(EliteModifier m) => m switch
         {
             EliteModifier.Swift => "andam e atacam mais rápido",
-            EliteModifier.Sturdy => "têm 50% mais vida",
-            EliteModifier.Fierce => "causam 30% mais dano",
+            EliteModifier.Sturdy => "têm 35% mais vida",
+            EliteModifier.Fierce => "causam 20% mais dano",
             EliteModifier.Volatile => "explodem ao morrer: saia do círculo",
             EliteModifier.Warded => "o primeiro golpe em cada um é bloqueado",
             _ => "",

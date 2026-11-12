@@ -179,6 +179,16 @@ namespace Quintessence.Game
             SetupShrine();
         }
         public string CurrentLayout { get; private set; } = "";
+
+        /// Layout da sala: a primeira sala da run so sorteia entre os sem perigo (so cobertura e barris).
+        int PickLayout(MapNode node)
+        {
+            if (node.Layer > 0) return LayoutPicker.Pick(GameFlow.Seed, node.Id, layouts.Length);
+            var safe = new List<int>();
+            for (int i = 0; i < layouts.Length; i++) if (layouts[i] != null && !layouts[i].HasHazard) safe.Add(i);
+            if (safe.Count == 0) return LayoutPicker.Pick(GameFlow.Seed, node.Id, layouts.Length);
+            return safe[LayoutPicker.Pick(GameFlow.Seed, node.Id, safe.Count)];
+        }
         Transform layoutRoot;
 
         /// Troca o arranjo da sala. index < 0 = sala vazia. Publico para a cena de teste e as capturas.
@@ -440,7 +450,7 @@ namespace Quintessence.Game
             }
             Cleanup();
             SaveRun();
-            ApplyLayout(LayoutPicker.UsesLayout(node.Type) ? LayoutPicker.Pick(GameFlow.Seed, node.Id, layouts.Length) : -1);
+            ApplyLayout(LayoutPicker.UsesLayout(node.Type) ? PickLayout(node) : -1);
             Dress(node.Type);
             if (node.Type == RoomType.Combat || node.Type == RoomType.Elite || node.Type == RoomType.Boss)
                 PlaceBiomeProps(Biomes.For(Run.Depth, Run.Map.LayerCount), GameFlow.Seed + node.Id * 7);

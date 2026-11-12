@@ -305,7 +305,7 @@ namespace Quintessence.UI
                 bossFill.color = bossShield ? new Color(0.55f, 0.62f, 0.75f) : new Color(0.8f, 0.42f, 0.16f);
                 bossName.text = $"{bossTitle.ToUpperInvariant()}  ·  FASE {bossPhase}/3";
                 bossHint.text = !bossShield ? "" : bossNeedsQuint
-                    ? (hero.QuintessenceReady ? "ESCUDO — aperte R e ataque!" : hero.QuintessenceActive ? "ESCUDO — ataque agora!" : "ESCUDO — cause reações nos reforços para encher a Quintessência")
+                    ? (hero.QuintessenceReady ? "ESCUDO — aperte R e ataque!" : hero.QuintessenceActive ? "ESCUDO — ataque agora!" : "ESCUDO — bata nele e cause reações para encher a Quintessência")
                     : "ESCUDO — aguente firme, ele vai ceder";
             }
 

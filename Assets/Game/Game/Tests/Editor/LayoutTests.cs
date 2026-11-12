@@ -90,5 +90,12 @@ namespace Quintessence.Game.Tests
                     Assert.IsNotNull(p.prefab.GetComponent<Collider>(), p.prefab.name + " sem colisor");
                 }
         }
+
+        [Test] public void SomeLayoutsAreSafe_ForTheFirstRoom()
+        {
+            var all = All();
+            Assert.GreaterOrEqual(all.Count(l => !l.HasHazard), 4, "a primeira sala precisa de opcoes sem perigo");
+            Assert.GreaterOrEqual(all.Count(l => l.HasHazard), 4);
+        }
     }
 }

@@ -1087,10 +1087,10 @@ namespace Quintessence.Game.PlayTests
             for (int k = 0; k < 25; k++) yield return null;
             var elite = Object.FindObjectsByType<EnemyBrain>(FindObjectsSortMode.None);
             Assert.Greater(elite.Length, 0);
-            float want = (1f + DifficultyCurve.HealthPerLayer * 4) * 1.5f;
+            float want = (1f + DifficultyCurve.HealthPerLayer * 4) * DifficultyCurve.SturdyHealth;
             foreach (var e in elite)
             {
-                Assert.AreEqual(e.Definition.maxHealth * want, e.GetComponent<Health>().Max, 0.05f, "Resistentes: +50% sobre a vida da profundidade");
+                Assert.AreEqual(e.Definition.maxHealth * want, e.GetComponent<Health>().Max, 0.05f, "Resistentes: mais vida sobre a da profundidade");
                 Assert.AreEqual(1f, e.Scaling.Speed, 0.001f);
             }
             Assert.AreEqual(EliteModifier.Sturdy, director.CurrentTrait);
@@ -1105,8 +1105,8 @@ namespace Quintessence.Game.PlayTests
             Assert.Greater(swift.Length, 0);
             foreach (var e in swift)
             {
-                Assert.AreEqual(1.25f, e.Scaling.Speed, 0.001f);
-                Assert.AreEqual(e.Definition.moveSpeed * 1.25f, e.GetComponent<UnityEngine.AI.NavMeshAgent>().speed, 0.3f);
+                Assert.AreEqual(DifficultyCurve.SwiftSpeed, e.Scaling.Speed, 0.001f);
+                Assert.AreEqual(e.Definition.moveSpeed * DifficultyCurve.SwiftSpeed, e.GetComponent<UnityEngine.AI.NavMeshAgent>().speed, 0.3f);
                 Assert.AreEqual(e.Definition.maxHealth * (1f + DifficultyCurve.HealthPerLayer * 4), e.GetComponent<Health>().Max, 0.05f);
             }
             // Protegidos: o primeiro golpe em cada um e bloqueado

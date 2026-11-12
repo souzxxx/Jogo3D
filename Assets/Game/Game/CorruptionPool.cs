@@ -12,6 +12,8 @@ namespace Quintessence.Game
         [SerializeField] Vector3 size = new(6f, 1.2f, 1.8f);
         [SerializeField] float interval = 0.5f;
         [SerializeField] float damage = 2.5f;
+        [Tooltip("Dano no heroi por pulso: menor que nos inimigos, a poca e para atrair o bando.")]
+        [SerializeField] float heroDamage = 1.5f;
         [SerializeField] Renderer[] surfaces = new Renderer[0];
         [SerializeField] Renderer[] veins = new Renderer[0];
 
@@ -60,9 +62,27 @@ namespace Quintessence.Game
                 // so criatura: barril e boneco nao se queimam na poca
                 if (h.Team == Team.Enemy && h.GetComponent<UnityEngine.AI.NavMeshAgent>() == null) continue;
                 var from = h.Team == Team.Player ? Team.Enemy : Team.Player;
-                h.TakeDamage(new DamageInfo(damage, ElementType.None, from, gameObject) { Point = h.transform.position + Vector3.up * 0.4f, IsReaction = true });
-                if (!h.IsDead) StatusHolder.GetOrAdd(h).Apply(status, 1.2f, from, gameObject);
+                bool hero = h.Team == Team.Player;
+                h.TakeDamage(new DamageInfo(hero ? heroDamage : damage, ElementType.None, from, gameObject) { Point = h.transform.position + Vector3.up * 0.4f, IsReaction = true });
+                // no heroi so a Cripta deixa efeito (encharca); a queimadura e para os inimigos
+                if (!h.IsDead && (!hero || status == StatusType.Soaked)) StatusHolder.GetOrAdd(h).Apply(status, 1.2f, from, gameObject);
             }
+        }
+
+        /// O ponto esta dentro da area que fere (para a sonda de balanceamento desviar).
+        public bool Contains(Vector3 p)
+        {
+            var local = Quaternion.Inverse(transform.rotation) * (p - transform.position);
+            return Mathf.Abs(local.x) <= size.x * 0.5f && Mathf.Abs(local.z) <= size.z * 0.5f;
+        }
+
+        /// Direcao (no mundo) para sair da poca pela borda mais perto.
+        public Vector3 ExitDirection(Vector3 p)
+        {
+            var local = Quaternion.Inverse(transform.rotation) * (p - transform.position);
+            float toX = size.x * 0.5f - Mathf.Abs(local.x), toZ = size.z * 0.5f - Mathf.Abs(local.z);
+            var dir = toX < toZ ? new Vector3(local.x >= 0f ? 1f : -1f, 0, 0) : new Vector3(0, 0, local.z >= 0f ? 1f : -1f);
+            return transform.rotation * dir;
         }
 
         void OnDrawGizmosSelected()
