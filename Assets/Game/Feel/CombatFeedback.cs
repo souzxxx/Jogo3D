@@ -353,6 +353,7 @@ namespace Quintessence.Feel
             if (champion == null) return;
             var amber = new Color(0.9f, 0.62f, 0.28f);
             DamageNumber.Spawn(champion.transform.position + Vector3.up * 3.6f, "CAMPEÃO", amber, 1.3f, 2f);
+            Sfx.Play("champion");
             var l = new GameObject("ChampionLight").AddComponent<Light>();
             l.transform.SetParent(champion.transform, false);
             l.transform.localPosition = new Vector3(0, 2.2f, 0);

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Gera todos os efeitos e as musicas do jogo por sintese, usando so o ffmpeg.
-Uso: python3 tools/gen_audio.py   (escreve em Assets/Resources/Audio)
+Uso: python3 tools/gen_audio.py [nomes...]   (escreve em Assets/Resources/Audio; sem nomes, gera todos)
 Cada som e um grafo de filtros: ondas por expressao (aevalsrc), ruido filtrado (anoisesrc) e eco curto.
 """
 import os, subprocess, sys
@@ -60,6 +60,8 @@ S["heal"] = ([tone(bell(440, 0, 5, 0.25) + "+" + bell(554.4, 0.12, 5, 0.25) + "+
 S["ui_click"] = ([tone(f"0.3*sin({P}*900*t)*exp(-60*t)", 0.06)], "")
 S["boss_spawn"] = ([tone(f"0.5*sin({P}*55*t)*(1+0.5*sin({P}*6*t))*min(t/0.3,1)*exp(-1.2*max(t-1,0))", 2.2), noise(2.2, "brown", "lowpass=f=200," + env("min(t/0.3,1)*exp(-1.5*max(t-0.8,0))*2")), tone(f"0.22*(sin({P}*110*t)+0.5*sin({P}*220*t)+0.33*sin({P}*330*t))*min(t/0.4,1)*exp(-1.5*max(t-1.2,0))", 2.2)], ECHO)
 S["boss_phase"] = ([tone(thump(180, 32, 6, 3, 1.0), 1.3), tone(f"0.2*(sin({P}*98*t)+0.5*sin({P}*196*t)+0.33*sin({P}*294*t))*exp(-2.5*t)", 1.3)], ECHO)
+S["level_up"] = ([tone("+".join(bell(f, i * 0.07, 4.0, 0.22) for i, f in enumerate([523.3, 659.3, 784, 1046.5, 1318.5])), 1.2)], ECHO)
+S["champion"] = ([tone(f"0.45*(sin({P}*82*t)+0.6*sin({P}*123*t)+0.3*sin({P}*164*t))*min(t/0.15,1)*exp(-2.2*max(t-0.35,0))", 1.4), noise(1.4, "brown", "lowpass=f=300," + env("min(t/0.1,1)*exp(-3*t)*1.6"))], ECHO)
 S["victory"] = ([tone("+".join(bell(f, i * 0.15, 2.2, 0.26) for i, f in enumerate([392, 523.3, 659.3, 784, 1046.5])), 2.8)], ECHO)
 S["defeat"] = ([tone("+".join(bell(f, i * 0.32, 2.4, 0.28) for i, f in enumerate([392, 370, 311.1, 261.6])), 2.6)], ECHO)
 
@@ -138,6 +140,8 @@ def render(name, sources, final):
 
 if __name__ == "__main__":
     os.makedirs(OUT, exist_ok=True)
-    ok = sum(render(n, src, fin) for n, (src, fin) in S.items())
-    print(f"{ok}/{len(S)} sons gerados em {os.path.normpath(OUT)}")
-    sys.exit(0 if ok == len(S) else 1)
+    # com nomes na linha de comando, gera so esses (o ruido e aleatorio: regerar tudo muda todos os arquivos)
+    names = sys.argv[1:] or list(S)
+    ok = sum(render(n, *S[n]) for n in names)
+    print(f"{ok}/{len(names)} sons gerados em {os.path.normpath(OUT)}")
+    sys.exit(0 if ok == len(names) else 1)
