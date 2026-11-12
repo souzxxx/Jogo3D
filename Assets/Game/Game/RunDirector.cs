@@ -339,7 +339,7 @@ namespace Quintessence.Game
                     OpenDoors();
                     break;
                 case RoomType.Pact:
-                    SetupPact();
+                    SetupPact(true);
                     Run.RoomCleared();
                     OpenDoors();
                     break;
@@ -501,7 +501,7 @@ namespace Quintessence.Game
         /// Monta a sala de Tesouro sem passar pelo mapa. Para os testes e as capturas.
         public void ShowTreasure() { Cleanup(); ApplyLayout(-1); Dress(RoomType.Treasure); SetupTreasure(); }
         /// Monta a sala de Pacto sem passar pelo mapa. Para os testes e as capturas.
-        public void ShowPact() { Cleanup(); ApplyLayout(-1); Dress(RoomType.Pact); SetupPact(); }
+        public void ShowPact() { Cleanup(); ApplyLayout(-1); Dress(RoomType.Pact); SetupPact(false); }
         /// Monta a sala de Descanso (so o cenario). Para as capturas.
         public void ShowRest() { Cleanup(); ApplyLayout(-1); Dress(RoomType.Rest); }
         /// Monta a sala do Mestre sem passar pelo mapa. Para as capturas.
@@ -545,7 +545,8 @@ namespace Quintessence.Game
         public int PactsTaken { get; private set; }
 
         /// Pacto: um ganho forte em troca de um custo permanente. Da para recusar: as portas ja estao abertas.
-        void SetupPact()
+        /// shuffle: a sala de verdade sorteia tres dos cinco; a de teste mostra os tres primeiros, sempre iguais.
+        void SetupPact(bool shuffle)
         {
             var wine = new Color(0.72f, 0.3f, 0.42f);
             var offers = new (string name, string gain, string cost, string icon, System.Func<bool> take)[]
@@ -571,7 +572,28 @@ namespace Quintessence.Game
                     Run.Progress.GrantPick();
                     return true;
                 }),
+                ("Pacto do Eco", "Reações causam +30%", "−15% de vida máxima", "boon_reaction", () =>
+                {
+                    baseMaxHealth *= 0.85f;
+                    player.Modifiers.ReactionPower += 0.3f;
+                    ApplyMaxHealth();
+                    return true;
+                }),
+                ("Pacto da Pressa", "+15% de velocidade e dash 30% mais rápido", "Você recebe +15% de dano", "boon_speed", () =>
+                {
+                    player.Modifiers.MoveSpeedMult += 0.15f;
+                    player.Modifiers.DashCooldownMult *= 0.7f;
+                    playerHealth.Pool.CurseMultiplier *= 1.15f;
+                    return true;
+                }),
             };
+            if (shuffle)
+                for (int k = offers.Length - 1; k > 0; k--)
+                {
+                    int j = rng.Next(k + 1);
+                    (offers[k], offers[j]) = (offers[j], offers[k]);
+                }
+            System.Array.Resize(ref offers, 3);
             for (int i = 0; i < offers.Length; i++)
             {
                 var o = offers[i];
