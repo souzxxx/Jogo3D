@@ -92,6 +92,8 @@ namespace Quintessence.Core
         public static event Action<Vector3, float> Exploded;
         /// (indice da onda comecando em 0, total de ondas)
         public static event Action<int, int> WaveStarted;
+        /// Um golpe foi esquivado (passiva do Vey).
+        public static event Action<Health> Evaded;
         /// Carga de Quintessencia que nao vem de reacao (golpe no escudo do chefe).
         public static event Action<float> QuintessenceCharge;
         /// A run entrou num trecho novo: indice da musica de ambiente (0 = Saloes de Cinza).
@@ -132,6 +134,7 @@ namespace Quintessence.Core
         public static void RaiseBossShield(bool up, bool needsQuintessence) => BossShieldChanged?.Invoke(up, needsQuintessence);
         public static void RaiseArmorChanged(Health enemy, bool armored) => ArmorChanged?.Invoke(enemy, armored);
         public static void RaiseExploded(Vector3 point, float radius) => Exploded?.Invoke(point, radius);
+        public static void RaiseEvaded(Health target) => Evaded?.Invoke(target);
         public static void RaiseQuintessenceCharge(float amount) => QuintessenceCharge?.Invoke(amount);
         public static void RaiseAmbient(int index) => AmbientChanged?.Invoke(index);
         public static void RaiseChampionSpawned(Health champion) => ChampionSpawned?.Invoke(champion);
@@ -153,7 +156,7 @@ namespace Quintessence.Core
             DamageDealt = null; Died = null; HitBlocked = null; Shattered = null; MarkApplied = null; ReactionTriggered = null;
             MarkCleared = null; StatusApplied = null; StatusEnded = null; AttackPerformed = null; ZoneSpawned = null;
             TelegraphStarted = null; TelegraphCancelled = null; AttackMissed = null; EnemySpawned = null; WaveStarted = null; ArmorChanged = null; Exploded = null;
-            EnemyHealed = null; ChampionSpawned = null; AmbientChanged = null; QuintessenceCharge = null;
+            EnemyHealed = null; ChampionSpawned = null; AmbientChanged = null; QuintessenceCharge = null; Evaded = null;
             BossSpawned = null; BossPhaseChanged = null; BossShieldChanged = null;
             ElementSwitched = null; ElementAwakened = null;
             QuintessenceMeterChanged = null; QuintessenceActiveChanged = null;

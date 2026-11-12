@@ -89,5 +89,20 @@ namespace Quintessence.Core.Tests
             Assert.IsTrue(health.IsDead);
             Assert.AreEqual(1, deaths);
         }
+
+        [Test] public void Evasion_SkipsTheWholeHit_AndRaisesTheEvent()
+        {
+            var p = new HealthPool(100f) { Evasion = 0.15f };
+            HealthPool.ForceEvade = true;
+            Assert.AreEqual(0f, p.Damage(30f));
+            Assert.IsTrue(p.LastEvaded);
+            HealthPool.ForceEvade = false;
+            Assert.AreEqual(30f, p.Damage(30f));
+            Assert.IsFalse(p.LastEvaded);
+            HealthPool.ForceEvade = null;
+            var none = new HealthPool(100f);
+            for (int i = 0; i < 50; i++) none.Damage(1f);
+            Assert.AreEqual(50f, none.Current, 0.001f, "sem esquiva, todo golpe entra");
+        }
     }
 }

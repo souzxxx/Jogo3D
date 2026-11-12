@@ -261,6 +261,7 @@ namespace Quintessence.Combat
 
             dash.Cooldown = dashCooldown * mods.DashCooldownMult;
             if (dash.MaxCharges != 1 + mods.DashChargesAdd) dash.SetMaxCharges(1 + mods.DashChargesAdd);
+            health.Pool.Evasion = mods.Evasion;
             float moveMul = mods.MoveSpeedMult;
             if (hasteLeft > 0f) { hasteLeft -= dt; moveMul *= 1.35f; }
             bool canAct = true;

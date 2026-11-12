@@ -89,6 +89,7 @@ namespace Quintessence.Feel
             GameEvents.Exploded += OnExploded;
             GameEvents.EnemyHealed += OnEnemyHealed;
             GameEvents.ChampionSpawned += OnChampion;
+            GameEvents.Evaded += OnEvaded;
             GameEvents.RoomCleared += OnRoomCleared;
             GameEvents.Shattered += OnShattered;
             GameEvents.QuintessenceActiveChanged += OnQuintessence;
@@ -119,6 +120,7 @@ namespace Quintessence.Feel
             GameEvents.Exploded -= OnExploded;
             GameEvents.EnemyHealed -= OnEnemyHealed;
             GameEvents.ChampionSpawned -= OnChampion;
+            GameEvents.Evaded -= OnEvaded;
             GameEvents.RoomCleared -= OnRoomCleared;
             GameEvents.Shattered -= OnShattered;
             GameEvents.QuintessenceActiveChanged -= OnQuintessence;
@@ -358,6 +360,15 @@ namespace Quintessence.Feel
             Burst(p, Vector3.up, 180f, 50, 4f, 11f, 0.25f, 0.6f, 0.5f, Steel);
             LightFlash(p, Steel, 8f, 6f, 0.3f);
             CameraShake.Add(0.4f);
+        }
+
+        void OnEvaded(Health target)
+        {
+            if (target == null) return;
+            var p = target.transform.position + Vector3.up * 1.2f;
+            DamageNumber.Spawn(p + Vector3.up * 1.8f, "ESQUIVA", new Color(0.7f, 0.92f, 0.8f), 0.8f, 0.7f);
+            accents?.Emit(ElementType.Air, p, Vector3.up, 120f, 10, 3f);
+            Sfx.Play("dash");
         }
 
         /// Campeao de Elite: anuncio e uma luz ambar que o acompanha.

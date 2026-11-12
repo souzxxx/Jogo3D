@@ -47,6 +47,8 @@ namespace Quintessence.Core
         /// Segundos devolvidos as recargas das skills a cada inimigo morto.
         public float SkillRefundOnKill;
         public float EssenceMult = 1f;
+        /// Chance de esquivar um golpe inteiro.
+        public float Evasion;
         public float XpMult = 1f;
 
         static int Pair(ElementType a, ElementType b) => System.Math.Min((int)a, (int)b) * 5 + System.Math.Max((int)a, (int)b);
@@ -84,7 +86,7 @@ namespace Quintessence.Core
             DamageAll = ReactionPower = MoveSpeedMult = DashCooldownMult = SkillCooldownMult = QuintessenceGainMult = StatusDurationMult = 1f;
             CritChanceAdd = MaxHealthAdd = HealOnReaction = HealOnRoomClear = SwitchStrikeAdd = 0f;
             BasicDamageMult = FinisherMult = EssenceMult = XpMult = 1f;
-            FireTrailSeconds = BurningBonus = WaterHealAdd = WaterFreezeSeconds = EarthThorns = AirHasteSeconds = SkillRefundOnKill = 0f;
+            Evasion = FireTrailSeconds = BurningBonus = WaterHealAdd = WaterFreezeSeconds = EarthThorns = AirHasteSeconds = SkillRefundOnKill = 0f;
             EarthBlocksAdd = DashChargesAdd = 0;
         }
     }
