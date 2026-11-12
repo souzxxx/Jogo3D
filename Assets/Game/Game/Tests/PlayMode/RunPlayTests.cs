@@ -1255,6 +1255,52 @@ namespace Quintessence.Game.PlayTests
             Time.captureFramerate = 0;
         }
 
+        [UnityTest, Timeout(300000)]
+        public IEnumerator Crypt_Elites_Bring_The_Priestess()
+        {
+            GameEvents.Clear();
+            Time.timeScale = 1f;
+            Time.captureFramerate = 30;
+            GameFlow.StartElement = ElementType.Earth;
+            GameFlow.Seed = 3; GameFlow.Layers = 5; GameFlow.Shrines = 1;
+            yield return EditorSceneManager.LoadSceneAsyncInPlayMode("Assets/Scenes/Run.unity", new LoadSceneParameters(LoadSceneMode.Single));
+            yield return null;
+            yield return null;
+            var director = Object.FindFirstObjectByType<RunDirector>();
+            var hud = Object.FindFirstObjectByType<Hud>();
+            cam = Camera.main;
+            hud.UseCamera(cam);
+            Object.FindFirstObjectByType<WaveSpawner>().enabled = false;
+            for (int k = 0; k < 2000 && director.Busy; k++) yield return null;
+            Assert.AreEqual("Sacerdotisa", director.MiniBossFor(Biome.Crypt).name, "na Cripta, a Sacerdotisa");
+            Assert.AreEqual("Carrasco", director.MiniBossFor(Biome.Ashes).name, "nos outros trechos, o Carrasco");
+            Assert.AreEqual("Carrasco", director.MiniBossFor(Biome.Garden).name);
+            var hero = Object.FindFirstObjectByType<PlayerController>();
+            hero.GetComponent<Health>().Pool.Invulnerable = true;
+            hero.Teleport(new Vector3(0, 0.05f, -2f), Vector3.forward);
+            director.ApplyLayout(-1);
+            director.DressBiome(Biome.Crypt);
+            string name = "";
+            GameEvents.BossSpawned += (_, n) => name = n;
+            var priestess = Object.Instantiate(director.MiniBossFor(Biome.Crypt), new Vector3(0, 0, 3f), Quaternion.Euler(0, 180, 0)).GetComponent<BossBrain>();
+            for (int k = 0; k < 40; k++) yield return null;
+            Assert.AreEqual("Sacerdotisa Afogada", name);
+            Assert.AreEqual(ElementType.Water, priestess.Definition.element);
+            for (int k = 0; k < 1500 && Object.FindFirstObjectByType<WaterPuddle>() == null; k++) yield return null;
+            Assert.IsNotNull(Object.FindFirstObjectByType<WaterPuddle>(), "as Erupcoes dela tambem deixam poca");
+            hud.ShowBanner("", "", Color.clear, 0.01f);
+            hud.HideTip();
+            Shot(cam, "docs/img/sacerdotisa.png");
+            var hp = priestess.GetComponent<Health>();
+            hp.TakeDamage(new DamageInfo(hp.Max * 0.75f, ElementType.None, Team.Player, hero.gameObject));
+            for (int k = 0; k < 30; k++) yield return null;
+            Assert.AreEqual(2, priestess.Phase);
+            Assert.IsFalse(priestess.Shield.Up, "mini-chefe: sem escudo na ultima fase");
+            Object.Destroy(priestess.gameObject);
+            GameFlow.Layers = 8; GameFlow.Shrines = 3;
+            Time.captureFramerate = 0;
+        }
+
         [UnityTest, Timeout(600000)]
         public IEnumerator Elementals_And_The_Swarm()
         {

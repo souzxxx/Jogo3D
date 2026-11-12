@@ -98,6 +98,11 @@ namespace Quintessence.Game
         }
 
         public void BindMiniBoss(GameObject prefab) => miniBossPrefab = prefab;
+        [SerializeField] GameObject cryptMiniBossPrefab;
+        public void BindCryptMiniBoss(GameObject prefab) => cryptMiniBossPrefab = prefab;
+        /// Mini-chefe das Elites do trecho: na Cripta, a Sacerdotisa Afogada; nos outros, o Carrasco.
+        public GameObject MiniBossFor(Biome biome) => biome == Biome.Crypt && cryptMiniBossPrefab != null ? cryptMiniBossPrefab : miniBossPrefab;
+        Biome encounterBiome = Biome.Ashes;
         public void BindElementals(GameObject swarm, GameObject ember, GameObject sentinel) { swarmPrefab = swarm; emberPrefab = ember; sentinelPrefab = sentinel; }
         public void BindGuard(GameObject guard) => guardPrefab = guard;
         [SerializeField] GameObject bannerPrefab;
@@ -784,7 +789,8 @@ namespace Quintessence.Game
                     $"ELITE {DifficultyCurve.Name(trait).ToUpperInvariant()}: {DifficultyCurve.Describe(trait)}", new Color(0.86f, 0.62f, 0.34f), 1f, 2.6f);
             }
             spawner.Champion = type == RoomType.Elite && depth < EncounterPlanner.MiniBossDepth;
-            spawner.Run(BuildWaves(EncounterPlanner.Plan(type, depth, Run != null ? Biomes.For(depth, Run.Map.LayerCount) : Biome.Ashes)));
+            encounterBiome = Run != null ? Biomes.For(depth, Run.Map.LayerCount) : Biome.Ashes;
+            spawner.Run(BuildWaves(EncounterPlanner.Plan(type, depth, encounterBiome)));
         }
 
         IEnumerator Fade(float from, float to, float seconds)
@@ -818,7 +824,7 @@ namespace Quintessence.Game
                 if (p.Banner > 0) w.entries.Add(new WaveEntry { prefab = bannerPrefab != null ? bannerPrefab : rangedPrefab, count = p.Banner });
                 if (p.Shade > 0) w.entries.Add(new WaveEntry { prefab = shadePrefab != null ? shadePrefab : chargerPrefab != null ? chargerPrefab : meleePrefab, count = p.Shade });
                 if (p.Drowned > 0) w.entries.Add(new WaveEntry { prefab = drownedPrefab != null ? drownedPrefab : lobberPrefab != null ? lobberPrefab : rangedPrefab, count = p.Drowned });
-                if (p.MiniBoss > 0 && miniBossPrefab != null) w.entries.Add(new WaveEntry { prefab = miniBossPrefab, count = p.MiniBoss });
+                if (p.MiniBoss > 0 && MiniBossFor(encounterBiome) != null) w.entries.Add(new WaveEntry { prefab = MiniBossFor(encounterBiome), count = p.MiniBoss });
                 if (p.Boss > 0) w.entries.Add(new WaveEntry { prefab = WeaverRun ? weaverPrefab : QueenRun ? queenPrefab : bossPrefab != null ? bossPrefab : brutePrefab, count = p.Boss });
                 waves.Add(w);
             }
