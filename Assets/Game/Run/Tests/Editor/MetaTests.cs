@@ -168,5 +168,57 @@ namespace Quintessence.Run.Tests
             Assert.AreEqual(2, back.Wins);
             Assert.AreEqual(0, MetaProgress.Parse("v1;40;3;1;7;2,1,0,3,1").HeroWins(ElementType.Water), "save antigo, sem o campo novo");
         }
+
+        [Test] public void Mastery_GrowsWithRuns_AndUnlocksPerksInOrder()
+        {
+            Assert.AreEqual(0, Mastery.LevelFor(0));
+            Assert.AreEqual(1, Mastery.LevelFor(15));
+            Assert.AreEqual(Mastery.MaxLevel, Mastery.LevelFor(100000), "o nivel para no maximo");
+            for (int xp = 1; xp < 400; xp++) Assert.GreaterOrEqual(Mastery.LevelFor(xp), Mastery.LevelFor(xp - 1), "nunca desce");
+            Assert.AreEqual(10 + 4 + 10, Mastery.RunXp(10, 42, true), "salas + abates/10 + vitoria");
+            Assert.AreEqual(3, Mastery.RunXp(3, 9, false));
+            Assert.AreEqual(0, Mastery.RunXp(-1, -5, false));
+            // duas derrotas no meio da run sobem a maestria 1; quatro vitorias levam a 3
+            Assert.AreEqual(1, Mastery.LevelFor(Mastery.RunXp(6, 40, false) * 2));
+            Assert.AreEqual(3, Mastery.LevelFor(Mastery.RunXp(10, 60, true) * 4));
+            for (int i = 1; i <= Mastery.MaxLevel; i++) Assert.IsNotEmpty(Mastery.Perk(i), "nivel " + i);
+            var (needed, fraction) = Mastery.Progress(20);
+            Assert.AreEqual(20, needed); Assert.AreEqual(0.2f, fraction, 0.001f);
+            Assert.AreEqual(0, Mastery.Progress(9999).needed);
+        }
+
+        [Test] public void Mastery_Perks_ApplyOnlyFromTheirLevel()
+        {
+            var m = new HeroModifiers();
+            Mastery.ApplyTo(0, m);
+            Assert.AreEqual(0f, m.MaxHealthAdd); Assert.AreEqual(1f, m.DamageAll);
+            Mastery.ApplyTo(1, m);
+            Assert.AreEqual(10f, m.MaxHealthAdd); Assert.AreEqual(1f, m.DamageAll);
+            m = new HeroModifiers();
+            Mastery.ApplyTo(5, m);
+            Assert.AreEqual(10f, m.MaxHealthAdd); Assert.AreEqual(1.08f, m.DamageAll, 0.0001f);
+            Assert.AreEqual(0, Mastery.StartTalents(1)); Assert.AreEqual(1, Mastery.StartTalents(2));
+            Assert.AreEqual(0, Mastery.ExtraRerolls(3)); Assert.AreEqual(1, Mastery.ExtraRerolls(4));
+            Assert.AreEqual(0, Mastery.StartEssence(4)); Assert.AreEqual(30, Mastery.StartEssence(5));
+        }
+
+        [Test] public void Mastery_IsPerHero_AndSurvivesSaving_AndOldSavesStartAtZero()
+        {
+            var p = new MetaProgress();
+            Assert.AreEqual(1, p.AddHeroXp(ElementType.Earth, 15), "subiu um nivel");
+            Assert.AreEqual(0, p.AddHeroXp(ElementType.Earth, 5));
+            Assert.AreEqual(0, p.AddHeroXp(ElementType.None, 50), "sem heroi nao soma");
+            Assert.AreEqual(0, p.AddHeroXp(ElementType.Air, -3));
+            Assert.AreEqual(20, p.HeroXp(ElementType.Earth));
+            Assert.AreEqual(0, p.HeroXp(ElementType.Fire), "a maestria e so do heroi usado");
+            Assert.AreEqual(2, p.AddHeroXp(ElementType.Fire, 45), "pode subir dois de uma vez");
+            var back = MetaProgress.Parse(p.Serialize());
+            Assert.AreEqual(20, back.HeroXp(ElementType.Earth));
+            Assert.AreEqual(2, back.MasteryLevel(ElementType.Fire));
+            var old = MetaProgress.Parse("v1;40;3;1;7;2,1,0,3,1;0,1,0,0");
+            Assert.AreEqual(1, old.HeroWins(ElementType.Water), "save com vitorias mas sem maestria");
+            Assert.AreEqual(0, old.HeroXp(ElementType.Water));
+            Assert.AreEqual(0, MetaProgress.Parse("v1;0;0;0;0;0,0,0,0,0;0,0,0,0;9,x").HeroXp(ElementType.Water), "campo estragado vira zero");
+        }
     }
 }

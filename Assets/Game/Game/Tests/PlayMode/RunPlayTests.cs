@@ -43,6 +43,8 @@ namespace Quintessence.Game.PlayTests
             Tips.UseKey(TestSaveKey + ".tips");
             Tips.ResetAll();
             GameFlow.Resume = null;
+            // a esquiva do Vey e sorteada: nos testes o golpe sempre entra (senao um golpe fatal falha 15% das vezes)
+            HealthPool.ForceEvade = false;
         }
 
         [TearDown]
@@ -51,6 +53,7 @@ namespace Quintessence.Game.PlayTests
             PlayerPrefs.DeleteKey(TestSaveKey);
             MetaStore.UseKey(MetaStore.DefaultKey);
             GameFlow.AutoPickTalents = false;
+            HealthPool.ForceEvade = null;
             RunSaveStore.Clear();
             RunSaveStore.UseKey(RunSaveStore.DefaultKey);
             Tips.ResetAll();
@@ -644,6 +647,47 @@ namespace Quintessence.Game.PlayTests
             for (int k = 0; k < 5; k++) yield return null;
             Assert.Greater(hero.Health.Max, before, "Vigor aumenta a vida maxima");
             Assert.AreEqual(2, hero.DashMaxCharges, "Asas da a segunda carga de dash");
+            GameFlow.AutoPickTalents = true;
+            GameFlow.Layers = 8; GameFlow.Shrines = 3;
+            Time.captureFramerate = 0;
+        }
+
+        [UnityTest, Timeout(300000)]
+        public IEnumerator Hero_Mastery_Brings_Its_Perks_Into_The_Run()
+        {
+            Time.timeScale = 1f;
+            Time.captureFramerate = 30;
+            GameFlow.Seed = 3; GameFlow.Layers = 5; GameFlow.Shrines = 1;
+            GameFlow.AutoPickTalents = false;
+            GameEvents.Clear();
+            Assert.AreEqual(4, MetaStore.Current.AddHeroXp(ElementType.Earth, 80) + MetaStore.Current.AddHeroXp(ElementType.Earth, 60), "140 de experiencia: maestria 4");
+            MetaStore.Save();
+            GameFlow.StartElement = ElementType.Earth;
+            yield return EditorSceneManager.LoadSceneAsyncInPlayMode("Assets/Scenes/Run.unity", new LoadSceneParameters(LoadSceneMode.Single));
+            yield return null;
+            yield return null;
+            var director = Object.FindFirstObjectByType<RunDirector>();
+            var hud = Object.FindFirstObjectByType<Hud>();
+            hud.UseCamera(Camera.main);
+            Object.FindFirstObjectByType<WaveSpawner>().enabled = false;
+            var hero = Object.FindFirstObjectByType<PlayerController>();
+            var hp = hero.GetComponent<Health>();
+            Assert.AreEqual(100f + 20f + 10f, hp.Max, 0.01f, "Brann: 100 + 20 da passiva + 10 da maestria 1");
+            Assert.AreEqual(1.08f, hero.Modifiers.DamageAll, 0.001f, "maestria 3: +8% de dano");
+            Assert.AreEqual(1, director.Run.Rerolls, "maestria 4: uma troca de talentos");
+            Assert.AreEqual(0, director.Run.Essence, "a Essencia inicial so vem na maestria 5");
+            // maestria 2: a run abre com uma escolha de talento
+            for (int k = 0; k < 2000 && !director.LevelUpOpen; k++) yield return null;
+            Assert.IsTrue(director.LevelUpOpen, "a maestria 2 oferece um talento logo no comeco");
+            Assert.IsTrue(hud.LevelUpVisible);
+            Shot(Camera.main, "docs/img/maestria_inicio.png");
+            director.RerollTalents();
+            Assert.AreEqual(0, director.Run.Rerolls, "a troca da maestria funciona no painel");
+            director.PickTalent(0);
+            Assert.IsFalse(director.LevelUpOpen);
+            Assert.AreEqual(1, director.Run.Talents.Count);
+            Assert.AreEqual(0, director.Run.Progress.PendingPicks);
+            Assert.AreEqual(1, director.Run.Progress.Level, "o talento da maestria nao mexe no nivel");
             GameFlow.AutoPickTalents = true;
             GameFlow.Layers = 8; GameFlow.Shrines = 3;
             Time.captureFramerate = 0;
@@ -1455,6 +1499,8 @@ namespace Quintessence.Game.PlayTests
             for (float t = 5f; t > 0f && !hud.ResultVisible; t -= Time.unscaledDeltaTime) yield return null;
             Assert.IsTrue(hud.ResultVisible, "morrer deveria levar a tela de resultado");
             Assert.IsFalse(director.Victory);
+            Assert.AreEqual(Mastery.RunXp(director.Run.RoomsCleared, director.Run.Kills, false), director.MasteryGained);
+            Assert.AreEqual(director.MasteryGained, MetaStore.Current.HeroXp(GameFlow.StartElement), "a derrota tambem soma maestria ao heroi");
             GameFlow.RestartRun();
             yield return null;
             for (int k = 0; k < 60 && Object.FindFirstObjectByType<RunDirector>() == director; k++) yield return null;

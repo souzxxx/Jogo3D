@@ -40,6 +40,52 @@ namespace Quintessence.Run
         }
     }
 
+    /// Maestria de cada heroi: experiencia acumulada em todas as runs com ele, em cinco niveis.
+    public static class Mastery
+    {
+        public const int MaxLevel = 5;
+        static readonly int[] thresholds = { 0, 15, 40, 80, 140, 220 };
+
+        /// Experiencia que uma run da: uma por sala vencida, uma a cada 10 abates e 10 pela vitoria.
+        public static int RunXp(int roomsCleared, int kills, bool victory) => Math.Max(0, roomsCleared) + Math.Max(0, kills) / 10 + (victory ? 10 : 0);
+
+        public static int LevelFor(int xp)
+        {
+            int level = 0;
+            for (int i = 1; i < thresholds.Length; i++) if (xp >= thresholds[i]) level = i;
+            return level;
+        }
+
+        /// Experiencia que falta para o proximo nivel (0 no maximo) e a fracao andada nele.
+        public static (int needed, float fraction) Progress(int xp)
+        {
+            int level = LevelFor(xp);
+            if (level >= MaxLevel) return (0, 1f);
+            int from = thresholds[level], to = thresholds[level + 1];
+            return (to - xp, (xp - from) / (float)(to - from));
+        }
+
+        public static string Perk(int level) => level switch
+        {
+            1 => "+10 de vida máxima",
+            2 => "um talento à escolha no começo da run",
+            3 => "+8% de dano",
+            4 => "+1 troca de talentos por run",
+            5 => "começa com 30 de Essência",
+            _ => "",
+        };
+
+        public static void ApplyTo(int level, HeroModifiers m)
+        {
+            if (level >= 1) m.MaxHealthAdd += 10f;
+            if (level >= 3) m.DamageAll += 0.08f;
+        }
+
+        public static int StartTalents(int level) => level >= 2 ? 1 : 0;
+        public static int ExtraRerolls(int level) => level >= 4 ? 1 : 0;
+        public static int StartEssence(int level) => level >= 5 ? 30 : 0;
+    }
+
     /// O que sobrevive entre as runs. So regra: quem grava em disco e outro.
     public class MetaProgress
     {
@@ -52,6 +98,19 @@ namespace Quintessence.Run
         public int Wins { get; private set; }
         public int BestRooms { get; private set; }
         readonly int[] heroWins = new int[5];
+        readonly int[] heroXp = new int[5];
+        /// Experiencia de maestria acumulada com o heroi.
+        public int HeroXp(ElementType hero) => (int)hero >= 1 && (int)hero <= 4 ? heroXp[(int)hero] : 0;
+        public int MasteryLevel(ElementType hero) => Mastery.LevelFor(HeroXp(hero));
+
+        /// Soma a experiencia da run ao heroi. Devolve quantos niveis de maestria ele subiu.
+        public int AddHeroXp(ElementType hero, int xp)
+        {
+            if ((int)hero < 1 || (int)hero > 4 || xp <= 0) return 0;
+            int before = MasteryLevel(hero);
+            heroXp[(int)hero] += xp;
+            return MasteryLevel(hero) - before;
+        }
         /// Vitorias com o heroi daquele elemento.
         public int HeroWins(ElementType hero) => (int)hero >= 1 && (int)hero <= 4 ? heroWins[(int)hero] : 0;
 
@@ -99,8 +158,8 @@ namespace Quintessence.Run
             m.XpMult += MetaInfo.PerLevel(MetaUpgrade.Wisdom) * Level(MetaUpgrade.Wisdom);
         }
 
-        /// "v1;fragmentos;runs;vitorias;recorde;niveis;vitorias por heroi" (o ultimo campo e opcional: saves antigos nao tem)
-        public string Serialize() => $"v1;{Shards};{Runs};{Wins};{BestRooms};{string.Join(",", levels)};{heroWins[1]},{heroWins[2]},{heroWins[3]},{heroWins[4]}";
+        /// "v1;fragmentos;runs;vitorias;recorde;niveis;vitorias por heroi;maestria por heroi" (os dois ultimos sao opcionais: saves antigos nao tem)
+        public string Serialize() => $"v1;{Shards};{Runs};{Wins};{BestRooms};{string.Join(",", levels)};{heroWins[1]},{heroWins[2]},{heroWins[3]},{heroWins[4]};{heroXp[1]},{heroXp[2]},{heroXp[3]},{heroXp[4]}";
 
         /// Le um save. Texto vazio, cortado ou adulterado vira progresso zerado ou valores dentro dos limites, nunca erro.
         public static MetaProgress Parse(string text)
@@ -120,6 +179,11 @@ namespace Quintessence.Run
             {
                 var hw = parts[6].Split(',');
                 for (int i = 0; i < 4 && i < hw.Length; i++) p.heroWins[i + 1] = Read(hw[i], 0, p.Wins);
+            }
+            if (parts.Length >= 8)
+            {
+                var hx = parts[7].Split(',');
+                for (int i = 0; i < 4 && i < hx.Length; i++) p.heroXp[i + 1] = Read(hx[i], 0, 99999);
             }
             return p;
         }

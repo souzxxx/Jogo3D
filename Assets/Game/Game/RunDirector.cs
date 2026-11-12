@@ -316,9 +316,12 @@ namespace Quintessence.Game
             // melhorias permanentes do Refugio entram antes da primeira sala
             HeroPassives.Apply(GameFlow.StartElement, player.Modifiers);
             MetaStore.Current.ApplyTo(player.Modifiers);
+            int mastery = MetaStore.Current.MasteryLevel(GameFlow.StartElement);
+            Mastery.ApplyTo(mastery, player.Modifiers);
             ApplyMaxHealth();
-            Run.AddEssence(MetaStore.Current.StartEssence);
-            Run.Rerolls = MetaStore.Current.Rerolls;
+            Run.AddEssence(MetaStore.Current.StartEssence + Mastery.StartEssence(mastery));
+            Run.Rerolls = MetaStore.Current.Rerolls + Mastery.ExtraRerolls(mastery);
+            for (int i = 0; i < Mastery.StartTalents(mastery); i++) { Run.Progress.GrantPick(); masteryPicks++; }
             hud.SetEssence(Run.Essence);
             if (GameFlow.Resume != null)
             {
@@ -622,6 +625,9 @@ namespace Quintessence.Game
 
         /// Quem derrubou o heroi (para a tela de derrota e os testes).
         public string KilledBy { get; private set; } = "";
+        /// Maestria que esta run deu ao heroi e quantos niveis ele subiu.
+        public int MasteryGained { get; private set; }
+        public int MasteryLevelsUp { get; private set; }
         /// Nivel de Ascensao que esta vitoria liberou (0 = nenhum).
         public int NewAscension { get; private set; }
 
@@ -651,6 +657,8 @@ namespace Quintessence.Game
             int unlockedBefore = Ascension.Unlocked(MetaStore.Current.Wins);
             int shards = MetaStore.Current.EndRun(Run.RoomsCleared, victory, Ascension.ShardMult(GameFlow.Ascension), GameFlow.StartElement);
             int unlockedNow = Ascension.Unlocked(MetaStore.Current.Wins);
+            MasteryGained = Mastery.RunXp(Run.RoomsCleared, Run.Kills, victory);
+            MasteryLevelsUp = MetaStore.Current.AddHeroXp(GameFlow.StartElement, MasteryGained);
             NewAscension = unlockedNow > unlockedBefore ? unlockedNow : 0;
             MetaStore.Save();
             ShardsEarned = shards;
@@ -659,7 +667,8 @@ namespace Quintessence.Game
             string stats = (GameFlow.Ascension > 0 ? $"Ascensão {GameFlow.Ascension}   ·   " : "") + $"{HeroPassives.HeroName(GameFlow.StartElement)}   ·   Nível {Run.Progress.Level}   ·   {Plural(Run.Kills, "inimigo derrotado", "inimigos derrotados")}   ·   {Plural(Run.Talents.Count, "talento", "talentos")} e {Plural(Run.Boons.Count, "bênção", "bênçãos")}"
                 + (!victory && KilledBy.Length > 0 ? $"\nDerrubado por: {KilledBy}" : "")
                 + $"\nSalas vencidas: {Run.RoomsCleared}   ·   Essência: {Run.Essence}   ·   Elementos: {player.Loadout.Awakened.Count}/4   ·   Tempo: {seconds / 60}:{seconds % 60:00}"
-                + $"\n+{shards} Fragmentos para o Refúgio (total: {MetaStore.Current.Shards})"
+                + $"\n+{shards} Fragmentos para o Refúgio (total: {MetaStore.Current.Shards})   ·   {HeroPassives.HeroName(GameFlow.StartElement)} +{MasteryGained} de maestria"
+                + (MasteryLevelsUp > 0 ? $"\nMaestria {MetaStore.Current.MasteryLevel(GameFlow.StartElement)} de {HeroPassives.HeroName(GameFlow.StartElement)}: {Mastery.Perk(MetaStore.Current.MasteryLevel(GameFlow.StartElement))}" : "")
                 + (NewAscension > 0 ? $"\nAscensão {NewAscension} liberada: escolha no título para enfrentar inimigos mais fortes" : "");
             Sfx.Play(victory ? "victory" : "defeat");
             hud.ShowResult(victory, stats, GameFlow.RestartRun, GameFlow.ToTitle);
@@ -831,6 +840,8 @@ namespace Quintessence.Game
         System.Random talentRng;
         bool levelUpOpen;
         List<Talent> talentOffer;
+        /// Escolhas que vieram da maestria (o painel diz isso em vez de "Nivel").
+        int masteryPicks;
         public bool LevelUpOpen => levelUpOpen;
         public IReadOnlyList<Talent> TalentOffer => talentOffer;
 
@@ -860,8 +871,8 @@ namespace Quintessence.Game
             levelUpOpen = true;
             GameClock.SetPaused(true);
             hud.ShowMap(Run, false);
-            hud.ShowLevelUp(Run.Progress.Level - Run.Progress.PendingPicks + 1, talentOffer, PickTalent, Run.Rerolls, RerollTalents);
-            Tip("level"); // depois do painel: a dica fica por cima dele
+            ShowLevelUpPanel();
+            if (masteryPicks == 0) Tip("level"); // depois do painel: a dica fica por cima dele
         }
 
         /// Troca as tres opcoes por outras (Intuicao, do Refugio). Publico para os testes.
@@ -873,7 +884,17 @@ namespace Quintessence.Game
             if (fresh.Count == 0) { Run.Rerolls++; return; }
             talentOffer = fresh;
             Sfx.Play("ui_click");
-            hud.ShowLevelUp(Run.Progress.Level - Run.Progress.PendingPicks + 1, talentOffer, PickTalent, Run.Rerolls, RerollTalents);
+            ShowLevelUpPanel();
+        }
+
+        void ShowLevelUpPanel()
+        {
+            if (masteryPicks > 0)
+            {
+                int m = MetaStore.Current.MasteryLevel(GameFlow.StartElement);
+                hud.ShowLevelUp(0, talentOffer, PickTalent, Run.Rerolls, RerollTalents, $"MAESTRIA {m}", $"{HeroPassives.HeroName(GameFlow.StartElement)} começa a run com um talento à escolha");
+            }
+            else hud.ShowLevelUp(Run.Progress.Level - Run.Progress.PendingPicks + 1, talentOffer, PickTalent, Run.Rerolls, RerollTalents);
         }
 
         void LevelUpKeys()
@@ -893,6 +914,7 @@ namespace Quintessence.Game
             var t = talentOffer[index];
             talentOffer = null;
             Run.Progress.ConsumePick();
+            if (masteryPicks > 0) masteryPicks--;
             Run.Talents.Take(t, player.Modifiers);
             ApplyMaxHealth();
             Sfx.Play("pickup");

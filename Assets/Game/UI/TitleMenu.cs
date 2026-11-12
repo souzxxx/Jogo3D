@@ -72,6 +72,7 @@ namespace Quintessence.UI
         }
 
         readonly UnityEngine.UI.Text[] heroWinLabels = new UnityEngine.UI.Text[4];
+        readonly UnityEngine.UI.Text[] heroMasteryLabels = new UnityEngine.UI.Text[4];
 
         void UpdateRefugeLabel()
         {
@@ -81,6 +82,8 @@ namespace Quintessence.UI
                 {
                     int w = meta.HeroWins(Elements.All[i]);
                     heroWinLabels[i].text = w > 0 ? (w == 1 ? "1 vitória" : $"{w} vitórias") : "";
+                    int m = meta.MasteryLevel(Elements.All[i]);
+                    if (heroMasteryLabels[i] != null) heroMasteryLabels[i].text = m > 0 ? $"Maestria {m}" : "";
                 }
             if (refugeLabel != null && meta != null) refugeLabel.text = $"REFÚGIO  ·  {meta.Shards} Fragmentos";
         }
@@ -177,11 +180,18 @@ namespace Quintessence.UI
             var foe = new Color(0.86f, 0.6f, 0.5f);
             var gold = new Color(0.88f, 0.74f, 0.42f);
             Column(70, "HERÓIS", heroes, 92);
+            // maestria: cada run da experiencia ao heroi usado; os niveis valem so para ele
+            UiKit.Text(UiKit.Rect("MasteryH", box, top, new Vector2(70, -560), new Vector2(500, 30)), "MAESTRIA · POR HERÓI", 22, UiKit.Dim, TextAnchor.MiddleLeft);
+            for (int i = 1; i <= Mastery.MaxLevel; i++)
+                UiKit.Text(UiKit.Rect("Mastery" + i, box, top, new Vector2(70, -560 - i * 30), new Vector2(500, 28)),
+                    $"{i}. {Mastery.Perk(i)}", 18, UiKit.Paper, TextAnchor.MiddleLeft, false);
+            UiKit.Text(UiKit.Rect("MasteryNote", box, top, new Vector2(70, -560 - 6 * 30 - 4), new Vector2(500, 28)),
+                "Cada sala vencida, cada 10 abates e a vitória dão experiência.", 16, UiKit.Dim, TextAnchor.MiddleLeft, false);
             Column(600, "INIMIGOS", new (string, string, Color)[]
             {
                 ("Rastejante", "Vem em grupo. Área e reações limpam o bando.", foe),
                 ("Atirador", "Tiro em linha; recua se você chega perto. Feche com o dash.", foe),
-                ("Bruto", "Armadura: leva 40% do dano. O Pilar de Pedra quebra.", foe),
+                ("Bruto", "Armadura: leva metade do dano. O Pilar de Pedra quebra.", foe),
                 ("Explosivo", "Corre e explode. Saia do círculo; a explosão fere o bando.", foe),
                 ("Ceifador", "Avisa uma linha e atravessa a sala. Saia e bata na volta.", foe),
                 ("Arremessador", "Joga a bomba onde você está. Saia do círculo.", foe),
@@ -250,8 +260,10 @@ namespace Quintessence.UI
             if (RunInProgress)
                 UiKit.Text(UiKit.Rect("Note", box, new Vector2(0.5f, 0), new Vector2(0, 112), new Vector2(1000, 28)),
                     "Há uma run salva: as compras valem a partir da próxima run nova.", 20, new Color(0.9f, 0.76f, 0.42f), TextAnchor.MiddleCenter, false);
-            UiKit.Text(UiKit.Rect("HeroWins", box, new Vector2(0.5f, 1), new Vector2(0, -192), new Vector2(900, 28)),
-                $"Vitórias por herói:   Rax {meta.HeroWins(ElementType.Fire)}   ·   Liora {meta.HeroWins(ElementType.Water)}   ·   Brann {meta.HeroWins(ElementType.Earth)}   ·   Vey {meta.HeroWins(ElementType.Air)}", 21, UiKit.Dim, TextAnchor.MiddleCenter, false);
+            string HeroLine(ElementType e) => $"{HeroPassives.HeroName(e)}: maestria {meta.MasteryLevel(e)}, {meta.HeroWins(e)} {(meta.HeroWins(e) == 1 ? "vitória" : "vitórias")}";
+            var heroLine = UiKit.Text(UiKit.Rect("HeroWins", box, new Vector2(0.5f, 1), new Vector2(0, -192), new Vector2(1100, 28)),
+                $"{HeroLine(ElementType.Fire)}   ·   {HeroLine(ElementType.Water)}   ·   {HeroLine(ElementType.Earth)}   ·   {HeroLine(ElementType.Air)}", 21, UiKit.Dim, TextAnchor.MiddleCenter, false);
+            heroLine.resizeTextForBestFit = true; heroLine.resizeTextMinSize = 14; heroLine.resizeTextMaxSize = 21;
 
             for (int i = 0; i < MetaInfo.Count; i++)
             {
@@ -345,6 +357,8 @@ namespace Quintessence.UI
                 UiKit.Image(UiKit.Rect("Rule", card, new Vector2(0.5f, 1), new Vector2(0, -148), new Vector2(72, 4)), null, Color.Lerp(c, UiKit.Cream, 0.2f));
                 UiKit.Text(UiKit.Rect("Note", card, new Vector2(0.5f, 0), new Vector2(0, 12), new Vector2(240, 58)), notes[i], 21, UiKit.Paper, TextAnchor.MiddleCenter, false);
                 heroWinLabels[i] = UiKit.Text(UiKit.Rect("Wins", card, new Vector2(1, 1), new Vector2(-38, -18), new Vector2(70, 22)), "", 17, new Color(0.9f, 0.76f, 0.42f), TextAnchor.MiddleRight, false);
+                heroMasteryLabels[i] = UiKit.Text(UiKit.Rect("Mastery", card, new Vector2(0, 1), new Vector2(12, -18), new Vector2(80, 22)), "", 17, UiKit.Cream, TextAnchor.MiddleLeft, false);
+                heroMasteryLabels[i].resizeTextForBestFit = true; heroMasteryLabels[i].resizeTextMinSize = 12; heroMasteryLabels[i].resizeTextMaxSize = 17;
             }
             var open = UiKit.Button(root, "REFÚGIO", new Vector2(0.5f, 0), new Vector2(-440, 74), new Vector2(360, 58), UiKit.Primary, () => ShowRefuge(true));
             void Small(string label, float x, Action act) =>

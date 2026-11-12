@@ -140,10 +140,11 @@ Os tipos entram aos poucos: Ceifador na segunda sala, Arremessador na quarta, Xa
 ### Progressão
 
 - **Na run:** Essência (moeda da loja) e bênçãos (29 no catálogo; cada Mestre só oferece a do próprio elemento a quem já o despertou).
-- **Nível e talentos:** inimigo derrotado dá experiência. Cada nível oferece três talentos para escolher um, com a sala limpa. São 17: cinco de corpo (combo, finalizador, vida, recarga por abate, Essência) e três por skill, que só aparecem com o elemento desperto. Exemplos: Labareda deixa o chão em chamas; Maré congela; Pilar bloqueia mais um golpe e devolve dano; Vendaval dá pressa; +1 carga de dash. Bênçãos mudam números; talentos mudam o que as skills fazem.
+- **Nível e talentos:** inimigo derrotado dá experiência. Cada nível oferece três talentos para escolher um, com a sala limpa. São 23: cinco de corpo (combo, finalizador, vida, recarga por abate, Essência), três por skill, que só aparecem com o elemento desperto, e seis de reação, que fortalecem uma reação quando os dois elementos dela estão despertos. Exemplos: Labareda deixa o chão em chamas; Maré congela; Pilar bloqueia mais um golpe e devolve dano; Vendaval dá pressa; +1 carga de dash. Bênçãos mudam números; talentos mudam o que as skills fazem.
 - **Entre runs:** Fragmentos, 3 por sala vencida e 15 por vencer o Guardião. No **Refúgio** compram sete melhorias permanentes: Vigor (vida), Força (dano), Bolsa (Essência inicial), Foco (Quintessência), Fôlego (cura por sala), Sabedoria (experiência) e Intuição (trocar as opções de talento). O progresso é salvo no navegador.
 - **Continuar:** a run é gravada ao entrar em cada sala. Fechar o jogo e voltar retoma do começo daquela sala. Começar uma run nova ou terminá-la apaga o save.
 - **Ascensão:** cada vitória libera um nível de desafio (até cinco). Cada nível dá +12% de vida e +10% de dano aos inimigos e +25% de Fragmentos.
+- **Maestria por herói:** cada run dá experiência ao herói usado (uma por sala vencida, uma a cada 10 abates, 10 pela vitória). São cinco níveis, e cada um vale só para aquele herói: 1) +10 de vida, 2) um talento à escolha no começo da run, 3) +8% de dano, 4) +1 troca de talentos, 5) começa com 30 de Essência. Aparece na carta do herói, no Refúgio, no Grimório e no fim da run.
 
 ### Estados e erros
 
@@ -226,6 +227,5 @@ A build WebGL tem página de carregamento própria (arte do título, barra doura
 
 ## O que falta
 
-- **[planejado]** Chefe com modelo e identidade próprios (hoje é um esqueleto do pack ampliado).
 - **[planejado]** Passada única de animação.
 - **[planejado]** Refúgio como sala 3D (hoje é um painel no título).

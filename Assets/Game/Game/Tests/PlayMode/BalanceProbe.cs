@@ -40,6 +40,9 @@ namespace Quintessence.Game.PlayTests
             foreach (var hero in Elements.All)
                 for (int seed = 1; seed <= ProbeSeeds; seed++)
                 {
+                    // cada run da sonda e de um jogador novo: sem Refugio nem maestria acumulada das anteriores
+                    PlayerPrefs.DeleteKey("quintessence.meta.test");
+                    MetaStore.UseKey("quintessence.meta.test");
                     if (OnlyHero != ElementType.None && (hero != OnlyHero || seed != OnlySeed)) continue;
                     Time.timeScale = 1f;
                     Time.captureFramerate = 30;

@@ -65,18 +65,21 @@ namespace Quintessence.UI
         };
 
         /// Subiu de nivel: tres talentos, escolhe um (clique, 1/2/3 ou controle).
-        public void ShowLevelUp(int level, IReadOnlyList<Talent> offer, Action<int> pick, int rerolls = 0, Action reroll = null)
+        public void ShowLevelUp(int level, IReadOnlyList<Talent> offer, Action<int> pick, int rerolls = 0, Action reroll = null, string heading = null, string sub = null)
         {
             if (levelPanel == null) levelPanel = Overlay("LevelUp", new Color(0.03f, 0.02f, 0.06f, 0.84f));
             foreach (Transform child in levelPanel) Destroy(child.gameObject);
             levelPanel.gameObject.SetActive(offer != null);
-            if (offer == null) return;
+            if (offer == null) { if (tipRoot != null) tipRoot.anchoredPosition = new Vector2(0, TipHigh); return; }
             levelPanel.SetAsLastSibling();
             fade.transform.SetAsLastSibling();
+            // o letreiro da sala fica no mesmo lugar do titulo do painel: sai da frente
+            if (bannerRoot != null) bannerRoot.gameObject.SetActive(false);
+            if (tipRoot != null) tipRoot.anchoredPosition = new Vector2(0, TipLow);
             var center = new Vector2(0.5f, 0.5f);
-            var title = UiKit.Text(UiKit.Rect("Title", levelPanel, center, new Vector2(0, 330), new Vector2(1400, 100)), "NÍVEL " + level, 84, new Color(0.9f, 0.76f, 0.42f));
+            var title = UiKit.Text(UiKit.Rect("Title", levelPanel, center, new Vector2(0, 330), new Vector2(1400, 100)), heading ?? "NÍVEL " + level, 84, new Color(0.9f, 0.76f, 0.42f));
             title.font = GameFonts.Title;
-            UiKit.Text(UiKit.Rect("Sub", levelPanel, center, new Vector2(0, 258), new Vector2(1400, 40)), "Escolha um talento", 30, UiKit.Dim, TextAnchor.MiddleCenter, false);
+            UiKit.Text(UiKit.Rect("Sub", levelPanel, center, new Vector2(0, 258), new Vector2(1400, 40)), sub ?? "Escolha um talento", 30, UiKit.Dim, TextAnchor.MiddleCenter, false);
             for (int i = 0; i < offer.Count; i++)
             {
                 var t = offer[i];
@@ -377,6 +380,8 @@ namespace Quintessence.UI
         public string LastTip { get; private set; } = "";
 
         /// Dica curta no rodape, acima da barra de habilidades. Some sozinha.
+        const float TipHigh = 330f, TipLow = 96f;
+
         public void ShowTip(string text, float seconds = 7f)
         {
             if (tipRoot == null)
@@ -388,6 +393,8 @@ namespace Quintessence.UI
             }
             LastTip = text;
             tipText.text = text;
+            // com o painel de talento aberto a dica desce para baixo dos botoes de escolha
+            tipRoot.anchoredPosition = new Vector2(0, LevelUpVisible ? TipLow : TipHigh);
             tipLeft = seconds;
             tipRoot.gameObject.SetActive(true);
             tipRoot.SetSiblingIndex(Mathf.Max(0, fade.transform.GetSiblingIndex() - 1));
@@ -752,7 +759,9 @@ namespace Quintessence.UI
             var title = UiKit.Text(UiKit.Rect("Title", resultPanel, center, new Vector2(0, 200), new Vector2(1400, 120)),
                 victory ? "VITÓRIA" : "VOCÊ CAIU", 104, victory ? new Color(0.9f, 0.76f, 0.42f) : new Color(0.78f, 0.3f, 0.28f));
             title.font = GameFonts.Title;
-            UiKit.Text(UiKit.Rect("Stats", resultPanel, center, new Vector2(0, 62), new Vector2(1500, 180)), stats, 28, UiKit.Cream, TextAnchor.MiddleCenter, false);
+            var statsText = UiKit.Text(UiKit.Rect("Stats", resultPanel, center, new Vector2(0, 62), new Vector2(1500, 180)), stats, 28, UiKit.Cream, TextAnchor.MiddleCenter, false);
+            // com subida de maestria e Ascensao nova o texto passa de cinco linhas: encolhe em vez de vazar
+            statsText.resizeTextForBestFit = true; statsText.resizeTextMinSize = 18; statsText.resizeTextMaxSize = 28;
             UiKit.Focus(UiKit.Button(resultPanel, "Jogar de novo", center, new Vector2(0, -95), new Vector2(380, 70), UiKit.Primary, again).gameObject);
             UiKit.Button(resultPanel, "Menu principal", center, new Vector2(0, -185), new Vector2(380, 70), UiKit.Secondary, menu);
         }
