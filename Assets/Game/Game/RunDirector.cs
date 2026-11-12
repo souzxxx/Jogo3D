@@ -264,7 +264,8 @@ namespace Quintessence.Game
         public int TrialHits { get; private set; }
         /// Resultado da ultima Provacao (null = nenhuma terminou nesta run).
         public bool? LastTrialPassed { get; private set; }
-        float lastTrialHit = -99f;
+        float lastTrialHit = -99f, lastTrialCounted = -99f;
+        GameObject lastTrialSource;
         /// Sala cuja Provacao ja estava perdida no save (sair e continuar nao da outra chance).
         int restoredTrialLost = -1;
         bool trialForfeit;
@@ -280,7 +281,8 @@ namespace Quintessence.Game
             TrialLimit = Trials.TimeLimit(waves);
             TrialElapsed = 0f;
             TrialHits = 0;
-            lastTrialHit = -99f;
+            lastTrialHit = lastTrialCounted = -99f;
+            lastTrialSource = null;
             trialLostShown = false;
             trialForfeit = node.Id == restoredTrialLost;
             TrialActive = true;
@@ -291,10 +293,15 @@ namespace Quintessence.Game
         void OnDamageDealt(Health target, DamageInfo info, float applied)
         {
             if (!TrialActive || target != playerHealth || applied <= 0f || Busy) return;
-            // varios projeteis de uma vez ou tiques de poca seguidos sao um golpe so: a janela anda com cada dano
-            bool fresh = Time.time - lastTrialHit >= Trials.HitWindow;
-            lastTrialHit = Time.time;
-            if (!fresh) return;
+            // tiques seguidos da mesma fonte (poca, rastro) sao um golpe so: a janela anda so para ela.
+            // Golpes de fontes diferentes contam, a nao ser que cheguem juntos com o ultimo golpe contado
+            float now = Time.time;
+            bool sameStream = info.Source == lastTrialSource && now - lastTrialHit < Trials.HitWindow;
+            bool together = now - lastTrialCounted < Trials.HitWindow;
+            lastTrialHit = now;
+            lastTrialSource = info.Source;
+            if (sameStream || together) return;
+            lastTrialCounted = now;
             TrialHits++;
             UpdateTrialLabel();
         }

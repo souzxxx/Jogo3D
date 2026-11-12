@@ -40,14 +40,16 @@ namespace Quintessence.Game
             if ((tick -= Time.deltaTime) > 0f) return;
             tick = interval;
             Pulses++;
-            int n = Physics.OverlapSphereNonAlloc(transform.position + Vector3.up * 0.5f, radius, buffer, ~0, QueryTriggerInteraction.Ignore);
+            // no ultimo segundo a poca encolhe na tela e no efeito
+            float r = radius * Mathf.Min(1f, life);
+            int n = Physics.OverlapSphereNonAlloc(transform.position + Vector3.up * 0.5f, r, buffer, ~0, QueryTriggerInteraction.Ignore);
             seen.Clear();
             for (int i = 0; i < n; i++)
             {
                 var h = buffer[i].GetComponentInParent<Health>();
                 if (h == null || h.IsDead || !seen.Add(h)) continue;
                 var flat = h.transform.position - transform.position; flat.y = 0f;
-                if (flat.magnitude > radius) continue;
+                if (flat.magnitude > r) continue;
                 if (h.Team == Team.Player) { StatusHolder.GetOrAdd(h).Apply(StatusType.Soaked, 1f, Team.Enemy, gameObject); continue; }
                 // so criatura: barril e boneco nao ficam marcados
                 if (h.GetComponent<UnityEngine.AI.NavMeshAgent>() == null) continue;

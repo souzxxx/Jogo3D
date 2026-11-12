@@ -20,7 +20,7 @@ namespace Quintessence.Core
         public static bool ScreenShake
         {
             get { if (shake < 0) shake = PlayerPrefs.GetInt(ShakeKey, 1); return shake == 1; }
-            set { shake = value ? 1 : 0; PlayerPrefs.SetInt(ShakeKey, shake); }
+            set { shake = value ? 1 : 0; PlayerPrefs.SetInt(ShakeKey, shake); PlayerPrefs.Save(); }
         }
     }
 
@@ -36,7 +36,7 @@ namespace Quintessence.Core
         public static bool Relaxed
         {
             get { if (Force.HasValue) return Force.Value; if (relaxed < 0) relaxed = PlayerPrefs.GetInt(RelaxedKey, 0); return relaxed == 1; }
-            set { relaxed = value ? 1 : 0; PlayerPrefs.SetInt(RelaxedKey, relaxed); }
+            set { relaxed = value ? 1 : 0; PlayerPrefs.SetInt(RelaxedKey, relaxed); PlayerPrefs.Save(); } // no navegador so grava com Save
         }
 
         public static float HeroDamageTaken => Relaxed ? RelaxedDamageTaken : 1f;
@@ -52,13 +52,13 @@ namespace Quintessence.Core
         public static float Music
         {
             get { if (music < 0f) music = PlayerPrefs.GetFloat(MusicKey, 0.6f); return music; }
-            set { music = Mathf.Clamp01(value); PlayerPrefs.SetFloat(MusicKey, music); Changed?.Invoke(); }
+            set { music = Mathf.Clamp01(value); PlayerPrefs.SetFloat(MusicKey, music); PlayerPrefs.Save(); Changed?.Invoke(); }
         }
 
         public static float Effects
         {
             get { if (sfx < 0f) sfx = PlayerPrefs.GetFloat(SfxKey, 0.8f); return sfx; }
-            set { sfx = Mathf.Clamp01(value); PlayerPrefs.SetFloat(SfxKey, sfx); Changed?.Invoke(); }
+            set { sfx = Mathf.Clamp01(value); PlayerPrefs.SetFloat(SfxKey, sfx); PlayerPrefs.Save(); Changed?.Invoke(); }
         }
 
         /// Passo de volume em decimos, de 0 a 10 (o que a tela de pausa mostra).

@@ -920,6 +920,13 @@ namespace Quintessence.Game.PlayTests
                 for (int k = 0; k < 12; k++) yield return null;
             }
             Assert.AreEqual(1, director.TrialHits, "cinco tiques seguidos contam um golpe");
+            // ...mas um golpe de outra fonte no meio do fluxo conta (ficar na poca nao protege)
+            var other = new GameObject("OutroAtacante");
+            hp.TakeDamage(new DamageInfo(1f, ElementType.None, Team.Enemy));
+            for (int k = 0; k < 24; k++) yield return null;
+            hp.TakeDamage(new DamageInfo(1f, ElementType.None, Team.Enemy, other));
+            Assert.AreEqual(2, director.TrialHits, "golpe de outro inimigo conta mesmo com a poca ferindo");
+            Object.Destroy(other);
             Assert.AreEqual(Trials.TimeLimit(1), director.TrialLimit, 0.01f);
             for (int k = 0; k < 3000 && director.TrialElapsed <= director.TrialLimit; k++) yield return null;
             Assert.Greater(director.TrialElapsed, director.TrialLimit, "o relogio estourou");

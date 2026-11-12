@@ -145,6 +145,7 @@ namespace Quintessence.Game.PlayTests
                 }
             GameFlow.AutoPickTalents = false;
             MetaStore.UseKey(MetaStore.DefaultKey);
+            GamePrefs.Force = null;
             RunSaveStore.Clear();
             RunSaveStore.UseKey(RunSaveStore.DefaultKey);
             Tips.UseKey(Tips.DefaultKey);
