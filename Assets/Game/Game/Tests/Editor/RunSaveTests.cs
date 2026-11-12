@@ -64,7 +64,7 @@ namespace Quintessence.Game.Tests
             Assert.IsFalse(Tips.Consume("shrine"), "a mesma dica nao volta");
             Tips.UseKey("quintessence.tips.edittest"); // como se o jogo tivesse sido reaberto
             Assert.IsTrue(Tips.WasSeen("shrine"));
-            foreach (var id in new[] { "start", "level", "shrine", "react", "elite", "shop", "pact", "quint", "perfect", "guard", "banner", "shade", "crystal", "siege", "trial", "terrain" }) Assert.IsNotEmpty(Tips.Text(id), id);
+            foreach (var id in new[] { "start", "level", "shrine", "react", "elite", "shop", "pact", "quint", "perfect", "guard", "banner", "shade", "thorns", "crystal", "siege", "trial", "terrain" }) Assert.IsNotEmpty(Tips.Text(id), id);
             Tips.ResetAll();
             Tips.UseKey(Tips.DefaultKey);
         }

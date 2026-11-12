@@ -150,12 +150,13 @@ namespace Quintessence.Enemies
             bool blocked = guard != null && guard.LastBlocked;
             // Elite Espinhosos: o golpe basico (sem elemento) do heroi volta em parte para ele
             if (Scaling.Thorns > 0f && applied > 0f && !blocked && info.SourceTeam == Team.Player && info.Element == ElementType.None && !info.IsReaction
-                && info.Source != null && Time.time - lastThorns >= ThornsInterval && info.Source.TryGetComponent(out Health attacker) && !attacker.IsDead)
+                && info.Source != null && (Time.time - lastThorns >= ThornsInterval || lastThorns > Time.time)
+                && info.Source.TryGetComponent(out Health attacker) && !attacker.IsDead && attacker.Pool.Blocks <= 0)
             {
                 lastThorns = Time.time;
-                var back = new DamageInfo(Mathf.Max(1f, applied * Scaling.Thorns), ElementType.None, Team.Enemy, gameObject) { Point = attacker.transform.position };
-                attacker.TakeDamage(back);
-                GameEvents.RaiseThorns(attacker.transform.position);
+                // o bloqueio do Pilar fica para os golpes de verdade; o espinho nao conta como golpe de criatura
+                var back = new DamageInfo(Mathf.Max(1f, applied * Scaling.Thorns), ElementType.None, Team.Enemy, gameObject) { Point = attacker.transform.position, Reflected = true };
+                if (attacker.TakeDamage(back) > 0f) GameEvents.RaiseThorns(attacker.transform.position);
             }
             // golpe no escudo quase nao empurra e nao faz recuar: o Escudeiro so cede pelas costas
             if (!definition.immovable) knock += info.Direction * info.Knockback * (blocked ? 0.25f : 1f);

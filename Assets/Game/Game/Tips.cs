@@ -43,6 +43,7 @@ namespace Quintessence.Game
             "guard" => "Escudeiro: de frente o escudo segura quase tudo. Contorne, congele, enraíze ou use reações.",
             "banner" => "Porta-Estandarte: quem está no círculo dele bate e corre mais. Derrube-o primeiro.",
             "shade" => "Espectro: ele aparece no círculo nas suas costas. Não fique parado.",
+            "thorns" => "Espinhosos: o golpe básico volta em parte para você. Aqui, prefira as skills.",
             "crystal" => "Cristal de Ressonância: bata nele e ele marca os inimigos em volta com o elemento do trecho. Detone com outra skill.",
             "trial" => "Provação: cumpra o desafio do letreiro e ganhe um talento extra. Falhar só perde o prêmio.",
             "fusion" => "Três elementos: lance a skill do terceiro na lava do Magma, na nuvem do Vapor ou no lamaçal da Lama. É uma Fusão.",

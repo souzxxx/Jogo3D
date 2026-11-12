@@ -17,6 +17,8 @@ namespace Quintessence.Core
         public bool IsReaction;
         /// Nao conta como abate do heroi (quem desmorona no fim do Cerco): sem XP, sem recarga, nao explode nem se divide.
         public bool NoCredit;
+        /// Dano devolvido pelos espinhos de uma Elite Espinhosa: nao e golpe de criatura (esquiva nao cura nem e perfeita).
+        public bool Reflected;
 
         public DamageInfo(float amount, ElementType element, Team sourceTeam, GameObject source = null)
         {
@@ -30,6 +32,7 @@ namespace Quintessence.Core
             IsCrit = false;
             IsReaction = false;
             NoCredit = false;
+            Reflected = false;
         }
     }
 

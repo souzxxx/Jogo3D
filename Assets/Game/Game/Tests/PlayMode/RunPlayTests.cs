@@ -2212,22 +2212,39 @@ namespace Quintessence.Game.PlayTests
             var thorny = liveThorny();
             Assert.IsNotNull(thorny, "a Elite Espinhosa tem inimigos");
             Assert.AreEqual(DifficultyCurve.ThornsFraction, thorny.Scaling.Thorns, 0.001f);
+            var thornyHp = thorny.GetComponent<Health>();
+            // cura o alvo antes de cada golpe: o teste confere os espinhos, nao quanto o inimigo aguenta
+            System.Action<ElementType> hitThorny = element =>
+            {
+                thornyHp.Pool.Heal(thornyHp.Max);
+                thornyHp.TakeDamage(new DamageInfo(8f, element, Team.Player, player.gameObject));
+            };
             var heroHp = player.GetComponent<Health>();
             heroHp.Pool.Invulnerable = false;
             int thornEvents = 0;
             GameEvents.Thorns += _ => thornEvents++;
-            for (int k = 0; k < 15; k++) yield return null; // passa o intervalo dos espinhos
+            for (float t0 = Time.time; Time.time - t0 < EnemyBrain.ThornsInterval + 0.05f;) yield return null; // passa o intervalo dos espinhos
             float beforeThorns = heroHp.Current;
-            thorny.GetComponent<Health>().TakeDamage(new DamageInfo(20f, ElementType.None, Team.Player, player.gameObject));
+            hitThorny(ElementType.None);
             float afterThorns = heroHp.Current;
             Assert.Less(afterThorns, beforeThorns, "o golpe basico volta em parte para o heroi");
             Assert.AreEqual(1, thornEvents, "e o feedback avisa ESPINHOS");
-            thorny.GetComponent<Health>().TakeDamage(new DamageInfo(20f, ElementType.None, Team.Player, player.gameObject));
+            Assert.AreEqual(Tips.Text("thorns"), hud.LastTip, "o primeiro espinho explica a Elite");
+            hitThorny(ElementType.None);
             Assert.AreEqual(afterThorns, heroHp.Current, 0.001f, "dentro do intervalo nao volta de novo");
-            for (int k = 0; k < 15; k++) yield return null;
+            for (float t0 = Time.time; Time.time - t0 < EnemyBrain.ThornsInterval + 0.05f;) yield return null;
             float beforeSkill = heroHp.Current;
-            thorny.GetComponent<Health>().TakeDamage(new DamageInfo(20f, ElementType.Fire, Team.Player, player.gameObject));
+            hitThorny(ElementType.Fire);
             Assert.AreEqual(beforeSkill, heroHp.Current, 0.001f, "skill com elemento nao volta");
+            // o intervalo ja passou: um basico agora volta (prova que foi o filtro de elemento, e nao o intervalo, que segurou a skill)
+            hitThorny(ElementType.None);
+            Assert.Less(heroHp.Current, beforeSkill, "depois do intervalo o basico volta de novo");
+            // com o bloqueio do Pilar ativo o espinho nao gasta o bloqueio
+            for (float t0 = Time.time; Time.time - t0 < EnemyBrain.ThornsInterval + 0.05f;) yield return null;
+            heroHp.Pool.Blocks = 1;
+            hitThorny(ElementType.None);
+            Assert.AreEqual(1, heroHp.Pool.Blocks, "o espinho nao gasta o bloqueio do Pilar");
+            heroHp.Pool.Blocks = 0;
             heroHp.Pool.Invulnerable = true;
             GameFlow.Layers = 8; GameFlow.Shrines = 3;
             Time.captureFramerate = 0;

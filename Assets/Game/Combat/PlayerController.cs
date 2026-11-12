@@ -240,7 +240,7 @@ namespace Quintessence.Combat
 
         /// O golpe veio de uma criatura inimiga (anda pela malha de navegacao): poca, respiradouro, espinhos e barril nao contam.
         bool FromCreature(DamageInfo info) =>
-            info.SourceTeam != health.Team && info.Source != null && info.Source.TryGetComponent(out Health attacker) && attacker.Team != health.Team
+            info.SourceTeam != health.Team && !info.Reflected && info.Source != null && info.Source.TryGetComponent(out Health attacker) && attacker.Team != health.Team
             && info.Source.GetComponent<UnityEngine.AI.NavMeshAgent>() != null;
 
         float lastDodgeHeal = -9f;

@@ -321,6 +321,7 @@ namespace Quintessence.Game
             GameEvents.BossShieldChanged += OnBossShield;
             GameEvents.AttackPerformed += OnAttackForTrial;
             GameEvents.PerfectDodge += OnPerfectDodge;
+            GameEvents.Thorns += OnThorns;
         }
 
         // Pes no Chao: cada dash do heroi conta
@@ -514,6 +515,7 @@ namespace Quintessence.Game
         }
 
         void OnPerfectDodge(Vector3 at) => Tip("perfect");
+        void OnThorns(Vector3 at) => Tip("thorns");
 
         void OnAwakened(ElementType e)
         {
@@ -570,6 +572,7 @@ namespace Quintessence.Game
             GameEvents.BossShieldChanged -= OnBossShield;
             GameEvents.AttackPerformed -= OnAttackForTrial;
             GameEvents.PerfectDodge -= OnPerfectDodge;
+            GameEvents.Thorns -= OnThorns;
         }
 
         void Start()
