@@ -19,7 +19,7 @@ namespace Quintessence.Run
         public static string Describe(ElementType e) => e switch
         {
             ElementType.Fire => "Combo básico causa +15%",
-            ElementType.Water => "Cura 6% ao limpar a sala; Maré cura mais 3%",
+            ElementType.Water => "Cura 8% ao limpar a sala; Maré cura mais 3%",
             ElementType.Earth => "+20 de vida máxima",
             ElementType.Air => "+10% de velocidade, dash 20% mais rápido e 15% de esquiva",
             _ => "",
@@ -40,7 +40,7 @@ namespace Quintessence.Run
             switch (hero)
             {
                 case ElementType.Fire: m.BasicDamageMult += 0.15f; break;
-                case ElementType.Water: m.HealOnRoomClear += 0.06f; m.WaterHealAdd += 0.03f; break;
+                case ElementType.Water: m.HealOnRoomClear += 0.08f; m.WaterHealAdd += 0.03f; break;
                 case ElementType.Earth: m.MaxHealthAdd += 20f; break;
                 case ElementType.Air: m.MoveSpeedMult += 0.1f; m.DashCooldownMult *= 0.8f; m.Evasion += 0.15f; break;
             }

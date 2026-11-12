@@ -40,7 +40,7 @@ Quatro aprendizes, cada um nascido de um elemento. O jogador escolhe um no iníc
 | Herói | Quem é | Elemento e primeira skill | Passiva |
 |---|---|---|---|
 | **Rax** | Felino caçador, garras | Fogo · Labareda | Garras do Caçador: combo básico +15% |
-| **Liora** | Espírito cervo-raposa, orbe d'água | Água · Maré | Seiva da Fonte: cura 6% ao limpar a sala; a Maré cura mais 3% |
+| **Liora** | Espírito cervo-raposa, orbe d'água | Água · Maré | Seiva da Fonte: cura 8% ao limpar a sala; a Maré cura mais 3% |
 | **Brann** | Texugo veterano, martelo de pedra | Terra · Pilar de Pedra | Couro Velho: +20 de vida máxima |
 | **Vey** | Espírito do vento encapuzado, sem pernas, duas adagas | Ar · Vendaval | Passo de Brisa: +10% de velocidade, dash 20% mais rápido |
 

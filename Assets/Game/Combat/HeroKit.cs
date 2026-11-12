@@ -24,7 +24,7 @@ namespace Quintessence.Combat
             ElementType.Water => new HeroKit
             {
                 Steps = new[] { new ComboStep(7f, 0.32f, 0.13f, 2f), new ComboStep(7f, 0.32f, 0.13f, 2f), new ComboStep(12f, 0.48f, 0.2f, 5f) },
-                Range = 4.8f, Arc = 50f, CritChance = 0.05f, Style = "Chicote: alcança longe, numa faixa estreita",
+                Range = 4.8f, Arc = 65f, CritChance = 0.05f, Style = "Chicote: alcança longe, numa faixa estreita",
             },
             // Brann: martelo. Lento, largo e pesado.
             ElementType.Earth => new HeroKit
