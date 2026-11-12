@@ -11,7 +11,7 @@ namespace Quintessence.Enemies
         [SerializeField] float interval = 4.5f;
         [SerializeField] float windup = 1.1f;
         [SerializeField] float radius = 1.9f;
-        [SerializeField] float damage = 8f;
+        [SerializeField] float damage = 6f;
 
         float timer;
         bool warned;

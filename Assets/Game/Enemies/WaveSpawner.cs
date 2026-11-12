@@ -113,7 +113,7 @@ namespace Quintessence.Enemies
                     var pos = PickPoint(offset + 360f * k++ / Mathf.Max(1, total));
                     bool champion = Champion && index == waves.Count - 1 && k == 1;
                     var keep = Scaling;
-                    if (champion) Scaling = new EnemyScaling { Health = keep.Health * 2f, Damage = keep.Damage * 1.15f, Speed = keep.Speed, Cooldown = keep.Cooldown, Size = keep.Size * 1.3f };
+                    if (champion) Scaling = new EnemyScaling { Health = keep.Health * 1.7f, Damage = keep.Damage * 1.15f, Speed = keep.Speed, Cooldown = keep.Cooldown, Size = keep.Size * 1.3f };
                     var go = Instantiate(entry.prefab, pos, Quaternion.identity, transform);
                     Scaling = keep;
                     if (champion)

@@ -362,8 +362,8 @@ public static class EnemyDevSceneBuilder
         var bruteDef = Asset<EnemyDefinition>("Bruto", d =>
         {
             d.displayName = "Bruto"; d.maxHealth = 70; d.moveSpeed = 2.7f;
-            d.armored = true; d.armoredDamageTaken = 0.4f;
-            d.attack = EnemyAttackKind.Melee; d.damage = 16; d.knockback = 9;
+            d.armored = true; d.armoredDamageTaken = 0.5f;
+            d.attack = EnemyAttackKind.Melee; d.damage = 13; d.knockback = 9;
             d.attackRange = 3f; d.telegraphTime = 0.95f; d.recoverTime = 0.8f; d.cooldown = 2.2f;
             d.strikeOffset = 2f; d.strikeRadius = 2.4f;
         });
@@ -405,7 +405,7 @@ public static class EnemyDevSceneBuilder
         var lobberDef = Asset<EnemyDefinition>("Arremessador", d =>
         {
             d.displayName = "Arremessador"; d.maxHealth = 26; d.moveSpeed = 3.2f;
-            d.attack = EnemyAttackKind.Lob; d.damage = 12; d.knockback = 5;
+            d.attack = EnemyAttackKind.Lob; d.damage = 10; d.knockback = 5;
             d.attackRange = 10f; d.telegraphTime = 1.05f; d.recoverTime = 0.5f; d.cooldown = 2.8f;
             d.strikeRadius = 2.3f; d.keepDistance = 5f;
         });

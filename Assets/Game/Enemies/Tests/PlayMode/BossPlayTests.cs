@@ -119,7 +119,8 @@ namespace Quintessence.Enemies.PlayTests
             // teste de fluxo, nao de balanceamento: o roteiro nao sabe ler o anel nem a investida, entao leva 40% do dano
             hp.Pool.CurseMultiplier = 0.4f;
             float limit = 360f, sinceSwitch = 0f, immuneChecked = -1f;
-            bool testedImmune = false;
+            bool testedImmune = false, charged = false;
+            float meterAtShield = 0f;
             while (!cleared && !hp.IsDead && limit > 0f)
             {
                 float dt = Time.deltaTime;
@@ -130,11 +131,18 @@ namespace Quintessence.Enemies.PlayTests
                 // O medidor e completado por fora para a luta nao depender de quantas reacoes o roteiro consegue nos reforcos.
                 if (shielded && !testedImmune)
                 {
-                    if (immuneChecked < 0f) immuneChecked = bossHp.Current;
+                    if (immuneChecked < 0f) { immuneChecked = bossHp.Current; meterAtShield = player.Quintessence01; charged = false; }
+                    if (!player.QuintessenceActive && player.Quintessence01 > meterAtShield + 0.001f) charged = true;
                     if (limit < 360f && Vector3.Distance(player.transform.position, boss.transform.position) < 4f && player.IsAttacking)
                     {
                         yield return Step(); yield return Step(); yield return Step();
                         Assert.AreEqual(immuneChecked, bossHp.Current, 0.01f, "com o escudo o chefe nao leva dano");
+                        for (int k = 0; k < 90 && !charged; k++)
+                        {
+                            if (player.Quintessence01 > meterAtShield + 0.001f) charged = true;
+                            yield return Step();
+                        }
+                        Assert.IsTrue(charged, "bater no escudo carrega a Quintessencia");
                         testedImmune = true;
                         player.AddQuintessence(100f);
                         input.PressQuintessence();

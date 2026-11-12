@@ -11,6 +11,8 @@ namespace Quintessence.Enemies
     public static class BossRules
     {
         public const int Phases = 3;
+        /// Quanto cada golpe no escudo carrega a Quintessencia (a barra tem 100).
+        public const float ShieldCharge = 4f;
 
         /// 0, 1 ou 2 conforme a vida restante (terços).
         public static int PhaseFor(float healthFraction) =>

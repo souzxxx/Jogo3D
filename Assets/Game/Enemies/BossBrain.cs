@@ -76,7 +76,12 @@ namespace Quintessence.Enemies
         {
             if (who != health || !Shield.Up) return;
             if (Shield.Hit(quintessence)) DropShield();
-            else health.Pool.Blocks = 9999;
+            else
+            {
+                health.Pool.Blocks = 9999;
+                // golpe no escudo carrega a Quintessencia do heroi: a fase do escudo e para bater, nao para esperar
+                if (Shield.NeedsQuintessence && info.SourceTeam == Team.Player) GameEvents.RaiseQuintessenceCharge(BossRules.ShieldCharge);
+            }
         }
 
         void DropShield()
