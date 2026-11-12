@@ -141,13 +141,19 @@ namespace Quintessence.Combat
         void OnBlocked(Health target, DamageInfo info)
         {
             if (target != health || mods.EarthThorns <= 0f) return;
+            thorns = true;
             ShapedHit(ElementType.Earth, transform.position, AimDirection, 3.2f, 360f, mods.EarthThorns, 5f, AttackKind.Skill, 0f, false, default, 0f);
+            thorns = false;
         }
+
+        bool thorns;
 
         /// Impeto: cada inimigo derrotado adianta as recargas.
         void OnAnyDied(Health target, DamageInfo info)
         {
             if (mods.SkillRefundOnKill <= 0f || target == health || target.Team == health.Team) return;
+            // so criatura conta como abate (barril de polvora e boneco de treino nao andam pelo NavMesh)
+            if (target.GetComponent<UnityEngine.AI.NavMeshAgent>() == null) return;
             for (int i = 0; i < skillCd.Length; i++) if (skillCd[i] > 0f) skillCd[i] -= mods.SkillRefundOnKill;
         }
 
@@ -225,6 +231,8 @@ namespace Quintessence.Combat
         void Update()
         {
             if (health.IsDead || Input == null) return;
+            // pausado (menu, inventario, escolha de talento) ou no quadro em que a pausa saiu: nenhum comando vira acao
+            if (GameClock.Paused || Time.frameCount == GameClock.ResumedFrame) { dashBuffer = skillBuffer = 0f; return; }
             float dt = Time.deltaTime;
             for (int i = 0; i < skillCd.Length; i++) if (skillCd[i] > 0f) skillCd[i] -= dt;
             if (armorLeft > 0f && (armorLeft -= dt) <= 0f) health.Pool.Blocks = 0;
@@ -379,7 +387,7 @@ namespace Quintessence.Combat
                 case ElementType.Fire:
                     if (mods.FireTrailSeconds > 0f)
                         DamageZone.Spawn(origin + AimDirection * (reach * 0.55f), reach * 0.45f, mods.FireTrailSeconds, 0.5f, 4f * mods.Damage(ElementType.Fire),
-                            ElementType.Fire, health.Team, gameObject, reactions).WithStatus(StatusType.Burn, 2f);
+                            ElementType.Fire, health.Team, gameObject, reactions).WithStatus(StatusType.Burn, 2f).WithModifiers(mods);
                     break;
                 case ElementType.Water:
                     if (waterSkillHeal + mods.WaterHealAdd > 0f) health.Heal(health.Max * (waterSkillHeal + mods.WaterHealAdd));
@@ -456,7 +464,7 @@ namespace Quintessence.Combat
                 hits++;
                 if (applyStatus && !target.IsDead)
                     StatusHolder.GetOrAdd(target).Apply(statusType, statusDuration * mods.StatusDurationMult, health.Team, gameObject);
-                if (kind == AttackKind.Skill && castElement == ElementType.Water && mods.WaterFreezeSeconds > 0f && !target.IsDead)
+                if (kind == AttackKind.Skill && !thorns && castElement == ElementType.Water && mods.WaterFreezeSeconds > 0f && !target.IsDead)
                     StatusHolder.GetOrAdd(target).Apply(StatusType.Frozen, mods.WaterFreezeSeconds, health.Team, gameObject);
                 if (applySecond && !target.IsDead)
                     StatusHolder.GetOrAdd(target).Apply(secondType, secondDuration * mods.StatusDurationMult, health.Team, gameObject);

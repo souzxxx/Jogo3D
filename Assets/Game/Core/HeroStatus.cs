@@ -23,9 +23,12 @@ namespace Quintessence.Core
     public static class GameClock
     {
         public static bool Paused { get; private set; }
+        /// Quadro em que a pausa terminou: a tecla ou o botao que fechou o menu nao pode virar comando de jogo.
+        public static int ResumedFrame { get; private set; } = -1;
 
         public static void SetPaused(bool paused)
         {
+            if (Paused && !paused) ResumedFrame = UnityEngine.Time.frameCount;
             Paused = paused;
             UnityEngine.Time.timeScale = paused ? 0f : 1f;
         }

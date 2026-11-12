@@ -14,6 +14,7 @@ namespace Quintessence.Combat
         ReactionTable table;
         bool fromReaction, appliesStatus;
         StatusType status;
+        HeroModifiers mods;
         static readonly Collider[] buffer = new Collider[32];
         static readonly HashSet<Health> seen = new();
 
@@ -28,6 +29,9 @@ namespace Quintessence.Combat
             GameEvents.RaiseZoneSpawned(new ZoneEvent { Point = point, Radius = radius, Duration = duration, Element = element });
             return z;
         }
+
+        /// Zona criada pelo heroi: as reacoes que ela detonar usam os bonus dele (forca de reacao e talentos de par).
+        public DamageZone WithModifiers(HeroModifiers modifiers) { mods = modifiers; return this; }
 
         public DamageZone WithStatus(StatusType type, float duration)
         {
@@ -54,7 +58,8 @@ namespace Quintessence.Combat
                 if (h == null || h.Team == team || h.IsDead || !seen.Add(h)) continue;
                 if (damage > 0f)
                     ElementCombat.Deliver(h, new DamageInfo(damage, element, team, source)
-                        { Point = h.transform.position + Vector3.up * 1.2f, IsReaction = fromReaction }, table);
+                        { Point = h.transform.position + Vector3.up * 1.2f, IsReaction = fromReaction }, table,
+                        mods != null ? mods.ReactionPower : 1f, ElementType.None, mods);
                 if (appliesStatus && !h.IsDead) StatusHolder.GetOrAdd(h).Apply(status, statusDuration, team, source);
             }
         }
