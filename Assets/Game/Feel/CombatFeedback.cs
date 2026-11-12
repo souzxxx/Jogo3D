@@ -177,6 +177,12 @@ namespace Quintessence.Feel
 
         void OnDied(Health target, DamageInfo info)
         {
+            // o estandarte caiu: o circulo da aura some junto
+            if (target != null && target.TryGetComponent(out AuraSource _))
+            {
+                var ring = target.transform.Find("AuraRing");
+                if (ring != null) Destroy(ring.gameObject);
+            }
             if (target != null && target == boss)
             {
                 var bp = target.transform.position + Vector3.up * 2f;
@@ -283,7 +289,21 @@ namespace Quintessence.Feel
             var c = new Color(0.7f, 0.3f, 1f);
             Ring(p + Vector3.up * 0.2f, 30, 5f, 0.3f, 0.6f, 0.4f, c);
             Burst(p + Vector3.up * 0.3f, Vector3.up, 25f, 24, 2f, 7f, 0.3f, 0.7f, 0.55f, c);
+            // aura (Porta-Estandarte): um circulo no chao mostra quem esta fortalecido
+            if (enemy.TryGetComponent(out AuraSource aura))
+            {
+                var ring = new GameObject("AuraRing");
+                ring.transform.SetParent(enemy.transform, false);
+                ring.transform.localPosition = Vector3.up * 0.06f;
+                float s = aura.Radius / Mathf.Max(0.01f, enemy.transform.lossyScale.x);
+                ring.transform.localScale = new Vector3(s, 1f, s);
+                ring.AddComponent<MeshFilter>().sharedMesh = RingMesh;
+                auraMaterial ??= new Material(flatMaterial) { color = new Color(0.6f, 0.14f, 0.2f, 0.55f) }; // carmim: nao confunde com o anel do heroi nem com aviso de ataque
+                ring.AddComponent<MeshRenderer>().sharedMaterial = auraMaterial;
+            }
         }
+
+        Material auraMaterial;
 
         static readonly Color Steel = new(0.62f, 0.72f, 0.95f);
         float lastImmune = -10f;
