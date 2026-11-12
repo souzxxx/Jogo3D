@@ -60,6 +60,7 @@ namespace Quintessence.Feel
             var lim = fx.limitVelocityOverLifetime; lim.enabled = true; lim.dampen = 0.06f; lim.limit = 0.5f;
             go.GetComponent<ParticleSystemRenderer>().sharedMaterial = particleMaterial;
             fx.Play();
+            if (particleMaterial != null) accents = new ElementAccents(transform, particleMaterial);
         }
 
         void OnEnable()
@@ -161,6 +162,12 @@ namespace Quintessence.Feel
             Ring(p + Vector3.up * 0.4f, 60, e.Radius / 0.42f, 0.35f, 0.6f, 0.5f, b);
             Burst(p, Vector3.up, 60f, 50, 2f, 8f, 0.3f, 0.7f, 0.7f, Color.Lerp(a, b, 0.5f));
             LightFlash(p + Vector3.up, Color.Lerp(a, b, 0.5f), 12f, e.Radius * 3f, 0.4f);
+            if (accents != null)
+            {
+                // a reacao mostra os dois elementos do par, cada um do seu jeito
+                if (e.Mark != ElementType.None) accents.Emit(e.Mark, p, Vector3.forward, 180f, 26, e.Radius * 2.2f);
+                if (e.Trigger != ElementType.None) accents.Emit(e.Trigger, p, Vector3.forward, 180f, 26, e.Radius * 2.2f);
+            }
             DamageNumber.Spawn(e.Point + Vector3.up * 3.6f, (e.Name ?? "REACAO").ToUpperInvariant() + "!", Color.Lerp(Color.Lerp(a, b, 0.5f), Color.white, 0.5f), 1.25f, 1.1f);
             CameraShake.Add(0.55f);
             Stop(0.08f);
@@ -338,8 +345,18 @@ namespace Quintessence.Feel
             if (StatusTint(type).HasValue) Flash(target).SetTint(Color.white);
         }
 
+        ElementAccents accents;
+
         void OnAttack(AttackEvent e)
         {
+            if (accents != null && e.Element != ElementType.None)
+            {
+                bool radial = e.Kind == AttackKind.Skill && e.Arc >= 300f;
+                int n = e.Kind switch { AttackKind.Basic => 10, AttackKind.Finisher => 24, AttackKind.Skill => 70, AttackKind.Dash => 14, _ => 0 };
+                var from = e.Origin + Vector3.up * (radial ? 0.6f : 1.1f) + (radial ? Vector3.zero : e.Direction * 0.8f);
+                if (radial) accents.Emit(e.Element, from, Vector3.forward, 180f, n, e.Range * 1.8f);
+                else accents.Emit(e.Element, from, e.Kind == AttackKind.Dash ? -e.Direction : e.Direction, Mathf.Max(20f, e.Arc * 0.45f), n, e.Range * 1.8f);
+            }
             var c = ElementColors.Of(e.Element);
             var o = e.Origin + Vector3.up * 1.15f + e.Direction * 0.7f;
             switch (e.Kind)
@@ -390,6 +407,7 @@ namespace Quintessence.Feel
             Ring(player.position + Vector3.up * 0.25f, 44, 7f, 0.25f, 0.5f, 0.35f, c);
             Burst(player.position + Vector3.up * 1.2f, Vector3.up, 60f, 26, 2f, 6f, 0.25f, 0.5f, 0.4f, c);
             LightFlash(player.position + Vector3.up * 1.5f, c, 6f, 6f, 0.25f);
+            if (accents != null) accents.Emit(to, player.position + Vector3.up * 1.1f, Vector3.forward, 180f, 16, 3f);
         }
 
         void OnZone(ZoneEvent z) => zones.Add((z, z.Duration));

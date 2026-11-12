@@ -171,6 +171,37 @@ namespace Quintessence.Combat.PlayTests
         }
 
         [UnityTest]
+        public IEnumerator Each_Element_Has_Its_Own_Particles()
+        {
+            yield return Setup("fx");
+            var dummies = Object.FindObjectsByType<DummyTarget>(FindObjectsSortMode.None);
+            System.Array.Sort(dummies, (x, y) => Dist(x.transform).CompareTo(Dist(y.transform)));
+            var names = new Dictionary<ElementType, string>
+            {
+                { ElementType.Fire, "FxEmbers" }, { ElementType.Water, "FxDroplets" }, { ElementType.Earth, "FxDebris" }, { ElementType.Air, "FxWisps" },
+            };
+            foreach (var pair in names)
+            {
+                player.ResetLoadout(pair.Key);
+                input.AimPoint = dummies[0].transform.position;
+                yield return Play(0.5f);
+                var ps = GameObject.Find(pair.Value).GetComponent<ParticleSystem>();
+                int before = ps.particleCount;
+                input.PressSkill();
+                int most = 0;
+                // foto no meio do efeito
+                yield return Play(0.4f, () => most = Mathf.Max(most, ps.particleCount));
+                cam.targetTexture = rt; cam.Render(); cam.targetTexture = null;
+                RenderTexture.active = rt; tex.ReadPixels(new Rect(0, 0, rt.width, rt.height), 0, 0); RenderTexture.active = null;
+                File.WriteAllBytes($"docs/img/fx_{pair.Key.ToString().ToLowerInvariant()}.png", tex.EncodeToPNG());
+                yield return Play(0.25f, () => most = Mathf.Max(most, ps.particleCount));
+                Assert.Greater(most, before, $"a skill de {pair.Key} deveria soltar as particulas proprias do elemento");
+                yield return Play(1.6f); // deixa tudo sumir antes do proximo elemento
+            }
+            Time.captureFramerate = 0;
+        }
+
+        [UnityTest]
         public IEnumerator Hero_Fights_With_Fire_And_Water()
         {
             yield return Setup("combat");

@@ -78,6 +78,7 @@ namespace Quintessence.UI
         {
             canvas = UiKit.Canvas("HudCanvas", 10, transform);
             var root = canvas.transform;
+            FpsCounter.Attach(canvas);
             var center = new Vector2(0.5f, 0.5f);
 
             // vida

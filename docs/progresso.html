@@ -36,6 +36,41 @@
   <p class="sub">Entrega mais recente no topo. Escopo em <a href="ESCOPO.md">ESCOPO.md</a> · kanban em <a href="https://github.com/users/souzxxx/projects/4">GitHub Projects</a>.</p>
 
   <section>
+    <h2>Cada elemento com o seu efeito, e desempenho medido no navegador</h2>
+    <div class="meta"><span class="tag who">Miguel</span><span class="tag ok">429 testes de regra + 15 testes jogando, todos passando</span></div>
+    <img src="img/fx_elementos.png" alt="Skill de Fogo, Água, Terra e Ar">
+    <div class="cols">
+      <div>
+        <h3>Efeitos por elemento</h3>
+        <ul>
+          <li>Antes os quatro elementos usavam o mesmo efeito, mudando só a cor. Agora cada um se comporta de um jeito:</li>
+          <li><b>Fogo:</b> brasas que sobem e tremem</li>
+          <li><b>Água:</b> gotas alongadas que sobem e caem em arco</li>
+          <li><b>Terra:</b> lascas de pedra, poucas, pesadas e girando</li>
+          <li><b>Ar:</b> riscos finos e rápidos, sem peso</li>
+          <li>Aparecem no golpe, no finalizador, na skill, no dash e na troca de elemento. A reação solta os dois elementos do par</li>
+        </ul>
+        <h3 style="margin-top:14px">Desempenho</h3>
+        <ul>
+          <li><kbd>F3</kbd> mostra quadros por segundo e o pior quadro do último meio segundo</li>
+          <li>Medido no Chrome, em combate na primeira sala: <b>120 fps, pior quadro de 10 ms</b></li>
+          <li>Build de 19,3 MB (o teto que definimos é 80 MB). Não cortei nada: o maior item é o logo do Unity, que a licença gratuita não deixa tirar</li>
+        </ul>
+      </div>
+      <div>
+        <h3>Limites</h3>
+        <ul>
+          <li class="warn">A medição foi num Mac só, com dois inimigos na tela e antes dos efeitos novos entrarem. Não medi sala cheia, chefe, nem máquina fraca</li>
+          <li class="warn">Print parado não mostra o movimento: a diferença entre subir, cair e riscar só aparece jogando</li>
+          <li class="warn">As lascas de Terra saíram num tom oliva, mais claro que a pedra do cenário</li>
+          <li class="warn">A Quintessência e o chefe continuam com os efeitos de antes</li>
+        </ul>
+        <p style="color:var(--dim);margin:10px 0 0">Também acertei o escopo e o kanban do Miguel: vários itens já estavam entregues desde as primeiras semanas e seguiam marcados como pendentes.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
     <h2>Pausa refeita, Opções, Créditos, GDD e build conferida no navegador</h2>
     <div class="meta"><span class="tag who">Nicolas</span><span class="tag ok">429 testes de regra + 14 testes jogando, todos passando</span></div>
     <img src="img/pausa.png" alt="Pausa nova">

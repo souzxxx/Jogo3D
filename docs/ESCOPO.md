@@ -203,15 +203,15 @@ Sprints sem data até confirmar a entrega. S0 é de todos e destrava o resto.
 - [x] Contínuo · GDD em DDE: rascunho em `docs/GDD.md` (falta colar no Milanote, aprovar a lore proposta e fazer a página do itch)
 
 ### Miguel — Visual e feedback
-- [ ] S1 · Pipeline URP pra WebGL, luz de crepúsculo, pós-processamento
-- [ ] S1 · Flash de hit e destaque de inimigo marcado (sem toon/outline)
-- [ ] S2 · VFX de Fogo e Água (ataque, skill, dash, marca)
+- [x] S1 · Pipeline URP pra WebGL, luz de crepúsculo, pós-processamento (variação B, build WebGL rodando)
+- [x] S1 · Flash de hit e destaque de inimigo marcado (sem toon/outline)
+- [x] S2 · VFX de Fogo e Água (ataque, skill, dash, marca): brasas que sobem, gotas em arco
 - [x] S2 · Feedback de combate: hit stop, shake, números de dano, flash, anel de marca, barra de vida (primeira versão feita junto com o S2 do Leonardo)
 - [x] S2 · Telegrafia no chão dos ataques inimigos
-- [ ] S3 · VFX de Terra e Ar + as 6 reações
-- [ ] S3 · Kit de cenário do Planalto das Cinzas (chão, paredes, braseiros, rachaduras de brasa, cristais)
+- [x] S3 · VFX de Terra e Ar + as 6 reações: lascas de pedra, riscos de vento; a reação solta os dois elementos do par
+- [x] S3 · Kit de cenário do Planalto das Cinzas (chão, paredes, tochas, rachaduras de brasa, cristais, seis arranjos de sala)
 - [ ] S4 · VFX de Quintessência e do chefe
-- [ ] S4 · Passada de performance WebGL (draw calls, tamanho da build)
+- [x] S4 · Passada de performance WebGL: medidor no F3, 120 fps no Chrome em combate, build de 19,3 MB. Falta medir sala cheia, chefe e máquina fraca
 
 ---
 
