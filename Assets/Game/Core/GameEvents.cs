@@ -92,6 +92,8 @@ namespace Quintessence.Core
         public static event Action<Vector3, float> Exploded;
         /// (indice da onda comecando em 0, total de ondas)
         public static event Action<int, int> WaveStarted;
+        /// A run entrou num trecho novo: indice da musica de ambiente (0 = Saloes de Cinza).
+        public static event Action<int> AmbientChanged;
         /// Nasceu o Campeao de uma sala de Elite.
         public static event Action<Health> ChampionSpawned;
         /// Um inimigo curou outro: (quem recebeu, quanto).
@@ -128,6 +130,7 @@ namespace Quintessence.Core
         public static void RaiseBossShield(bool up, bool needsQuintessence) => BossShieldChanged?.Invoke(up, needsQuintessence);
         public static void RaiseArmorChanged(Health enemy, bool armored) => ArmorChanged?.Invoke(enemy, armored);
         public static void RaiseExploded(Vector3 point, float radius) => Exploded?.Invoke(point, radius);
+        public static void RaiseAmbient(int index) => AmbientChanged?.Invoke(index);
         public static void RaiseChampionSpawned(Health champion) => ChampionSpawned?.Invoke(champion);
         public static void RaiseEnemyHealed(Health target, float amount) => EnemyHealed?.Invoke(target, amount);
         public static void RaiseWaveStarted(int index, int total) => WaveStarted?.Invoke(index, total);
@@ -147,7 +150,7 @@ namespace Quintessence.Core
             DamageDealt = null; Died = null; HitBlocked = null; Shattered = null; MarkApplied = null; ReactionTriggered = null;
             MarkCleared = null; StatusApplied = null; StatusEnded = null; AttackPerformed = null; ZoneSpawned = null;
             TelegraphStarted = null; TelegraphCancelled = null; AttackMissed = null; EnemySpawned = null; WaveStarted = null; ArmorChanged = null; Exploded = null;
-            EnemyHealed = null; ChampionSpawned = null;
+            EnemyHealed = null; ChampionSpawned = null; AmbientChanged = null;
             BossSpawned = null; BossPhaseChanged = null; BossShieldChanged = null;
             ElementSwitched = null; ElementAwakened = null;
             QuintessenceMeterChanged = null; QuintessenceActiveChanged = null;

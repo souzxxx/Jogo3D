@@ -449,6 +449,8 @@ namespace Quintessence.Game
         /// Quem derrubou o heroi (para a tela de derrota e os testes).
         public string KilledBy { get; private set; } = "";
 
+        static string Plural(int n, string one, string many) => n == 1 ? $"1 {one}" : $"{n} {many}";
+
         public static string KillerName(GameObject source)
         {
             if (source == null) return "";
@@ -471,7 +473,7 @@ namespace Quintessence.Game
             int shards = MetaStore.Current.EndRun(Run.RoomsCleared, victory, Ascension.ShardMult(GameFlow.Ascension));
             MetaStore.Save();
             ShardsEarned = shards;
-            string stats = (GameFlow.Ascension > 0 ? $"Ascensão {GameFlow.Ascension}   ·   " : "") + $"{HeroPassives.HeroName(GameFlow.StartElement)}   ·   Nível {Run.Progress.Level}   ·   {Run.Kills} inimigos derrotados   ·   {Run.Talents.Count} talentos e {Run.Boons.Count} bênçãos"
+            string stats = (GameFlow.Ascension > 0 ? $"Ascensão {GameFlow.Ascension}   ·   " : "") + $"{HeroPassives.HeroName(GameFlow.StartElement)}   ·   Nível {Run.Progress.Level}   ·   {Plural(Run.Kills, "inimigo derrotado", "inimigos derrotados")}   ·   {Plural(Run.Talents.Count, "talento", "talentos")} e {Plural(Run.Boons.Count, "bênção", "bênçãos")}"
                 + (!victory && KilledBy.Length > 0 ? $"\nDerrubado por: {KilledBy}" : "")
                 + $"\nSalas vencidas: {Run.RoomsCleared}   ·   Essência: {Run.Essence}   ·   Elementos: {player.Loadout.Awakened.Count}/4   ·   Tempo: {seconds / 60}:{seconds % 60:00}"
                 + $"\n+{shards} Fragmentos para o Refúgio (total: {MetaStore.Current.Shards})";
@@ -485,6 +487,8 @@ namespace Quintessence.Game
         public void DressBiome(Biome biome, bool announce = false)
         {
             if (dresser != null) dresser.Apply(biome);
+            // musica do trecho: Cripta e Jardim tem faixa propria; o Coracao fica com a de luta do chefe
+            GameEvents.RaiseAmbient(biome == Biome.Crypt ? 1 : biome == Biome.Garden ? 2 : 0);
             if (biome == lastBiome) return;
             lastBiome = biome;
             if (!announce) return;

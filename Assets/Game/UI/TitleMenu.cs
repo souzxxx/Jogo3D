@@ -174,7 +174,7 @@ namespace Quintessence.UI
 
         public void ShowCredits()
         {
-            var box = OpenSheet("CRÉDITOS", 760);
+            var box = OpenSheet("CRÉDITOS", 800);
             void Line(float y, string text, int size, Color color, bool bold = false) =>
                 UiKit.Text(UiKit.Rect("Line", box, new Vector2(0.5f, 1), new Vector2(0, y), new Vector2(920, size + 10)), text, size, color, TextAnchor.MiddleCenter, bold);
             Line(-130, "Quintessence 3D", 34, new Color(0.88f, 0.74f, 0.42f), true);
@@ -186,10 +186,11 @@ namespace Quintessence.UI
             Line(-376, "Miguel Damasio · visual, feedback e som", 26, UiKit.Cream);
             Line(-440, "ASSETS", 24, UiKit.Dim, true);
             Line(-478, "Modelos e animações: KayKit, de Kay Lousberg (CC0)", 24, UiKit.Cream);
-            Line(-510, "Ícones: game-icons.net, de Lorc, Delapouite e outros (CC BY 3.0)", 24, UiKit.Cream);
-            Line(-542, "Fontes: Lilita One, Titillium Web e Cinzel Decorative (OFL)", 24, UiKit.Cream);
-            Line(-574, "Efeitos sonoros e música: sintetizados pela equipe", 24, UiKit.Cream);
-            Line(-622, "Feito com Unity 6", 22, UiKit.Dim);
+            Line(-510, "Heróis, Guardião, inimigos e adereços: modelados pela equipe no Blender sobre o KayKit", 24, UiKit.Cream);
+            Line(-542, "Ícones: game-icons.net, de Lorc, Delapouite e outros (CC BY 3.0)", 24, UiKit.Cream);
+            Line(-574, "Fontes: Lilita One, Titillium Web e Cinzel Decorative (OFL)", 24, UiKit.Cream);
+            Line(-606, "Efeitos sonoros e música: sintetizados pela equipe", 24, UiKit.Cream);
+            Line(-648, "Feito com Unity 6", 22, UiKit.Dim);
         }
 
         void BuildRefuge()
