@@ -973,6 +973,7 @@ namespace Quintessence.Game
             }
             if (bestTier > 0) parts.Add($"Sintonia de {Synergy.ElementName(best)} {(bestTier == 2 ? "II" : "I")}");
             if (player.Fusions > 0) parts.Add(Plural(player.Fusions, "Fusão", "Fusões"));
+            if (player.Cadences > 0) parts.Add(Plural(player.Cadences, "Cadência", "Cadências"));
             if (player.PerfectDodges > 0) parts.Add(Plural(player.PerfectDodges, "esquiva perfeita", "esquivas perfeitas"));
             foreach (var t in Run.Talents.Taken) if (t.Hero != ElementType.None) { parts.Add(t.Name); break; }
             return parts.Count > 0 ? "\nBuild: " + string.Join("   ·   ", parts) : "";

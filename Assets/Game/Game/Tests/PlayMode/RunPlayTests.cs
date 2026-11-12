@@ -1630,6 +1630,7 @@ namespace Quintessence.Game.PlayTests
             for (int k = 0; k < 600 && hero.Cadences == 0; k++) yield return null;
             Assert.GreaterOrEqual(hero.Cadences, 1, "skill de outro elemento logo depois da anterior entra na Cadencia");
             Assert.AreEqual(hero.Cadences, cadenceEvents, "cada Cadencia avisa o feedback");
+            StringAssert.Contains("Cadência", director.BuildLine(), "o resultado conta as Cadencias na linha Build");
             Assert.IsTrue(DamageZone.Active.Any(z => z.Fusable), "o Magma deixa a poca no chao");
             // a pausa de impacto da reacao corre em tempo real: no teste ela dura muitos quadros
             for (int k = 0; k < 1500 && hero.IsCasting; k++) yield return null; // termina o Pilar antes de pedir a proxima skill
