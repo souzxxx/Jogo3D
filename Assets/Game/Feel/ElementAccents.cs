@@ -78,13 +78,14 @@ namespace Quintessence.Feel
         }
 
         /// Solta o detalhe do elemento a partir de pos, na direcao dir (spread em graus para os lados), com forca power.
-        public void Emit(ElementType element, Vector3 pos, Vector3 dir, float spread, int count, float power)
+        public void Emit(ElementType element, Vector3 pos, Vector3 dir, float spread, int count, float power, Color? tint = null)
         {
             var ps = systems[(int)element];
             if (ps == null || count <= 0) return;
             if (dir.sqrMagnitude < 0.0001f) dir = Vector3.up;
             var basis = Quaternion.LookRotation(dir.normalized, Mathf.Abs(dir.normalized.y) > 0.95f ? Vector3.forward : Vector3.up);
-            var c = ElementColors.Of(element);
+            // tint troca a cor mantendo o comportamento (lascas de aco do escudo, cinzas do Guardiao)
+            var c = tint ?? ElementColors.Of(element);
             if (element == ElementType.Earth) count = Mathf.Max(1, count / 2);
             var p = new ParticleSystem.EmitParams();
             for (int i = 0; i < count; i++)

@@ -210,7 +210,7 @@ Sprints sem data até confirmar a entrega. S0 é de todos e destrava o resto.
 - [x] S2 · Telegrafia no chão dos ataques inimigos
 - [x] S3 · VFX de Terra e Ar + as 6 reações: lascas de pedra, riscos de vento; a reação solta os dois elementos do par
 - [x] S3 · Kit de cenário do Planalto das Cinzas (chão, paredes, tochas, rachaduras de brasa, cristais, seis arranjos de sala)
-- [ ] S4 · VFX de Quintessência e do chefe
+- [x] S4 · VFX de Quintessência e do chefe (aros do escudo, cinzas, estilhaço, morte; aura dos quatro elementos)
 - [x] S4 · Passada de performance WebGL: medidor no F3, 120 fps no Chrome em combate, build de 19,3 MB. Falta medir sala cheia, chefe e máquina fraca
 
 ---

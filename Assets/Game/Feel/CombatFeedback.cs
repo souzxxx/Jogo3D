@@ -142,6 +142,19 @@ namespace Quintessence.Feel
 
         void OnDied(Health target, DamageInfo info)
         {
+            if (target != null && target == boss)
+            {
+                var bp = target.transform.position + Vector3.up * 2f;
+                accents?.Emit(ElementType.Fire, bp, Vector3.forward, 180f, 200, 9f);
+                accents?.Emit(ElementType.Earth, bp, Vector3.forward, 180f, 120, 10f, Ash);
+                foreach (var e in Elements.All) Ring(bp + Vector3.up * (0.3f * (int)e), 70, 10f + 3f * (int)e, 0.5f, 1.1f, 0.8f, ElementColors.Of(e));
+                LightFlash(bp, Color.white, 22f, 24f, 1f);
+                CameraShake.Add(1.2f);
+                Stop(0.3f);
+                if (shieldCage != null) shieldCage.gameObject.SetActive(false);
+                shieldUp = false;
+                boss = null;
+            }
             var p = target.transform.position + Vector3.up * 1.2f;
             Burst(p, Vector3.up, 180f, 46, 3f, 11f, 0.2f, 0.55f, 0.55f, Color.Lerp(ElementColors.Of(info.Element), Color.white, 0.5f));
             LightFlash(p, Color.white, 6f, 6f, 0.25f);
@@ -237,6 +250,34 @@ namespace Quintessence.Feel
             LightFlash(p, new Color(1f, 0.5f, 0.15f), 16f, 18f, 0.8f);
             DamageNumber.Spawn(b.transform.position + Vector3.up * 6.5f, name.ToUpperInvariant(), new Color(1f, 0.7f, 0.3f), 1.7f, 2.4f);
             CameraShake.Add(0.8f);
+            // nasce das cinzas: brasas subindo e pedra voando em volta
+            accents?.Emit(ElementType.Fire, b.transform.position + Vector3.up, Vector3.forward, 180f, 90, 5f);
+            accents?.Emit(ElementType.Earth, b.transform.position + Vector3.up * 0.4f, Vector3.forward, 180f, 40, 6f, Ash);
+        }
+
+        static readonly Color Ash = new(0.42f, 0.38f, 0.36f);
+        Transform shieldCage;
+        Material shieldMat;
+        bool shieldUp, shieldNeedsQuint;
+        float bossEmit;
+
+        /// Tres aros girando em volta do Guardiao enquanto o escudo esta de pe.
+        void BuildShieldCage()
+        {
+            shieldCage = new GameObject("BossShieldCage").transform;
+            shieldCage.SetParent(transform, false);
+            shieldMat = new Material(flatMaterial) { color = new Color(Steel.r, Steel.g, Steel.b, 0.75f) };
+            var tilts = new[] { new Vector3(0, 0, 0), new Vector3(62, 0, 0), new Vector3(62, 120, 0) };
+            foreach (var t in tilts)
+            {
+                var ring = new GameObject("Ring");
+                ring.transform.SetParent(shieldCage, false);
+                ring.transform.localRotation = Quaternion.Euler(t);
+                ring.transform.localScale = Vector3.one * 2.7f;
+                ring.AddComponent<MeshFilter>().sharedMesh = RingMesh;
+                ring.AddComponent<MeshRenderer>().sharedMaterial = shieldMat;
+            }
+            shieldCage.gameObject.SetActive(false);
         }
 
         void OnBossPhase(int phase, int total)
@@ -249,12 +290,35 @@ namespace Quintessence.Feel
             DamageNumber.Spawn(boss.transform.position + Vector3.up * 6.5f, $"FASE {phase}", new Color(1f, 0.6f, 0.25f), 1.6f, 1.8f);
             CameraShake.Add(0.9f);
             Stop(0.15f);
+            accents?.Emit(ElementType.Fire, p, Vector3.forward, 180f, 110, 7f);
+            accents?.Emit(ElementType.Earth, p + Vector3.down, Vector3.forward, 180f, 50, 8f, Ash);
         }
 
         void OnBossShield(bool up, bool needsQuintessence)
         {
             if (boss == null) return;
             DamageNumber.Spawn(boss.transform.position + Vector3.up * 5.6f, up ? "ESCUDO!" : "ESCUDO QUEBRADO!", Steel, 1.4f, 1.8f);
+            if (up && needsQuintessence)
+                DamageNumber.Spawn(boss.transform.position + Vector3.up * 4.6f, "só a Quintessência quebra", Color.white, 0.9f, 2.6f);
+            if (shieldCage == null && flatMaterial != null) BuildShieldCage();
+            bool was = shieldUp;
+            shieldUp = up; shieldNeedsQuint = needsQuintessence;
+            if (shieldCage != null) shieldCage.gameObject.SetActive(up);
+            var p = boss.transform.position + Vector3.up * 2f;
+            if (up)
+            {
+                Ring(p, 70, 10f, 0.4f, 0.8f, 0.45f, Steel);
+                LightFlash(p, Steel, 9f, 10f, 0.4f);
+            }
+            else if (was)
+            {
+                // o escudo estilhaca: lascas de aco para todo lado
+                accents?.Emit(ElementType.Earth, p, Vector3.forward, 180f, 120, 11f, Steel);
+                Ring(p, 90, 16f, 0.5f, 1.1f, 0.5f, Color.white);
+                LightFlash(p, Color.white, 16f, 16f, 0.5f);
+                CameraShake.Add(0.9f);
+                Stop(0.14f);
+            }
         }
 
         void OnArmor(Health enemy, bool armored)
@@ -273,6 +337,8 @@ namespace Quintessence.Feel
             var c = new Color(1f, 0.5f, 0.1f);
             var p = point + Vector3.up * 0.8f;
             Ring(p, 70, radius / 0.25f, 0.6f, 1.3f, 0.4f, c);
+            accents?.Emit(ElementType.Fire, p, Vector3.forward, 180f, 36, radius * 1.6f);
+            accents?.Emit(ElementType.Earth, p, Vector3.forward, 180f, 16, radius * 2f, Ash);
             Burst(p, Vector3.up, 180f, 90, 3f, 13f, 0.4f, 1.2f, 0.6f, c);
             LightFlash(p + Vector3.up, c, 14f, radius * 3.5f, 0.4f);
             CameraShake.Add(0.6f);
@@ -324,13 +390,16 @@ namespace Quintessence.Feel
             {
                 foreach (var e in Elements.All) Ring(p + Vector3.up * (0.2f * (int)e), 50, 6f + 2f * (int)e, 0.4f, 0.8f, 0.6f, ElementColors.Of(e));
                 LightFlash(p, Color.white, 16f, 14f, 0.6f);
-                DamageNumber.Spawn(player.position + Vector3.up * 4f, "QUINTESSENCIA!", Color.white, 1.5f, 1.4f);
+                DamageNumber.Spawn(player.position + Vector3.up * 4f, "QUINTESSÊNCIA!", Color.white, 1.5f, 1.4f);
+                // os quatro elementos saem juntos, cada um do seu jeito
+                if (accents != null) foreach (var e in Elements.All) accents.Emit(e, p, Vector3.forward, 180f, 40, 7f);
                 CameraShake.Add(0.7f);
                 Stop(0.12f);
             }
             else
             {
                 Ring(p, 40, 8f, 0.3f, 0.5f, 0.4f, Color.white);
+                accents?.Emit(current, p, Vector3.forward, 180f, 30, 4f);
                 var c = ElementColors.Of(current);
                 presenceTarget = Color.Lerp(c, Color.white, 0.35f);
                 if (playerRingMat != null) playerRingMat.color = new Color(c.r, c.g, c.b, 0.9f);
@@ -543,7 +612,31 @@ namespace Quintessence.Feel
                         var e = Elements.All[Random.Range(0, 4)];
                         var off = Random.insideUnitCircle.normalized * 0.9f;
                         Burst(player.position + new Vector3(off.x, Random.Range(0.2f, 1.2f), off.y), Vector3.up, 15f, 2, 2f, 5f, 0.25f, 0.55f, 0.6f, ElementColors.Of(e));
+                        // aura: o detalhe de um elemento sorteado girando em volta do heroi
+                        var tangent = new Vector3(-off.y, 0, off.x);
+                        accents?.Emit(e, player.position + new Vector3(off.x, Random.Range(0.4f, 1.6f), off.y) * 1.2f, tangent, 25f, 2, 3.5f);
                     }
+                }
+            }
+
+            if (boss != null && !boss.IsDead)
+            {
+                // o Guardiao solta brasa e cinza o tempo todo
+                bossEmit -= dt;
+                if (bossEmit <= 0f)
+                {
+                    bossEmit = 0.06f;
+                    var bp = boss.transform.position + new Vector3(Random.Range(-0.8f, 0.8f), Random.Range(0.6f, 3f), Random.Range(-0.8f, 0.8f));
+                    accents?.Emit(ElementType.Fire, bp, Vector3.up, 40f, 1, 1.2f);
+                    if (Random.value < 0.35f) accents?.Emit(ElementType.Fire, bp, Vector3.up, 60f, 1, 0.8f, Ash);
+                }
+                if (shieldUp && shieldCage != null)
+                {
+                    shieldCage.position = boss.transform.position + Vector3.up * 2f;
+                    shieldCage.rotation = Quaternion.Euler(Time.time * 35f, Time.time * 80f, 0);
+                    // escudo que so a Quintessencia quebra gira pelas cores; o comum fica cor de aco
+                    var sc = shieldNeedsQuint ? Color.Lerp(Color.HSVToRGB(Mathf.Repeat(Time.time * 0.5f, 1f), 0.45f, 1f), Steel, 0.35f) : Steel;
+                    shieldMat.color = new Color(sc.r, sc.g, sc.b, 0.75f);
                 }
             }
 
