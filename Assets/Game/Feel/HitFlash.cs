@@ -7,6 +7,7 @@ namespace Quintessence.Feel
     {
         static readonly int BaseColor = Shader.PropertyToID("_BaseColor");
         Renderer[] renderers;
+        Color[] baseColors;
         MaterialPropertyBlock block;
         Color flash, tint = Color.white;
         float left, duration;
@@ -16,6 +17,13 @@ namespace Quintessence.Feel
         {
             renderers = GetComponentsInChildren<Renderer>(true);
             block = new MaterialPropertyBlock();
+            // a cor propria do material (cinza do Guardiao, tom quente do Explosivo) e preservada: o piscar multiplica por ela
+            baseColors = new Color[renderers.Length];
+            for (int i = 0; i < renderers.Length; i++)
+            {
+                var m = renderers[i] != null ? renderers[i].sharedMaterial : null;
+                baseColors[i] = m != null && m.HasProperty(BaseColor) ? m.GetColor(BaseColor) : Color.white;
+            }
         }
 
         public void Flash(Color color, float seconds = 0.14f)
@@ -30,12 +38,13 @@ namespace Quintessence.Feel
             if (!dirty) return;
             left -= Time.unscaledDeltaTime;
             float k = duration > 0f ? Mathf.Clamp01(left / duration) : 0f;
-            var c = Color.Lerp(tint, flash, k);
-            foreach (var r in renderers)
+            for (int i = 0; i < renderers.Length; i++)
             {
+                var r = renderers[i];
                 if (r == null || r is ParticleSystemRenderer) continue;
                 r.GetPropertyBlock(block);
-                block.SetColor(BaseColor, c);
+                // o tom de status multiplica a cor do material; o clarao do golpe cobre tudo
+                block.SetColor(BaseColor, Color.Lerp(baseColors[i] * tint, flash, k));
                 r.SetPropertyBlock(block);
             }
             if (left <= 0f) dirty = false;

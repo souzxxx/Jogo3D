@@ -73,16 +73,6 @@ namespace Quintessence.Enemies.PlayTests
             Assert.Less(hp.Current, hp.Max, "heroi parado deveria apanhar");
             Assert.Greater(telegraphsBeforeFirstHit, 0, "todo golpe tem aviso antes");
 
-            // ainda parado, quase sem levar dano, ate o atirador avisar ou disparar: nao depende da sorte da luta
-            float keep = hp.Pool.ExtraDamageTakenMultiplier;
-            hp.Pool.ExtraDamageTakenMultiplier = 0.02f;
-            for (float t = 10f; t > 0f && !sawProjectile; t -= Time.deltaTime)
-            {
-                if (Object.FindFirstObjectByType<Projectile>() != null) sawProjectile = true;
-                yield return Step();
-            }
-            hp.Pool.ExtraDamageTakenMultiplier = keep;
-
             // 2) agora joga: desvia dos avisos, bate, troca de elemento e usa skill ate limpar a sala
             dodging = true;
             float limit = 150f, sinceSwitch = 0f;
@@ -122,10 +112,27 @@ namespace Quintessence.Enemies.PlayTests
             input.AttackHeld = false;
 
             Assert.IsFalse(hp.IsDead, "o heroi morreu antes de limpar a sala");
+            var feedback = Object.FindFirstObjectByType<Quintessence.Feel.CombatFeedback>();
+            Assert.Greater(feedback.LastBonesDropped, 3, "inimigo morto deveria se desmontar em ossos");
             Assert.IsTrue(cleared, "a sala deveria ficar limpa quando a ultima onda morre");
             Assert.AreEqual(3, waves, "tres ondas");
             Assert.AreEqual(12, spawned, "3 + 4 + 5 (Bruto, 2 Explosivos, 2 Rastejantes)");
             Assert.IsTrue(sawArmor, "o Bruto nasce com armadura");
+            if (!sawProjectile)
+            {
+                // o roteiro matou os Atiradores antes do primeiro tiro: solta um longe do heroi parado e espera o aviso em linha
+                var shooter = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Game/Enemies/Prefabs/Atirador.prefab");
+                float keepShot = hp.Pool.ExtraDamageTakenMultiplier;
+                hp.Pool.ExtraDamageTakenMultiplier = 0.02f;
+                var side = player.transform.position.x > 0f ? -8f : 8f;
+                Object.Instantiate(shooter, player.transform.position + new Vector3(side, 0, 0), Quaternion.identity);
+                for (float t = 12f; t > 0f && !sawProjectile; t -= Time.deltaTime)
+                {
+                    if (Object.FindFirstObjectByType<Projectile>() != null) sawProjectile = true;
+                    yield return Step();
+                }
+                hp.Pool.ExtraDamageTakenMultiplier = keepShot;
+            }
             if (!sawExplosion)
             {
                 // o roteiro matou os Explosivos antes da hora: solta um ao lado do heroi parado e espera ele estourar

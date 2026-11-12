@@ -36,6 +36,60 @@
   <p class="sub">Entrega mais recente no topo. Escopo em <a href="ESCOPO.md">ESCOPO.md</a> · kanban em <a href="https://github.com/users/souzxxx/projects/4">GitHub Projects</a>.</p>
 
   <section>
+    <h2>Inimigo morto se desmonta em ossos</h2>
+    <div class="meta"><span class="tag who">Miguel</span><span class="tag ok">429 testes de regra + 16 testes jogando, todos passando</span></div>
+    <img src="img/morte_ossos.png" alt="Ossos espalhados depois da morte de um inimigo">
+    <div class="cols">
+      <div>
+        <h3>Como funciona</h3>
+        <ul>
+          <li>Ao morrer, o esqueleto se desmonta <b>nas próprias peças</b>: crânio, mandíbula, costelas, braços, pernas, capa e o que estiver carregando</li>
+          <li>As peças voam na direção do golpe, quicam no chão, param, e depois de uns 3 segundos encolhem e somem</li>
+          <li>Vale para os quatro inimigos e para o Guardião (que solta o machado, o escudo e os cristais)</li>
+          <li>Os bonecos do Treino não se desmontam, porque eles voltam</li>
+        </ul>
+      </div>
+      <div>
+        <h3>Também corrigido</h3>
+        <ul>
+          <li>O piscar de dano apagava a cor própria do inimigo depois do primeiro golpe (o tom quente do Explosivo, o cinza do Guardião). Agora ele multiplica por ela</li>
+        </ul>
+        <h3 style="margin-top:14px">Limites</h3>
+        <ul>
+          <li class="warn">Os ossos não colidem com as coberturas da sala nem entre si; só com o chão e as paredes de fora</li>
+          <li class="warn">Não medi o desempenho no navegador com muitos inimigos morrendo juntos</li>
+          <li class="warn">A animação de morte do pack deixou de aparecer: o corpo some na hora e ficam os ossos</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Guardião das Cinzas: primeira versão do visual próprio</h2>
+    <div class="meta"><span class="tag who">Enzo</span><span class="tag ok">teste novo confere machado, escudo e cristais</span></div>
+    <img src="img/guardiao_novo.png" alt="Guardião de frente e de costas">
+    <div class="cols">
+      <div>
+        <h3>O que mudou</h3>
+        <ul>
+          <li>Ossos em cinza escuro, em vez do esqueleto avermelhado</li>
+          <li><b>Machado</b> do pack na mão direita e <b>escudo</b> na esquerda</li>
+          <li><b>Cristais âmbar</b> da corrupção crescendo nas costas e nos ombros, os mesmos do cenário</li>
+        </ul>
+      </div>
+      <div>
+        <h3>Limites</h3>
+        <ul>
+          <li class="warn">É uma proposta para você olhar, não o chefe final: continua sendo o esqueleto guerreiro do pack ampliado</li>
+          <li class="warn">O machado fica apontado para o lado, porque a animação parada do pack é de mãos vazias</li>
+          <li class="warn">Os ataques continuam com as mesmas animações; ele não golpeia com o machado de um jeito próprio</li>
+          <li class="warn">Na câmera do jogo ele fica menor que nestas fotos de perto</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section>
     <h2>Efeitos do Guardião e da Quintessência</h2>
     <div class="meta"><span class="tag who">Miguel</span><span class="tag ok">429 testes de regra + 15 testes jogando, todos passando</span></div>
     <img src="img/chefe_fx.png" alt="Escudo de pé, escudo quebrando e morte do Guardião">

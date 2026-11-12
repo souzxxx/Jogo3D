@@ -160,8 +160,16 @@ namespace Quintessence.Feel
             LightFlash(p, Color.white, 6f, 6f, 0.25f);
             CameraShake.Add(0.3f);
             if (displays.TryGetValue(target, out var d)) { d.SetMark(ElementType.None); foreach (StatusType t in System.Enum.GetValues(typeof(StatusType))) d.SetStatus(t, false); }
-            Flash(target).SetTint(Color.white);
+            Flash(target).SetTint(Color.white);            // inimigo de verdade (anda pelo NavMesh) se desmonta nos proprios ossos; boneco de treino nao, porque ele volta
+            if (target.GetComponent<UnityEngine.AI.NavMeshAgent>() != null)
+            {
+                LastBonesDropped = BonePile.Scatter(target.gameObject, info.Direction);
+                accents?.Emit(ElementType.Earth, target.transform.position + Vector3.up * 0.8f, Vector3.forward, 180f, 16, 4f, new Color(0.8f, 0.76f, 0.68f));
+            }
         }
+
+        /// Quantas pecas o ultimo inimigo morto soltou (para os testes).
+        public int LastBonesDropped { get; private set; }
 
         void OnMark(ElementType element, Health target) => Display(target).SetMark(element);
         void OnMarkCleared(Health target) { if (target != null) Display(target).SetMark(ElementType.None); }
