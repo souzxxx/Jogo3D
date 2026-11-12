@@ -188,6 +188,8 @@ namespace Quintessence.Combat.PlayTests
                 var ps = GameObject.Find(pair.Value).GetComponent<ParticleSystem>();
                 int before = ps.particleCount;
                 input.PressSkill();
+                yield return Play(0.08f);
+                Assert.AreEqual("Skill" + pair.Key, player.GetComponentInChildren<PlayerAnimator>().Current, "cada elemento tem a sua animacao de skill");
                 int most = 0;
                 // foto no meio do efeito
                 yield return Play(0.4f, () => most = Mathf.Max(most, ps.particleCount));

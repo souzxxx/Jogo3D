@@ -40,9 +40,16 @@ public static class CombatDevSceneBuilder
         Loop(HeroFbx, "Idle", "Running_A");
         Loop(MinionFbx, "Idle", "Idle_Combat");
         var heroCtrl = Controller(HeroFbx, AnimDir + "Hero.controller",
-            ("Idle", "Idle", 0f), ("Run", "Running_A", 0f), ("Dash", "Dodge_Forward", 0.3f),
-            ("Attack0", "Spellcast_Shoot", 0.34f), ("Attack1", "Spellcast_Shoot", 0.34f),
-            ("Attack2", "Spellcast_Long", 0.5f), ("Skill", "Spellcast_Raise", 0.4f));
+            ("Idle", "Idle", 0f), ("Run", "Running_A", 0f),
+            // dash: a esquiva certa para o lado em que o heroi vai, em relacao a onde ele olha
+            ("DashF", "Dodge_Forward", 0.3f), ("DashB", "Dodge_Backward", 0.3f), ("DashL", "Dodge_Left", 0.3f), ("DashR", "Dodge_Right", 0.3f),
+            // combo: dois cortes de cajado e um golpe de cima para fechar
+            ("Attack0", "1H_Melee_Attack_Slice_Diagonal", 0.34f), ("Attack1", "1H_Melee_Attack_Slice_Horizontal", 0.34f),
+            ("Attack2", "2H_Melee_Attack_Chop", 0.5f),
+            // uma skill por elemento: disparo, varrida, erguer do chao e giro
+            ("SkillFire", "Spellcast_Shoot", 0.4f), ("SkillWater", "2H_Melee_Attack_Slice", 0.45f),
+            ("SkillEarth", "Spellcast_Raise", 0.6f), ("SkillAir", "2H_Melee_Attack_Spinning|2H_Melee_Attack_Spin", 0.45f),
+            ("Hit", "Hit_A", 0.3f), ("Death", "Death_A", 0f), ("Quint", "Cheer", 0.7f));
         dummyCtrl = Controller(MinionFbx, AnimDir + "Dummy.controller", ("Idle", "Idle_Combat", 0f));
 
         var root = LookDevBuilder.BeginArena(rootName);

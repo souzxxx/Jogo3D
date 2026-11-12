@@ -224,7 +224,7 @@ Sprints sem data até confirmar a entrega. S0 é de todos e destrava o resto.
 - [ ] Personalizar o chefe (hoje é o esqueleto guerreiro do pack ampliado) — pedido do Leonardo em 11/11
 - [x] HUD com ícones de verdade e barra de habilidades (11/11). Falta: botões e telas de pausa/resultado
 - [x] Menu de título com identidade própria: altar dos cinco, aprendiz, emblema e pedestal que acende com o mouse (11/11)
-- [ ] Passada única de animação: trocar as animações genéricas do pack (ataques, skills, dash, inimigos) — combinado em 11/11 deixar pro fim
+- [x] Passada única de animação (11/11): combo, skill por elemento, dash direcional, reação a dano, morte; inimigos recuam; Guardião com golpe saltado e rugido. Só clipes do pack
 - [ ] Trazer os heróis do Quintessence 2D (Rax, Liora, Brann, Vey) para o 3D no lugar do mago do pack — pedido do Leonardo em 11/11
 
 ## 9. Riscos
