@@ -73,6 +73,7 @@ namespace Quintessence.Game.PlayTests
             Assert.AreEqual(0, menu.HoveredElement);
             for (int i = 0; i < 40; i++) yield return null;
             Assert.Greater(title.LightOf(0), before + 2f, "o pedestal de Fogo deveria acender");
+            Assert.AreEqual(0, title.Cheering, "o Rax comemora quando a carta dele esta sob o mouse");
             Assert.Less(title.LightOf(1), before + 1f, "os outros ficam como estavam");
             Shot(Camera.main, "docs/img/titulo_fogo.png");
             GameObject.Find("Card_Rax").GetComponent<UiHover>().OnPointerExit(null);

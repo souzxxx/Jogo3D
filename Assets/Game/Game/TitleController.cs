@@ -13,6 +13,11 @@ namespace Quintessence.Game
         Light quint;
         Camera cam;
         Vector3 camHome;
+        readonly Animator[] heroes = new Animator[4];
+        int lastHovered = -1;
+        float cheerLeft;
+        /// Heroi que esta comemorando agora (para os testes).
+        public int Cheering { get; private set; } = -1;
 
         void Start()
         {
@@ -31,6 +36,11 @@ namespace Quintessence.Game
             quint = q != null ? q.GetComponent<Light>() : null;
             cam = Camera.main;
             if (cam != null) camHome = cam.transform.position;
+            for (int i = 0; i < 4; i++)
+            {
+                var h = GameObject.Find("TitleHero" + i);
+                heroes[i] = h != null ? h.GetComponent<Animator>() : null;
+            }
         }
 
         /// Intensidade atual da luz de um pedestal (para os testes).
@@ -41,6 +51,16 @@ namespace Quintessence.Game
             if (menu == null) return;
             int hovered = menu.HoveredElement;
             float dt = Time.unscaledDeltaTime;
+            // o heroi da carta sob o mouse comemora uma vez; depois volta a esperar
+            if (hovered != lastHovered)
+            {
+                if (lastHovered >= 0 && heroes[lastHovered] != null) heroes[lastHovered].CrossFadeInFixedTime("Idle", 0.2f);
+                if (hovered >= 0 && heroes[hovered] != null) { heroes[hovered].CrossFadeInFixedTime("Cheer", 0.15f); cheerLeft = 1.6f; }
+                Cheering = hovered;
+                lastHovered = hovered;
+            }
+            if (cheerLeft > 0f && (cheerLeft -= dt) <= 0f && Cheering >= 0 && heroes[Cheering] != null)
+                heroes[Cheering].CrossFadeInFixedTime("Idle", 0.25f);
             for (int i = 0; i < 4; i++)
                 if (lights[i] != null) lights[i].intensity = Mathf.Lerp(lights[i].intensity, i == hovered ? Lit : Dim, 1f - Mathf.Exp(-8f * dt));
             // o quinto respira sozinho: e o que ainda falta alcancar
