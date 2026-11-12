@@ -15,7 +15,7 @@ namespace Quintessence.Feel
         void OnDisable() { if (Instance == this) Instance = null; }
 
         /// 0..1; valores somam e saturam em 1.
-        public static void Add(float amount) { if (Instance != null) Instance.trauma = Mathf.Clamp01(Instance.trauma + amount); }
+        public static void Add(float amount) { if (Instance != null && Quintessence.Core.FxPrefs.ScreenShake) Instance.trauma = Mathf.Clamp01(Instance.trauma + amount); }
 
         void LateUpdate()
         {

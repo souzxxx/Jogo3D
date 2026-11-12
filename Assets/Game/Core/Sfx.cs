@@ -10,6 +10,20 @@ namespace Quintessence.Core
         public static void Play(string id) => Requested?.Invoke(id);
     }
 
+    /// Preferencias de efeito visual (acessibilidade), guardadas entre sessoes.
+    public static class FxPrefs
+    {
+        const string ShakeKey = "fx.shake";
+        static int shake = -1;
+
+        /// Tremor de camera em golpes e explosoes. Desligado, a camera fica parada.
+        public static bool ScreenShake
+        {
+            get { if (shake < 0) shake = PlayerPrefs.GetInt(ShakeKey, 1); return shake == 1; }
+            set { shake = value ? 1 : 0; PlayerPrefs.SetInt(ShakeKey, shake); }
+        }
+    }
+
     /// Volumes escolhidos pelo jogador (0..1), guardados entre sessoes.
     public static class AudioPrefs
     {
