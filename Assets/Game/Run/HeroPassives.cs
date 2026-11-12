@@ -21,7 +21,7 @@ namespace Quintessence.Run
             ElementType.Fire => "Combo básico causa +15%",
             ElementType.Water => "Cura 8% ao limpar a sala; Maré cura mais 3%",
             ElementType.Earth => "+20 de vida máxima",
-            ElementType.Air => "+10% de velocidade, dash 20% mais rápido e 15% de esquiva",
+            ElementType.Air => "+10% de velocidade, dash 20% mais rápido, 20% de esquiva e +10 de vida",
             _ => "",
         };
 
@@ -42,7 +42,7 @@ namespace Quintessence.Run
                 case ElementType.Fire: m.BasicDamageMult += 0.15f; break;
                 case ElementType.Water: m.HealOnRoomClear += 0.08f; m.WaterHealAdd += 0.03f; break;
                 case ElementType.Earth: m.MaxHealthAdd += 20f; break;
-                case ElementType.Air: m.MoveSpeedMult += 0.1f; m.DashCooldownMult *= 0.8f; m.Evasion += 0.15f; break;
+                case ElementType.Air: m.MoveSpeedMult += 0.1f; m.DashCooldownMult *= 0.8f; m.Evasion += 0.2f; m.MaxHealthAdd += 10f; break;
             }
         }
     }

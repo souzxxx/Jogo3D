@@ -41,7 +41,7 @@ namespace Quintessence.Combat
             ElementType.Air => new HeroKit
             {
                 Steps = new[] { new ComboStep(5.5f, 0.2f, 0.08f, 1f), new ComboStep(5.5f, 0.2f, 0.08f, 1f), new ComboStep(10f, 0.3f, 0.12f, 3f) },
-                Range = 3f, Arc = 95f, CritChance = 0.15f, Style = "Adagas: o mais rápido, mais crítico",
+                Range = 3.2f, Arc = 110f, CritChance = 0.15f, Style = "Adagas: o mais rápido, mais crítico",
                 Burst = new QuintBurst { Name = "Olho do Vendaval", Damage = 18f, Radius = 6f, Knockback = 11f, Applies = true, Status = StatusType.Blinded, StatusTime = 3f },
             },
             _ => new HeroKit

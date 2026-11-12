@@ -30,6 +30,7 @@ namespace Quintessence.Run.Tests
             Assert.AreEqual(0f, brann.Evasion);
             Assert.AreEqual(1f, brann.BasicDamageMult);
             Assert.AreEqual(0f, rax.MaxHealthAdd);
+            Assert.Less(vey.MaxHealthAdd, brann.MaxHealthAdd, "Vey ganha um pouco de vida, menos que Brann");
         }
     }
 }
