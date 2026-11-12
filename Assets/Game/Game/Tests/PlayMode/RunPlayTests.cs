@@ -817,7 +817,7 @@ namespace Quintessence.Game.PlayTests
             for (int k = 0; k < 25; k++) yield return null;
             var elite = Object.FindObjectsByType<EnemyBrain>(FindObjectsSortMode.None);
             Assert.Greater(elite.Length, 0);
-            float want = (1f + 0.07f * 4) * 1.5f;
+            float want = (1f + DifficultyCurve.HealthPerLayer * 4) * 1.5f;
             foreach (var e in elite)
             {
                 Assert.AreEqual(e.Definition.maxHealth * want, e.GetComponent<Health>().Max, 0.05f, "Resistentes: +50% sobre a vida da profundidade");

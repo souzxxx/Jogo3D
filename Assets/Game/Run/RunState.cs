@@ -82,9 +82,11 @@ namespace Quintessence.Run
                         Melee = 2 + depth / 3, Ranged = depth >= 1 ? 1 + depth / 3 - (depth >= 3 ? 1 : 0) : 0, Brute = depth >= 3 ? 1 : 0,
                         Lobber = depth >= 3 ? 1 + depth / 7 : 0, Shaman = depth >= 4 ? 1 : 0,
                     });
+                    // do meio da run em diante as salas comuns ganham uma terceira onda
+                    if (depth >= 5) waves.Add(new WavePlan { Melee = 1 + depth / 4, Ranged = 1, Charger = 1, Bomber = depth >= 7 ? 1 : 0 });
                     break;
                 case RoomType.Elite:
-                    waves.Add(new WavePlan { Melee = 2 + depth / 2, Ranged = 1, Bomber = 1, Charger = 1 });
+                    waves.Add(new WavePlan { Melee = 1 + depth / 2, Ranged = 1, Bomber = 1, Charger = 1 });
                     waves.Add(new WavePlan { Melee = 2 + depth / 3, Ranged = 1 + depth / 3, Brute = 1, Shaman = 1 });
                     waves.Add(new WavePlan { Melee = 2, Ranged = 1 + depth / 4, Brute = 1 + depth / 5, Bomber = 2, Lobber = 1 });
                     break;

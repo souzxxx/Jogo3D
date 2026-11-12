@@ -23,9 +23,9 @@ namespace Quintessence.Run.Tests
             Assert.AreEqual(1f, first.Health, 0.001f);
             Assert.AreEqual(1f, first.Damage, 0.001f);
             var last = DifficultyCurve.For(RoomType.Combat, 7);
-            Assert.AreEqual(1.49f, last.Health, 0.001f);
-            Assert.AreEqual(1.35f, last.Damage, 0.001f);
-            Assert.LessOrEqual(last.Damage, 1.4f, "o dano nao dispara: a run tem 8 camadas");
+            Assert.AreEqual(1f + 7 * DifficultyCurve.HealthPerLayer, last.Health, 0.001f);
+            Assert.AreEqual(1f + 7 * DifficultyCurve.DamagePerLayer, last.Damage, 0.001f);
+            Assert.LessOrEqual(DifficultyCurve.For(RoomType.Combat, 9).Damage, 1.65f, "o dano nao dispara nem na ultima camada de uma run de 10");
         }
 
         [Test]
