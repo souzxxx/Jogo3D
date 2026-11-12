@@ -233,6 +233,11 @@ namespace Quintessence.Game
         /// O chefe nao passa pela escala das salas: a Ascensao entra aqui.
         void OnBossSpawned(Health boss, string name)
         {
+            if (Run != null && !GameFlow.Tutorial)
+            {
+                bool final = Run.Current.Type == RoomType.Boss;
+                hud.ShowBanner(name.ToUpperInvariant(), final ? "Chefe final" : "Mini-chefe", final ? new Color(0.95f, 0.62f, 0.32f) : new Color(0.8f, 0.78f, 0.9f), 3f);
+            }
             if (GameFlow.Ascension <= 0 || boss == null) return;
             boss.Pool.SetMax(boss.Max * Ascension.HealthMult(GameFlow.Ascension));
         }

@@ -787,6 +787,7 @@ namespace Quintessence.Game.PlayTests
             var mini = Object.Instantiate(prefab, new Vector3(2.6f, 0, 1.6f), Quaternion.Euler(0, 210, 0)).GetComponent<BossBrain>();
             for (int k = 0; k < 45; k++) yield return null;
             Assert.AreEqual("Carrasco", name, "ele se anuncia como chefe (barra no alto)");
+            Assert.AreEqual("CARRASCO", hud.LastBanner, "e com o nome no letreiro");
             Assert.IsNotNull(mini.transform.Find("Model").GetComponentInChildren<Renderer>());
             var hp = mini.GetComponent<Health>();
             Assert.Less(hp.Max, 400f, "mini-chefe: bem menos vida que o Guardiao");
