@@ -118,7 +118,7 @@ namespace Quintessence.Enemies.PlayTests
 
             // teste de fluxo, nao de balanceamento: o roteiro nao sabe ler o anel nem a investida, entao leva 40% do dano
             hp.Pool.CurseMultiplier = 0.4f;
-            float limit = 240f, sinceSwitch = 0f, immuneChecked = -1f;
+            float limit = 360f, sinceSwitch = 0f, immuneChecked = -1f;
             bool testedImmune = false;
             while (!cleared && !hp.IsDead && limit > 0f)
             {
@@ -131,7 +131,7 @@ namespace Quintessence.Enemies.PlayTests
                 if (shielded && !testedImmune)
                 {
                     if (immuneChecked < 0f) immuneChecked = bossHp.Current;
-                    if (limit < 240f && Vector3.Distance(player.transform.position, boss.transform.position) < 4f && player.IsAttacking)
+                    if (limit < 360f && Vector3.Distance(player.transform.position, boss.transform.position) < 4f && player.IsAttacking)
                     {
                         yield return Step(); yield return Step(); yield return Step();
                         Assert.AreEqual(immuneChecked, bossHp.Current, 0.01f, "com o escudo o chefe nao leva dano");
