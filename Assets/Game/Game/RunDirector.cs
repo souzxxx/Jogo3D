@@ -183,6 +183,7 @@ namespace Quintessence.Game
             MetaStore.Current.ApplyTo(player.Modifiers);
             ApplyMaxHealth();
             Run.AddEssence(MetaStore.Current.StartEssence);
+            Run.Rerolls = MetaStore.Current.Rerolls;
             hud.SetEssence(Run.Essence);
             StartCoroutine(EnterRoom(Run.Current, true));
         }
@@ -555,7 +556,19 @@ namespace Quintessence.Game
             levelUpOpen = true;
             GameClock.SetPaused(true);
             hud.ShowMap(Run, false);
-            hud.ShowLevelUp(Run.Progress.Level - Run.Progress.PendingPicks + 1, talentOffer, PickTalent);
+            hud.ShowLevelUp(Run.Progress.Level - Run.Progress.PendingPicks + 1, talentOffer, PickTalent, Run.Rerolls, RerollTalents);
+        }
+
+        /// Troca as tres opcoes por outras (Intuicao, do Refugio). Publico para os testes.
+        public void RerollTalents()
+        {
+            if (!levelUpOpen || Run.Rerolls <= 0) return;
+            var fresh = TalentCatalog.Offer(Run.Talents, player.Loadout.Awakened, talentRng);
+            if (fresh.Count == 0) return;
+            Run.Rerolls--;
+            talentOffer = fresh;
+            Sfx.Play("ui_click");
+            hud.ShowLevelUp(Run.Progress.Level - Run.Progress.PendingPicks + 1, talentOffer, PickTalent, Run.Rerolls, RerollTalents);
         }
 
         void LevelUpKeys()
@@ -565,6 +578,7 @@ namespace Quintessence.Game
             if (kb.digit1Key.wasPressedThisFrame || kb.numpad1Key.wasPressedThisFrame) PickTalent(0);
             else if (kb.digit2Key.wasPressedThisFrame || kb.numpad2Key.wasPressedThisFrame) PickTalent(1);
             else if (kb.digit3Key.wasPressedThisFrame || kb.numpad3Key.wasPressedThisFrame) PickTalent(2);
+            else if (kb.tKey.wasPressedThisFrame) RerollTalents();
         }
 
         /// Pega o talento de indice index da oferta atual. Publico para os testes.

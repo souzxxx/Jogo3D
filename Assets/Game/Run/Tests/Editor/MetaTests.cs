@@ -127,5 +127,32 @@ namespace Quintessence.Run.Tests
             Assert.AreEqual(2, p.Level(MetaUpgrade.Purse));
             Assert.AreEqual(0, p.Level(MetaUpgrade.Focus), "nivel que falta no texto comeca em zero");
         }
+
+        [Test] public void Wisdom_RaisesXp_AndInsight_GivesRerolls()
+        {
+            var p = new MetaProgress();
+            p.AddShards(999);
+            Assert.AreEqual(0, p.Rerolls);
+            Assert.IsTrue(p.TryBuy(MetaUpgrade.Wisdom));
+            Assert.IsTrue(p.TryBuy(MetaUpgrade.Insight));
+            Assert.IsTrue(p.TryBuy(MetaUpgrade.Insight));
+            Assert.IsFalse(p.TryBuy(MetaUpgrade.Insight), "Intuicao tem dois niveis");
+            Assert.AreEqual(2, p.Rerolls);
+            var m = new Quintessence.Core.HeroModifiers();
+            p.ApplyTo(m);
+            Assert.AreEqual(1.08f, m.XpMult, 0.001f);
+            var back = MetaProgress.Parse(p.Serialize());
+            Assert.AreEqual(2, back.Rerolls);
+            Assert.AreEqual(1, back.Level(MetaUpgrade.Wisdom));
+        }
+
+        [Test] public void OldSaves_WithFiveUpgrades_StillLoad()
+        {
+            var p = MetaProgress.Parse("v1;40;3;1;7;2,1,0,3,1");
+            Assert.AreEqual(40, p.Shards);
+            Assert.AreEqual(2, p.Level(MetaUpgrade.Vigor));
+            Assert.AreEqual(0, p.Level(MetaUpgrade.Wisdom));
+            Assert.AreEqual(0, p.Rerolls);
+        }
     }
 }

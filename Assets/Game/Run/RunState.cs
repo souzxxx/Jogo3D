@@ -15,6 +15,8 @@ namespace Quintessence.Run
         public readonly Progression Progress = new();
         public readonly TalentBook Talents = new();
         public int Kills;
+        /// Trocas de oferta de talento que ainda restam nesta run.
+        public int Rerolls;
 
         public void AddBoon(Boon b) { Boons.Add(b); BoonIds.Add(b.id); }
 

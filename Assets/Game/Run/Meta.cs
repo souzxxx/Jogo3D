@@ -4,18 +4,18 @@ using Quintessence.Core;
 namespace Quintessence.Run
 {
     /// Melhorias permanentes do Refugio, compradas com Fragmentos entre uma run e outra.
-    public enum MetaUpgrade { Vigor, Power, Purse, Focus, Recovery }
+    public enum MetaUpgrade { Vigor, Power, Purse, Focus, Recovery, Wisdom, Insight }
 
     public static class MetaInfo
     {
-        public const int Count = 5;
-        static readonly string[] names = { "Vigor", "Força", "Bolsa", "Foco", "Fôlego" };
-        static readonly string[] icons = { "boon_health", "boon_damage", "essence", "boon_quint", "boon_rest" };
-        static readonly int[] maxLevel = { 5, 5, 3, 3, 3 };
-        static readonly int[] baseCost = { 10, 12, 8, 10, 14 };
-        static readonly int[] costStep = { 8, 10, 8, 10, 12 };
+        public const int Count = 7;
+        static readonly string[] names = { "Vigor", "Força", "Bolsa", "Foco", "Fôlego", "Sabedoria", "Intuição" };
+        static readonly string[] icons = { "boon_health", "boon_damage", "essence", "boon_quint", "boon_rest", "boon_skill", "boon_reaction" };
+        static readonly int[] maxLevel = { 5, 5, 3, 3, 3, 3, 2 };
+        static readonly int[] baseCost = { 10, 12, 8, 10, 14, 10, 16 };
+        static readonly int[] costStep = { 8, 10, 8, 10, 12, 10, 14 };
         /// Quanto cada nivel da: vida, fracao de dano, essencia, fracao de ganho, fracao de cura.
-        static readonly float[] perLevel = { 8f, 0.04f, 8f, 0.1f, 0.03f };
+        static readonly float[] perLevel = { 8f, 0.04f, 8f, 0.1f, 0.03f, 0.08f, 1f };
 
         public static string Name(MetaUpgrade u) => names[(int)u];
         public static string Icon(MetaUpgrade u) => icons[(int)u];
@@ -33,7 +33,9 @@ namespace Quintessence.Run
                 MetaUpgrade.Power => $"+{v * 100:0}% de dano",
                 MetaUpgrade.Purse => $"começa com {v:0} de Essência",
                 MetaUpgrade.Focus => $"Quintessência enche {v * 100:0}% mais rápido",
-                _ => $"cura {v * 100:0}% ao limpar a sala",
+                MetaUpgrade.Recovery => $"cura {v * 100:0}% ao limpar a sala",
+                MetaUpgrade.Wisdom => $"+{v * 100:0}% de experiência",
+                _ => v <= 1f ? "1 troca de talentos por run" : $"{v:0} trocas de talentos por run",
             };
         }
     }
@@ -79,6 +81,9 @@ namespace Quintessence.Run
             return earned;
         }
 
+        /// Quantas vezes por run da para trocar as tres opcoes de talento.
+        public int Rerolls => (int)(MetaInfo.PerLevel(MetaUpgrade.Insight) * Level(MetaUpgrade.Insight));
+
         public int StartEssence => (int)(MetaInfo.PerLevel(MetaUpgrade.Purse) * Level(MetaUpgrade.Purse));
 
         public void ApplyTo(HeroModifiers m)
@@ -87,6 +92,7 @@ namespace Quintessence.Run
             m.DamageAll += MetaInfo.PerLevel(MetaUpgrade.Power) * Level(MetaUpgrade.Power);
             m.QuintessenceGainMult += MetaInfo.PerLevel(MetaUpgrade.Focus) * Level(MetaUpgrade.Focus);
             m.HealOnRoomClear += MetaInfo.PerLevel(MetaUpgrade.Recovery) * Level(MetaUpgrade.Recovery);
+            m.XpMult += MetaInfo.PerLevel(MetaUpgrade.Wisdom) * Level(MetaUpgrade.Wisdom);
         }
 
         /// "v1;fragmentos;runs;vitorias;recorde;n0,n1,n2,n3,n4"

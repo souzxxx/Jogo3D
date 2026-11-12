@@ -61,7 +61,7 @@ namespace Quintessence.UI
         };
 
         /// Subiu de nivel: tres talentos, escolhe um (clique, 1/2/3 ou controle).
-        public void ShowLevelUp(int level, IReadOnlyList<Talent> offer, Action<int> pick)
+        public void ShowLevelUp(int level, IReadOnlyList<Talent> offer, Action<int> pick, int rerolls = 0, Action reroll = null)
         {
             if (levelPanel == null) levelPanel = Overlay("LevelUp", new Color(0.03f, 0.02f, 0.06f, 0.84f));
             foreach (Transform child in levelPanel) Destroy(child.gameObject);
@@ -95,6 +95,8 @@ namespace Quintessence.UI
                 var b = UiKit.Button(card, $"Escolher  [{i + 1}]", new Vector2(0.5f, 0), new Vector2(0, 26), new Vector2(300, 60), UiKit.Primary, () => pick(index));
                 if (i == 0) UiKit.Focus(b.gameObject);
             }
+            if (rerolls > 0 && reroll != null)
+                UiKit.Button(levelPanel, $"Trocar as opções  [T]  ·  restam {rerolls}", center, new Vector2(0, -330), new Vector2(520, 56), UiKit.Secondary, reroll);
         }
 
         class Tile { public RectTransform Root; public Image Back, Icon, Cooldown, Ring; public Text Key; }
