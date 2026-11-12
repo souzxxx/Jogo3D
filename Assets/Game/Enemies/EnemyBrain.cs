@@ -141,9 +141,22 @@ namespace Quintessence.Enemies
             return false;
         }
 
+        /// Intervalo minimo entre dois espinhos (de qualquer inimigo): pressiona o combo sem derreter o heroi.
+        public const float ThornsInterval = 0.35f;
+        static float lastThorns = -99f;
+
         void OnDamaged(DamageInfo info, float applied)
         {
             bool blocked = guard != null && guard.LastBlocked;
+            // Elite Espinhosos: o golpe basico (sem elemento) do heroi volta em parte para ele
+            if (Scaling.Thorns > 0f && applied > 0f && !blocked && info.SourceTeam == Team.Player && info.Element == ElementType.None && !info.IsReaction
+                && info.Source != null && Time.time - lastThorns >= ThornsInterval && info.Source.TryGetComponent(out Health attacker) && !attacker.IsDead)
+            {
+                lastThorns = Time.time;
+                var back = new DamageInfo(Mathf.Max(1f, applied * Scaling.Thorns), ElementType.None, Team.Enemy, gameObject) { Point = attacker.transform.position };
+                attacker.TakeDamage(back);
+                GameEvents.RaiseThorns(attacker.transform.position);
+            }
             // golpe no escudo quase nao empurra e nao faz recuar: o Escudeiro so cede pelas costas
             if (!definition.immovable) knock += info.Direction * info.Knockback * (blocked ? 0.25f : 1f);
             if (blocked) return;

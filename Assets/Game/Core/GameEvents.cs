@@ -154,6 +154,9 @@ namespace Quintessence.Core
         /// Uma skill de outro elemento entrou na janela da Cadencia.
         public static event Action<Vector3> Cadence;
         public static void RaiseCadence(Vector3 at) => Cadence?.Invoke(at);
+        /// Um inimigo Espinhoso devolveu parte do golpe basico ao heroi.
+        public static event Action<Vector3> Thorns;
+        public static void RaiseThorns(Vector3 at) => Thorns?.Invoke(at);
         public static void RaiseQuintessenceCharge(float amount) => QuintessenceCharge?.Invoke(amount);
         public static void RaiseAmbient(int index) => AmbientChanged?.Invoke(index);
         public static void RaiseChampionSpawned(Health champion) => ChampionSpawned?.Invoke(champion);
@@ -175,7 +178,7 @@ namespace Quintessence.Core
             DamageDealt = null; Died = null; HitBlocked = null; Shattered = null; MarkApplied = null; ReactionTriggered = null;
             MarkCleared = null; StatusApplied = null; StatusEnded = null; AttackPerformed = null; ZoneSpawned = null;
             TelegraphStarted = null; TelegraphCancelled = null; AttackMissed = null; EnemySpawned = null; WaveStarted = null; ArmorChanged = null; Exploded = null; PuddleLanded = null; QuintessenceBurst = null;
-            EnemyHealed = null; ChampionSpawned = null; AmbientChanged = null; QuintessenceCharge = null; Evaded = null; Dodged = null; PerfectDodge = null; Cadence = null;
+            EnemyHealed = null; ChampionSpawned = null; AmbientChanged = null; QuintessenceCharge = null; Evaded = null; Dodged = null; PerfectDodge = null; Cadence = null; Thorns = null;
             BossSpawned = null; BossPhaseChanged = null; BossShieldChanged = null;
             ElementSwitched = null; ElementAwakened = null;
             QuintessenceMeterChanged = null; QuintessenceActiveChanged = null;

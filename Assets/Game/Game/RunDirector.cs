@@ -852,7 +852,7 @@ namespace Quintessence.Game
             var diff = DifficultyCurve.For(type, depth, trait);
             diff.Health *= Ascension.HealthMult(GameFlow.Ascension);
             diff.Damage *= Ascension.DamageMult(GameFlow.Ascension);
-            spawner.Scaling = new EnemyScaling { Health = diff.Health, Damage = diff.Damage, Speed = diff.Speed, Cooldown = diff.Cooldown, Size = diff.Size, Volatile = diff.Volatile, Wards = diff.Wards, Splits = diff.Splits };
+            spawner.Scaling = new EnemyScaling { Health = diff.Health, Damage = diff.Damage, Speed = diff.Speed, Cooldown = diff.Cooldown, Size = diff.Size, Volatile = diff.Volatile, Wards = diff.Wards, Splits = diff.Splits, Thorns = diff.Thorns };
             spawner.SplitPrefab = swarmPrefab;
             CurrentTrait = trait;
             if (trait != EliteModifier.None)

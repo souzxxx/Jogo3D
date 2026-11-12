@@ -10,6 +10,8 @@ namespace Quintessence.Enemies
         public int Wards;
         /// Ao cair, vira dois Cinzentos (Elite Divisores). Os Cinzentos nao se dividem.
         public bool Splits;
+        /// Fracao do golpe basico do heroi devolvida a ele (Elite Espinhosos).
+        public float Thorns;
         public static EnemyScaling None => new() { Health = 1f, Damage = 1f, Speed = 1f, Cooldown = 1f, Size = 1f };
     }
 }

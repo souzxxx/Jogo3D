@@ -2198,6 +2198,36 @@ namespace Quintessence.Game.PlayTests
             var babies = Object.FindObjectsByType<EnemyBrain>(FindObjectsSortMode.None).Where(e => e.Definition.displayName == "Cinzento" && !e.GetComponent<Health>().IsDead).ToList();
             Assert.GreaterOrEqual(babies.Count, 2);
             Assert.IsFalse(babies.Any(b => b.Scaling.Splits), "os Cinzentos nao se dividem de novo");
+
+            // Espinhosos: o golpe basico do heroi volta em parte para ele; skill com elemento nao
+            foreach (var e in Object.FindObjectsByType<EnemyBrain>(FindObjectsSortMode.None)) Object.Destroy(e.gameObject);
+            yield return null;
+            director.StartEncounter(RoomType.Elite, 4, EliteModifier.Thorny);
+            // a camera lenta do abate anterior atrasa a onda: espera alguem de corpo a corpo nascer
+            System.Func<EnemyBrain> liveThorny = () => Object.FindObjectsByType<EnemyBrain>(FindObjectsSortMode.None)
+                .FirstOrDefault(e => e.Definition.attack != EnemyAttackKind.Explode && !e.GetComponent<Health>().IsDead && e.Scaling.Thorns > 0f);
+            for (int k = 0; k < 3000 && liveThorny() == null; k++) yield return null;
+            for (int k = 0; k < 25; k++) yield return null;
+            var thorny = liveThorny();
+            Assert.IsNotNull(thorny, "a Elite Espinhosa tem inimigos");
+            Assert.AreEqual(DifficultyCurve.ThornsFraction, thorny.Scaling.Thorns, 0.001f);
+            var heroHp = player.GetComponent<Health>();
+            heroHp.Pool.Invulnerable = false;
+            int thornEvents = 0;
+            GameEvents.Thorns += _ => thornEvents++;
+            for (int k = 0; k < 15; k++) yield return null; // passa o intervalo dos espinhos
+            float beforeThorns = heroHp.Current;
+            thorny.GetComponent<Health>().TakeDamage(new DamageInfo(20f, ElementType.None, Team.Player, player.gameObject));
+            float afterThorns = heroHp.Current;
+            Assert.Less(afterThorns, beforeThorns, "o golpe basico volta em parte para o heroi");
+            Assert.AreEqual(1, thornEvents, "e o feedback avisa ESPINHOS");
+            thorny.GetComponent<Health>().TakeDamage(new DamageInfo(20f, ElementType.None, Team.Player, player.gameObject));
+            Assert.AreEqual(afterThorns, heroHp.Current, 0.001f, "dentro do intervalo nao volta de novo");
+            for (int k = 0; k < 15; k++) yield return null;
+            float beforeSkill = heroHp.Current;
+            thorny.GetComponent<Health>().TakeDamage(new DamageInfo(20f, ElementType.Fire, Team.Player, player.gameObject));
+            Assert.AreEqual(beforeSkill, heroHp.Current, 0.001f, "skill com elemento nao volta");
+            heroHp.Pool.Invulnerable = true;
             GameFlow.Layers = 8; GameFlow.Shrines = 3;
             Time.captureFramerate = 0;
         }

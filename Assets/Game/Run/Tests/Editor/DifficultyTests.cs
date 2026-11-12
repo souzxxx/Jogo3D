@@ -83,7 +83,19 @@ namespace Quintessence.Run.Tests
                 Assert.IsNotEmpty(DifficultyCurve.Name(m));
                 Assert.IsNotEmpty(DifficultyCurve.Describe(m));
             }
-            Assert.AreEqual(6, seen.Count, "os seis tracos saem");
+            Assert.AreEqual(7, seen.Count, "os sete tracos saem");
+        }
+
+        [Test]
+        public void Thorny_Returns_Part_Of_The_Basic_Hit_Only_In_Elites()
+        {
+            var t = DifficultyCurve.For(RoomType.Elite, 4, EliteModifier.Thorny);
+            Assert.AreEqual(DifficultyCurve.ThornsFraction, t.Thorns, 1e-4f);
+            Assert.AreEqual(0.15f, DifficultyCurve.ThornsFraction, 1e-4f);
+            Assert.AreEqual(0f, DifficultyCurve.For(RoomType.Combat, 4, EliteModifier.Thorny).Thorns, "sala comum nao tem traco");
+            Assert.AreEqual(0f, DifficultyCurve.For(RoomType.Elite, 4, EliteModifier.Warded).Thorns);
+            Assert.AreEqual("Espinhosos", DifficultyCurve.Name(EliteModifier.Thorny));
+            StringAssert.Contains("skills", DifficultyCurve.Describe(EliteModifier.Thorny));
         }
 
         [Test]

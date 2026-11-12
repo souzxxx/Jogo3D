@@ -3,7 +3,7 @@ using System;
 namespace Quintessence.Run
 {
     /// O que deixa uma sala de Elite diferente: os inimigos ganham um traco, alem de virem em tres ondas.
-    public enum EliteModifier { None, Swift, Sturdy, Fierce, Volatile, Warded, Splitting }
+    public enum EliteModifier { None, Swift, Sturdy, Fierce, Volatile, Warded, Splitting, Thorny }
 
     /// Multiplicadores aplicados aos inimigos de uma sala. 1 = como esta na ficha do inimigo.
     public struct Difficulty
@@ -15,12 +15,14 @@ namespace Quintessence.Run
         public int Wards;
         /// Ao cair, vira dois Cinzentos (Elite Divisores).
         public bool Splits;
+        /// Fracao do golpe basico devolvida ao heroi (Elite Espinhosos).
+        public float Thorns;
         public static Difficulty Base => new() { Health = 1f, Damage = 1f, Speed = 1f, Cooldown = 1f, Size = 1f };
     }
 
     public static class DifficultyCurve
     {
-        public const float SturdyHealth = 1.35f, FierceDamage = 1.2f, SwiftSpeed = 1.2f, SwiftCooldown = 0.85f;
+        public const float SturdyHealth = 1.35f, FierceDamage = 1.2f, SwiftSpeed = 1.2f, SwiftCooldown = 0.85f, ThornsFraction = 0.15f;
 
         /// Vida e dano dos inimigos crescem com a profundidade: a primeira sala usa a ficha do inimigo e cada camada
         /// soma 9% de vida e 6,5% de dano. O tempo de aviso dos golpes nunca muda.
@@ -45,6 +47,7 @@ namespace Quintessence.Run
                 case EliteModifier.Volatile: d.Volatile = true; break;
                 case EliteModifier.Warded: d.Wards = 1; d.Health *= 1.15f; break;
                 case EliteModifier.Splitting: d.Splits = true; d.Health *= 0.85f; break;
+                case EliteModifier.Thorny: d.Thorns = ThornsFraction; break;
             }
             return d;
         }
@@ -56,7 +59,7 @@ namespace Quintessence.Run
             {
                 uint h = (uint)seed * 2654435761u ^ (uint)(nodeId + 1) * 40503u;
                 h ^= h >> 13; h *= 2246822519u; h ^= h >> 16;
-                return (EliteModifier)(1 + h % 6);
+                return (EliteModifier)(1 + h % 7);
             }
         }
 
@@ -68,6 +71,7 @@ namespace Quintessence.Run
             EliteModifier.Volatile => "Voláteis",
             EliteModifier.Warded => "Protegidos",
             EliteModifier.Splitting => "Divisores",
+            EliteModifier.Thorny => "Espinhosos",
             _ => "",
         };
 
@@ -79,6 +83,7 @@ namespace Quintessence.Run
             EliteModifier.Volatile => "explodem ao morrer: saia do círculo",
             EliteModifier.Warded => "o primeiro golpe em cada um é bloqueado",
             EliteModifier.Splitting => "ao cair, cada um vira dois Cinzentos: área resolve",
+            EliteModifier.Thorny => "devolvem 15% do golpe básico: use as skills",
             _ => "",
         };
     }
