@@ -107,6 +107,24 @@ namespace Quintessence.Game
             biome == Biome.Crypt && cryptMiniBossPrefab != null ? cryptMiniBossPrefab
             : biome == Biome.Garden && gardenMiniBossPrefab != null ? gardenMiniBossPrefab : miniBossPrefab;
         Biome encounterBiome = Biome.Ashes;
+        GameObject encounterMiniBoss;
+
+        /// Mini-chefe de uma sala de Elite: sorteado pela semente e pela sala entre os tres (com 10 camadas a Elite com
+        /// mini-chefe so cai no Jardim, entao o trecho sozinho deixaria dois deles de fora).
+        public GameObject MiniBossForRoom(int seed, int nodeId)
+        {
+            var options = new[] { miniBossPrefab, cryptMiniBossPrefab, gardenMiniBossPrefab };
+            int pick = (int)((((long)seed * 7919 + nodeId * 104729) % 3 + 3) % 3);
+            for (int i = 0; i < 3; i++) { var o = options[(pick + i) % 3]; if (o != null) return o; }
+            return null;
+        }
+
+        /// Nome do mini-chefe para a porta da Elite.
+        public string MiniBossName(int seed, int nodeId)
+        {
+            var p = MiniBossForRoom(seed, nodeId);
+            return p != null && p.TryGetComponent(out BossBrain b) && b.Definition != null ? b.Definition.displayName : "o mini-chefe";
+        }
         public void BindElementals(GameObject swarm, GameObject ember, GameObject sentinel) { swarmPrefab = swarm; emberPrefab = ember; sentinelPrefab = sentinel; }
         public void BindGuard(GameObject guard) => guardPrefab = guard;
         [SerializeField] GameObject bannerPrefab;
@@ -132,7 +150,7 @@ namespace Quintessence.Game
             {
                 var f = CrystalSpots[(start + i) % CrystalSpots.Length];
                 var pos = new Vector3(f.x * Arena.HalfX, 0f, f.z * Arena.HalfZ);
-                // nao em cima de peca do arranjo (barreira, pilar, barril, poca) nem fora do chao navegavel
+                // nao em cima de peca do arranjo (barreira, pilar, barril) nem fora do chao navegavel; perigos de chao abaixo
                 // (a esfera fica acima do piso: o colisor do chao nao conta)
                 if (Physics.CheckSphere(pos + Vector3.up * 1.2f, 0.9f, ~0, QueryTriggerInteraction.Ignore)) continue;
                 if (!UnityEngine.AI.NavMesh.SamplePosition(pos, out var hit, 0.6f, UnityEngine.AI.NavMesh.AllAreas)) continue;
@@ -141,7 +159,7 @@ namespace Quintessence.Game
                 go.GetComponent<ResonanceCrystal>().SetElement(ResonanceCrystal.ElementFor(biome));
                 placed++;
             }
-            if (placed > 0) Tip("crystal");
+            if (placed > 0 && !tipThisRoom) Tip("crystal");
             return placed;
         }
         public void BindDrowned(GameObject drowned, GameObject puddle) { drownedPrefab = drowned; puddlePrefab = puddle; }
@@ -266,7 +284,8 @@ namespace Quintessence.Game
         /// Troca o arranjo da sala. index < 0 = sala vazia. Publico para a cena de teste e as capturas.
         public void ApplyLayout(int index)
         {
-            if (layoutRoot != null) Destroy(layoutRoot.gameObject);
+            // a sala anterior sai da fisica ja (o Destroy so vale no fim do quadro)
+            if (layoutRoot != null) { layoutRoot.gameObject.SetActive(false); Destroy(layoutRoot.gameObject); }
             layoutRoot = new GameObject("Layout").transform;
             CurrentLayout = "";
             CurrentDecor = "";
@@ -499,9 +518,13 @@ namespace Quintessence.Game
         }
 
         /// Mostra a dica uma vez so por jogador.
+        /// A sala ja mostrou uma dica (o rodape so tem uma: a segunda apagaria a primeira).
+        bool tipThisRoom;
+
         void Tip(string id)
         {
             if (GameFlow.Tutorial || !Tips.Consume(id)) return;
+            tipThisRoom = true;
             if (id == "start")
             {
                 // a skill inicial fica na tecla do elemento do heroi (Liora no 2, Brann no 3, Vey no 4)
@@ -738,6 +761,7 @@ namespace Quintessence.Game
                 Run.Advance(node.Id);
             }
             Cleanup();
+            tipThisRoom = false;
             SaveRun();
             ApplyLayout(LayoutPicker.UsesLayout(node.Type) ? PickLayout(node) : -1);
             Dress(node.Type);
@@ -746,9 +770,6 @@ namespace Quintessence.Game
             if (node.Type == RoomType.Combat || node.Type == RoomType.Siege || node.Type == RoomType.Elite || node.Type == RoomType.Boss || node.Type == RoomType.Trial)
                 // a sala da Rainha Afogada e um salao alagado: adereços da Cripta em vez dos do Coracao
                 PlaceBiomeProps(node.Type == RoomType.Boss && QueenRun ? Biome.Crypt : Biomes.For(Run.Depth, Run.Map.LayerCount), GameFlow.Seed + node.Id * 7);
-            // Cristais de Ressonancia nas salas de luta, da segunda em diante (o chefe luta sem eles)
-            if (node.Type != RoomType.Boss && LayoutPicker.UsesLayout(node.Type) && Run.Depth >= 1)
-                PlaceCrystals(Biomes.For(Run.Depth, Run.Map.LayerCount), GameFlow.Seed + node.Id * 13, Run.Depth >= 4 ? 2 : 1);
             DressBiome(Biomes.For(Run.Depth, Run.Map.LayerCount), true);
             // a Rainha Afogada alaga o Coracao: a luz e a cor da sala final viram as da Cripta (o nome continua o do Coracao)
             if (node.Type == RoomType.Boss && QueenRun && dresser != null) dresser.Apply(Biome.Crypt);
@@ -763,6 +784,10 @@ namespace Quintessence.Game
             else if (node.Type == RoomType.Pact) Tip("pact");
             else if (node.Type == RoomType.Trial) Tip("trial");
             else if (node.Type == RoomType.Siege) Tip("siege");
+            // Cristais de Ressonancia nas salas de luta, da segunda em diante (o chefe luta sem eles). Depois do quadro de espera:
+            // a sala anterior ja saiu da fisica e da malha de navegacao
+            if (node.Type != RoomType.Boss && LayoutPicker.UsesLayout(node.Type) && Run.Depth >= 1)
+                PlaceCrystals(Biomes.For(Run.Depth, Run.Map.LayerCount), GameFlow.Seed + node.Id * 13, Run.Depth >= 4 ? 2 : 1);
             switch (node.Type)
             {
                 case RoomType.Shrine:
@@ -828,6 +853,7 @@ namespace Quintessence.Game
             }
             spawner.Champion = type == RoomType.Elite && depth < EncounterPlanner.MiniBossDepth;
             encounterBiome = Run != null ? Biomes.For(depth, Run.Map.LayerCount) : Biome.Ashes;
+            encounterMiniBoss = Run != null ? MiniBossForRoom(GameFlow.Seed, Run.Current.Id) : MiniBossFor(encounterBiome);
             spawner.Run(BuildWaves(EncounterPlanner.Plan(type, depth, encounterBiome)));
         }
 
@@ -862,7 +888,8 @@ namespace Quintessence.Game
                 if (p.Banner > 0) w.entries.Add(new WaveEntry { prefab = bannerPrefab != null ? bannerPrefab : rangedPrefab, count = p.Banner });
                 if (p.Shade > 0) w.entries.Add(new WaveEntry { prefab = shadePrefab != null ? shadePrefab : chargerPrefab != null ? chargerPrefab : meleePrefab, count = p.Shade });
                 if (p.Drowned > 0) w.entries.Add(new WaveEntry { prefab = drownedPrefab != null ? drownedPrefab : lobberPrefab != null ? lobberPrefab : rangedPrefab, count = p.Drowned });
-                if (p.MiniBoss > 0 && MiniBossFor(encounterBiome) != null) w.entries.Add(new WaveEntry { prefab = MiniBossFor(encounterBiome), count = p.MiniBoss });
+                var mini = encounterMiniBoss != null ? encounterMiniBoss : MiniBossFor(encounterBiome);
+                if (p.MiniBoss > 0 && mini != null) w.entries.Add(new WaveEntry { prefab = mini, count = p.MiniBoss });
                 if (p.Boss > 0) w.entries.Add(new WaveEntry { prefab = WeaverRun ? weaverPrefab : QueenRun ? queenPrefab : bossPrefab != null ? bossPrefab : brutePrefab, count = p.Boss });
                 waves.Add(w);
             }
@@ -1247,7 +1274,7 @@ namespace Quintessence.Game
                 string reward = RoomInfo.Name(node.Reward);
                 string kind = RoomInfo.Name(node.Type);
                 if (node.Type == RoomType.Elite) kind += ": " + DifficultyCurve.Name(DifficultyCurve.PickElite(GameFlow.Seed, node.Id))
-                    + (node.Layer >= EncounterPlanner.MiniBossDepth ? "\ne o Carrasco" : "");
+                    + (node.Layer >= EncounterPlanner.MiniBossDepth ? "\ne " + MiniBossName(GameFlow.Seed, node.Id) : "");
                 string label = kind + (reward.Length > 0 ? "\n" + reward : "");
                 var go = BuildDoor(new Vector3(x, 0, doorLine), node.Type, label);
                 interactables.Add(new Interactable

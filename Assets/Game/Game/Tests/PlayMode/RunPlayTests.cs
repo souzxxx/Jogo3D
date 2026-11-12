@@ -1275,6 +1275,11 @@ namespace Quintessence.Game.PlayTests
             Assert.AreEqual("Sacerdotisa", director.MiniBossFor(Biome.Crypt).name, "na Cripta, a Sacerdotisa");
             Assert.AreEqual("Carrasco", director.MiniBossFor(Biome.Ashes).name, "nos Saloes, o Carrasco");
             Assert.AreEqual("Colosso", director.MiniBossFor(Biome.Garden).name, "no Jardim, o Colosso de Pedra");
+            // na run, a Elite sorteia entre os tres (com 10 camadas o mini-chefe so cairia no Jardim)
+            var seenMini = new System.Collections.Generic.HashSet<string>();
+            for (int node = 0; node < 30; node++) seenMini.Add(director.MiniBossForRoom(7, node).name);
+            Assert.AreEqual(3, seenMini.Count, "os tres mini-chefes aparecem");
+            StringAssert.Contains(director.MiniBossName(7, 0), "Carrasco Sacerdotisa Afogada Colosso de Pedra");
             var colossus = Object.Instantiate(director.MiniBossFor(Biome.Garden), new Vector3(6f, 0, 3f), Quaternion.Euler(0, 180, 0)).GetComponent<BossBrain>();
             Assert.AreEqual(ElementType.Earth, colossus.Definition.element);
             Assert.IsFalse(colossus.Definition.lastPhaseShield, "mini-chefe nao tem o escudo final");
@@ -1345,7 +1350,6 @@ namespace Quintessence.Game.PlayTests
             hero.GetComponent<Health>().Pool.Invulnerable = true;
             hero.Teleport(new Vector3(0, 0.05f, -5f), Vector3.forward);
             Assert.AreEqual(2, director.PlaceCrystals(Biome.Crypt, 5, 2), "dois cristais na sala vazia");
-            Assert.AreEqual(Tips.Text("crystal"), hud.LastTip, "a primeira vez traz a dica");
             var crystal = Object.FindObjectsByType<ResonanceCrystal>(FindObjectsSortMode.None).First();
             Assert.AreEqual(ElementType.Water, crystal.Element, "na Cripta, cristal de Agua");
             GameObject Load(string n) => UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Game/Enemies/Prefabs/" + n + ".prefab");
