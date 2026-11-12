@@ -137,7 +137,7 @@ Uma skill deixa no inimigo a **marca** do elemento dela. Acertar esse inimigo co
 
 **Afinidade elemental:** inimigo elemental leva metade do dano do próprio elemento e 1,6 vez do elemento que o vence (Água vence Fogo, Terra vence Água, Ar vence Terra, Fogo vence Ar).
 
-Os tipos entram aos poucos: Ceifador na segunda sala, Cinzentos na terceira, Arremessador e Escudeiro na quarta, Xamã na quinta. Vida e dano sobem a cada camada (9% de vida e 6,5% de dano por camada). O tempo de aviso dos golpes nunca diminui.
+Os tipos entram aos poucos: Ceifador na segunda sala, Cinzentos na terceira, Arremessador e Escudeiro na quarta, Xamã na quinta. Vida e dano sobem a cada camada (9% de vida e 6,5% de dano por camada). As duas primeiras salas são aquecimento: o inimigo bate 75% e depois 87% do normal. O tempo de aviso dos golpes nunca diminui.
 
 ### Progressão
 

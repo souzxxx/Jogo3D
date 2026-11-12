@@ -30,6 +30,8 @@ namespace Quintessence.Game
         public int[] awakened = new int[0];
         public float health, maxHealth, baseMaxHealth, curse = 1f, elapsed;
         public string modifiers = "";
+        /// Sala cuja Provacao ja foi perdida (-1 = nenhuma): continuar nao reabre o desafio.
+        public int trialLost = -1;
 
         public string Summary => $"{HeroPassives.HeroName((ElementType)hero)} · sala {depth + 1}/{layers}" + (ascension > 0 ? $" · Ascensão {ascension}" : "");
     }

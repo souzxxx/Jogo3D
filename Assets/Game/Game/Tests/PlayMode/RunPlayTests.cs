@@ -829,6 +829,18 @@ namespace Quintessence.Game.PlayTests
             before = h.Current;
             h.TakeDamage(new DamageInfo(10f, ElementType.None, Team.Player, hero.gameObject) { Direction = Vector3.forward, IsReaction = true });
             Assert.AreEqual(before - 10f, h.Current, 0.01f, "reacao atravessa o escudo");
+            // congelado, o golpe de frente estilhaca inteiro (+30%) e so depois o gelo sai
+            h.Heal(h.Max);
+            var table = UnityEditor.AssetDatabase.LoadAssetAtPath<ReactionTable>("Assets/Game/Combat/Data/Reactions.asset");
+            StatusHolder.GetOrAdd(h).Apply(StatusType.Frozen, 5f, Team.Player, hero.gameObject);
+            before = h.Current;
+            ElementCombat.Deliver(h, new DamageInfo(10f, ElementType.None, Team.Player, hero.gameObject) { Direction = Vector3.forward }, table);
+            Assert.AreEqual(before - 10f * ElementCombat.ShatterBonus, h.Current, 0.01f, "congelado nao segura o escudo: estilhaca inteiro");
+            Assert.IsFalse(h.GetComponent<StatusHolder>().State.Has(StatusType.Frozen), "o gelo sai depois do golpe");
+            // um golpe que vem pelas costas entra inteiro mesmo com quem bateu na frente (o Pilar nasce atras do alvo)
+            before = h.Current;
+            h.TakeDamage(new DamageInfo(10f, ElementType.None, Team.Player, hero.gameObject) { Direction = Vector3.back });
+            Assert.AreEqual(before - 10f, h.Current, 0.01f, "vale a direcao do golpe, nao a posicao do heroi");
             // enraizado, o escudo cai
             StatusHolder.GetOrAdd(h).Apply(StatusType.Rooted, 5f, Team.Player, hero.gameObject);
             before = h.Current;
@@ -887,6 +899,13 @@ namespace Quintessence.Game.PlayTests
             // Contra o relogio: o tempo estoura e a sala limpa nao paga o premio
             director.StartTrial(new MapNode { Id = IdFor(TrialKind.Clock), Type = RoomType.Trial }, 1);
             Assert.AreEqual(TrialKind.Clock, director.TrialKind);
+            // tiques seguidos (poca a cada 0,4 s) sao um golpe so: a janela anda com cada dano
+            for (int i = 0; i < 5; i++)
+            {
+                hp.TakeDamage(new DamageInfo(1f, ElementType.None, Team.Enemy));
+                for (int k = 0; k < 12; k++) yield return null;
+            }
+            Assert.AreEqual(1, director.TrialHits, "cinco tiques seguidos contam um golpe");
             Assert.AreEqual(Trials.TimeLimit(1), director.TrialLimit, 0.01f);
             for (int k = 0; k < 3000 && director.TrialElapsed <= director.TrialLimit; k++) yield return null;
             Assert.Greater(director.TrialElapsed, director.TrialLimit, "o relogio estourou");
@@ -1246,6 +1265,7 @@ namespace Quintessence.Game.PlayTests
             hero = Object.FindFirstObjectByType<PlayerController>();
             hp = hero.GetComponent<Health>();
             Assert.IsTrue(director.Resumed);
+            Assert.AreEqual(0, director.MasteryPicksLeft, "retomada depois da primeira sala, nenhuma escolha conta como da maestria");
             Assert.AreEqual(ElementType.Air, hero.GetComponent<HeroSkin>().Shown, "volta o mesmo heroi (Vey)");
             Assert.AreEqual(room, director.Run.Current.Id, "volta para a sala em que parou");
             Assert.AreEqual(essence, director.Run.Essence);
@@ -1462,14 +1482,14 @@ namespace Quintessence.Game.PlayTests
             hud.UseCamera(cam);
             for (int k = 0; k < 2000 && director.Busy; k++) yield return null;
 
-            // primeira sala (profundidade 0): inimigos com os numeros da ficha
+            // primeira sala (profundidade 0): vida da ficha, dano do aquecimento
             for (int k = 0; k < 90 && Object.FindObjectsByType<EnemyBrain>(FindObjectsSortMode.None).Length == 0; k++) yield return null;
             var early = Object.FindObjectsByType<EnemyBrain>(FindObjectsSortMode.None);
             Assert.Greater(early.Length, 0, "a primeira sala deveria ter inimigos");
             foreach (var e in early)
             {
                 Assert.AreEqual(e.Definition.maxHealth, e.GetComponent<Health>().Max, 0.01f, "sala 1: a vida da ficha");
-                Assert.AreEqual(1f, e.Scaling.Damage, 0.001f);
+                Assert.AreEqual(DifficultyCurve.EarlyDamage(0), e.Scaling.Damage, 0.001f, "sala 1: aquecimento, bate mais fraco");
             }
 
             // Elite Resistentes na profundidade 4

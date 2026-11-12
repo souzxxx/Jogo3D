@@ -68,5 +68,13 @@ namespace Quintessence.Game.Tests
             Tips.ResetAll();
             Tips.UseKey(Tips.DefaultKey);
         }
+
+        [Test] public void TrialLost_DefaultsToNone_AndSurvivesJson()
+        {
+            Assert.AreEqual(-1, new RunSave().trialLost);
+            var s = new RunSave { trialLost = 7 };
+            Assert.AreEqual(7, JsonUtility.FromJson<RunSave>(JsonUtility.ToJson(s)).trialLost);
+            Assert.AreEqual(-1, JsonUtility.FromJson<RunSave>("{\"hero\":1}").trialLost, "save antigo sem o campo: nenhuma Provacao perdida");
+        }
     }
 }

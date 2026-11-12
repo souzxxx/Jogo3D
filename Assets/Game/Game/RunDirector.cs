@@ -259,6 +259,11 @@ namespace Quintessence.Game
         /// Resultado da ultima Provacao (null = nenhuma terminou nesta run).
         public bool? LastTrialPassed { get; private set; }
         float lastTrialHit = -99f;
+        /// Sala cuja Provacao ja estava perdida no save (sair e continuar nao da outra chance).
+        int restoredTrialLost = -1;
+        bool trialForfeit;
+        public int MasteryPicksLeft => masteryPicks;
+        bool TrialHolding => !trialForfeit && Trials.Holding(TrialKind, TrialElapsed, TrialHits, TrialLimit);
         string trialStatus = "";
         bool trialLostShown;
 
@@ -271,6 +276,7 @@ namespace Quintessence.Game
             TrialHits = 0;
             lastTrialHit = -99f;
             trialLostShown = false;
+            trialForfeit = node.Id == restoredTrialLost;
             TrialActive = true;
             hud.ShowBanner("PROVAÇÃO", $"{Trials.Name(TrialKind)}: {Trials.Goal(TrialKind, TrialLimit)}", RoomInfo.Color(RoomType.Trial) * 1.25f, 4f);
             UpdateTrialLabel();
@@ -279,9 +285,10 @@ namespace Quintessence.Game
         void OnDamageDealt(Health target, DamageInfo info, float applied)
         {
             if (!TrialActive || target != playerHealth || applied <= 0f || Busy) return;
-            // varios projeteis de uma vez ou tiques de poca seguidos sao um golpe so
-            if (Time.time - lastTrialHit < Trials.HitWindow) return;
+            // varios projeteis de uma vez ou tiques de poca seguidos sao um golpe so: a janela anda com cada dano
+            bool fresh = Time.time - lastTrialHit >= Trials.HitWindow;
             lastTrialHit = Time.time;
+            if (!fresh) return;
             TrialHits++;
             UpdateTrialLabel();
         }
@@ -291,11 +298,14 @@ namespace Quintessence.Game
             if (!TrialActive || Busy || Finished) return;
             TrialElapsed += Time.deltaTime;
             // o letreiro so muda quando o texto muda (um segundo a menos, um golpe a mais)
-            if (Trials.Status(TrialKind, TrialElapsed, TrialHits, TrialLimit) != trialStatus) UpdateTrialLabel();
-            if (!trialLostShown && !Trials.Holding(TrialKind, TrialElapsed, TrialHits, TrialLimit))
+            if ((TrialHolding ? Trials.Status(TrialKind, TrialElapsed, TrialHits, TrialLimit) : "perdida") != trialStatus) UpdateTrialLabel();
+            if (!trialLostShown && !TrialHolding)
             {
                 trialLostShown = true;
                 Feel.DamageNumber.Spawn(player.transform.position + Vector3.up * 3.6f, "PROVAÇÃO PERDIDA", new Color(0.66f, 0.68f, 0.74f), 1f, 1.8f);
+                // o save da sala guarda que esta Provacao ja foi perdida
+                restoredTrialLost = Run.Current.Id;
+                if (currentSave != null && currentSave.current == Run.Current.Id) { currentSave.trialLost = Run.Current.Id; RunSaveStore.Save(currentSave); }
                 Sfx.Play("block");
             }
         }
@@ -303,7 +313,7 @@ namespace Quintessence.Game
         void UpdateTrialLabel()
         {
             if (!TrialActive || Run == null) return;
-            trialStatus = Trials.Status(TrialKind, TrialElapsed, TrialHits, TrialLimit);
+            trialStatus = (TrialHolding ? Trials.Status(TrialKind, TrialElapsed, TrialHits, TrialLimit) : "perdida");
             hud.SetRoom($"Sala {Run.Depth + 1}/{Run.Map.LayerCount} · Provação · {trialStatus}", RoomType.Trial);
         }
 
@@ -312,7 +322,7 @@ namespace Quintessence.Game
         {
             if (!TrialActive) return;
             TrialActive = false;
-            bool passed = Trials.Holding(TrialKind, TrialElapsed, TrialHits, TrialLimit);
+            bool passed = TrialHolding;
             LastTrialPassed = passed;
             if (passed)
             {
@@ -447,6 +457,7 @@ namespace Quintessence.Game
                 level = Run.Progress.Level, xp = Run.Progress.Xp, pending = Run.Progress.PendingPicks, totalXp = Run.Progress.TotalXp,
                 health = playerHealth.Current, maxHealth = playerHealth.Max, baseMaxHealth = baseMaxHealth, curse = playerHealth.Pool.CurseMultiplier,
                 elapsed = Time.time - startTime, modifiers = player.Modifiers.ToJson(),
+                trialLost = restoredTrialLost == Run.Current.Id ? restoredTrialLost : -1,
             };
             var talents = new List<string>();
             foreach (var t in Run.Talents.Taken) talents.Add(t.Id);
@@ -483,6 +494,9 @@ namespace Quintessence.Game
             Run.Rerolls = s.rerolls;
             for (int i = 0; i < Run.SkillRank.Length && i < s.ranks.Length; i++) Run.SkillRank[i] = Mathf.Clamp(s.ranks[i], 1, RunState.MaxSkillRank);
             Run.Progress.Restore(s.level, s.xp, s.pending, s.totalXp);
+            // a escolha da maestria so continua pendente se o save e da primeira sala e ela ainda nao foi usada
+            masteryPicks = Run.Depth == 0 ? Mathf.Min(masteryPicks, s.pending) : 0;
+            restoredTrialLost = s.trialLost;
             foreach (var id in s.talents) Run.Talents.Restore(TalentCatalog.Find(id));
             foreach (var b in s.boons)
                 Run.AddBoon(new Boon { id = b.id, name = b.name, description = b.description, patron = (ElementType)b.patron, stat = (BoonStat)b.stat, value = b.value });
@@ -965,7 +979,7 @@ namespace Quintessence.Game
         {
             talentRng = TalentRng();
             talentOffer = TalentCatalog.Offer(Run.Talents, player.Loadout.Awakened, talentRng);
-            if (talentOffer.Count == 0) { while (Run.Progress.ConsumePick()) { } return; }
+            if (talentOffer.Count == 0) { while (Run.Progress.ConsumePick()) { } masteryPicks = 0; return; }
             if (GameFlow.AutoPickTalents) { PickTalent(0); return; }
             levelUpOpen = true;
             GameClock.SetPaused(true);
