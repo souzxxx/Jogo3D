@@ -12,6 +12,9 @@ namespace Quintessence.Run
         public int RoomsCleared { get; private set; }
         public readonly List<Boon> Boons = new();
         public readonly HashSet<string> BoonIds = new();
+        public readonly Progression Progress = new();
+        public readonly TalentBook Talents = new();
+        public int Kills;
 
         public void AddBoon(Boon b) { Boons.Add(b); BoonIds.Add(b.id); }
 

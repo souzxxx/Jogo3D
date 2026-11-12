@@ -163,6 +163,8 @@ namespace Quintessence.Game
             baseMaxHealth = playerHealth.Max;
             rng = new System.Random(GameFlow.Seed);
             hud.SetBoons(Run.Boons);
+            hud.SetProgress(Run.Progress, Run.Talents);
+            talentRng = new System.Random(GameFlow.Seed ^ 0x5f3759df);
             startTime = Time.time;
             // melhorias permanentes do Refugio entram antes da primeira sala
             MetaStore.Current.ApplyTo(player.Modifiers);
@@ -175,7 +177,8 @@ namespace Quintessence.Game
         void Update()
         {
             if (Finished) return;
-            if (MenuInput.InventoryPressed && !Busy && (!GameClock.Paused || hud.InventoryVisible)) SetInventory(!hud.InventoryVisible);
+            if (levelUpOpen) { }
+            else if (MenuInput.InventoryPressed && !Busy && (!GameClock.Paused || hud.InventoryVisible)) SetInventory(!hud.InventoryVisible);
             else if (MenuInput.PausePressed)
             {
                 // Esc fecha o inventario se ele estiver aberto; senao pausa
@@ -188,7 +191,9 @@ namespace Quintessence.Game
                 mapByTab = MenuInput.MapHeld;
                 hud.ShowMap(Run, mapByTab);
             }
+            if (levelUpOpen) { LevelUpKeys(); hud.HidePrompt(); return; }
             if (GameClock.Paused || Busy) { hud.HidePrompt(); return; }
+            if (Run.Progress.PendingPicks > 0 && RoomQuiet) { OpenLevelUp(); return; }
             // heroi fora da sala (atravessou parede, caiu): volta para a entrada
             if (!Arena.Contains(player.transform.position)) { player.Teleport(entryPoint, Vector3.forward); HeroRescues++; }
 
@@ -331,7 +336,7 @@ namespace Quintessence.Game
                 essence /= 2;
             }
             if (player.Modifiers.HealOnRoomClear > 0f) playerHealth.Heal(playerHealth.Max * player.Modifiers.HealOnRoomClear);
-            Run.AddEssence(essence);
+            Run.AddEssence(Mathf.RoundToInt(essence * player.Modifiers.EssenceMult));
             hud.SetEssence(Run.Essence);
             if (node.Type == RoomType.Boss) { StartCoroutine(Finish(true)); return; }
             if (node.Reward == RewardType.Boon && SetupBoons()) return; // as portas abrem depois de escolher
@@ -340,6 +345,7 @@ namespace Quintessence.Game
 
         void OnDied(Health target, DamageInfo info)
         {
+            if (target != playerHealth && target.Team == Team.Enemy && Run != null && !Finished) GrantKillXp(target);
             if (target == playerHealth && !Finished) StartCoroutine(Finish(false));
         }
 
@@ -358,6 +364,72 @@ namespace Quintessence.Game
                 + $"\n+{shards} Fragmentos para o Refúgio (total: {MetaStore.Current.Shards})";
             Sfx.Play(victory ? "victory" : "defeat");
             hud.ShowResult(victory, stats, GameFlow.RestartRun, GameFlow.ToTitle);
+        }
+
+        // ---------- nivel e talentos ----------
+
+        System.Random talentRng;
+        bool levelUpOpen;
+        List<Talent> talentOffer;
+        public bool LevelUpOpen => levelUpOpen;
+        public IReadOnlyList<Talent> TalentOffer => talentOffer;
+
+        /// Sem inimigo vivo na sala: a escolha de talento nunca interrompe a luta.
+        bool RoomQuiet => spawner == null || spawner.State == null || spawner.State.Alive <= 0;
+
+        void GrantKillXp(Health enemy)
+        {
+            var brain = enemy.GetComponent<EnemyBrain>();
+            bool boss = enemy.GetComponent<BossBrain>() != null;
+            float baseHealth = brain != null && brain.Definition != null ? brain.Definition.maxHealth : enemy.Max;
+            Run.Kills++;
+            int levels = Run.Progress.AddXp(Mathf.RoundToInt(Progression.XpForEnemy(baseHealth, boss) * player.Modifiers.XpMult));
+            if (levels <= 0) return;
+            Sfx.Play("pickup");
+            Feel.DamageNumber.Spawn(player.transform.position + Vector3.up * 3.9f, "NÍVEL " + Run.Progress.Level + "!", new Color(0.9f, 0.76f, 0.42f), 1.3f, 1.8f);
+        }
+
+        void OpenLevelUp()
+        {
+            if (talentRng == null) talentRng = new System.Random(GameFlow.Seed);
+            talentOffer = TalentCatalog.Offer(Run.Talents, player.Loadout.Awakened, talentRng);
+            if (talentOffer.Count == 0) { while (Run.Progress.ConsumePick()) { } return; }
+            if (GameFlow.AutoPickTalents) { PickTalent(0); return; }
+            levelUpOpen = true;
+            GameClock.SetPaused(true);
+            hud.ShowMap(Run, false);
+            hud.ShowLevelUp(Run.Progress.Level - Run.Progress.PendingPicks + 1, talentOffer, PickTalent);
+        }
+
+        void LevelUpKeys()
+        {
+            var kb = Keyboard.current;
+            if (kb == null || talentOffer == null) return;
+            if (kb.digit1Key.wasPressedThisFrame || kb.numpad1Key.wasPressedThisFrame) PickTalent(0);
+            else if (kb.digit2Key.wasPressedThisFrame || kb.numpad2Key.wasPressedThisFrame) PickTalent(1);
+            else if (kb.digit3Key.wasPressedThisFrame || kb.numpad3Key.wasPressedThisFrame) PickTalent(2);
+        }
+
+        /// Pega o talento de indice index da oferta atual. Publico para os testes.
+        public void PickTalent(int index)
+        {
+            if (talentOffer == null || index < 0 || index >= talentOffer.Count) return;
+            var t = talentOffer[index];
+            talentOffer = null;
+            Run.Progress.ConsumePick();
+            Run.Talents.Take(t, player.Modifiers);
+            ApplyMaxHealth();
+            Sfx.Play("pickup");
+            if (levelUpOpen)
+            {
+                levelUpOpen = false;
+                hud.ShowLevelUp(0, null, null);
+                GameClock.SetPaused(false);
+                // a tecla que escolheu o talento nao pode virar skill no quadro seguinte
+                if (player.Input != null) { player.Input.ConsumeElementSkill(); player.Input.ConsumeSkill(); }
+            }
+            var c = t.Element == ElementType.None ? new Color(0.9f, 0.76f, 0.42f) : ElementColors.Of(t.Element);
+            Feel.DamageNumber.Spawn(player.transform.position + Vector3.up * 3.6f, t.Name.ToUpperInvariant() + "!", c, 1.1f, 1.5f);
         }
 
         // ---------- portas e santuario ----------

@@ -17,6 +17,8 @@ namespace Quintessence.Game
         public static int Shrines = 3;
         /// A proxima cena de run abre a sala de treino em vez do mapa.
         public static bool Tutorial;
+        /// Testes: ao subir de nivel o primeiro talento oferecido e pego sozinho, sem abrir a escolha.
+        public static bool AutoPickTalents;
 
         public static void StartRun(ElementType element)
         {

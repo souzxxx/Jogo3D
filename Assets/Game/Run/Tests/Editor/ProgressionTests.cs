@@ -1,0 +1,135 @@
+using System.Collections.Generic;
+using System.Linq;
+using NUnit.Framework;
+using Quintessence.Core;
+
+namespace Quintessence.Run.Tests
+{
+    public class ProgressionTests
+    {
+        [Test] public void StartsAtLevelOne_WithNothingPending()
+        {
+            var p = new Progression();
+            Assert.AreEqual(1, p.Level);
+            Assert.AreEqual(0, p.PendingPicks);
+            Assert.AreEqual(0f, p.Normalized);
+        }
+
+        [Test] public void EnoughXp_RaisesLevel_AndKeepsTheRest()
+        {
+            var p = new Progression();
+            int need = p.XpToNext;
+            Assert.AreEqual(1, p.AddXp(need + 3));
+            Assert.AreEqual(2, p.Level);
+            Assert.AreEqual(3, p.Xp);
+            Assert.AreEqual(1, p.PendingPicks);
+        }
+
+        [Test] public void BigGain_CanRaiseSeveralLevels()
+        {
+            var p = new Progression();
+            int gained = p.AddXp(Progression.XpFor(1) + Progression.XpFor(2) + Progression.XpFor(3));
+            Assert.AreEqual(3, gained);
+            Assert.AreEqual(4, p.Level);
+            Assert.AreEqual(3, p.PendingPicks);
+        }
+
+        [Test] public void EachLevelCostsMoreThanTheLast()
+        {
+            for (int l = 1; l < Progression.MaxLevel; l++) Assert.Greater(Progression.XpFor(l + 1), Progression.XpFor(l));
+        }
+
+        [Test] public void StopsAtMaxLevel()
+        {
+            var p = new Progression();
+            p.AddXp(100000);
+            Assert.AreEqual(Progression.MaxLevel, p.Level);
+            Assert.AreEqual(0, p.AddXp(500));
+            Assert.AreEqual(1f, p.Normalized);
+        }
+
+        [Test] public void NegativeOrZeroXp_DoesNothing()
+        {
+            var p = new Progression();
+            Assert.AreEqual(0, p.AddXp(0));
+            Assert.AreEqual(0, p.AddXp(-10));
+            Assert.AreEqual(0, p.Xp);
+        }
+
+        [Test] public void ConsumePick_OnlyWhenThereIsOne()
+        {
+            var p = new Progression();
+            Assert.IsFalse(p.ConsumePick());
+            p.AddXp(p.XpToNext);
+            Assert.IsTrue(p.ConsumePick());
+            Assert.IsFalse(p.ConsumePick());
+        }
+
+        [Test] public void BiggerEnemies_GiveMoreXp_BossGivesMost()
+        {
+            Assert.Greater(Progression.XpForEnemy(90), Progression.XpForEnemy(30));
+            Assert.Greater(Progression.XpForEnemy(0, true), Progression.XpForEnemy(90));
+            Assert.GreaterOrEqual(Progression.XpForEnemy(1), 2);
+        }
+
+        [Test] public void TalentIds_AreUnique_AndTextsFilled()
+        {
+            var ids = new HashSet<string>();
+            foreach (var t in TalentCatalog.All)
+            {
+                Assert.IsTrue(ids.Add(t.Id), t.Id);
+                Assert.IsNotEmpty(t.Name); Assert.IsNotEmpty(t.Description);
+                Assert.GreaterOrEqual(t.MaxRank, 1);
+            }
+            foreach (var e in Elements.All) Assert.GreaterOrEqual(TalentCatalog.All.Count(t => t.Element == e), 3, e.ToString());
+        }
+
+        [Test] public void Offer_OnlyHasAwakenedElements_AndNoRepeats([NUnit.Framework.Range(1, 25)] int seed)
+        {
+            var offer = TalentCatalog.Offer(new TalentBook(), new[] { ElementType.Fire }, new System.Random(seed));
+            Assert.AreEqual(3, offer.Count);
+            Assert.AreEqual(3, offer.Select(t => t.Id).Distinct().Count());
+            foreach (var t in offer) Assert.IsTrue(t.Element == ElementType.None || t.Element == ElementType.Fire, t.Id);
+        }
+
+        [Test] public void Talent_StopsBeingOffered_AtMaxRank()
+        {
+            var book = new TalentBook();
+            var mods = new HeroModifiers();
+            var asas = TalentCatalog.Find("air_dash");
+            Assert.IsTrue(book.Take(asas, mods));
+            Assert.IsFalse(book.Take(asas, mods));
+            Assert.AreEqual(1, mods.DashChargesAdd);
+            for (int seed = 1; seed < 40; seed++)
+                Assert.IsFalse(TalentCatalog.Offer(book, Elements.All, new System.Random(seed)).Any(t => t.Id == "air_dash"));
+        }
+
+        [Test] public void EveryTalent_ChangesTheModifiers()
+        {
+            foreach (var t in TalentCatalog.All)
+            {
+                var m = new HeroModifiers();
+                string before = Dump(m);
+                TalentCatalog.Apply(m, t);
+                Assert.AreNotEqual(before, Dump(m), t.Id + " nao mudou nada");
+            }
+        }
+
+        [Test] public void Reset_ClearsTalentEffects()
+        {
+            var m = new HeroModifiers();
+            string clean = Dump(m);
+            foreach (var t in TalentCatalog.All) TalentCatalog.Apply(m, t);
+            m.Reset();
+            Assert.AreEqual(clean, Dump(m));
+        }
+
+        static string Dump(HeroModifiers m)
+        {
+            var sb = new System.Text.StringBuilder();
+            foreach (var f in typeof(HeroModifiers).GetFields()) sb.Append(f.Name).Append('=').Append(f.GetValue(m)).Append(';');
+            foreach (var e in Elements.All) sb.Append(m.Damage(e)).Append('|').Append(m.SkillRange(e)).Append('|').Append(m.SkillCooldown(e)).Append(';');
+            return sb.ToString();
+        }
+    }
+}

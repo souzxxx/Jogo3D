@@ -37,6 +37,7 @@ namespace Quintessence.Game.PlayTests
         {
             PlayerPrefs.DeleteKey(TestSaveKey);
             MetaStore.UseKey(TestSaveKey);
+            GameFlow.AutoPickTalents = true;
         }
 
         [TearDown]
@@ -44,6 +45,7 @@ namespace Quintessence.Game.PlayTests
         {
             PlayerPrefs.DeleteKey(TestSaveKey);
             MetaStore.UseKey(MetaStore.DefaultKey);
+            GameFlow.AutoPickTalents = false;
         }
 
         [UnityTest, Timeout(600000)]
@@ -548,6 +550,65 @@ namespace Quintessence.Game.PlayTests
             director.RefreshPrices();
             for (int k = 0; k < 20; k++) yield return null;
             Shot(cam, "docs/img/loja_banca.png");
+            GameFlow.Layers = 8; GameFlow.Shrines = 3;
+            Time.captureFramerate = 0;
+        }
+
+        [UnityTest, Timeout(600000)]
+        public IEnumerator Level_Up_Offers_Talents_And_The_Pick_Changes_The_Hero()
+        {
+            GameEvents.Clear();
+            Time.timeScale = 1f;
+            Time.captureFramerate = 30;
+            GameFlow.AutoPickTalents = false;
+            GameFlow.StartElement = ElementType.Fire;
+            GameFlow.Seed = 3; GameFlow.Layers = 5; GameFlow.Shrines = 1;
+            yield return EditorSceneManager.LoadSceneAsyncInPlayMode("Assets/Scenes/Run.unity", new LoadSceneParameters(LoadSceneMode.Single));
+            yield return null;
+            yield return null;
+            var director = Object.FindFirstObjectByType<RunDirector>();
+            var hud = Object.FindFirstObjectByType<Hud>();
+            cam = Camera.main;
+            hud.UseCamera(cam);
+            Object.FindFirstObjectByType<WaveSpawner>().enabled = false;
+            for (int k = 0; k < 2000 && director.Busy; k++) yield return null;
+            var hero = Object.FindFirstObjectByType<PlayerController>();
+            Assert.AreEqual(1, director.Run.Progress.Level);
+            Assert.IsFalse(director.LevelUpOpen);
+
+            // experiencia de sobra para um nivel: a escolha abre sozinha e o jogo para
+            director.Run.Progress.AddXp(director.Run.Progress.XpToNext);
+            for (int k = 0; k < 10 && !director.LevelUpOpen; k++) yield return null;
+            Assert.IsTrue(director.LevelUpOpen, "subir de nivel abre a escolha de talento");
+            Assert.IsTrue(GameClock.Paused, "o jogo para durante a escolha");
+            Assert.IsTrue(hud.LevelUpVisible);
+            Assert.AreEqual(3, director.TalentOffer.Count);
+            foreach (var t in director.TalentOffer)
+                Assert.IsTrue(t.Element == ElementType.None || t.Element == ElementType.Fire, "so talentos de corpo ou do elemento desperto: " + t.Id);
+            for (int k = 0; k < 4; k++) yield return null;
+            Shot(cam, "docs/img/nivel_talentos.png");
+
+            var picked = director.TalentOffer[1];
+            director.PickTalent(1);
+            yield return null;
+            Assert.IsFalse(director.LevelUpOpen);
+            Assert.IsFalse(GameClock.Paused, "escolheu: o jogo volta");
+            Assert.AreEqual(1, director.Run.Talents.Rank(picked.Id));
+            Assert.AreEqual(0, director.Run.Progress.PendingPicks);
+            Assert.AreEqual(2, director.Run.Progress.Level);
+
+            // talentos mudam o heroi de verdade: Vigor aumenta a vida, Asas da a segunda carga de dash
+            float before = hero.Health.Max;
+            director.Run.Talents.Take(TalentCatalog.Find("body_health"), hero.Modifiers);
+            hero.Awaken(ElementType.Air);
+            director.Run.Talents.Take(TalentCatalog.Find("air_dash"), hero.Modifiers);
+            director.Run.Progress.AddXp(director.Run.Progress.XpToNext);
+            for (int k = 0; k < 10 && !director.LevelUpOpen; k++) yield return null;
+            director.PickTalent(0);
+            for (int k = 0; k < 5; k++) yield return null;
+            Assert.Greater(hero.Health.Max, before, "Vigor aumenta a vida maxima");
+            Assert.AreEqual(2, hero.DashMaxCharges, "Asas da a segunda carga de dash");
+            GameFlow.AutoPickTalents = true;
             GameFlow.Layers = 8; GameFlow.Shrines = 3;
             Time.captureFramerate = 0;
         }

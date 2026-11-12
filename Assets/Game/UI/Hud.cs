@@ -36,6 +36,67 @@ namespace Quintessence.UI
         string bossTitle = "";
         IReadOnlyList<Boon> boons;
 
+        Text levelText;
+        Image xpFill;
+        RectTransform xpRoot, levelPanel;
+        Progression progress;
+        TalentBook talents;
+
+        /// Liga a barra de nivel a run.
+        public void SetProgress(Progression p, TalentBook book)
+        {
+            progress = p; talents = book;
+            xpRoot.gameObject.SetActive(p != null);
+        }
+
+        public bool LevelUpVisible => levelPanel != null && levelPanel.gameObject.activeSelf;
+
+        static string TalentIcon(Talent t) => t.Element != ElementType.None ? SkillIcon[(int)t.Element] : t.Effect switch
+        {
+            TalentEffect.MaxHealth => "boon_health",
+            TalentEffect.Essence => "essence",
+            TalentEffect.SkillRefundOnKill => "boon_skill",
+            TalentEffect.Finisher => "boon_crit",
+            _ => "boon_damage",
+        };
+
+        /// Subiu de nivel: tres talentos, escolhe um (clique, 1/2/3 ou controle).
+        public void ShowLevelUp(int level, IReadOnlyList<Talent> offer, Action<int> pick)
+        {
+            if (levelPanel == null) levelPanel = Overlay("LevelUp", new Color(0.03f, 0.02f, 0.06f, 0.84f));
+            foreach (Transform child in levelPanel) Destroy(child.gameObject);
+            levelPanel.gameObject.SetActive(offer != null);
+            if (offer == null) return;
+            levelPanel.SetAsLastSibling();
+            fade.transform.SetAsLastSibling();
+            var center = new Vector2(0.5f, 0.5f);
+            var title = UiKit.Text(UiKit.Rect("Title", levelPanel, center, new Vector2(0, 330), new Vector2(1400, 100)), "NÍVEL " + level, 84, new Color(0.9f, 0.76f, 0.42f));
+            title.font = GameFonts.Title;
+            UiKit.Text(UiKit.Rect("Sub", levelPanel, center, new Vector2(0, 258), new Vector2(1400, 40)), "Escolha um talento", 30, UiKit.Dim, TextAnchor.MiddleCenter, false);
+            for (int i = 0; i < offer.Count; i++)
+            {
+                var t = offer[i];
+                int index = i;
+                var c = t.Element == ElementType.None ? new Color(0.85f, 0.72f, 0.4f) : ElementColors.Of(t.Element);
+                var card = UiKit.Box("Card" + i, levelPanel, center, new Vector2((i - (offer.Count - 1) / 2f) * 400f, -30), new Vector2(360, 470), 0.96f);
+                UiKit.Image(UiKit.Rect("Band", card, new Vector2(0.5f, 1), new Vector2(0, -8), new Vector2(344, 8)), null, c);
+                var disc = UiKit.Rect("Disc", card, new Vector2(0.5f, 1), new Vector2(0, -34), new Vector2(120, 120));
+                UiKit.Image(disc, UiKit.Circle, Color.Lerp(c, new Color(0.05f, 0.04f, 0.08f), 0.55f));
+                UiKit.Image(UiKit.Stretch("Ring", disc), UiKit.Ring, Color.Lerp(c, UiKit.Cream, 0.3f));
+                UiKit.Image(UiKit.Rect("Icon", disc, center, Vector2.zero, new Vector2(74, 74)), UiKit.Icon(TalentIcon(t)), UiKit.Cream);
+                string where = t.Element == ElementType.None ? "CORPO" : SkillName[(int)t.Element].ToUpperInvariant();
+                UiKit.Text(UiKit.Rect("Where", card, new Vector2(0.5f, 1), new Vector2(0, -168), new Vector2(330, 26)), where, 19, Color.Lerp(c, UiKit.Cream, 0.3f));
+                UiKit.Text(UiKit.Rect("Name", card, new Vector2(0.5f, 1), new Vector2(0, -198), new Vector2(330, 44)), t.Name, 32, UiKit.Cream);
+                var desc = UiKit.Text(UiKit.Rect("Desc", card, new Vector2(0.5f, 1), new Vector2(0, -250), new Vector2(310, 96)), t.Description, 23, UiKit.Paper, TextAnchor.MiddleCenter, false);
+                desc.horizontalOverflow = HorizontalWrapMode.Wrap;
+                int rank = talents != null ? talents.Rank(t.Id) : 0;
+                if (t.MaxRank > 1)
+                    UiKit.Text(UiKit.Rect("Rank", card, new Vector2(0.5f, 1), new Vector2(0, -350), new Vector2(330, 26)), $"Grau {rank + 1} de {t.MaxRank}", 19, UiKit.Dim, TextAnchor.MiddleCenter, false);
+                var b = UiKit.Button(card, $"Escolher  [{i + 1}]", new Vector2(0.5f, 0), new Vector2(0, 26), new Vector2(300, 60), UiKit.Primary, () => pick(index));
+                if (i == 0) UiKit.Focus(b.gameObject);
+            }
+        }
+
         class Tile { public RectTransform Root; public Image Back, Icon, Cooldown, Ring; public Text Key; }
 
         void Awake()
@@ -91,6 +152,15 @@ namespace Quintessence.UI
             hpLag = Bar(hpBar, new Color(0.9f, 0.8f, 0.68f, 0.9f));
             hpFill = Bar(hpBar, new Color(0.72f, 0.22f, 0.2f));
             hpText = UiKit.Text(UiKit.Stretch("Text", hpBar), "", 22, UiKit.Cream);
+
+            // nivel e experiencia, logo acima da vida
+            var xpBox = UiKit.Box("Level", root, new Vector2(0, 0), new Vector2(40, 124), new Vector2(470, 36));
+            levelText = UiKit.Text(UiKit.Rect("Text", xpBox, new Vector2(0, 0.5f), new Vector2(14, 0), new Vector2(110, 28)), "NÍVEL 1", 20, UiKit.Cream, TextAnchor.MiddleLeft);
+            var xpBar = UiKit.Rect("Bar", xpBox, new Vector2(0, 0.5f), new Vector2(126, 0), new Vector2(326, 14));
+            UiKit.Image(xpBar, UiKit.Panel, new Color(0.02f, 0.02f, 0.04f, 0.9f)).type = Image.Type.Sliced;
+            xpFill = Bar(xpBar, new Color(0.82f, 0.68f, 0.36f));
+            xpBox.gameObject.SetActive(false);
+            xpRoot = xpBox;
 
             // barra de habilidades
             var bar = UiKit.Box("Abilities", root, new Vector2(0.5f, 0), new Vector2(0, 40), new Vector2(820, 132));
@@ -235,6 +305,12 @@ namespace Quintessence.UI
             SetBar(hpFill, hp);
             SetBar(hpLag, lagHp);
             hpText.text = $"{Mathf.CeilToInt(hero.Health.Current)} / {Mathf.RoundToInt(hero.Health.Max)}";
+
+            if (progress != null)
+            {
+                SetBar(xpFill, progress.Normalized);
+                levelText.text = "NÍVEL " + progress.Level;
+            }
 
             var awakened = hero.AwakenedElements;
             for (int i = 0; i < 4; i++)
@@ -484,6 +560,20 @@ namespace Quintessence.UI
                     UiKit.Text(UiKit.Rect("Boon" + i, box, new Vector2(0, 1), new Vector2(744, y), new Vector2(540, 32)),
                         boons[i].name + " — " + boons[i].description, 21, UiKit.Cream, TextAnchor.MiddleLeft, false);
                 }
+            if (talents != null && talents.Count > 0)
+            {
+                var seen = new List<string>();
+                var parts = new List<string>();
+                foreach (var t in talents.Taken)
+                {
+                    if (seen.Contains(t.Id)) continue;
+                    seen.Add(t.Id);
+                    parts.Add(t.MaxRank > 1 ? $"{t.Name} {talents.Rank(t.Id)}/{t.MaxRank}" : t.Name);
+                }
+                var tl = UiKit.Text(UiKit.Rect("Talents", box, new Vector2(0, 1), new Vector2(60, -690), new Vector2(1200, 60)),
+                    $"TALENTOS (nível {progress?.Level ?? 1}):  " + string.Join("  ·  ", parts), 21, UiKit.Cream, TextAnchor.UpperLeft, false);
+                tl.horizontalOverflow = HorizontalWrapMode.Wrap;
+            }
             UiKit.Text(UiKit.Rect("Close", box, new Vector2(0.5f, 0), new Vector2(0, 22), new Vector2(900, 30)), "I ou Esc fecha", 20, UiKit.Dim, TextAnchor.MiddleCenter, false);
         }
 
