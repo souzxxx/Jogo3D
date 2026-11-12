@@ -51,9 +51,12 @@ namespace Quintessence.Game
             SceneManager.LoadScene(RunScene);
         }
 
-        public static void StartTutorial()
+        /// Treino com o heroi dado (o da ultima carta em foco no titulo).
+        public static void StartTutorial() => StartTutorial(ElementType.Fire);
+
+        public static void StartTutorial(ElementType hero)
         {
-            StartElement = ElementType.Fire;
+            StartElement = hero == ElementType.None ? ElementType.Fire : hero;
             Tutorial = true;
             GameClock.SetPaused(false);
             SceneManager.LoadScene(RunScene);

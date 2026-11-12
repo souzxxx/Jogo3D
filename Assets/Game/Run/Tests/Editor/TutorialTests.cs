@@ -75,5 +75,17 @@ namespace Quintessence.Run.Tests
                 Assert.IsNotEmpty(TutorialState.Text(s));
             }
         }
+
+        [Test]
+        public void Texts_Follow_The_Hero_Of_The_Training()
+        {
+            StringAssert.Contains("Aperte 3", TutorialState.Text(TutorialStep.Skill, Quintessence.Core.ElementType.Earth, Quintessence.Core.ElementType.Fire));
+            StringAssert.Contains("Terra", TutorialState.Text(TutorialStep.Skill, Quintessence.Core.ElementType.Earth, Quintessence.Core.ElementType.Fire));
+            var react = TutorialState.Text(TutorialStep.React, Quintessence.Core.ElementType.Air, Quintessence.Core.ElementType.Fire);
+            StringAssert.Contains("o Fogo", react);
+            StringAssert.Contains("com 4", react);
+            StringAssert.Contains("com 1", react);
+            Assert.AreEqual(TutorialState.Text(TutorialStep.Move), TutorialState.Text(TutorialStep.Move, Quintessence.Core.ElementType.Water));
+        }
     }
 }

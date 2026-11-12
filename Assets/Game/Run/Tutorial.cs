@@ -48,6 +48,27 @@ namespace Quintessence.Run
             _ => "Treino concluído",
         };
 
+        static string Named(Quintessence.Core.ElementType e) => e switch
+        {
+            Quintessence.Core.ElementType.Fire => "o Fogo", Quintessence.Core.ElementType.Water => "a Água",
+            Quintessence.Core.ElementType.Earth => "a Terra", Quintessence.Core.ElementType.Air => "o Ar", _ => "",
+        };
+
+        static string Bare(Quintessence.Core.ElementType e) => e switch
+        {
+            Quintessence.Core.ElementType.Fire => "Fogo", Quintessence.Core.ElementType.Water => "Água",
+            Quintessence.Core.ElementType.Earth => "Terra", Quintessence.Core.ElementType.Air => "Ar", _ => "",
+        };
+
+        /// Texto do passo para o heroi do treino: as teclas e os elementos seguem o elemento inicial e o segundo despertado.
+        public static string Text(TutorialStep s, Quintessence.Core.ElementType hero = Quintessence.Core.ElementType.Fire,
+            Quintessence.Core.ElementType second = Quintessence.Core.ElementType.Water) => s switch
+        {
+            TutorialStep.Skill => $"Aperte {(int)hero} perto de um boneco: é a skill de {Bare(hero)}. Ela deixa a marca do elemento no inimigo e tem recarga.",
+            TutorialStep.React => $"Você despertou {Named(second)}. Marque um boneco com {(int)hero} e acerte o mesmo boneco com {(int)second}: skills de elementos diferentes reagem.",
+            _ => Text(s),
+        };
+
         public static string Text(TutorialStep s) => s switch
         {
             TutorialStep.Move => "Ande pela sala com W A S D. O herói mira onde o mouse aponta.",

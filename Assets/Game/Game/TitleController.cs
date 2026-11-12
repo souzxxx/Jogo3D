@@ -18,6 +18,8 @@ namespace Quintessence.Game
         float cheerLeft;
         /// Heroi que esta comemorando agora (para os testes).
         public int Cheering { get; private set; } = -1;
+        /// Heroi da ultima carta que esteve em foco: o Treino usa ele.
+        public Quintessence.Core.ElementType LastHero { get; private set; } = Quintessence.Core.ElementType.Fire;
 
         void Start()
         {
@@ -25,7 +27,8 @@ namespace Quintessence.Game
             if (menu == null) menu = new GameObject("TitleMenu").AddComponent<TitleMenu>();
             menu.Ascension = Ascension.Clamp(GameFlow.Ascension, MetaStore.Current.Wins);
             menu.OnPick = e => { GameFlow.Ascension = Ascension.Clamp(menu.Ascension, MetaStore.Current.Wins); GameFlow.StartRun(e); };
-            menu.OnTutorial = GameFlow.StartTutorial;
+            // o treino usa o heroi da ultima carta em foco (Rax se nenhuma)
+            menu.OnTutorial = () => GameFlow.StartTutorial(LastHero);
             var save = RunSaveStore.Load();
             if (save != null) menu.ShowContinue(save.Summary, () => GameFlow.ContinueRun());
             menu.BindMeta(MetaStore.Current, MetaStore.Save, MetaStore.Reset, () => MetaStore.Current);
@@ -60,6 +63,7 @@ namespace Quintessence.Game
                 if (hovered >= 0 && heroes[hovered] != null) { heroes[hovered].CrossFadeInFixedTime("Cheer", 0.15f); cheerLeft = 1.6f; }
                 Cheering = hovered;
                 lastHovered = hovered;
+                if (hovered >= 0) LastHero = Quintessence.Core.Elements.All[hovered];
             }
             if (cheerLeft > 0f && (cheerLeft -= dt) <= 0f && Cheering >= 0 && heroes[Cheering] != null)
                 heroes[Cheering].CrossFadeInFixedTime("Idle", 0.25f);

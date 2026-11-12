@@ -64,8 +64,7 @@ namespace Quintessence.Game
             {
                 case TutorialStep.React:
                     // a segunda skill chega na hora de aprender a reacao
-                    foreach (var e in Elements.All)
-                        if (e != GameFlow.StartElement) { player.Awaken(e); break; }
+                    player.Awaken(SecondElement);
                     break;
                 case TutorialStep.Quintessence:
                     foreach (var e in Elements.All) player.Awaken(e);
@@ -83,7 +82,14 @@ namespace Quintessence.Game
             hud.ShowTutorialEnd(() => GameFlow.StartRun(GameFlow.StartElement), GameFlow.ToTitle);
         }
 
-        void Show() => hud.ShowTutorial(State.Number, TutorialState.StepCount, TutorialState.Title(State.Step), TutorialState.Text(State.Step), State.Progress01);
+        void Show() => hud.ShowTutorial(State.Number, TutorialState.StepCount, TutorialState.Title(State.Step),
+            TutorialState.Text(State.Step, GameFlow.StartElement, SecondElement), State.Progress01);
+
+        /// O elemento que o treino desperta na hora da reacao: o primeiro que nao e o do heroi.
+        static ElementType SecondElement
+        {
+            get { foreach (var e in Elements.All) if (e != GameFlow.StartElement) return e; return ElementType.Water; }
+        }
 
         void Update()
         {
