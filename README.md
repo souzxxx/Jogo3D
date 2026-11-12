@@ -1,6 +1,8 @@
 # Quintessence 3D
 
-Action roguelite 3D de câmera top-down: você começa a run com um elemento, desperta os outros três e encadeia reações elementais até alcançar a Quintessência. Projeto 3D de Jogos Digitais e Interação (Insper).
+Action roguelite 3D de câmera top-down: você escolhe um dos quatro heróis (Rax, Liora, Brann ou Vey), começa a run com o elemento dele, desperta os outros três e combina as skills em reações até alcançar a Quintessência. Projeto 3D de Jogos Digitais e Interação (Insper).
+
+**O que tem no jogo:** 4 heróis com golpe básico e passiva próprios · 4 skills elementais e 6 reações · run de 10 salas em mapa ramificado, por três trechos (Salões de Cinza, Cripta Afogada, Jardim de Pedra) até o Coração das Cinzas · 7 tipos de inimigo, Campeão de Elite, o mini-chefe Carrasco e o Guardião das Cinzas · nível e 23 talentos, 29 bênçãos, Santuário que desperta ou aprofunda skills, Loja, Tesouro e Pacto · 16 arranjos de sala com perigos (brasa, espinhos, barril de pólvora) · Refúgio com 7 melhorias permanentes e Ascensão em 5 níveis · Grimório, treino e opções (volume, tela cheia, tremor de tela).
 
 **Equipe:** Leonardo de Souza, Nicolas Volf, Enzo Canavero, Miguel Damasio
 **Engine:** Unity `6000.6.4f1` (URP). Use exatamente essa versão.
@@ -15,7 +17,7 @@ Action roguelite 3D de câmera top-down: você começa a run com um elemento, de
 
 ## Jogar
 
-Abra `Assets/Scenes/Title.unity` no Unity e dê Play.
+Abra `Assets/Scenes/Title.unity` no Unity e dê Play. A build WebGL também roda direto no navegador (ver abaixo).
 
 WASD move · mouse mira · clique esquerdo ataca · 1 2 3 4 skills elementais · Espaço dash · R Quintessência · E interage · I inventário · Tab mapa · Esc pausa
 
@@ -41,7 +43,8 @@ A cena `Assets/Scenes/LookDev/LookDev_B_Lit.unity` é gerada por `Assets/Editor/
 | [Lilita One](https://fonts.google.com/specimen/Lilita+One) | Juan Montoreano | OFL 1.1 |
 | [Titillium Web](https://fonts.google.com/specimen/Titillium+Web) | Accademia di Belle Arti di Urbino | OFL 1.1 |
 | [Cinzel Decorative](https://fonts.google.com/specimen/Cinzel+Decorative) | Natanael Gama | OFL 1.1 |
-| Ícones de [game-icons.net](https://game-icons.net) (21 ícones em `Assets/Resources/Icons`) | Lorc, Carl Olsen, Skoll | CC BY 3.0 |
+| Ícones de [game-icons.net](https://game-icons.net) (ícones em `Assets/Resources/Icons`) | Lorc, Delapouite, Carl Olsen, Skoll e outros | CC BY 3.0 |
+| Cabeças, caudas e armas dos heróis, peças do Guardião, acessórios dos inimigos e adereços dos trechos (`Assets/Art`, fontes e scripts do Blender em `ArtSource/`) | Equipe, modelados sobre os corpos do KayKit | do projeto |
 
 Som: todos os efeitos e as músicas são sintetizados pelo script `tools/gen_audio.py` (ffmpeg), sem arquivos de terceiros.
 
