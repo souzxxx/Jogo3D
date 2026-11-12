@@ -277,13 +277,16 @@ namespace Quintessence.Enemies
         public bool IsCharging => chargeLeft > 0f;
         static readonly Collider[] allies = new Collider[32];
 
+        /// Aliado de verdade: inimigo ou chefe (o barril de polvora tambem e do time inimigo, mas nao se cura).
+        static bool IsCreature(Health h) => h.GetComponent<EnemyBrain>() != null || h.GetComponent<BossBrain>() != null;
+
         bool AnyWoundedAlly()
         {
             int n = Physics.OverlapSphereNonAlloc(transform.position + Vector3.up, definition.healRadius, allies, ~0, QueryTriggerInteraction.Ignore);
             for (int i = 0; i < n; i++)
             {
                 var h = allies[i].GetComponentInParent<Health>();
-                if (h != null && h != health && h.Team == health.Team && !h.IsDead && h.Current < h.Max - 0.5f) return true;
+                if (h != null && h != health && h.Team == health.Team && !h.IsDead && h.Current < h.Max - 0.5f && IsCreature(h)) return true;
             }
             return false;
         }
@@ -295,7 +298,7 @@ namespace Quintessence.Enemies
             for (int i = 0; i < n; i++)
             {
                 var h = allies[i].GetComponentInParent<Health>();
-                if (h == null || h == health || h.Team != health.Team || h.IsDead || !seen.Add(h)) continue;
+                if (h == null || h == health || h.Team != health.Team || h.IsDead || !IsCreature(h) || !seen.Add(h)) continue;
                 float got = h.Heal(definition.healAmount * Scaling.Health);
                 if (got > 0f) GameEvents.RaiseEnemyHealed(h, got);
             }
