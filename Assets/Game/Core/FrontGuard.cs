@@ -40,7 +40,8 @@ namespace Quintessence.Core
         {
             LastBlocked = false;
             if (info.IsReaction || info.Direction.sqrMagnitude < 1e-4f || !Up) return 1f;
-            var to = info.Source != null ? info.Source.transform.position - transform.position : -info.Direction;
+            // de onde o golpe vem, nao onde esta quem bateu: o Pilar de Pedra nasce a frente do heroi e pode pegar pelas costas
+            var to = -info.Direction;
             if (!Covers(transform.forward, to, arc)) return 1f;
             LastBlocked = true;
             Blocks++;

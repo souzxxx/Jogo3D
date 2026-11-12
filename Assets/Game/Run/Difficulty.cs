@@ -23,6 +23,8 @@ namespace Quintessence.Run
         /// Vida e dano dos inimigos crescem com a profundidade: a primeira sala usa a ficha do inimigo e cada camada
         /// soma 9% de vida e 6,5% de dano. O tempo de aviso dos golpes nunca muda.
         public const float HealthPerLayer = 0.09f, DamagePerLayer = 0.065f;
+        /// As duas primeiras salas sao o aquecimento: o inimigo bate 75% e depois 87% do normal (quem esta aprendendo apanha mais).
+        public static float EarlyDamage(int depth) => depth <= 0 ? 0.75f : depth == 1 ? 0.87f : 1f;
 
         public static Difficulty For(RoomType type, int depth, EliteModifier modifier = EliteModifier.None)
         {
@@ -30,7 +32,7 @@ namespace Quintessence.Run
             if (type != RoomType.Combat && type != RoomType.Elite) return d;
             depth = Math.Max(0, depth);
             d.Health = 1f + HealthPerLayer * depth;
-            d.Damage = 1f + DamagePerLayer * depth;
+            d.Damage = (1f + DamagePerLayer * depth) * EarlyDamage(depth);
             if (type != RoomType.Elite) return d;
             d.Size = 1.12f;
             switch (modifier)

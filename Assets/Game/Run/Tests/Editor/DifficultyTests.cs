@@ -21,7 +21,9 @@ namespace Quintessence.Run.Tests
         {
             var first = DifficultyCurve.For(RoomType.Combat, 0);
             Assert.AreEqual(1f, first.Health, 0.001f);
-            Assert.AreEqual(1f, first.Damage, 0.001f);
+            Assert.AreEqual(DifficultyCurve.EarlyDamage(0), first.Damage, 0.001f);
+            Assert.Less(first.Damage, 1f, "a primeira sala bate mais fraco: aquecimento");
+            Assert.AreEqual(1f, DifficultyCurve.EarlyDamage(2), "do terceiro em diante a rampa some");
             var last = DifficultyCurve.For(RoomType.Combat, 7);
             Assert.AreEqual(1f + 7 * DifficultyCurve.HealthPerLayer, last.Health, 0.001f);
             Assert.AreEqual(1f + 7 * DifficultyCurve.DamagePerLayer, last.Damage, 0.001f);

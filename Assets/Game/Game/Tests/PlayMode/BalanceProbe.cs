@@ -30,6 +30,7 @@ namespace Quintessence.Game.PlayTests
         public IEnumerator Probe_Full_Runs()
         {
             var log = new System.Text.StringBuilder();
+            log.AppendLine($"# sonda: dano levado {ProbeTaken:0.##}, desvia de {ProbeDodge:P0} dos avisos, {ProbeSeeds} sementes por heroi");
             // o roteiro desvia de todo aviso com reflexo perfeito, mas joga sem estrategia: dano cheio por padrao
             float taken = ProbeTaken;
             GameFlow.AutoPickTalents = true;
@@ -58,6 +59,7 @@ namespace Quintessence.Game.PlayTests
                     player.Input = input;
                     hp.Pool.ExtraDamageTakenMultiplier = taken;
                     GameEvents.TelegraphStarted += ConsiderDodge;
+                    dodgeRng = new System.Random(GameFlow.Seed * 13 + 5);
                     GameEvents.QuintessenceActiveChanged += on => { if (!on) hp.Pool.ExtraDamageTakenMultiplier = taken; };
                     var damageBy = new System.Collections.Generic.Dictionary<string, float>();
                     GameEvents.DamageDealt += (t, info, applied) =>
@@ -149,6 +151,9 @@ namespace Quintessence.Game.PlayTests
 
         /// Quanto do dano o roteiro leva e quantas sementes por heroi. Mudar aqui para comparar.
         public static float ProbeTaken = 1f;
+        /// Chance de o roteiro desviar de cada aviso que o ameaca. 1 = reflexo perfeito; 0,65 = alguem que joga razoavelmente.
+        public static float ProbeDodge = 0.65f;
+        System.Random dodgeRng = new(1);
         public static int ProbeSeeds = 3;
         /// Para investigar uma run so (None = todas).
         public static ElementType OnlyHero = ElementType.None;
@@ -237,6 +242,7 @@ namespace Quintessence.Game.PlayTests
             }
             else threatened = Vector3.Distance(p, e.Point) < e.Radius + 1.2f;
             if (!threatened) return;
+            if (dodgeRng.NextDouble() > ProbeDodge) return; // nem todo aviso e visto a tempo
             dodgeDir = Vector3.Dot(side, -p) >= 0f ? side : -side;
             dodgeLeft = 0.4f;
             input.PressDash();

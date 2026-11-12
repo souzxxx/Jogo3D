@@ -37,10 +37,10 @@ namespace Quintessence.Core.Tests
                 var zone = new DamageInfo(20f, ElementType.Fire, Team.Player, attacker);
                 Assert.AreEqual(1f, guard.Multiplier(zone), "zona e queimadura chegam sem direcao e passam");
 
-                attacker.transform.position = new Vector3(0f, 0f, -3f);
-                Assert.AreEqual(1f, guard.Multiplier(hit), "pelas costas entra inteiro");
+                var behind = hit; behind.Direction = Vector3.forward;
+                Assert.AreEqual(1f, guard.Multiplier(behind), "pelas costas entra inteiro");
+                Assert.AreEqual(1f, guard.Multiplier(behind), "mesmo com quem bateu na frente: vale a direcao do golpe (Pilar que nasce atras)");
 
-                attacker.transform.position = new Vector3(0f, 0f, 3f);
                 var holder = go.AddComponent<StatusHolder>();
                 holder.State.Apply(StatusType.Rooted, 2f);
                 Assert.IsFalse(guard.Up, "enraizado, o escudo cai");
