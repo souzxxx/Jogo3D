@@ -750,7 +750,7 @@ namespace Quintessence.Game
             if (champion) { Run.AddEssence(Mathf.RoundToInt(15 * player.Modifiers.EssenceMult)); hud.SetEssence(Run.Essence); }
             int levels = Run.Progress.AddXp(Mathf.RoundToInt(Progression.XpForEnemy(baseHealth, boss) * (champion ? 3 : 1) * player.Modifiers.XpMult));
             if (levels <= 0) return;
-            Sfx.Play("pickup");
+            Sfx.Play("level_up");
             Feel.DamageNumber.Spawn(player.transform.position + Vector3.up * 3.9f, "NÍVEL " + Run.Progress.Level + "!", new Color(0.9f, 0.76f, 0.42f), 1.3f, 1.8f);
         }
 
