@@ -127,6 +127,11 @@ namespace Quintessence.Game.PlayTests
             yield return null;
             Shot(Camera.main, "docs/img/refugio.png");
             menu.ShowRefuge(false);
+            // com uma vitoria no save, o titulo oferece a Ascensao
+            yield return null;
+            Assert.IsNotNull(GameObject.Find("Ascension"), "depois da primeira vitoria o titulo mostra a Ascensao");
+            menu.Ascension = 1;
+            Shot(Camera.main, "docs/img/titulo_ascensao.png");
 
             // como se o jogo tivesse sido fechado e aberto: le de novo do disco
             MetaStore.UseKey(key);
@@ -143,6 +148,8 @@ namespace Quintessence.Game.PlayTests
             Assert.AreEqual(108f, health.Current, 0.01f);
             Assert.AreEqual(8, director.Run.Essence, "Bolsa 1: comeca com 8 de Essencia");
             Assert.AreEqual(1.04f, p.Modifiers.DamageAll, 0.001f);
+            Assert.AreEqual(1, GameFlow.Ascension, "a Ascensao escolhida no titulo vale para a run");
+            GameFlow.Ascension = 0;
 
             // save estragado nao derruba o jogo: volta zerado
             PlayerPrefs.SetString(key, "v1;###;;quebrado");

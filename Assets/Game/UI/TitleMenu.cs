@@ -28,6 +28,27 @@ namespace Quintessence.UI
         {
             meta = progress; save = onSave; reset = onReset; reload = onReload;
             UpdateRefugeLabel();
+            BuildAscension();
+        }
+
+        /// Seletor de Ascensao: aparece depois da primeira vitoria (precisa do save, por isso nasce no BindMeta).
+        void BuildAscension()
+        {
+            if (canvas == null) return;
+            var root = canvas.transform;
+            var old = root.Find("Ascension");
+            if (old != null) Destroy(old.gameObject);
+            var mid = new Vector2(0.5f, 0.5f);
+            int unlocked = meta != null ? Quintessence.Run.Ascension.Unlocked(meta.Wins) : 0;
+            if (unlocked <= 0) { Ascension = 0; return; }
+            Ascension = Mathf.Clamp(Ascension, 0, unlocked);
+            var asc = UiKit.Rect("Ascension", root, new Vector2(0.5f, 0), new Vector2(0, 122), new Vector2(860, 32));
+            asc.SetSiblingIndex(Mathf.Max(0, root.childCount - 4));
+            var label = UiKit.Text(UiKit.Rect("Label", asc, mid, Vector2.zero, new Vector2(740, 30)), "", 20, UiKit.Cream, TextAnchor.MiddleCenter, false);
+            void Refresh() => label.text = $"ASCENSÃO {Ascension}/{unlocked}  ·  {Quintessence.Run.Ascension.Describe(Ascension)}";
+            UiKit.Button(asc, "−", new Vector2(0, 0.5f), new Vector2(22, 0), new Vector2(44, 30), UiKit.Secondary, () => { Ascension = Mathf.Max(0, Ascension - 1); Refresh(); });
+            UiKit.Button(asc, "+", new Vector2(1, 0.5f), new Vector2(-22, 0), new Vector2(44, 30), UiKit.Secondary, () => { Ascension = Mathf.Min(unlocked, Ascension + 1); Refresh(); });
+            Refresh();
         }
 
         void UpdateRefugeLabel()
@@ -225,18 +246,6 @@ namespace Quintessence.UI
                 UiKit.Text(UiKit.Rect("Name", card, new Vector2(0.5f, 1), new Vector2(0, -90), new Vector2(240, 48)), names[i], 38, UiKit.Cream);
                 UiKit.Image(UiKit.Rect("Rule", card, new Vector2(0.5f, 1), new Vector2(0, -148), new Vector2(72, 4)), null, Color.Lerp(c, UiKit.Cream, 0.2f));
                 UiKit.Text(UiKit.Rect("Note", card, new Vector2(0.5f, 0), new Vector2(0, 12), new Vector2(240, 58)), notes[i], 21, UiKit.Paper, TextAnchor.MiddleCenter, false);
-            }
-            // Ascensao: aparece depois da primeira vitoria
-            int unlocked = meta != null ? Quintessence.Run.Ascension.Unlocked(meta.Wins) : 0;
-            if (unlocked > 0)
-            {
-                Ascension = Mathf.Clamp(Ascension, 0, unlocked);
-                var asc = UiKit.Rect("Ascension", root, new Vector2(0.5f, 0), new Vector2(0, 136), new Vector2(1100, 44));
-                var label = UiKit.Text(UiKit.Rect("Label", asc, mid, Vector2.zero, new Vector2(900, 40)), "", 22, UiKit.Cream, TextAnchor.MiddleCenter, false);
-                void Refresh() => label.text = $"ASCENSÃO {Ascension}/{unlocked}  ·  {Quintessence.Run.Ascension.Describe(Ascension)}";
-                UiKit.Button(asc, "−", new Vector2(0, 0.5f), new Vector2(24, 0), new Vector2(48, 40), UiKit.Secondary, () => { Ascension = Mathf.Max(0, Ascension - 1); Refresh(); });
-                UiKit.Button(asc, "+", new Vector2(1, 0.5f), new Vector2(-24, 0), new Vector2(48, 40), UiKit.Secondary, () => { Ascension = Mathf.Min(unlocked, Ascension + 1); Refresh(); });
-                Refresh();
             }
             var open = UiKit.Button(root, "REFÚGIO", new Vector2(0.5f, 0), new Vector2(-330, 74), new Vector2(400, 58), UiKit.Primary, () => ShowRefuge(true));
             void Small(string label, float x, Action act) =>
