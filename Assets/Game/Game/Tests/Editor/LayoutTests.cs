@@ -83,6 +83,7 @@ namespace Quintessence.Game.Tests
                 {
                     if (p.prefab.GetComponent<Quintessence.Enemies.EmberVent>() != null) continue;
                     if (p.prefab.GetComponent<Quintessence.Enemies.SpikeTrap>() != null) continue; // armadilha no chao: anda-se por cima
+                    if (p.prefab.GetComponent<CorruptionPool>() != null) continue; // poca no chao: inimigo atravessa e se queima
                     var carve = p.prefab.GetComponent<UnityEngine.AI.NavMeshObstacle>();
                     Assert.IsNotNull(carve, p.prefab.name + " sem NavMeshObstacle: os inimigos atravessariam");
                     Assert.IsTrue(carve.carving);

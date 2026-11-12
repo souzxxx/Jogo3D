@@ -427,6 +427,66 @@ public static class GameSceneBuilder
         return prefab;
     }
 
+    /// Poca de corrupcao: manchas redondas sobrepostas, borda de cinza escura e superficie de brilho baixo
+    /// (no mesmo registro dos respiradouros). width x depth em metros: a area que fere.
+    static GameObject PoolPrefab(string name, float width, float depth, int seed)
+    {
+        string path = "Assets/Game/Game/Prefabs/Obstacles/" + name + ".prefab";
+        var root = new GameObject(name);
+        var rimMat = LookDevBuilder.Mat("Scorch2", null, new Color(0.2f, 0.15f, 0.15f), Color.black, 0f);
+        var glowMat = LookDevBuilder.Mat("Glow_Pool3", null, new Color(0.13f, 0.08f, 0.08f), new Color(0.12f, 0.02f, 0.01f), 0f);
+        var crackMat = LookDevBuilder.Mat("Glow_PoolCrack", null, new Color(0.6f, 0.1f, 0.01f), new Color(1f, 0.16f, 0.02f), 0f);
+        var cracks = new System.Collections.Generic.List<Renderer>();
+        var surfaces = new System.Collections.Generic.List<Renderer>();
+        var rng = new System.Random(seed);
+        // manchas ao longo do lado maior, com tamanho e deslocamento variados
+        bool alongX = width >= depth;
+        float length = alongX ? width : depth, thick = alongX ? depth : width;
+        int blobs = Mathf.Max(2, Mathf.RoundToInt(length / (thick * 0.8f)));
+        for (int b = 0; b < blobs; b++)
+        {
+            float t = blobs == 1 ? 0f : (b / (float)(blobs - 1) - 0.5f) * (length - thick);
+            float side = ((float)rng.NextDouble() - 0.5f) * thick * 0.25f;
+            float d = thick * (0.95f + (float)rng.NextDouble() * 0.35f);
+            var pos = alongX ? new Vector3(t, 0, side) : new Vector3(side, 0, t);
+            Disc(root.transform, "Rim", pos, d + 0.45f, 0.011f, rimMat);
+            surfaces.Add(Disc(root.transform, "Surface", pos, d, 0.02f + b * 0.0005f, glowMat));
+            // veios de brasa cruzando a mancha, como as rachaduras do chao da sala
+            for (int c = 0; c < 3; c++)
+            {
+                float ang = (float)rng.NextDouble() * 180f, len = d * (0.45f + (float)rng.NextDouble() * 0.35f);
+                var off = new Vector3(((float)rng.NextDouble() - 0.5f) * d * 0.4f, 0, ((float)rng.NextDouble() - 0.5f) * d * 0.4f);
+                var crack = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                Object.DestroyImmediate(crack.GetComponent<Collider>());
+                crack.name = "Vein";
+                crack.transform.SetParent(root.transform, false);
+                crack.transform.localPosition = pos + off + Vector3.up * 0.03f;
+                crack.transform.localRotation = Quaternion.Euler(0, ang, 0);
+                crack.transform.localScale = new Vector3(0.07f + (float)rng.NextDouble() * 0.06f, 0.02f, len);
+                var cr = crack.GetComponent<Renderer>();
+                cr.sharedMaterial = crackMat;
+                cracks.Add(cr);
+            }
+        }
+        root.AddComponent<CorruptionPool>().Bind(new Vector3(width, 1.2f, depth), surfaces.ToArray(), cracks.ToArray());
+        var prefab = PrefabUtility.SaveAsPrefabAsset(root, path);
+        Object.DestroyImmediate(root);
+        return prefab;
+    }
+
+    static Renderer Disc(Transform parent, string name, Vector3 pos, float diameter, float y, Material m)
+    {
+        var d = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+        Object.DestroyImmediate(d.GetComponent<Collider>());
+        d.name = name;
+        d.transform.SetParent(parent, false);
+        d.transform.localPosition = new Vector3(pos.x, y, pos.z);
+        d.transform.localScale = new Vector3(diameter, 0.008f, diameter);
+        var r = d.GetComponent<Renderer>();
+        r.sharedMaterial = m;
+        return r;
+    }
+
     /// Os seis arranjos iniciais. Depois de criados sao assets: da pra mover peca no Inspector sem tocar no codigo.
     static RoomLayout[] Layouts()
     {
@@ -475,6 +535,10 @@ public static class GameSceneBuilder
         Make("14_Anel", "Anel", (crates, 0f, 0.8f, 15), (barrel, 1.7f, 0.1f, 0), (box, -1.6f, 1.7f, 30), (pillar, -5.6f, 0.5f, 0), (pillar, 5.6f, 0.5f, 0), (vent, 0f, 3.4f, 0));
         Make("15_Diagonal", "Diagonal", (barrier, -4.6f, 2.2f, 45), (barrier, -1.4f, -0.6f, 45), (barrier, 3.6f, 1.6f, -45), (column, 6.6f, -2.6f, 0), (spikes, 0.6f, 3.1f, 0));
         Make("16_Colunata", "Colunata", (column, -6f, 2.6f, 0), (column, -2f, 2.6f, 0), (column, 2f, 2.6f, 0), (column, 6f, 2.6f, 0), (column, -4f, -1.6f, 0), (column, 4f, -1.6f, 0), (powder, 0f, 0.5f, 0));
+        var strip = PoolPrefab("CorruptionStrip", 6f, 1.8f, 3);
+        var pool = PoolPrefab("CorruptionPool", 3f, 3f, 7);
+        Make("17_Travessia", "Travessia", (strip, -4.6f, 1.2f, 0), (strip, 4.6f, 1.2f, 0), (column, 0f, 3.4f, 0), (pillar, -7.2f, -3.2f, 0), (pillar, 7.2f, -3.2f, 0));
+        Make("18_Charcos", "Charcos", (pool, -4.2f, 2.4f, 0), (pool, 3.8f, -0.4f, 0), (pool, -1.2f, -2.2f, 0), (pillar, 5.2f, 3.2f, 0), (box, -7.4f, -1.4f, 20));
         Make("6_Cruz", "Cruz", (barrier, 0f, 2.6f, 0), (barrier, -4.2f, -0.8f, 90), (barrier, 4.2f, -0.8f, 90), (vent, -4.2f, 3.6f, 0), (vent, 4.2f, 3.6f, 0));
         return list.ToArray();
     }

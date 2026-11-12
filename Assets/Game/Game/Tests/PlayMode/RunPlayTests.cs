@@ -816,6 +816,18 @@ namespace Quintessence.Game.PlayTests
             Object.Destroy(trap.gameObject);
             heroHp.Heal(999);
 
+            // poca de corrupcao: fere e queima quem esta dentro
+            var poolPrefab = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Game/Game/Prefabs/Obstacles/CorruptionPool.prefab");
+            var pool = Object.Instantiate(poolPrefab, new Vector3(0, 0, 0), Quaternion.identity).GetComponent<CorruptionPool>();
+            hero.Teleport(new Vector3(0.2f, 0.05f, 0.1f), Vector3.forward);
+            heroBefore = heroHp.Current;
+            for (int k = 0; k < 60 && pool.Pulses < 2; k++) yield return null;
+            Assert.Less(heroHp.Current, heroBefore, "quem pisa na poca se fere");
+            Assert.AreEqual(StatusType.Burn, pool.Status, "nos Saloes de Cinza ela queima");
+            Shot(cam, "docs/img/perigo_poca.png");
+            Object.Destroy(pool.gameObject);
+            heroHp.Heal(999);
+
             // tesouro: abrir paga Essencia
             director.ShowTreasure();
             hero.Teleport(new Vector3(0, 0.05f, -2.4f), Vector3.forward);
