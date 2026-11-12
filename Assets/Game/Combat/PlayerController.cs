@@ -116,6 +116,7 @@ namespace Quintessence.Combat
             foreach (var e in alsoAwakened) loadout.Awaken(e);
             fallback = ScriptableObject.CreateInstance<ElementDefinition>();
             Input ??= GetComponent<IPlayerInput>();
+            if (TryGetComponent(out HeroSkin skin)) skin.Show(startingElement);
         }
 
         void OnEnable()
@@ -189,6 +190,7 @@ namespace Quintessence.Combat
             Element = starting;
             mods.Reset();
             for (int i = 0; i < skillCd.Length; i++) skillCd[i] = 0f;
+            if (TryGetComponent(out HeroSkin skin)) skin.Show(starting);
             GameEvents.RaiseElementAwakened(starting);
             GameEvents.RaiseElementSwitched(ElementType.None, starting);
         }

@@ -50,6 +50,23 @@ public static class CombatDevSceneBuilder
             ("SkillFire", "Spellcast_Shoot", 0.4f), ("SkillWater", "2H_Melee_Attack_Slice", 0.45f),
             ("SkillEarth", "Spellcast_Raise", 0.6f), ("SkillAir", "2H_Melee_Attack_Spinning|2H_Melee_Attack_Spin", 0.45f),
             ("Hit", "Hit_A", 0.3f), ("Death", "Death_A", 0f), ("Quint", "Cheer", 0.7f));
+        // cada heroi golpeia com o que carrega: garras, orbe, martelo ou duas adagas (o resto das animacoes e igual)
+        var heroCtrls = new RuntimeAnimatorController[4];
+        (string a, string b, string c)[] combos =
+        {
+            ("Unarmed_Melee_Attack_Punch_A|1H_Melee_Attack_Slice_Diagonal", "Unarmed_Melee_Attack_Punch_B|1H_Melee_Attack_Slice_Horizontal", "Unarmed_Melee_Attack_Kick|2H_Melee_Attack_Chop"),
+            ("1H_Melee_Attack_Slice_Diagonal", "1H_Melee_Attack_Slice_Horizontal", "1H_Melee_Attack_Chop|2H_Melee_Attack_Chop"),
+            ("2H_Melee_Attack_Slice|1H_Melee_Attack_Slice_Diagonal", "2H_Melee_Attack_Stab|1H_Melee_Attack_Slice_Horizontal", "2H_Melee_Attack_Chop"),
+            ("Dualwield_Melee_Attack_Slice|1H_Melee_Attack_Slice_Diagonal", "Dualwield_Melee_Attack_Stab|1H_Melee_Attack_Slice_Horizontal", "Dualwield_Melee_Attack_Chop|2H_Melee_Attack_Chop"),
+        };
+        for (int h = 0; h < 4; h++)
+            heroCtrls[h] = Controller(HeroFbx, AnimDir + "Hero_" + HeroBuilder.Specs[h].Name + ".controller",
+                ("Idle", "Idle", 0f), ("Run", "Running_A", 0f),
+                ("DashF", "Dodge_Forward", 0.3f), ("DashB", "Dodge_Backward", 0.3f), ("DashL", "Dodge_Left", 0.3f), ("DashR", "Dodge_Right", 0.3f),
+                ("Attack0", combos[h].a, 0.34f), ("Attack1", combos[h].b, 0.34f), ("Attack2", combos[h].c, 0.5f),
+                ("SkillFire", "Spellcast_Shoot", 0.4f), ("SkillWater", "2H_Melee_Attack_Slice", 0.45f),
+                ("SkillEarth", "Spellcast_Raise", 0.6f), ("SkillAir", "2H_Melee_Attack_Spinning|2H_Melee_Attack_Spin", 0.45f),
+                ("Hit", "Hit_A", 0.3f), ("Death", "Death_A", 0f), ("Quint", "Cheer", 0.7f));
         dummyCtrl = Controller(MinionFbx, AnimDir + "Dummy.controller", ("Idle", "Idle_Combat", 0f));
 
         var root = LookDevBuilder.BeginArena(rootName);
@@ -82,13 +99,18 @@ public static class CombatDevSceneBuilder
         also.GetArrayElementAtIndex(1).intValue = (int)ElementType.Earth;
         also.GetArrayElementAtIndex(2).intValue = (int)ElementType.Air;
         pso.ApplyModifiedPropertiesWithoutUndo();
-        var heroMat = LookDevBuilder.Mat("Hero", KK + "Adventurers/Characters/mage_texture.png", Color.white, Color.black, 0f);
-        var model = LookDevBuilder.Spawn("Adventurers/Characters/Mage.fbx", Vector3.zero, 0, heroMat);
-        model.name = "Model";
-        model.transform.SetParent(player.transform, false);
-        LookDevBuilder.Hide(model, "Spellbook", "1H_Wand");
-        var anim = Animator(model, heroCtrl);
-        player.AddComponent<PlayerAnimator>().Bind(pc, anim);
+        // os quatro herois moram no mesmo prefab; o HeroSkin mostra o do elemento inicial
+        HeroBuilder.Prepare();
+        var heroModels = new GameObject[4];
+        for (int i = 0; i < 4; i++)
+        {
+            heroModels[i] = HeroBuilder.Build(i, heroCtrls[i]);
+            heroModels[i].transform.SetParent(player.transform, false);
+            heroModels[i].SetActive(i == 0);
+        }
+        var heroAnim = player.AddComponent<PlayerAnimator>();
+        heroAnim.Bind(pc, heroModels[0].GetComponent<Animator>());
+        player.AddComponent<HeroSkin>().Bind(heroModels, heroAnim, pc);
         var light = new GameObject("PresenceLight").AddComponent<Light>();
         light.transform.SetParent(player.transform, false);
         light.transform.localPosition = new Vector3(0, 2.4f, 0);
