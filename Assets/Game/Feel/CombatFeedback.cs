@@ -90,6 +90,7 @@ namespace Quintessence.Feel
             GameEvents.Exploded += OnExploded;
             GameEvents.PuddleLanded += OnPuddle;
             GameEvents.QuintessenceBurst += OnBurst;
+            GameEvents.PerfectDodge += OnPerfectDodge;
             GameEvents.EnemyHealed += OnEnemyHealed;
             GameEvents.ChampionSpawned += OnChampion;
             GameEvents.Evaded += OnEvaded;
@@ -123,6 +124,7 @@ namespace Quintessence.Feel
             GameEvents.Exploded -= OnExploded;
             GameEvents.PuddleLanded -= OnPuddle;
             GameEvents.QuintessenceBurst -= OnBurst;
+            GameEvents.PerfectDodge -= OnPerfectDodge;
             GameEvents.EnemyHealed -= OnEnemyHealed;
             GameEvents.ChampionSpawned -= OnChampion;
             GameEvents.Evaded -= OnEvaded;
@@ -399,6 +401,16 @@ namespace Quintessence.Feel
             Burst(p, Vector3.up, 180f, 50, 4f, 11f, 0.25f, 0.6f, 0.5f, Steel);
             LightFlash(p, Steel, 8f, 6f, 0.3f);
             CameraShake.Add(0.4f);
+        }
+
+        /// Esquiva perfeita: rotulo, um anel claro e o som do dash mais agudo.
+        void OnPerfectDodge(Vector3 at)
+        {
+            var p = at + Vector3.up * 1.2f;
+            DamageNumber.Spawn(p + Vector3.up * 2.2f, "ESQUIVA PERFEITA", new Color(0.95f, 0.88f, 0.62f), 0.9f, 1f);
+            Ring(p, 40, 4f, 0.35f, 0.5f, 0.5f, new Color(0.95f, 0.9f, 0.7f));
+            Sfx.Play("dash");
+            Stop(0.06f);
         }
 
         void OnEvaded(Health target)
