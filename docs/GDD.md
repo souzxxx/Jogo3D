@@ -124,18 +124,19 @@ Uma skill deixa no inimigo a **marca** do elemento dela. Acertar esse inimigo co
 |---|---|---|
 | Rastejante | Corpo a corpo, vem em grupo | Área e reações |
 | Atirador | Projétil em linha, recua se você chega perto | Dash para fechar a distância |
-| Bruto | Armadura: leva 40% do dano | O Pilar de Pedra quebra a armadura |
+| Bruto | Armadura: leva metade do dano | O Pilar de Pedra quebra a armadura |
 | Explosivo | Corre, avisa um círculo e explode | Sair do círculo; a explosão também fere os outros inimigos |
 | Ceifador | Avisa uma linha larga e atravessa a sala por ela | Sair da linha e bater enquanto ele se recupera |
 | Arremessador | Joga uma bomba onde o herói está | Sair do círculo avisado |
 | Xamã | Cura os aliados feridos em volta (aviso verde); sozinho, atira | Derrubar primeiro |
+| Escudeiro | Escudo na frente: golpe direto de frente leva 15%. Gira devagar e não recua quando o golpe bate no escudo | Contornar (ou dash) e bater pelas costas; reações, queimadura e zonas atravessam; atordoado, congelado, enraizado ou com armadura quebrada, o escudo cai |
 | Cinzentos | Bando de três ou quatro, pequenos e rápidos | Skills de área |
 | Brasa Viva | Elemental de Fogo (Salões de Cinza): não queima, estoura ao morrer | Água, e sair do círculo depois |
 | Sentinela de Pedra | Torre parada de Terra (Jardim de Pedra), não é empurrada | Ar, ou fechar a distância |
 
 **Afinidade elemental:** inimigo elemental leva metade do dano do próprio elemento e 1,6 vez do elemento que o vence (Água vence Fogo, Terra vence Água, Ar vence Terra, Fogo vence Ar).
 
-Os tipos entram aos poucos: Ceifador na segunda sala, Arremessador na quarta, Xamã na quinta. Vida e dano sobem a cada camada (9% de vida e 6,5% de dano por camada). O tempo de aviso dos golpes nunca diminui.
+Os tipos entram aos poucos: Ceifador na segunda sala, Cinzentos na terceira, Arremessador e Escudeiro na quarta, Xamã na quinta. Vida e dano sobem a cada camada (9% de vida e 6,5% de dano por camada). O tempo de aviso dos golpes nunca diminui.
 
 ### Progressão
 

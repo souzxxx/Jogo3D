@@ -23,6 +23,7 @@ namespace Quintessence.Game
         [SerializeField] GameObject swarmPrefab;
         [SerializeField] GameObject emberPrefab;
         [SerializeField] GameObject sentinelPrefab;
+        [SerializeField] GameObject guardPrefab;
         [SerializeField] GameObject miniBossPrefab;
         [Tooltip("Segundo chefe final; a run sorteia entre ele e o Guardiao pela semente.")]
         [SerializeField] GameObject weaverPrefab;
@@ -96,6 +97,7 @@ namespace Quintessence.Game
 
         public void BindMiniBoss(GameObject prefab) => miniBossPrefab = prefab;
         public void BindElementals(GameObject swarm, GameObject ember, GameObject sentinel) { swarmPrefab = swarm; emberPrefab = ember; sentinelPrefab = sentinel; }
+        public void BindGuard(GameObject guard) => guardPrefab = guard;
         public void BindWeaver(GameObject prefab) => weaverPrefab = prefab;
 
         /// O chefe final desta run: semente par traz a Tecela das Cinzas, impar o Guardiao.
@@ -576,6 +578,7 @@ namespace Quintessence.Game
                 if (p.Swarm > 0 && swarmPrefab != null) w.entries.Add(new WaveEntry { prefab = swarmPrefab, count = p.Swarm });
                 if (p.Ember > 0 && emberPrefab != null) w.entries.Add(new WaveEntry { prefab = emberPrefab, count = p.Ember });
                 if (p.Sentinel > 0 && sentinelPrefab != null) w.entries.Add(new WaveEntry { prefab = sentinelPrefab, count = p.Sentinel });
+                if (p.Guard > 0) w.entries.Add(new WaveEntry { prefab = guardPrefab != null ? guardPrefab : meleePrefab, count = p.Guard });
                 if (p.MiniBoss > 0 && miniBossPrefab != null) w.entries.Add(new WaveEntry { prefab = miniBossPrefab, count = p.MiniBoss });
                 if (p.Boss > 0) w.entries.Add(new WaveEntry { prefab = WeaverRun ? weaverPrefab : bossPrefab != null ? bossPrefab : brutePrefab, count = p.Boss });
                 waves.Add(w);

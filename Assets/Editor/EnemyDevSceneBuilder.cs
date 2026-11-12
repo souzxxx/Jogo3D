@@ -437,6 +437,34 @@ public static class EnemyDevSceneBuilder
     }
 
     /// Cinzento (enxame), Brasa Viva (elemental de Fogo) e Sentinela de Pedra (torre de Terra). Chamar depois de Prefabs.
+    /// Pecas que o proximo EnemyPrefab segura alem da principal: (peca do pack, osso, rotacao).
+    static (string prop, string bone, Vector3 euler)[] holds;
+
+    /// Escudeiro: esqueleto guerreiro com escudo grande e lamina, tudo do pack KayKit. Escudo a frente, gira devagar.
+    public static GameObject GuardPrefab()
+    {
+        const string warriorFbx = KK + "Skeletons/Characters/Skeleton_Warrior.fbx";
+        CombatDevSceneBuilder.Loop(warriorFbx, "Blocking", "Walking_B");
+        var ctrl = CombatDevSceneBuilder.Controller(warriorFbx, Dir + "Animation/Escudeiro.controller",
+            ("Idle", "Blocking|Idle_Combat", 0f), ("Run", "Walking_B|Walking_A", 0f), ("Attack", "Block_Attack|1H_Melee_Attack_Stab", 0.9f),
+            ("Hit", "Hit_A|Hit_B", 0.3f), ("Death", "Death_A|Death_B", 0f), ("Spawn", "Spawn_Ground|Skeletons_Awaken_Standing|Idle", 0.7f));
+        var def = Asset<EnemyDefinition>("Escudeiro", d =>
+        {
+            d.displayName = "Escudeiro"; d.maxHealth = 50; d.moveSpeed = 3.1f;
+            d.attack = EnemyAttackKind.Melee; d.damage = 10; d.knockback = 7;
+            d.attackRange = 2.3f; d.telegraphTime = 0.7f; d.recoverTime = 0.6f; d.cooldown = 1.8f;
+            d.strikeOffset = 1.5f; d.strikeRadius = 1.6f;
+            d.guardArc = 130f; d.guardDamageTaken = 0.15f; d.turnSpeed = 100f;
+        });
+        // aco frio, como o resto da tropa: sem brilho
+        var steel = LookDevBuilder.Mat("SkeletonGuard", KK + "Skeletons/Characters/skeleton_texture.png", new Color(0.66f, 0.7f, 0.78f), Color.black, 0f);
+        // na pose de guarda (Blocking) o emblema fica para a frente com o escudo deitado -90 no X
+        holds = new[] { ("Skeleton_Shield_Large_B", "handslot.l", new Vector3(-90, 0, 0)) };
+        var prefab = EnemyPrefab("Escudeiro", "Skeletons/Characters/Skeleton_Warrior.fbx", def, ctrl, steel, 1.12f, "Skeleton_Blade", "handslot.r");
+        holds = null;
+        return prefab;
+    }
+
     /// Usa as pecas de Assets/Art/Enemies2 quando existirem; sem elas, so a tinta e a escala.
     public static void ElementalPrefabs(out GameObject swarm, out GameObject ember, out GameObject sentinel)
     {
@@ -558,23 +586,23 @@ public static class EnemyDevSceneBuilder
         model.transform.SetParent(go.transform, false);
         model.transform.localScale = Vector3.one * scale;
         col.height *= scale; col.radius *= scale; col.center *= scale;
-        if (prop != null)
+        void HoldProp(string propName, string boneName, Vector3 euler)
         {
             Transform hand = null;
-            foreach (var t in model.GetComponentsInChildren<Transform>(true)) if (t.name == bone) hand = t;
-            if (hand != null)
-            {
-                var gear = LookDevBuilder.Mat("SkeletonGear", KK + "Skeletons/Props/skeleton_texture.png", new Color(0.7f, 0.66f, 0.68f), Color.black, 0f);
-                var held = LookDevBuilder.Spawn("Skeletons/Props/" + prop + ".fbx", Vector3.zero, 0, gear);
-                held.name = prop;
-                held.transform.SetParent(hand, false);
-                held.transform.localPosition = Vector3.zero;
-                held.transform.localRotation = Quaternion.identity;
-                var source = AssetDatabase.LoadAssetAtPath<GameObject>(KK + "Skeletons/Props/" + prop + ".fbx");
-                float native = source != null ? source.transform.localScale.x : 1f;
-                held.transform.localScale = Vector3.one * (native * model.transform.lossyScale.x / Mathf.Max(0.0001f, hand.lossyScale.x));
-            }
+            foreach (var t in model.GetComponentsInChildren<Transform>(true)) if (t.name == boneName) hand = t;
+            if (hand == null) return;
+            var gear = LookDevBuilder.Mat("SkeletonGear", KK + "Skeletons/Props/skeleton_texture.png", new Color(0.7f, 0.66f, 0.68f), Color.black, 0f);
+            var held = LookDevBuilder.Spawn("Skeletons/Props/" + propName + ".fbx", Vector3.zero, 0, gear);
+            held.name = propName;
+            held.transform.SetParent(hand, false);
+            held.transform.localPosition = Vector3.zero;
+            held.transform.localRotation = Quaternion.Euler(euler);
+            var source = AssetDatabase.LoadAssetAtPath<GameObject>(KK + "Skeletons/Props/" + propName + ".fbx");
+            float native = source != null ? source.transform.localScale.x : 1f;
+            held.transform.localScale = Vector3.one * (native * model.transform.lossyScale.x / Mathf.Max(0.0001f, hand.lossyScale.x));
         }
+        if (prop != null) HoldProp(prop, bone, Vector3.zero);
+        if (holds != null) foreach (var (p, b, e) in holds) HoldProp(p, b, e);
         var anim = CombatDevSceneBuilder.Animator(model, ctrl);
         go.AddComponent<EnemyBrain>().Bind(def, anim);
         var prefab = PrefabUtility.SaveAsPrefabAsset(go, path);

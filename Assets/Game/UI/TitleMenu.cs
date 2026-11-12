@@ -196,11 +196,12 @@ namespace Quintessence.UI
                 ("Ceifador", "Avisa uma linha e atravessa a sala. Saia e bata na volta.", foe),
                 ("Arremessador", "Joga a bomba onde você está. Saia do círculo.", foe),
                 ("Xamã", "Cura os aliados feridos (aviso verde). Derrube primeiro.", foe),
+                ("Escudeiro", "Escudo na frente. Contorne, congele, enraíze ou use reações.", foe),
                 ("Cinzentos", "Bando pequeno e rápido. Skills de área resolvem.", foe),
                 ("Brasa Viva", "Elemental de Fogo: fraca a Água, estoura ao morrer.", foe),
                 ("Sentinela de Pedra", "Torre parada de Terra: fraca a Ar, não é empurrada.", foe),
                 ("Campeão, Carrasco e chefes", "Fecham as Elites. No fim: o Guardião (corpo a corpo) ou a Tecelã (de longe).", gold),
-            }, 58);
+            }, 53);
             Column(1130, "REAÇÕES", new (string, string, Color)[]
             {
                 ("Vapor · Fogo + Água", "Nuvem: quem está dentro erra metade dos ataques.", Color.Lerp(ElementColors.Of(ElementType.Fire), ElementColors.Of(ElementType.Water), 0.5f)),
@@ -254,7 +255,7 @@ namespace Quintessence.UI
             var title = UiKit.Text(UiKit.Rect("Title", box, new Vector2(0.5f, 1), new Vector2(0, -58), new Vector2(900, 70)), "REFÚGIO", 60, UiKit.Paper);
             title.font = GameFonts.Title;
             UiKit.Text(UiKit.Rect("Sub", box, new Vector2(0.5f, 1), new Vector2(0, -112), new Vector2(1000, 36)),
-                "Melhorias que ficam para todas as runs. Cada sala vencida rende 3 Fragmentos; vencer o Guardião, mais 15.", 23, UiKit.Dim, TextAnchor.MiddleCenter, false);
+                "Melhorias que ficam para todas as runs. Cada sala vencida rende 3 Fragmentos; vencer o chefe final, mais 15.", 23, UiKit.Dim, TextAnchor.MiddleCenter, false);
             UiKit.Text(UiKit.Rect("Wallet", box, new Vector2(0.5f, 1), new Vector2(0, -160), new Vector2(900, 40)),
                 $"{meta.Shards} Fragmentos   ·   runs: {meta.Runs}   ·   vitórias: {meta.Wins}   ·   recorde: {meta.BestRooms} salas", 27, new Color(0.88f, 0.74f, 0.42f));
             if (RunInProgress)

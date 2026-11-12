@@ -74,5 +74,19 @@ namespace Quintessence.Run.Tests
                     foreach (var w in EncounterPlanner.Plan(RoomType.Combat, d, b))
                         Assert.IsTrue(w.Melee >= 0 && w.Ranged >= 0, "nenhuma contagem negativa");
         }
+
+        [Test] public void Escudeiro_TakesTheSpotOfARastejante_FromTheFourthRoom()
+        {
+            Assert.AreEqual(0, EncounterPlanner.Plan(RoomType.Combat, EncounterPlanner.GuardDepth - 1).Sum(w => w.Guard), "nao aparece cedo");
+            for (int d = EncounterPlanner.GuardDepth; d < 10; d++)
+            {
+                Assert.AreEqual(1, EncounterPlanner.Plan(RoomType.Combat, d)[0].Guard, "sala comum " + d);
+                Assert.AreEqual(1, EncounterPlanner.Plan(RoomType.Elite, d)[0].Guard, "Elite " + d);
+                Assert.AreEqual(1, EncounterPlanner.Plan(RoomType.Combat, d, Biome.Crypt).Sum(w => w.Guard), "o trecho nao tira o Escudeiro");
+            }
+            Assert.AreEqual(0, EncounterPlanner.Plan(RoomType.Boss, 9).Sum(w => w.Guard));
+            var w3 = EncounterPlanner.Plan(RoomType.Combat, EncounterPlanner.GuardDepth)[0];
+            Assert.GreaterOrEqual(w3.Melee, 1, "continua havendo Rastejante na onda");
+        }
     }
 }

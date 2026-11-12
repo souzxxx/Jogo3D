@@ -114,11 +114,13 @@ namespace Quintessence.Run
     {
         public struct WavePlan
         {
-            public int Melee, Ranged, Brute, Bomber, Boss, Charger, Lobber, Shaman, MiniBoss, Swarm, Ember, Sentinel;
-            public int Total => Melee + Ranged + Brute + Bomber + Boss + Charger + Lobber + Shaman + MiniBoss + Swarm + Ember + Sentinel;
+            public int Melee, Ranged, Brute, Bomber, Boss, Charger, Lobber, Shaman, MiniBoss, Swarm, Ember, Sentinel, Guard;
+            public int Total => Melee + Ranged + Brute + Bomber + Boss + Charger + Lobber + Shaman + MiniBoss + Swarm + Ember + Sentinel + Guard;
         }
 
         public const int MiniBossDepth = 5;
+        /// O Escudeiro aparece da quarta sala em diante, no lugar de um Rastejante da primeira onda.
+        public const int GuardDepth = 3;
 
         /// Tamanho do bando de Cinzentos: nenhum nas duas primeiras salas, depois 3 e, do meio em diante, 4.
         public static int SwarmSize(int depth) => depth < 2 ? 0 : depth < 5 ? 3 : 4;
@@ -154,6 +156,13 @@ namespace Quintessence.Run
                 case RoomType.Boss: // o Guardiao das Cinzas chama os proprios reforcos
                     waves.Add(new WavePlan { Boss = 1 });
                     break;
+            }
+            // o Escudeiro toma o lugar de um Rastejante na primeira onda: a sala nao fica maior, fica diferente
+            if ((type == RoomType.Combat || type == RoomType.Elite) && depth >= GuardDepth && waves.Count > 0 && waves[0].Melee >= 2)
+            {
+                var first = waves[0];
+                first.Melee--; first.Guard++;
+                waves[0] = first;
             }
             return waves;
         }

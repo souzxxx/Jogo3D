@@ -162,6 +162,8 @@ namespace Quintessence.Game.PlayTests
 
         /// Luta como um jogador razoavel: marca com uma skill, detona com a de outro elemento,
         /// enche a Quintessencia nos reforcos quando o chefe esta de escudo e solta o R para quebra-lo.
+        float flankDash;
+
         void Fight(Health target)
         {
             var boss = target.GetComponent<BossBrain>();
@@ -176,6 +178,17 @@ namespace Quintessence.Game.PlayTests
             float reach = boss != null ? 1f : 0f;
             input.Move = d > 2.6f + reach ? SteerTo(target.transform.position) : Vector2.zero;
             input.AttackHeld = d < 3.6f + reach;
+            // Escudeiro de frente: da a volta para as costas dele em vez de bater no escudo (skills ainda marcam e detonam)
+            if (target.TryGetComponent(out FrontGuard guard) && guard.Up && d < 6f
+                && FrontGuard.Covers(target.transform.forward, player.transform.position - target.transform.position, guard.Arc))
+            {
+                var side = Vector3.Cross(Vector3.up, target.transform.forward).normalized;
+                if (Vector3.Dot(side, player.transform.position - target.transform.position) < 0f) side = -side;
+                var flank = target.transform.position - target.transform.forward * 2.2f + side * 2.4f;
+                input.Move = SteerTo(flank);
+                input.AttackHeld = false;
+                if (d < 3f && (flankDash -= Time.deltaTime) <= 0f) { flankDash = 2.5f; input.PressDash(); }
+            }
             if (player.QuintessenceReady) input.PressQuintessence();
             if (d > 4.5f + reach) return;
             // skill: se o alvo ja tem marca, detona com outro elemento; senao marca com qualquer pronta

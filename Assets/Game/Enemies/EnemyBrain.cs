@@ -38,6 +38,7 @@ namespace Quintessence.Enemies
             if (Scaling.Size != 1f) transform.localScale *= Scaling.Size;
             if (Scaling.Wards > 0) health.Pool.Blocks = Scaling.Wards;
             if (definition.affinity != ElementType.None) (GetComponent<ElementalAffinity>() ?? gameObject.AddComponent<ElementalAffinity>()).Set(definition.affinity);
+            if (definition.guardArc > 0f) (guard = GetComponent<FrontGuard>() ?? gameObject.AddComponent<FrontGuard>()).Configure(definition.guardArc, definition.guardDamageTaken);
             fsm = new EnemyFsm(definition.telegraphTime, definition.recoverTime, definition.cooldown * Scaling.Cooldown, definition.attackRange);
             agent.speed = definition.moveSpeed * Scaling.Speed;
             agent.updateRotation = false;
@@ -100,9 +101,14 @@ namespace Quintessence.Enemies
         public int Rescues { get; private set; }
         float safetyCheck;
 
+        FrontGuard guard;
+
         void OnDamaged(DamageInfo info, float applied)
         {
-            if (!definition.immovable) knock += info.Direction * info.Knockback;
+            bool blocked = guard != null && guard.LastBlocked;
+            // golpe no escudo quase nao empurra e nao faz recuar: o Escudeiro so cede pelas costas
+            if (!definition.immovable) knock += info.Direction * info.Knockback * (blocked ? 0.25f : 1f);
+            if (blocked) return;
             // recua ao apanhar, mas so enquanto persegue: golpe ja avisado nao e cortado pela animacao
             if (health.IsDead || fsm.Phase != EnemyPhase.Chase || applied <= 0f) return;
             anim = null;
@@ -190,7 +196,7 @@ namespace Quintessence.Enemies
 
             var face = fsm.Phase == EnemyPhase.Windup || fsm.Phase == EnemyPhase.Recover ? strikeDir : toDir;
             if (canAct && face.sqrMagnitude > 0.01f)
-                transform.rotation = Quaternion.RotateTowards(transform.rotation, Quaternion.LookRotation(face), 540f * dt);
+                transform.rotation = Quaternion.RotateTowards(transform.rotation, Quaternion.LookRotation(face), definition.turnSpeed * dt);
 
             if (hitHold > 0f) hitHold -= dt;
             else if (fsm.Phase == EnemyPhase.Chase)

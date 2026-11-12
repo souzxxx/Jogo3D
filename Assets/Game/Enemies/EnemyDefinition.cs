@@ -48,6 +48,13 @@ namespace Quintessence.Enemies
         [Tooltip("Ao morrer, estoura em brasas num circulo avisado (Brasa Viva).")]
         public bool burstOnDeath;
 
+        [Header("Escudo")]
+        [Tooltip("Arco a frente coberto pelo escudo, em graus. 0 = sem escudo (Escudeiro).")]
+        public float guardArc;
+        [Range(0f, 1f)] public float guardDamageTaken = 0.15f;
+        [Tooltip("Graus por segundo que o inimigo gira para encarar o heroi. Baixo = da para contornar.")]
+        public float turnSpeed = 540f;
+
         [Header("Investida")]
         public float chargeDistance = 8f;
         public float chargeSpeed = 22f;

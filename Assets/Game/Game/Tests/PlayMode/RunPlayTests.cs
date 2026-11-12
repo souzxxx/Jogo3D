@@ -750,6 +750,96 @@ namespace Quintessence.Game.PlayTests
             Time.captureFramerate = 0;
         }
 
+        [UnityTest, Timeout(300000)]
+        public IEnumerator Escudeiro_Blocks_From_The_Front_But_Not_From_Behind()
+        {
+            GameEvents.Clear();
+            Time.timeScale = 1f;
+            Time.captureFramerate = 30;
+            GameFlow.StartElement = ElementType.Earth;
+            GameFlow.Seed = 3; GameFlow.Layers = 5; GameFlow.Shrines = 1;
+            yield return EditorSceneManager.LoadSceneAsyncInPlayMode("Assets/Scenes/Run.unity", new LoadSceneParameters(LoadSceneMode.Single));
+            yield return null;
+            yield return null;
+            var director = Object.FindFirstObjectByType<RunDirector>();
+            var hud = Object.FindFirstObjectByType<Hud>();
+            cam = Camera.main;
+            hud.UseCamera(cam);
+            Object.FindFirstObjectByType<WaveSpawner>().enabled = false;
+            for (int k = 0; k < 2000 && director.Busy; k++) yield return null;
+            director.ApplyLayout(-1);
+            var hero = Object.FindFirstObjectByType<PlayerController>();
+            hero.GetComponent<Health>().Pool.Invulnerable = true;
+            hero.Teleport(new Vector3(0, 0.05f, -2.4f), Vector3.forward);
+            var prefab = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Game/Enemies/Prefabs/Escudeiro.prefab");
+            Assert.IsNotNull(prefab, "o prefab do Escudeiro existe");
+            var guardBody = Object.Instantiate(prefab, new Vector3(0, 0, 0.2f), Quaternion.Euler(0, 180, 0));
+            var h = guardBody.GetComponent<Health>();
+            var guard = guardBody.GetComponent<FrontGuard>();
+            Assert.IsNotNull(guard, "o Escudeiro traz o escudo");
+            Assert.IsTrue(guardBody.GetComponentsInChildren<Transform>(true).Any(t => t.name == "Skeleton_Shield_Large_B"), "segura o escudo do pack");
+            Assert.IsTrue(guardBody.GetComponentsInChildren<Transform>(true).Any(t => t.name == "Skeleton_Blade"), "e a lamina");
+            for (int k = 0; k < 40; k++) yield return null;
+
+            // de frente: o golpe do heroi bate no escudo
+            var scripted = hero.gameObject.AddComponent<ScriptedInput>();
+            hero.GetComponent<PlayerInputReader>().enabled = false;
+            hero.Input = scripted;
+            scripted.AimPoint = guardBody.transform.position;
+            float before = h.Current;
+            scripted.AttackHeld = true;
+            for (int k = 0; k < 400 && guard.Blocks == 0; k++) yield return null;
+            scripted.AttackHeld = false;
+            Assert.Greater(guard.Blocks, 0, "golpe de frente bate no escudo");
+            Assert.Less(before - h.Current, 4f, "e quase nao tira vida");
+            for (int k = 0; k < 30; k++) yield return null;
+            hud.ShowBanner("", "", Color.clear, 0.01f);
+            Shot(cam, "docs/img/inimigo_escudeiro.png");
+            {
+                // de perto, de frente, para conferir escudo e lamina
+                var follow = cam.GetComponent<FollowCamera>();
+                if (follow != null) follow.enabled = false;
+                guardBody.GetComponent<EnemyBrain>().enabled = false;
+                guardBody.transform.rotation = Quaternion.LookRotation(Vector3.back);
+                hero.Teleport(new Vector3(-6f, 0.05f, -3f), Vector3.forward);
+                var at = guardBody.transform.position;
+                cam.transform.position = at + guardBody.transform.forward * 5.2f + guardBody.transform.right * 2.2f + Vector3.up * 2.6f;
+                cam.transform.LookAt(at + Vector3.up * 1.1f);
+                float fov = cam.fieldOfView;
+                cam.fieldOfView = 40f;
+                for (int k = 0; k < 3; k++) yield return null;
+                Shot(cam, "docs/img/escudeiro_perto.png");
+                cam.fieldOfView = fov;
+                if (follow != null) follow.enabled = true;
+                hero.Teleport(guardBody.transform.position + new Vector3(0, 0.05f, -2.4f), Vector3.forward);
+                yield return null;
+            }
+
+            // pelas costas: dano inteiro
+            guardBody.GetComponent<EnemyBrain>().enabled = false;
+            guardBody.transform.rotation = Quaternion.LookRotation(Vector3.forward);
+            before = h.Current;
+            h.TakeDamage(new DamageInfo(20f, ElementType.None, Team.Player, hero.gameObject) { Direction = Vector3.forward });
+            Assert.AreEqual(before - 20f, h.Current, 0.01f, "pelas costas entra inteiro");
+            // de frente de novo, mas com reacao: atravessa
+            guardBody.transform.rotation = Quaternion.LookRotation(Vector3.back);
+            before = h.Current;
+            h.TakeDamage(new DamageInfo(20f, ElementType.None, Team.Player, hero.gameObject) { Direction = Vector3.forward });
+            Assert.AreEqual(before - 3f, h.Current, 0.01f, "de frente leva 15%");
+            before = h.Current;
+            h.TakeDamage(new DamageInfo(10f, ElementType.None, Team.Player, hero.gameObject) { Direction = Vector3.forward, IsReaction = true });
+            Assert.AreEqual(before - 10f, h.Current, 0.01f, "reacao atravessa o escudo");
+            // enraizado, o escudo cai
+            StatusHolder.GetOrAdd(h).Apply(StatusType.Rooted, 5f, Team.Player, hero.gameObject);
+            before = h.Current;
+            h.TakeDamage(new DamageInfo(10f, ElementType.None, Team.Player, hero.gameObject) { Direction = Vector3.forward });
+            Assert.AreEqual(before - 10f, h.Current, 0.01f, "enraizado nao segura o escudo");
+            Assert.AreEqual(100f, guardBody.GetComponent<EnemyBrain>().Definition.turnSpeed, 0.01f, "gira devagar: da para contornar");
+            GameFlow.StartElement = ElementType.Fire;
+            GameFlow.Layers = 8; GameFlow.Shrines = 3;
+            Time.captureFramerate = 0;
+        }
+
         [UnityTest, Timeout(600000)]
         public IEnumerator Elementals_And_The_Swarm()
         {

@@ -35,6 +35,7 @@ namespace Quintessence.Core
             if (info.SourceTeam == team) return 0f;
             float amount = info.Amount;
             if (TryGetComponent(out ElementalAffinity affinity)) amount *= affinity.Multiplier(info.Element);
+            if (TryGetComponent(out FrontGuard guard)) amount *= guard.Multiplier(info);
             float applied = Pool.Damage(amount);
             if (applied <= 0f)
             {
