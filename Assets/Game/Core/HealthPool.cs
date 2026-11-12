@@ -52,6 +52,9 @@ namespace Quintessence.Core
             Current = Math.Max(1f, Max * Math.Min(1f, Math.Max(0f, fraction)));
         }
 
+        /// Poe a vida atual direto (save da run). Nunca mata nem passa do maximo.
+        public void SetCurrent(float value) => Current = Math.Min(Max, Math.Max(1f, value));
+
         /// Muda a vida maxima mantendo a proporcao atual.
         public void SetMax(float max)
         {

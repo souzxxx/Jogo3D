@@ -1,12 +1,14 @@
 namespace Quintessence.Core
 {
     /// Modificadores do heroi acumulados na run (bencaos, talentos, upgrades). O combate le daqui; quem da bencao escreve aqui.
+    /// Serializavel: o save da run guarda uma foto disto, que ja traz passiva, Refugio, bencaos, talentos, pactos e graus.
+    [System.Serializable]
     public class HeroModifiers
     {
-        readonly float[] elementDamage = { 1f, 1f, 1f, 1f, 1f };
-        readonly float[] skillRange = { 1f, 1f, 1f, 1f, 1f };
-        readonly float[] skillCooldown = { 1f, 1f, 1f, 1f, 1f };
-        readonly float[] reactionBonus = new float[25];
+        [UnityEngine.SerializeField] float[] elementDamage = { 1f, 1f, 1f, 1f, 1f };
+        [UnityEngine.SerializeField] float[] skillRange = { 1f, 1f, 1f, 1f, 1f };
+        [UnityEngine.SerializeField] float[] skillCooldown = { 1f, 1f, 1f, 1f, 1f };
+        [UnityEngine.SerializeField] float[] reactionBonus = new float[25];
         public float DamageAll = 1f;
         public float ReactionPower = 1f;
         public float CritChanceAdd;
@@ -59,6 +61,21 @@ namespace Quintessence.Core
         /// Recarga da skill daquele elemento, ja com o multiplicador geral.
         public float SkillCooldown(ElementType e) => SkillCooldownMult * skillCooldown[(int)e];
         public void ScaleSkillCooldown(ElementType e, float factor) => skillCooldown[(int)e] *= factor;
+
+        public string ToJson() => UnityEngine.JsonUtility.ToJson(this);
+
+        /// Volta a foto salva. Texto invalido deixa como esta.
+        public bool FromJson(string json)
+        {
+            if (string.IsNullOrEmpty(json)) return false;
+            try { UnityEngine.JsonUtility.FromJsonOverwrite(json, this); }
+            catch (System.Exception) { return false; }
+            if (elementDamage == null || elementDamage.Length != 5) elementDamage = new[] { 1f, 1f, 1f, 1f, 1f };
+            if (skillRange == null || skillRange.Length != 5) skillRange = new[] { 1f, 1f, 1f, 1f, 1f };
+            if (skillCooldown == null || skillCooldown.Length != 5) skillCooldown = new[] { 1f, 1f, 1f, 1f, 1f };
+            if (reactionBonus == null || reactionBonus.Length != 25) reactionBonus = new float[25];
+            return true;
+        }
 
         public void Reset()
         {
