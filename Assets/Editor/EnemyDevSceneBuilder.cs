@@ -206,23 +206,51 @@ public static class EnemyDevSceneBuilder
             d.blinkWindup = 0.8f; d.blinkDistance = 6f; d.blinkDamage = 10f; d.blinkRadius = 2.2f;
             d.maxAdds = 3; d.addsPerPhaseChange = 2; d.addInterval = 10f;
         });
+        return DrownedBoss("Rainha", def, add1, add2, 2.3f, ctrl);
+    }
+
+    /// Sacerdotisa Afogada: mini-chefe das Elites da Cripta. A Rainha em menor, sem o escudo da ultima fase.
+    public static GameObject PriestessPrefab(GameObject add1, GameObject add2)
+    {
+        const string fbx = KK + "Skeletons/Characters/Skeleton_Mage.fbx";
+        var ctrl = CombatDevSceneBuilder.Controller(fbx, Dir + "Animation/Sacerdotisa.controller",
+            ("Idle", "Idle_Combat|Idle", 0f), ("Run", "Walking_A|Running_A", 0f), ("Attack", "Spellcast_Long|Spellcast_Shoot", 1f),
+            ("Cast", "Spellcast_Shoot|Spellcast_Long", 0.9f), ("Summon", "Spellcast_Summon|Spellcast_Raise", 1.3f),
+            ("Roar", "Spellcast_Raise|Taunt|Cheer", 0.9f), ("Hit", "Hit_B|Hit_A", 0.3f), ("Death", "Death_B|Death_A", 0f), ("Spawn", "Spawn_Ground|Skeletons_Awaken_Standing|Idle", 1f));
+        var def = Asset<BossDefinition>("Sacerdotisa", d =>
+        {
+            d.displayName = "Sacerdotisa Afogada"; d.pattern = 2; d.element = ElementType.Water; d.maxHealth = 210f; d.moveSpeed = 2.6f;
+            d.cooldownByPhase = new[] { 1.6f, 1.3f, 1.05f };
+            d.slamDamage = 12f; d.slamRadius = 2.6f; d.slamRange = 4.2f;
+            d.fanDamage = 7f; d.fanCount = 3; d.fanCountLastPhase = 4; d.fanSpread = 20f;
+            d.eruptionDamage = 9f; d.eruptionCount = 3; d.eruptionRadius = 2f; d.eruptionPuddleSeconds = 5f;
+            d.ringDamage = 9f; d.ringCount = 6; d.ringRadius = 4.6f; d.ringCircleRadius = 1.8f;
+            d.blinkWindup = 0.8f; d.blinkDistance = 5.5f; d.blinkDamage = 9f; d.blinkRadius = 2f;
+            d.lastPhaseShield = false; d.maxAdds = 1; d.addsPerPhaseChange = 1; d.addInterval = 12f;
+        });
+        return DrownedBoss("Sacerdotisa", def, add1, add2, 1.55f, ctrl);
+    }
+
+    /// Corpo dos chefes de agua: o mago esqueleto do pack com a textura do Afogado, cajado, afinidade de Agua e luz fria.
+    static GameObject DrownedBoss(string file, BossDefinition def, GameObject add1, GameObject add2, float scale, RuntimeAnimatorController ctrl)
+    {
         def.projectilePrefab = ProjectilePrefab();
         def.addPrefabs = new[] { add1, add2 };
         EditorUtility.SetDirty(def);
 
         string tex = Recolor(KK + "Skeletons/Characters/skeleton_texture.png", "Assets/Art/Enemies/skeleton_texture_drowned.png", 0.56f, 0.22f);
         var skin = LookDevBuilder.Mat("QueenDrowned", tex, new Color(0.8f, 0.92f, 0.95f), Color.black, 0f);
-        var go = new GameObject("Rainha");
+        var go = new GameObject(file);
         var col = go.AddComponent<CapsuleCollider>();
-        col.height = 5f; col.radius = 1.15f; col.center = new Vector3(0, 2.5f, 0);
+        col.height = 5f * scale / 2.3f; col.radius = 1.15f * scale / 2.3f; col.center = new Vector3(0, 2.5f * scale / 2.3f, 0);
         go.AddComponent<Health>().Configure(def.maxHealth, Team.Enemy);
         go.AddComponent<ElementalAffinity>().Set(ElementType.Water);
         var agent = go.AddComponent<NavMeshAgent>();
-        agent.radius = 1.15f; agent.height = 5f; agent.angularSpeed = 0f;
+        agent.radius = 1.15f * scale / 2.3f; agent.height = 5f * scale / 2.3f; agent.angularSpeed = 0f;
         var model = LookDevBuilder.Spawn("Skeletons/Characters/Skeleton_Mage.fbx", Vector3.zero, 0, skin);
         model.name = "Model";
         model.transform.SetParent(go.transform, false);
-        model.transform.localScale = Vector3.one * 2.3f;
+        model.transform.localScale = Vector3.one * scale;
         Transform hand = null;
         foreach (var t in model.GetComponentsInChildren<Transform>(true)) if (t.name == "handslot.r") hand = t;
         if (hand != null)
@@ -242,7 +270,7 @@ public static class EnemyDevSceneBuilder
         light.transform.SetParent(go.transform, false);
         light.transform.localPosition = new Vector3(0, 3f, 0.8f);
         light.type = LightType.Point; light.color = new Color(0.45f, 0.75f, 0.85f); light.intensity = 1.6f; light.range = 7f;
-        var prefab = PrefabUtility.SaveAsPrefabAsset(go, Dir + "Prefabs/Rainha.prefab");
+        var prefab = PrefabUtility.SaveAsPrefabAsset(go, Dir + "Prefabs/" + file + ".prefab");
         Object.DestroyImmediate(go);
         return prefab;
     }
