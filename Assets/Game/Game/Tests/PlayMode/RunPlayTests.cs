@@ -1476,6 +1476,17 @@ namespace Quintessence.Game.PlayTests
             hp.TakeDamage(new DamageInfo(2f, ElementType.None, Team.Enemy, hazard) { IsReaction = true });
             Object.Destroy(hazard);
             Assert.AreEqual(dodges, hero.PerfectDodges, "perigo de chao nao e esquiva perfeita");
+            // e esquivar o tique de uma poca (passiva do Vey) nao cura
+            for (int k = 0; k < 40; k++) yield return null;
+            HealthPool.ForceEvade = true;
+            hp.TakeDamage(new DamageInfo(30f, ElementType.None, Team.Enemy, foe.gameObject)); // golpe de verdade esquivado: cura
+            float healed = hp.Current;
+            for (int k = 0; k < 20; k++) yield return null;
+            var pool = new GameObject("PocaDeTeste2");
+            hp.TakeDamage(new DamageInfo(2f, ElementType.None, Team.Enemy, pool) { IsReaction = true });
+            Object.Destroy(pool);
+            HealthPool.ForceEvade = false;
+            Assert.AreEqual(healed, hp.Current, 0.01f, "esquivar a poca nao cura");
             GameFlow.StartElement = ElementType.Fire;
             GameFlow.Layers = 8; GameFlow.Shrines = 3;
             Time.captureFramerate = 0;

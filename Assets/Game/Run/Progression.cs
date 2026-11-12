@@ -181,7 +181,7 @@ namespace Quintessence.Run
             return $"{ElementName(e)} {after}/{goal}" + (after == Tier1 || after == Tier2 ? "!" : "");
         }
 
-        public static string Describe(int tier) => tier == 1 ? "skill +20% de dano" : tier == 2 ? "skill recarrega 15% mais rápido" : "";
+        public static string Describe(int tier) => tier == 1 ? "skill +20% de dano" : tier == 2 ? "skill +20% de dano e recarga 15% menor" : "";
     }
 
     public static class TalentCatalog
@@ -211,7 +211,7 @@ namespace Quintessence.Run
             Signature("hero_rax", "Instinto do Caçador", "Golpes em quem tem menos de 30% de vida causam +40%", ElementType.Fire, TalentEffect.HunterInstinct, 0.4f);
             Signature("hero_liora", "Maré Crescente", "Cada reação cura 3 de vida", ElementType.Water, TalentEffect.RisingTide, 3f);
             Signature("hero_brann", "Pele de Pedra", "+25 de vida máxima e o Pilar bloqueia mais um golpe", ElementType.Earth, TalentEffect.StoneSkin, 25f);
-            Signature("hero_vey", "Corrente de Ar", "Dash recarrega 30% mais rápido e +10% de velocidade", ElementType.Air, TalentEffect.Tailwind, 0.3f);
+            Signature("hero_vey", "Vento de Cauda", "Dash recarrega 30% mais rápido e +10% de velocidade", ElementType.Air, TalentEffect.Tailwind, 0.3f);
 
             Add("fire_trail", "Rastro de Brasa", "Labareda deixa o chão em chamas por 3 s", ElementType.Fire, TalentEffect.FireTrail, 3f, 1);
             Add("fire_range", "Fornalha", "Labareda alcança 20% mais longe", ElementType.Fire, TalentEffect.FireRange, 0.2f, 2);

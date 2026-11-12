@@ -630,8 +630,10 @@ namespace Quintessence.UI
             if (hero != null && hero.AwakenedElements.Count > 0)
             {
                 var first = hero.AwakenedElements[0];
-                UiKit.Text(UiKit.Rect("Hero", box, new Vector2(0.5f, 1), new Vector2(0, -92), new Vector2(1200, 30)),
+                var heroLine = UiKit.Text(UiKit.Rect("Hero", box, new Vector2(0.5f, 1), new Vector2(0, -92), new Vector2(1200, 30)),
                     $"{HeroPassives.HeroName(first)}  ·  {HeroPassives.Style(first)}  ·  {HeroPassives.Title(first)}: {HeroPassives.Describe(first)}", 22, Color.Lerp(ElementColors.Of(first), UiKit.Cream, 0.5f), TextAnchor.MiddleCenter, false);
+                heroLine.horizontalOverflow = HorizontalWrapMode.Wrap; heroLine.verticalOverflow = VerticalWrapMode.Truncate;
+                heroLine.resizeTextForBestFit = true; heroLine.resizeTextMinSize = 14; heroLine.resizeTextMaxSize = 22;
             }
 
             // coluna da esquerda: as quatro skills
@@ -729,7 +731,8 @@ namespace Quintessence.UI
                 }
                 var tl = UiKit.Text(UiKit.Rect("Talents", box, new Vector2(0, 1), new Vector2(60, -722), new Vector2(1200, 50)),
                     $"TALENTOS (nível {progress?.Level ?? 1}):  " + string.Join("  ·  ", parts), 21, UiKit.Cream, TextAnchor.UpperLeft, false);
-                tl.horizontalOverflow = HorizontalWrapMode.Wrap;
+                tl.horizontalOverflow = HorizontalWrapMode.Wrap; tl.verticalOverflow = VerticalWrapMode.Truncate;
+                tl.resizeTextForBestFit = true; tl.resizeTextMinSize = 13; tl.resizeTextMaxSize = 21; // muitos talentos encolhem, nao descem sobre a Sintonia
                 // Sintonia: quantos talentos de cada elemento e o grau que eles ja deram
                 var syn = new List<string>();
                 foreach (var e in Elements.All)
