@@ -33,7 +33,9 @@ namespace Quintessence.Core
         public float TakeDamage(in DamageInfo info)
         {
             if (info.SourceTeam == team) return 0f;
-            float applied = Pool.Damage(info.Amount);
+            float amount = info.Amount;
+            if (TryGetComponent(out ElementalAffinity affinity)) amount *= affinity.Multiplier(info.Element);
+            float applied = Pool.Damage(amount);
             if (applied <= 0f)
             {
                 if (Pool.LastBlocked) GameEvents.RaiseHitBlocked(this, info);

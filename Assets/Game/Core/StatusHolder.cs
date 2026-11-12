@@ -23,6 +23,7 @@ namespace Quintessence.Core
         {
             if (health == null) health = GetComponent<Health>();
             if (health.IsDead) return;
+            if (TryGetComponent(out ElementalAffinity affinity) && affinity.Immune(type)) return;
             State.Apply(type, duration);
             if (type == StatusType.Burn) { burnTeam = sourceTeam; burnSource = source; }
             health.Pool.DamageTakenMultiplier = State.DamageTakenMultiplier;

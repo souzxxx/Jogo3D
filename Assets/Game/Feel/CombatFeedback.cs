@@ -18,6 +18,7 @@ namespace Quintessence.Feel
         public static Mesh RingMesh { get; private set; }
         public static Mesh DiscMesh { get; private set; }
         readonly Dictionary<GameObject, TelegraphVisual> telegraphs = new();
+        readonly Dictionary<Health, float> affinityLabel = new();
 
         ParticleSystem fx;
         readonly Dictionary<Health, TargetDisplay> displays = new();
@@ -135,6 +136,18 @@ namespace Quintessence.Feel
             if (info.IsCrit) size *= 1.3f;
             bool resisted = enemy && displays.TryGetValue(target, out var shown) && shown != null && shown.Armored && !info.IsReaction;
             if (resisted) { size *= 0.8f; c = Steel; }
+            // afinidade elemental: fraqueza e resistencia aparecem no numero, com um rotulo de vez em quando
+            if (enemy && info.Element != ElementType.None && target.TryGetComponent(out ElementalAffinity aff))
+            {
+                float mult = aff.Multiplier(info.Element);
+                if (mult != 1f && (!affinityLabel.TryGetValue(target, out float at) || Time.time - at > 1.2f))
+                {
+                    affinityLabel[target] = Time.time;
+                    DamageNumber.Spawn(target.transform.position + Vector3.up * 3.5f, mult > 1f ? "FRAQUEZA" : "RESISTE",
+                        mult > 1f ? new Color(1f, 0.82f, 0.4f) : new Color(0.65f, 0.66f, 0.7f), 0.75f, 0.7f);
+                }
+                if (mult > 1f) size *= 1.25f; else if (mult < 1f) { size *= 0.8f; c = Steel; }
+            }
             DamageNumber.Spawn(target.transform.position + Vector3.up * 2.7f, Mathf.RoundToInt(applied) + (info.IsCrit ? "!" : ""),
                 enemy ? Color.Lerp(c, Color.white, 0.35f) : new Color(1f, 0.25f, 0.25f), size);
             var p = info.Point.sqrMagnitude > 0.001f ? info.Point : target.transform.position + Vector3.up * 1.2f;

@@ -60,5 +60,38 @@ namespace Quintessence.Core.Tests
             Assert.IsFalse(t.Tick(-100f, true));
             Assert.IsFalse(t.Tick(4f, true));
         }
+
+        [Test]
+        public void Affinity_ResistsItsOwnElement_AndIsWeakToTheOneThatBeatsIt()
+        {
+            Assert.AreEqual(ElementType.Water, ElementalAffinity.WeakTo(ElementType.Fire));
+            Assert.AreEqual(ElementType.Earth, ElementalAffinity.WeakTo(ElementType.Water));
+            Assert.AreEqual(ElementType.Air, ElementalAffinity.WeakTo(ElementType.Earth));
+            Assert.AreEqual(ElementType.Fire, ElementalAffinity.WeakTo(ElementType.Air));
+            Assert.AreEqual(ElementalAffinity.Resist, ElementalAffinity.Multiplier(ElementType.Fire, ElementType.Fire));
+            Assert.AreEqual(ElementalAffinity.Weak, ElementalAffinity.Multiplier(ElementType.Fire, ElementType.Water));
+            Assert.AreEqual(1f, ElementalAffinity.Multiplier(ElementType.Fire, ElementType.Earth));
+            Assert.AreEqual(1f, ElementalAffinity.Multiplier(ElementType.Fire, ElementType.None), "golpe basico e neutro");
+            Assert.AreEqual(1f, ElementalAffinity.Multiplier(ElementType.None, ElementType.Water));
+        }
+
+        [Test]
+        public void Health_AppliesAffinity_AndFireElementalDoesNotBurn()
+        {
+            var go = new GameObject("elemental");
+            var h = go.AddComponent<Health>();
+            h.Configure(100, Team.Enemy);
+            go.AddComponent<ElementalAffinity>().Set(ElementType.Fire);
+            h.TakeDamage(new DamageInfo(10, ElementType.Fire, Team.Player));
+            Assert.AreEqual(95f, h.Current, 0.001f, "resiste: metade");
+            h.TakeDamage(new DamageInfo(10, ElementType.Water, Team.Player));
+            Assert.AreEqual(79f, h.Current, 0.001f, "fraqueza: 1,6x");
+            var st = go.AddComponent<StatusHolder>();
+            st.Apply(StatusType.Burn, 3f, Team.Player);
+            Assert.IsFalse(st.State.Has(StatusType.Burn), "Fogo nao queima");
+            st.Apply(StatusType.Stun, 1f, Team.Player);
+            Assert.IsTrue(st.State.Has(StatusType.Stun));
+            Object.DestroyImmediate(go);
+        }
     }
 }
