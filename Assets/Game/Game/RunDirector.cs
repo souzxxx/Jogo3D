@@ -698,7 +698,8 @@ namespace Quintessence.Game
                 float x = (i - (choices.Count - 1) / 2f) * 6f;
                 string reward = RoomInfo.Name(node.Reward);
                 string kind = RoomInfo.Name(node.Type);
-                if (node.Type == RoomType.Elite) kind += ": " + DifficultyCurve.Name(DifficultyCurve.PickElite(GameFlow.Seed, node.Id));
+                if (node.Type == RoomType.Elite) kind += ": " + DifficultyCurve.Name(DifficultyCurve.PickElite(GameFlow.Seed, node.Id))
+                    + (node.Layer >= EncounterPlanner.MiniBossDepth ? "\ne o Carrasco" : "");
                 string label = kind + (reward.Length > 0 ? "\n" + reward : "");
                 var go = BuildDoor(new Vector3(x, 0, doorLine), node.Type, label);
                 interactables.Add(new Interactable

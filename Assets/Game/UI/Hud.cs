@@ -573,9 +573,27 @@ namespace Quintessence.UI
                     has ? role[i + 1] : "Desperte este elemento num Santuário.", 20, has ? UiKit.Paper : UiKit.Dim, TextAnchor.MiddleLeft, false);
                 note.horizontalOverflow = HorizontalWrapMode.Wrap;
             }
-            UiKit.Text(UiKit.Rect("Combo", box, new Vector2(0, 1), new Vector2(60, -606), new Vector2(580, 60)),
-                "Uma skill marca o inimigo. Outra skill, de outro elemento, detona a reação.\nO golpe básico não tem elemento, mas bate mais forte em quem está marcado.",
-                20, UiKit.Dim, TextAnchor.UpperLeft, false);
+            // as seis reacoes: claras as que o heroi ja pode detonar (tem os dois elementos)
+            UiKit.Text(UiKit.Rect("ReactH", box, new Vector2(0, 1), new Vector2(60, -590), new Vector2(580, 28)),
+                "REAÇÕES  ·  uma skill marca, outra de outro elemento detona", 19, UiKit.Dim, TextAnchor.MiddleLeft, false);
+            (string name, ElementType a, ElementType b)[] pairs =
+            {
+                ("Vapor", ElementType.Fire, ElementType.Water), ("Magma", ElementType.Fire, ElementType.Earth), ("Tempestade", ElementType.Fire, ElementType.Air),
+                ("Lama", ElementType.Water, ElementType.Earth), ("Nevasca", ElementType.Water, ElementType.Air), ("Estilhaços", ElementType.Earth, ElementType.Air),
+            };
+            string[] short1 = { "", "Fogo", "Água", "Terra", "Ar" };
+            for (int i = 0; i < pairs.Length; i++)
+            {
+                var (rname, ra, rb) = pairs[i];
+                bool known = false, knownB = false;
+                if (hero != null) foreach (var x in hero.AwakenedElements) { if (x == ra) known = true; if (x == rb) knownB = true; }
+                bool can = known && knownB;
+                var pos = new Vector2(60 + (i % 3) * 196, -624 - (i / 3) * 30);
+                UiKit.Image(UiKit.Rect("Dot" + i, box, new Vector2(0, 1), pos + new Vector2(6, -2), new Vector2(10, 10)), UiKit.Circle,
+                    can ? Color.Lerp(ElementColors.Of(ra), ElementColors.Of(rb), 0.5f) : new Color(1, 1, 1, 0.15f));
+                UiKit.Text(UiKit.Rect("React" + i, box, new Vector2(0, 1), pos + new Vector2(18, 0), new Vector2(180, 26)),
+                    $"{rname} · {short1[(int)ra]}+{short1[(int)rb]}", 17, can ? UiKit.Cream : UiKit.Dim, TextAnchor.MiddleLeft, false);
+            }
 
             // coluna da direita: atributos e bencaos
             UiKit.Text(UiKit.Rect("H2", box, new Vector2(0, 1), new Vector2(700, -130), new Vector2(560, 34)), "ATRIBUTOS DA RUN", 24, UiKit.Dim, TextAnchor.MiddleLeft);
@@ -618,7 +636,7 @@ namespace Quintessence.UI
                     seen.Add(t.Id);
                     parts.Add(t.MaxRank > 1 ? $"{t.Name} {talents.Rank(t.Id)}/{t.MaxRank}" : t.Name);
                 }
-                var tl = UiKit.Text(UiKit.Rect("Talents", box, new Vector2(0, 1), new Vector2(60, -690), new Vector2(1200, 60)),
+                var tl = UiKit.Text(UiKit.Rect("Talents", box, new Vector2(0, 1), new Vector2(60, -702), new Vector2(1200, 60)),
                     $"TALENTOS (nível {progress?.Level ?? 1}):  " + string.Join("  ·  ", parts), 21, UiKit.Cream, TextAnchor.UpperLeft, false);
                 tl.horizontalOverflow = HorizontalWrapMode.Wrap;
             }
