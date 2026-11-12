@@ -40,6 +40,9 @@ namespace Quintessence.Combat
             recharge = Cooldown;
         }
 
+        /// Devolve todas as cargas na hora (Vendaval: a skill de fuga).
+        public void Refill() { charges = MaxCharges; recharge = Cooldown; }
+
         /// Troca o numero de cargas (ex.: dash de Ar tem 2).
         public void SetMaxCharges(int max)
         {

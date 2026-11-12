@@ -434,7 +434,8 @@ namespace Quintessence.Feel
                 if (radial) accents.Emit(e.Element, from, Vector3.forward, 180f, n, e.Range * 1.8f);
                 else accents.Emit(e.Element, from, e.Kind == AttackKind.Dash ? -e.Direction : e.Direction, Mathf.Max(20f, e.Arc * 0.45f), n, e.Range * 1.8f);
             }
-            var c = ElementColors.Of(e.Element);
+            // golpe basico e dash nao tem elemento: saem num tom de osso, sem competir com as skills
+            var c = e.Element == ElementType.None ? new Color(0.8f, 0.76f, 0.68f) : ElementColors.Of(e.Element);
             var o = e.Origin + Vector3.up * 1.15f + e.Direction * 0.7f;
             switch (e.Kind)
             {
@@ -465,11 +466,6 @@ namespace Quintessence.Feel
                     Burst(e.Origin + Vector3.up, -e.Direction, 40f, 22, 2f, 7f, 0.3f, 0.6f, 0.3f, c);
                     break;
             }
-            if (e.SwitchStrike)
-            {
-                Ring(e.Origin + Vector3.up * 0.3f, 36, 9f, 0.25f, 0.45f, 0.28f, Color.Lerp(c, Color.white, 0.5f));
-                DamageNumber.Spawn(e.Origin + Vector3.up * 3.4f, "TROCA!", Color.Lerp(c, Color.white, 0.4f), 0.9f, 0.6f);
-            }
         }
 
         void OnSwitch(ElementType from, ElementType to)
@@ -480,11 +476,7 @@ namespace Quintessence.Feel
             var c = ElementColors.Of(to);
             presenceTarget = Color.Lerp(c, Color.white, 0.35f);
             if (playerRingMat != null) playerRingMat.color = new Color(c.r * 0.85f, c.g * 0.85f, c.b * 0.85f, 0.7f);
-            if (player == null || from == ElementType.None) return;
-            Ring(player.position + Vector3.up * 0.25f, 44, 7f, 0.25f, 0.5f, 0.35f, c);
-            Burst(player.position + Vector3.up * 1.2f, Vector3.up, 60f, 26, 2f, 6f, 0.25f, 0.5f, 0.4f, c);
-            LightFlash(player.position + Vector3.up * 1.5f, c, 6f, 6f, 0.25f);
-            if (accents != null) accents.Emit(to, player.position + Vector3.up * 1.1f, Vector3.forward, 180f, 16, 3f);
+            // a cor do heroi segue a ultima skill usada; o efeito da skill ja mostra a troca
         }
 
         void OnZone(ZoneEvent z) => zones.Add((z, z.Duration));

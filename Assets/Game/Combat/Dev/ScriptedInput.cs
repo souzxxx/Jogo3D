@@ -12,9 +12,11 @@ namespace Quintessence.Combat
         public void PressDash() => dash = true;
         public bool ConsumeDash() { bool d = dash; dash = false; return d; }
         bool skill;
-        int sw;
         public void PressSkill() => skill = true;
-        public void PressSwitch(int dir) => sw = dir;
+        int elementSkill;
+        /// 1 a 4: pede a skill daquele elemento.
+        public void PressElementSkill(int slot) => elementSkill = slot;
+        public int ConsumeElementSkill() { int d = elementSkill; elementSkill = 0; return d; }
         bool interact;
         public void PressInteract() => interact = true;
         public bool ConsumeInteract() { bool d = interact; interact = false; return d; }
@@ -22,6 +24,5 @@ namespace Quintessence.Combat
         public void PressQuintessence() => quint = true;
         public bool ConsumeQuintessence() { bool d = quint; quint = false; return d; }
         public bool ConsumeSkill() { bool d = skill; skill = false; return d; }
-        public int ConsumeSwitch() { int d = sw; sw = 0; return d; }
     }
 }

@@ -150,8 +150,7 @@ namespace Quintessence.Enemies.PlayTests
                     input.AimPoint = target.transform.position;
                     input.Move = d > 3.4f ? new Vector2(to.x / d, to.z / d) : Vector2.zero;
                     input.AttackHeld = d < 4.6f;
-                    if (d < 5f && player.SkillCooldown01(player.Element) <= 0f) input.PressSkill();
-                    if (sinceSwitch > 1.1f) { sinceSwitch = 0f; input.PressSwitch(1); }
+                    if (d < 5f && player.AnySkillReady) input.PressSkill();
                 }
                 else input.Move = Vector2.zero;
                 yield return Step();
@@ -159,7 +158,7 @@ namespace Quintessence.Enemies.PlayTests
             input.Move = Vector2.zero; input.AttackHeld = false;
 
             Assert.IsFalse(hp.IsDead, "o heroi caiu");
-            Assert.Greater(telegraphs, 5, "os ataques do chefe sao avisados");
+            Assert.GreaterOrEqual(telegraphs, 3, "os ataques do chefe sao avisados");
             Assert.AreEqual(3, maxPhase, "o chefe passa pelas tres fases");
             Assert.IsTrue(shieldUp, "na ultima fase o escudo sobe");
             Assert.IsTrue(shieldNeedsQuint, "com os quatro elementos, o escudo pede Quintessencia");

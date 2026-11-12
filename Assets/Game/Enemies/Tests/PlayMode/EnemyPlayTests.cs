@@ -103,8 +103,7 @@ namespace Quintessence.Enemies.PlayTests
                     input.AimPoint = target.transform.position;
                     input.Move = d > 2.6f ? new Vector2(to.x / d, to.z / d) : Vector2.zero;
                     input.AttackHeld = d < 3.6f;
-                    if (d < 4.5f && player.SkillCooldown01(player.Element) <= 0f) input.PressSkill();
-                    if (sinceSwitch > 1.3f) { sinceSwitch = 0f; input.PressSwitch(1); }
+                    if (d < 4.5f && player.AnySkillReady) input.PressSkill();
                 }
                 yield return Step();
             }

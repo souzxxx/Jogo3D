@@ -149,7 +149,7 @@ namespace Quintessence.Feel
         }
 
         void OnReaction(ReactionEvent e) => Play("reaction", 1f, 0.06f);
-        void OnSwitch(ElementType from, ElementType to) { if (from != ElementType.None) Play("switch", 0.7f, 0.04f); }
+        void OnSwitch(ElementType from, ElementType to) { } // a skill ja tem o proprio som
         void OnTelegraph(TelegraphEvent e) => Play("telegraph", 0.6f, 0.05f);
         void OnExploded(Vector3 p, float r) => Play("explode", 0.9f, 0.08f);
         void OnBlocked(Health who, DamageInfo info) => Play("block", 0.7f, 0.06f);

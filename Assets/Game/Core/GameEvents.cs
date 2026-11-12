@@ -26,7 +26,6 @@ namespace Quintessence.Core
         public float Range;
         public float Arc;
         public AttackKind Kind;
-        public bool SwitchStrike;
         public GameObject Source;
     }
 
