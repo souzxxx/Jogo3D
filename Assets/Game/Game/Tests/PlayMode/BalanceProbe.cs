@@ -24,6 +24,8 @@ namespace Quintessence.Game.PlayTests
         Health hp;
         Vector3 dodgeDir, lastPos;
         float dodgeLeft, stuck, sidestep;
+        int stuckStreak;
+        Vector3 stuckAnchor;
         Vector2 sideDir;
 
         [UnityTest, Explicit, Timeout(3000000)]
@@ -90,7 +92,7 @@ namespace Quintessence.Game.PlayTests
                             var alive = Object.FindObjectsByType<EnemyBrain>(FindObjectsSortMode.None).Where(e => !e.GetComponent<Health>().IsDead)
                                 .Select(e => { var ag = e.GetComponent<UnityEngine.AI.NavMeshAgent>(); return $"{e.Definition.displayName}@{e.transform.position.x:0.0},{e.transform.position.z:0.0} navmesh={ag.isOnNavMesh} fase={e.Phase} vida={e.GetComponent<Health>().Current:0}"; });
                             var sp = Object.FindFirstObjectByType<WaveSpawner>();
-                            stuckReport = $"PRESO sala {director.Run.Depth + 1} layout '{director.CurrentLayout}' heroi@{player.transform.position.x:0.0},{player.transform.position.z:0.0} vivos(state)={sp?.State?.Alive} resgates={sp?.StallRescues}: " + string.Join(" | ", alive);
+                            stuckReport = $"PRESO sala {director.Run.Depth + 1} layout '{director.CurrentLayout}' heroi@{player.transform.position.x:0.0},{player.transform.position.z:0.0} vivos(state)={sp?.State?.Alive} onda={sp?.State?.CurrentWave}/{sp?.State?.TotalWaves} comecou={sp?.State?.Started} limpa={sp?.State?.Cleared} espera={sp?.State?.Delay:0.00} resgates={sp?.StallRescues} timeScale={Time.timeScale} pausa={GameClock.Paused} ocupado={director.Busy} nivel={director.LevelUpOpen} pendentes={director.Run.Progress.PendingPicks} portas={string.Join("/", director.Interactables.Select(i => i.Prompt))}: " + string.Join(" | ", alive);
                             Debug.Log("SONDA " + stuckReport);
                             break;
                         }
@@ -275,11 +277,21 @@ namespace Quintessence.Game.PlayTests
         {
             var pos = player.transform.position;
             bool trying = input.Move.sqrMagnitude > 0.2f;
+            // preso entre pecas: cada tentativa seguida desvia por mais tempo e para um lado diferente; na terceira, dash
+            if ((pos - stuckAnchor).magnitude > 2f) { stuckStreak = 0; stuckAnchor = pos; }
             if (sidestep > 0f) { sidestep -= dt; input.Move = sideDir; }
             else if (trying && (pos - lastPos).magnitude < 0.03f)
             {
                 stuck += dt;
-                if (stuck > 0.35f) { stuck = 0f; sidestep = 0.55f; sideDir = (Random.value < 0.5f ? 1f : -1f) * new Vector2(-input.Move.y, input.Move.x); }
+                if (stuck > 0.35f)
+                {
+                    stuck = 0f;
+                    stuckStreak++;
+                    sidestep = Mathf.Min(0.55f + 0.35f * stuckStreak, 2f);
+                    var perp = new Vector2(-input.Move.y, input.Move.x) * (Random.value < 0.5f ? 1f : -1f);
+                    sideDir = stuckStreak % 3 == 0 ? -input.Move.normalized : stuckStreak > 3 ? Random.insideUnitCircle.normalized : perp;
+                    if (stuckStreak >= 3) input.PressDash();
+                }
             }
             else stuck = 0f;
             lastPos = pos;

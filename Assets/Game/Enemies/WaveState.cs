@@ -19,6 +19,8 @@ namespace Quintessence.Enemies
         public int TotalWaves => sizes.Length;
         public int Alive => alive;
         public bool Cleared { get; private set; }
+        public bool Started => started;
+        public float Delay => delay;
 
         public void Start() => started = true;
 
