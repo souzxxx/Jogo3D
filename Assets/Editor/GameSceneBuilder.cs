@@ -409,6 +409,38 @@ public static class GameSceneBuilder
         return prefab;
     }
 
+    /// Cantoneira em L: um colisor e um recorte por braco, para o vao de dentro do L ficar livre (um so cobria o quadrado todo).
+    /// Na rotacao 0 a quina fica a sudoeste e os bracos vao para norte e leste.
+    static GameObject CornerObstacle(string model, float scale, float arm)
+    {
+        const string dir = "Assets/Game/Game/Prefabs/Obstacles/";
+        var mat = LookDevBuilder.Mat("DungeonProp", CombatDevSceneBuilder.KK + "Dungeon/dungeon_texture.png", Color.white, Color.black, 0f);
+        var root = new GameObject(model);
+        var visual = LookDevBuilder.Spawn("Dungeon/" + model + ".fbx", Vector3.zero, 0, mat, scale);
+        visual.name = "Model";
+        visual.transform.SetParent(root.transform, false);
+        var rs = visual.GetComponentsInChildren<Renderer>();
+        var b = rs[0].bounds;
+        foreach (var x in rs) b.Encapsulate(x.bounds);
+        void Arm(string name, Vector3 center, Vector3 size)
+        {
+            var go = new GameObject(name);
+            go.transform.SetParent(root.transform, false);
+            var col = go.AddComponent<BoxCollider>();
+            col.center = center; col.size = size;
+            var carve = go.AddComponent<UnityEngine.AI.NavMeshObstacle>();
+            carve.shape = UnityEngine.AI.NavMeshObstacleShape.Box;
+            carve.center = center; carve.size = size + new Vector3(0.3f, 0, 0.3f);
+            carve.carving = true;
+        }
+        Arm("ArmNorth", new Vector3(b.min.x + arm * 0.5f, b.center.y, b.center.z), new Vector3(arm, b.size.y, b.size.z));
+        Arm("ArmEast", new Vector3(b.center.x, b.center.y, b.min.z + arm * 0.5f), new Vector3(b.size.x, b.size.y, arm));
+        var prefab = PrefabUtility.SaveAsPrefabAsset(root, dir + model + ".prefab");
+        Object.DestroyImmediate(root);
+        Debug.Log($"cantoneira {model} x{scale}: tamanho {b.size}, braco {arm}");
+        return prefab;
+    }
+
     static GameObject Vent()
     {
         const string path = "Assets/Game/Game/Prefabs/Obstacles/EmberVent.prefab";
@@ -681,7 +713,7 @@ public static class GameSceneBuilder
         var keg = Obstacle("keg", 1f);
         var trunk = Obstacle("trunk_large_A", 1f);
         var boxes = Obstacle("box_stacked", 1f);
-        var corner = Obstacle("barrier_corner", 1f);
+        var corner = CornerObstacle("barrier_corner", 1f, 0.7f);
         var bigRubble = Obstacle("rubble_large", 0.8f);
         var shrinePillar = Obstacle("pillar_decorated", 0.8f);
         Make("28_Refeitorio", "Refeitório", (table, -4.2f, 1.4f, 0), (table, 4.2f, 1.4f, 0), (tableBroken, 0f, 3.6f, 90), (keg, -7.4f, -2.6f, 0), (keg, 7.4f, -2.6f, 0),

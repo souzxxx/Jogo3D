@@ -112,6 +112,23 @@ namespace Quintessence.Game.Tests
                 }
         }
 
+        [Test] public void CornerBarrier_LeavesTheInsideOfTheLFree()
+        {
+            var corner = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Game/Game/Prefabs/Obstacles/barrier_corner.prefab");
+            Assert.IsNotNull(corner);
+            var boxes = corner.GetComponentsInChildren<BoxCollider>();
+            Assert.AreEqual(2, boxes.Length, "um colisor por braco");
+            Assert.AreEqual(2, corner.GetComponentsInChildren<UnityEngine.AI.NavMeshObstacle>().Length, "um recorte por braco");
+            // o canto de dentro do L (nordeste na rotacao 0) nao fica dentro de nenhum braco
+            var all = boxes[0].bounds; all.Encapsulate(boxes[1].bounds);
+            var inside = new Vector3(all.max.x - 0.4f, all.center.y, all.max.z - 0.4f);
+            foreach (var box in boxes)
+            {
+                var local = new Bounds(box.center, box.size);
+                Assert.IsFalse(local.Contains(inside), box.name + " cobre o vao do L");
+            }
+        }
+
         [Test] public void CoverPiecesCarveTheNavMesh()
         {
             foreach (var l in All())
@@ -120,10 +137,11 @@ namespace Quintessence.Game.Tests
                     if (p.prefab.GetComponent<Quintessence.Enemies.EmberVent>() != null) continue;
                     if (p.prefab.GetComponent<Quintessence.Enemies.SpikeTrap>() != null) continue; // armadilha no chao: anda-se por cima
                     if (p.prefab.GetComponent<CorruptionPool>() != null) continue; // poca no chao: inimigo atravessa e se queima
-                    var carve = p.prefab.GetComponent<UnityEngine.AI.NavMeshObstacle>();
-                    Assert.IsNotNull(carve, p.prefab.name + " sem NavMeshObstacle: os inimigos atravessariam");
-                    Assert.IsTrue(carve.carving);
-                    Assert.IsNotNull(p.prefab.GetComponent<Collider>(), p.prefab.name + " sem colisor");
+                    // a cantoneira em L tem um recorte por braco, nos filhos
+                    var carves = p.prefab.GetComponentsInChildren<UnityEngine.AI.NavMeshObstacle>();
+                    Assert.IsNotEmpty(carves, p.prefab.name + " sem NavMeshObstacle: os inimigos atravessariam");
+                    foreach (var carve in carves) Assert.IsTrue(carve.carving, p.prefab.name);
+                    Assert.IsNotNull(p.prefab.GetComponentInChildren<Collider>(), p.prefab.name + " sem colisor");
                 }
         }
 
