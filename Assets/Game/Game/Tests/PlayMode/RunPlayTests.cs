@@ -837,7 +837,7 @@ namespace Quintessence.Game.PlayTests
             {
                 Assert.AreEqual(1.25f, e.Scaling.Speed, 0.001f);
                 Assert.AreEqual(e.Definition.moveSpeed * 1.25f, e.GetComponent<UnityEngine.AI.NavMeshAgent>().speed, 0.3f);
-                Assert.AreEqual(e.Definition.maxHealth * (1f + 0.07f * 4), e.GetComponent<Health>().Max, 0.05f);
+                Assert.AreEqual(e.Definition.maxHealth * (1f + DifficultyCurve.HealthPerLayer * 4), e.GetComponent<Health>().Max, 0.05f);
             }
             GameFlow.Layers = 8; GameFlow.Shrines = 3;
             Time.captureFramerate = 0;
