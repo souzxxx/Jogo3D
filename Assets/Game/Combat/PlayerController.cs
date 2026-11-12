@@ -126,6 +126,7 @@ namespace Quintessence.Combat
         void OnEnable()
         {
             GameEvents.ReactionTriggered += OnReaction;
+            GameEvents.QuintessenceCharge += OnCharge;
             GameEvents.HitBlocked += OnBlocked;
             GameEvents.Died += OnAnyDied;
         }
@@ -133,6 +134,7 @@ namespace Quintessence.Combat
         void OnDisable()
         {
             GameEvents.ReactionTriggered -= OnReaction;
+            GameEvents.QuintessenceCharge -= OnCharge;
             GameEvents.HitBlocked -= OnBlocked;
             GameEvents.Died -= OnAnyDied;
         }
@@ -170,6 +172,13 @@ namespace Quintessence.Combat
             if (mods.HealOnReaction > 0f) health.Heal(mods.HealOnReaction);
             if (quint.Active) return;
             quint.AddMeter(QuintessenceState.PerReaction * mods.QuintessenceGainMult);
+            GameEvents.RaiseQuintessenceMeter(quint.Normalized);
+        }
+
+        void OnCharge(float amount)
+        {
+            if (quint.Active || health.IsDead) return;
+            quint.AddMeter(amount * mods.QuintessenceGainMult);
             GameEvents.RaiseQuintessenceMeter(quint.Normalized);
         }
 

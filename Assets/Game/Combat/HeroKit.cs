@@ -35,7 +35,7 @@ namespace Quintessence.Combat
             // Vey: duas adagas. O mais rapido, com mais critico.
             ElementType.Air => new HeroKit
             {
-                Steps = new[] { new ComboStep(5f, 0.2f, 0.08f, 1f), new ComboStep(5f, 0.2f, 0.08f, 1f), new ComboStep(9f, 0.3f, 0.12f, 3f) },
+                Steps = new[] { new ComboStep(5.5f, 0.2f, 0.08f, 1f), new ComboStep(5.5f, 0.2f, 0.08f, 1f), new ComboStep(10f, 0.3f, 0.12f, 3f) },
                 Range = 3f, Arc = 95f, CritChance = 0.15f, Style = "Adagas: o mais rápido, mais crítico",
             },
             _ => new HeroKit
