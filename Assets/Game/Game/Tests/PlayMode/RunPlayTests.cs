@@ -1089,6 +1089,129 @@ namespace Quintessence.Game.PlayTests
             Time.captureFramerate = 0;
         }
 
+        [UnityTest, Timeout(300000)]
+        public IEnumerator Banner_Bearer_Rallies_Nearby_Enemies_Until_It_Falls()
+        {
+            GameEvents.Clear();
+            Time.timeScale = 1f;
+            Time.captureFramerate = 30;
+            GameFlow.StartElement = ElementType.Fire;
+            GameFlow.Seed = 3; GameFlow.Layers = 5; GameFlow.Shrines = 1;
+            yield return EditorSceneManager.LoadSceneAsyncInPlayMode("Assets/Scenes/Run.unity", new LoadSceneParameters(LoadSceneMode.Single));
+            yield return null;
+            yield return null;
+            var director = Object.FindFirstObjectByType<RunDirector>();
+            var hud = Object.FindFirstObjectByType<Hud>();
+            cam = Camera.main;
+            hud.UseCamera(cam);
+            Object.FindFirstObjectByType<WaveSpawner>().enabled = false;
+            for (int k = 0; k < 2000 && director.Busy; k++) yield return null;
+            director.ApplyLayout(-1);
+            var hero = Object.FindFirstObjectByType<PlayerController>();
+            hero.GetComponent<Health>().Pool.Invulnerable = true;
+            hero.Teleport(new Vector3(0, 0.05f, -5f), Vector3.forward);
+            GameObject Load(string n) => UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Game/Enemies/Prefabs/" + n + ".prefab");
+            var bearer = Object.Instantiate(Load("PortaEstandarte"), new Vector3(0, 0, 2f), Quaternion.Euler(0, 180, 0)).GetComponent<Health>();
+            var near = Object.Instantiate(Load("Rastejante"), new Vector3(1.5f, 0, 1f), Quaternion.Euler(0, 180, 0)).GetComponent<EnemyBrain>();
+            var far = Object.Instantiate(Load("Rastejante"), new Vector3(9f, 0, -4f), Quaternion.Euler(0, 180, 0)).GetComponent<EnemyBrain>();
+            yield return null; yield return null; // o Start de cada um anuncia o nascimento (o circulo da aura vem dai)
+            bearer.GetComponent<EnemyBrain>().enabled = false;
+            near.enabled = false; far.enabled = false;
+            Assert.IsTrue(bearer.GetComponentsInChildren<Transform>(true).Any(t => t.name == "Banner"), "estandarte nas costas");
+            Assert.IsNotNull(bearer.GetComponent<RallyAura>());
+            for (int k = 0; k < 30; k++) yield return null;
+            Assert.IsNotNull(bearer.transform.Find("AuraRing"), "o circulo da aura aparece no chao");
+            Assert.IsTrue(near.Rallied, "quem esta no circulo e fortalecido");
+            Assert.IsFalse(far.Rallied, "quem esta longe, nao");
+            hud.ShowBanner("", "", Color.clear, 0.01f);
+            hud.HideTip();
+            Shot(cam, "docs/img/inimigo_estandarte.png");
+            {
+                var follow = cam.GetComponent<FollowCamera>();
+                if (follow != null) follow.enabled = false;
+                var at = bearer.transform.position;
+                float fov = cam.fieldOfView;
+                cam.transform.position = at + new Vector3(-3.2f, 3f, -5.2f);
+                cam.transform.LookAt(at + Vector3.up * 1.4f);
+                cam.fieldOfView = 40f;
+                for (int k = 0; k < 3; k++) yield return null;
+                Shot(cam, "docs/img/estandarte_perto.png");
+                cam.fieldOfView = fov;
+                if (follow != null) follow.enabled = true;
+            }
+            // derrubado, o bonus some logo e o circulo tambem
+            bearer.TakeDamage(new DamageInfo(9999f, ElementType.None, Team.Player, hero.gameObject));
+            // o abate dispara a camera lenta: em tempo de jogo o bonus ainda dura um pouco
+            for (int k = 0; k < 3000 && near.Rallied; k++) yield return null;
+            Assert.IsFalse(near.Rallied, "sem o estandarte, o bonus acaba");
+            Assert.IsTrue(bearer == null || bearer.transform.Find("AuraRing") == null, "o circulo some");
+
+            // Contagio (talento): o marcado que cai passa a marca para o vizinho mais perto
+            hero.Modifiers.MarkSpread = 5f;
+            yield return null; // o heroi publica o raio no quadro dele
+            var marked = Object.Instantiate(Load("Rastejante"), near.transform.position + new Vector3(1.2f, 0, 0), Quaternion.identity).GetComponent<Health>();
+            yield return null;
+            marked.GetComponent<EnemyBrain>().enabled = false;
+            marked.gameObject.AddComponent<ElementMark>().State.Hit(ElementType.Water, out _);
+            int spreads = ElementMark.Spreads;
+            marked.TakeDamage(new DamageInfo(9999f, ElementType.None, Team.Player, hero.gameObject));
+            Assert.AreEqual(spreads + 1, ElementMark.Spreads, "a marca pulou");
+            Assert.AreEqual(ElementType.Water, near.GetComponent<ElementMark>().State.Element, "o vizinho ficou marcado com Agua");
+            hero.Modifiers.MarkSpread = 0f;
+            GameFlow.Layers = 8; GameFlow.Shrines = 3;
+            Time.captureFramerate = 0;
+        }
+
+        [UnityTest, Timeout(300000)]
+        public IEnumerator Siege_Keeps_Sending_Waves_Until_Time_Runs_Out()
+        {
+            GameEvents.Clear();
+            Time.timeScale = 1f;
+            Time.captureFramerate = 30;
+            GameFlow.StartElement = ElementType.Earth;
+            GameFlow.Seed = 3; GameFlow.Layers = 5; GameFlow.Shrines = 1;
+            yield return EditorSceneManager.LoadSceneAsyncInPlayMode("Assets/Scenes/Run.unity", new LoadSceneParameters(LoadSceneMode.Single));
+            yield return null;
+            yield return null;
+            var director = Object.FindFirstObjectByType<RunDirector>();
+            var hud = Object.FindFirstObjectByType<Hud>();
+            cam = Camera.main;
+            hud.UseCamera(cam);
+            var spawner = Object.FindFirstObjectByType<WaveSpawner>();
+            for (int k = 0; k < 2000 && director.Busy; k++) yield return null;
+            var hero = Object.FindFirstObjectByType<PlayerController>();
+            hero.GetComponent<Health>().Pool.Invulnerable = true;
+            int cleared = 0;
+            GameEvents.RoomCleared += () => cleared++;
+            // a sala da primeira camada vira um Cerco curto: as ondas voltam enquanto o tempo corre
+            director.StartEncounter(RoomType.Combat, 1, EliteModifier.None);
+            director.StartSiege(30f);
+            Assert.IsTrue(director.SiegeActive);
+            for (int k = 0; k < 120; k++) yield return null;
+            StringAssert.Contains("Cerco", hud.RoomLabel);
+            // matar quem nasce: a onda seguinte vem em vez de a sala limpar
+            // (o abate dispara a camera lenta, entao conta ondas em vez de quadros)
+            for (int k = 0; k < 6000 && spawner.State.Spawned < 3 && director.SiegeActive; k++)
+            {
+                if (k % 15 == 0)
+                    foreach (var e in Object.FindObjectsByType<EnemyBrain>(FindObjectsSortMode.None))
+                        if (!e.GetComponent<Health>().IsDead) e.GetComponent<Health>().TakeDamage(new DamageInfo(99999f, ElementType.None, Team.Player, hero.gameObject));
+                yield return null;
+            }
+            Assert.AreEqual(0, cleared, "no Cerco a sala nao limpa sozinha");
+            Assert.GreaterOrEqual(spawner.State.Spawned, 3, "as ondas se repetem");
+            hud.HideTip();
+            Shot(cam, "docs/img/cerco.png");
+            for (int k = 0; k < 3000 && director.SiegeActive; k++) yield return null;
+            Assert.IsFalse(director.SiegeActive, "o tempo acaba");
+            for (int k = 0; k < 60 && cleared == 0; k++) yield return null;
+            Assert.AreEqual(1, cleared, "acabado o tempo, a sala limpa uma vez");
+            for (int k = 0; k < 30; k++) yield return null;
+            Assert.IsFalse(Object.FindObjectsByType<EnemyBrain>(FindObjectsSortMode.None).Any(e => !e.GetComponent<Health>().IsDead), "quem sobrou desmoronou");
+            GameFlow.Layers = 8; GameFlow.Shrines = 3;
+            Time.captureFramerate = 0;
+        }
+
         [UnityTest, Timeout(600000)]
         public IEnumerator Elementals_And_The_Swarm()
         {

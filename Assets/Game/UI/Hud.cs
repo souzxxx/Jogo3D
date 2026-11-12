@@ -63,6 +63,8 @@ namespace Quintessence.UI
             TalentEffect.Finisher => "boon_crit",
             TalentEffect.SureFooted => "boon_speed",
             TalentEffect.BurstPower => "quintessence",
+            TalentEffect.Contagion => "boon_reaction",
+            TalentEffect.Alchemy => "boon_element",
             _ => "boon_damage",
         };
 

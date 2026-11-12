@@ -209,6 +209,7 @@ namespace Quintessence.UI
                 ("Arremessador", "Joga a bomba onde você está. Saia do círculo.", foe),
                 ("Xamã", "Cura os aliados feridos (aviso verde). Derrube primeiro.", foe),
                 ("Escudeiro", "Escudo na frente. Contorne, congele, enraíze ou use reações.", foe),
+                ("Porta-Estandarte", "Quem está no círculo dele bate mais e corre mais. Derrube primeiro.", foe),
                 ("Cinzentos", "Bando pequeno e rápido. Skills de área resolvem.", foe),
                 ("Elementais", "Brasa Viva (Fogo, estoura), Afogado (Água, deixa poça) e Sentinela (Terra, torre).", foe),
                 ("Campeão, Carrasco e chefes", "Fecham as Elites. No fim: o Guardião, a Tecelã ou a Rainha Afogada.", gold),

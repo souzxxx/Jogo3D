@@ -137,6 +137,19 @@ namespace Quintessence.Enemies
                 }
         }
 
+        /// Cerco: as ondas se repetem ate EndSiege.
+        public void SetRepeat(bool repeat) { if (State != null) State.Repeat = repeat; }
+
+        /// Fim do Cerco: quem sobrou desmorona e a sala conta como limpa (o RoomCleared sai no proximo quadro).
+        public void EndSiege()
+        {
+            if (State == null || State.Cleared) return;
+            State.ForceClear();
+            foreach (var brain in GetComponentsInChildren<EnemyBrain>())
+                if (brain.TryGetComponent(out Health h) && !h.IsDead)
+                    h.TakeDamage(new DamageInfo(99999f, ElementType.None, Team.Player, gameObject) { IsReaction = true });
+        }
+
         /// Um Divisor caiu: nascem count Cinzentos em volta do corpo, que contam para a onda e nao se dividem de novo.
         public void SpawnSplit(Vector3 at, int count)
         {

@@ -55,5 +55,27 @@ namespace Quintessence.Run.Tests
             Assert.IsTrue(LayoutPicker.UsesLayout(RoomType.Trial), "a Provacao e uma sala de luta com arranjo");
             Assert.AreEqual(EncounterPlanner.EssenceReward(RoomType.Combat, 4), EncounterPlanner.EssenceReward(RoomType.Trial, 4));
         }
+
+        [Test] public void Map_PlacesSieges_FromTheFourthLayer_PayingABoon()
+        {
+            int total = 0;
+            for (int seed = 1; seed <= 200; seed++)
+            {
+                var map = RunMapGenerator.Generate(seed, 10, 3);
+                foreach (var n in map.Nodes.Where(n => n.Type == RoomType.Siege))
+                {
+                    total++;
+                    Assert.GreaterOrEqual(n.Layer, 3);
+                    Assert.Less(n.Layer, map.LayerCount - 1);
+                    Assert.AreEqual(RewardType.Boon, n.Reward);
+                }
+                foreach (var layer in map.Nodes.GroupBy(n => n.Layer))
+                    Assert.LessOrEqual(layer.Count(n => n.Type == RoomType.Siege), 1);
+            }
+            Assert.Greater(total, 30, "aparece de vez em quando");
+            Assert.AreEqual("Cerco", RoomInfo.Name(RoomType.Siege));
+            Assert.IsTrue(LayoutPicker.UsesLayout(RoomType.Siege));
+            Assert.Greater(EncounterPlanner.EssenceReward(RoomType.Siege, 4), EncounterPlanner.EssenceReward(RoomType.Combat, 4), "paga mais que a sala comum");
+        }
     }
 }

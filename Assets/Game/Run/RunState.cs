@@ -114,13 +114,15 @@ namespace Quintessence.Run
     {
         public struct WavePlan
         {
-            public int Melee, Ranged, Brute, Bomber, Boss, Charger, Lobber, Shaman, MiniBoss, Swarm, Ember, Sentinel, Guard, Drowned;
-            public int Total => Melee + Ranged + Brute + Bomber + Boss + Charger + Lobber + Shaman + MiniBoss + Swarm + Ember + Sentinel + Guard + Drowned;
+            public int Melee, Ranged, Brute, Bomber, Boss, Charger, Lobber, Shaman, MiniBoss, Swarm, Ember, Sentinel, Guard, Drowned, Banner;
+            public int Total => Melee + Ranged + Brute + Bomber + Boss + Charger + Lobber + Shaman + MiniBoss + Swarm + Ember + Sentinel + Guard + Drowned + Banner;
         }
 
         public const int MiniBossDepth = 5;
         /// O Escudeiro aparece da quarta sala em diante, no lugar de um Rastejante da primeira onda.
         public const int GuardDepth = 3;
+        /// O Porta-Estandarte vem da quinta sala em diante, no lugar de um Atirador da segunda onda.
+        public const int BannerDepth = 4;
 
         /// Tamanho do bando de Cinzentos: nenhum nas duas primeiras salas, depois 3 e, do meio em diante, 4.
         public static int SwarmSize(int depth) => depth < 2 ? 0 : depth < 5 ? 3 : 4;
@@ -156,6 +158,13 @@ namespace Quintessence.Run
                 case RoomType.Boss: // o Guardiao das Cinzas chama os proprios reforcos
                     waves.Add(new WavePlan { Boss = 1 });
                     break;
+            }
+            // o Porta-Estandarte toma o lugar de um Atirador da segunda onda: atras do bando, fortalecendo quem esta perto
+            if ((type == RoomType.Combat || type == RoomType.Elite) && depth >= BannerDepth && waves.Count > 1 && waves[1].Ranged >= 1)
+            {
+                var second = waves[1];
+                second.Ranged--; second.Banner++;
+                waves[1] = second;
             }
             // o Escudeiro toma o lugar de um Rastejante na primeira onda: a sala nao fica maior, fica diferente
             if ((type == RoomType.Combat || type == RoomType.Elite) && depth >= GuardDepth && waves.Count > 0 && waves[0].Melee >= 2)
@@ -194,6 +203,7 @@ namespace Quintessence.Run
         {
             RoomType.Elite => 2 * (10 + 2 * depth),
             RoomType.Combat or RoomType.Trial => 10 + 2 * depth,
+            RoomType.Siege => 15 + 3 * depth,
             RoomType.Boss => 50,
             _ => 0,
         };

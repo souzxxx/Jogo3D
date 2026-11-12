@@ -189,5 +189,22 @@ namespace Quintessence.Run.Tests
             TalentCatalog.Apply(m, TalentCatalog.All.First(t => t.Id == "body_flank"));
             Assert.AreEqual(0.25f, m.FlankBonus, 1e-4f);
         }
+
+        [Test] public void ComboTalents_WaitForTheElementsTheyNeed()
+        {
+            var book = new TalentBook();
+            for (int seed = 0; seed < 200; seed++)
+            {
+                var one = TalentCatalog.Offer(book, new[] { ElementType.Fire }, new System.Random(seed));
+                Assert.IsFalse(one.Any(t => t.Effect == TalentEffect.Contagion), "Contagio pede dois elementos (reacao)");
+                var two = TalentCatalog.Offer(book, new[] { ElementType.Fire, ElementType.Water }, new System.Random(seed));
+                Assert.IsFalse(two.Any(t => t.Effect == TalentEffect.Alchemy), "Alquimia pede tres (Fusao)");
+            }
+            var m = new HeroModifiers();
+            TalentCatalog.Apply(m, TalentCatalog.All.First(t => t.Id == "body_contagion"));
+            Assert.AreEqual(5f, m.MarkSpread, 1e-4f);
+            TalentCatalog.Apply(m, TalentCatalog.All.First(t => t.Id == "body_alchemy"));
+            Assert.AreEqual(0.4f, m.FusionBonus, 1e-4f);
+        }
     }
 }

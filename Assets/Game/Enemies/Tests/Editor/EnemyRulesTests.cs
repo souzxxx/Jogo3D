@@ -115,5 +115,24 @@ namespace Quintessence.Enemies.Tests
             w.AddAlive(3);
             Assert.AreEqual(0, w.Alive, "sala limpa nao reabre");
         }
+
+        [Test] public void Siege_RepeatsWaves_UntilForcedClear()
+        {
+            var w = new WaveState(new[] { 1, 2 }, 0f) { Repeat = true };
+            w.Start();
+            Assert.AreEqual(0, w.Tick(0.1f)); w.NotifyDeath();
+            Assert.AreEqual(1, w.Tick(0.1f)); w.NotifyDeath(); w.NotifyDeath();
+            Assert.AreEqual(0, w.Tick(0.1f), "depois da ultima, volta para a primeira");
+            Assert.IsFalse(w.Cleared);
+            Assert.AreEqual(3, w.Spawned);
+            w.ForceClear();
+            Assert.IsTrue(w.Cleared);
+            Assert.AreEqual(0, w.Alive);
+            Assert.AreEqual(-1, w.Tick(0.1f), "encerrado, nada mais nasce");
+            var empty = new WaveState(new int[0]) { Repeat = true };
+            empty.Start();
+            Assert.AreEqual(-1, empty.Tick(0.1f));
+            Assert.IsTrue(empty.Cleared, "sala sem onda limpa na hora, mesmo no Cerco");
+        }
     }
 }

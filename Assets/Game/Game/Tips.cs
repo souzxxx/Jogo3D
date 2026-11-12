@@ -38,6 +38,7 @@ namespace Quintessence.Game
             "shop" => "Loja: gaste Essência em cura, vida máxima, bênçãos e talentos.",
             "pact" => "Pacto: um ganho forte com um custo que dura a run toda. Dá para recusar.",
             "terrain" => "A poça marca quem está dentro com o elemento do trecho: uma skill de outro elemento detona a reação.",
+            "siege" => "Cerco: as ondas não param. Aguente até o tempo acabar; quem sobrar desmorona e você ganha uma bênção.",
             "trial" => "Provação: cumpra o desafio do letreiro e ganhe um talento extra. Falhar só perde o prêmio.",
             "fusion" => "Três elementos: lance a skill do terceiro numa poça de Magma ou numa nuvem de Vapor. É uma Fusão.",
             "affinity" => "Elementais resistem ao próprio elemento e são fracos a outro: Água vence Fogo, Ar vence Pedra.",

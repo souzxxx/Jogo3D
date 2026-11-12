@@ -104,5 +104,19 @@ namespace Quintessence.Run.Tests
             }
             Assert.IsTrue(seen, "a Cripta tem Afogado em alguma profundidade");
         }
+
+        [Test] public void BannerBearer_TakesTheSpotOfAShooter_FromTheFifthRoom()
+        {
+            Assert.AreEqual(0, EncounterPlanner.Plan(RoomType.Combat, EncounterPlanner.BannerDepth - 1).Sum(w => w.Banner), "nao aparece cedo");
+            bool seen = false;
+            for (int d = EncounterPlanner.BannerDepth; d < 10; d++)
+            {
+                var plan = EncounterPlanner.Plan(RoomType.Combat, d);
+                Assert.LessOrEqual(plan.Sum(w => w.Banner), 1, "no maximo um por sala");
+                seen |= plan.Sum(w => w.Banner) > 0;
+            }
+            Assert.IsTrue(seen);
+            Assert.AreEqual(0, EncounterPlanner.Plan(RoomType.Boss, 9).Sum(w => w.Banner));
+        }
     }
 }

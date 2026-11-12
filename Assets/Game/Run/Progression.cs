@@ -70,7 +70,7 @@ namespace Quintessence.Run
         EarthBlocks, EarthRange, EarthThorns,
         AirDashCharge, AirRange, AirHaste,
         ReactionBoost,
-        Flank, SureFooted, BurstPower,
+        Flank, SureFooted, BurstPower, Contagion, Alchemy,
     }
 
     public class Talent
@@ -134,6 +134,8 @@ namespace Quintessence.Run
             Add("body_flank", "Flanqueador", "Golpes pelas costas do alvo causam +25%", ElementType.None, TalentEffect.Flank, 0.25f, 2);
             Add("body_footing", "Pés Firmes", "Encharcado, você não fica lento", ElementType.None, TalentEffect.SureFooted, 1f, 1);
             Add("body_awaken", "Despertar Intenso", "A explosão da Quintessência causa +50%", ElementType.None, TalentEffect.BurstPower, 0.5f, 2);
+            Add("body_contagion", "Contágio", "Quando um inimigo marcado cai, a marca pula para o vizinho mais perto", ElementType.None, TalentEffect.Contagion, 5f, 1);
+            Add("body_alchemy", "Alquimia", "Fusões causam +40%", ElementType.None, TalentEffect.Alchemy, 0.4f, 2);
 
             Add("fire_trail", "Rastro de Brasa", "Labareda deixa o chão em chamas por 3 s", ElementType.Fire, TalentEffect.FireTrail, 3f, 1);
             Add("fire_range", "Fornalha", "Labareda alcança 20% mais longe", ElementType.Fire, TalentEffect.FireRange, 0.2f, 2);
@@ -202,6 +204,8 @@ namespace Quintessence.Run
                 case TalentEffect.Flank: m.FlankBonus += t.Value; break;
                 case TalentEffect.SureFooted: m.SureFooted = true; break;
                 case TalentEffect.BurstPower: m.BurstBonus += t.Value; break;
+                case TalentEffect.Contagion: m.MarkSpread = System.Math.Max(m.MarkSpread, t.Value); break;
+                case TalentEffect.Alchemy: m.FusionBonus += t.Value; break;
             }
         }
 
@@ -216,6 +220,9 @@ namespace Quintessence.Run
                 if (t.Second != ElementType.None && !Has(awakened, t.Second)) continue;
                 // o despertar so vale com os quatro elementos: oferece a partir do terceiro
                 if (t.Effect == TalentEffect.BurstPower && awakened.Count < 3) continue;
+                // Contagio so serve com reacao possivel (dois elementos); Alquimia so com Fusao (tres)
+                if (t.Effect == TalentEffect.Contagion && awakened.Count < 2) continue;
+                if (t.Effect == TalentEffect.Alchemy && awakened.Count < 3) continue;
                 pool.Add(t);
             }
             var offer = new List<Talent>();

@@ -100,6 +100,8 @@ namespace Quintessence.Game
         public void BindMiniBoss(GameObject prefab) => miniBossPrefab = prefab;
         public void BindElementals(GameObject swarm, GameObject ember, GameObject sentinel) { swarmPrefab = swarm; emberPrefab = ember; sentinelPrefab = sentinel; }
         public void BindGuard(GameObject guard) => guardPrefab = guard;
+        [SerializeField] GameObject bannerPrefab;
+        public void BindBanner(GameObject banner) => bannerPrefab = banner;
         public void BindDrowned(GameObject drowned, GameObject puddle) { drownedPrefab = drowned; puddlePrefab = puddle; }
         public void BindWeaver(GameObject prefab) => weaverPrefab = prefab;
 
@@ -302,6 +304,45 @@ namespace Quintessence.Game
         void OnPuddleLanded(Vector3 point, float radius, ElementType element, float seconds) { if (seconds > 0f) WaterPuddle.Spawn(puddlePrefab, point, radius, element, seconds); }
 
         void OnPoolMarked() => Tip("terrain");
+
+        // ---------- Cerco ----------
+
+        public const float SiegeSeconds = 40f;
+        public bool SiegeActive { get; private set; }
+        public float SiegeLeft { get; private set; }
+        string siegeLabel = "";
+
+        /// Comeca o Cerco: as ondas da profundidade se repetem ate o tempo acabar. Publico para os testes.
+        public void StartSiege(float seconds = SiegeSeconds)
+        {
+            spawner.SetRepeat(true);
+            SiegeLeft = seconds;
+            SiegeActive = true;
+            hud.ShowBanner("CERCO", $"aguente {seconds:0} segundos: as ondas não param", RoomInfo.Color(RoomType.Siege) * 1.25f, 4f);
+            UpdateSiegeLabel();
+        }
+
+        void TickSiege()
+        {
+            if (!SiegeActive || Busy || Finished) return;
+            SiegeLeft -= Time.deltaTime;
+            if (SiegeLeft > 0f) { UpdateSiegeLabel(); return; }
+            // tempo esgotado: quem sobrou desmorona e a sala limpa (a bencao vem no RoomCleared)
+            SiegeActive = false;
+            SiegeLeft = 0f;
+            hud.SetRoom($"Sala {Run.Depth + 1}/{Run.Map.LayerCount} · Cerco · resistiu", RoomType.Siege);
+            Feel.DamageNumber.Spawn(player.transform.position + Vector3.up * 3.9f, "CERCO VENCIDO", new Color(0.9f, 0.76f, 0.42f), 1.1f, 2f);
+            Sfx.Play("level_up");
+            spawner.EndSiege();
+        }
+
+        void UpdateSiegeLabel()
+        {
+            string label = $"Sala {Run.Depth + 1}/{Run.Map.LayerCount} · Cerco · {Mathf.CeilToInt(Mathf.Max(0f, SiegeLeft))} s";
+            if (label == siegeLabel) return;
+            siegeLabel = label;
+            hud.SetRoom(label, RoomType.Siege);
+        }
 
         // ---------- Provacao ----------
 
@@ -590,6 +631,7 @@ namespace Quintessence.Game
             // a dificuldade pode mudar na pausa: vale na hora
             if (playerHealth != null) playerHealth.Pool.AssistMultiplier = GameFlow.Tutorial ? 1f : GamePrefs.HeroDamageTaken;
             TickTrial();
+            TickSiege();
             if ((saveHealthTimer -= Time.unscaledDeltaTime) <= 0f) { saveHealthTimer = 2f; SyncSavedHealth(); }
             if (levelUpOpen) { }
             else if (MenuInput.InventoryPressed && !Busy && (!GameClock.Paused || hud.InventoryVisible)) SetInventory(!hud.InventoryVisible);
@@ -658,7 +700,8 @@ namespace Quintessence.Game
             ApplyLayout(LayoutPicker.UsesLayout(node.Type) ? PickLayout(node) : -1);
             Dress(node.Type);
             TrialActive = false;
-            if (node.Type == RoomType.Combat || node.Type == RoomType.Elite || node.Type == RoomType.Boss || node.Type == RoomType.Trial)
+            SiegeActive = false;
+            if (node.Type == RoomType.Combat || node.Type == RoomType.Siege || node.Type == RoomType.Elite || node.Type == RoomType.Boss || node.Type == RoomType.Trial)
                 // a sala da Rainha Afogada e um salao alagado: adereços da Cripta em vez dos do Coracao
                 PlaceBiomeProps(node.Type == RoomType.Boss && QueenRun ? Biome.Crypt : Biomes.For(Run.Depth, Run.Map.LayerCount), GameFlow.Seed + node.Id * 7);
             DressBiome(Biomes.For(Run.Depth, Run.Map.LayerCount), true);
@@ -674,6 +717,7 @@ namespace Quintessence.Game
             else if (node.Type == RoomType.Shop) Tip("shop");
             else if (node.Type == RoomType.Pact) Tip("pact");
             else if (node.Type == RoomType.Trial) Tip("trial");
+            else if (node.Type == RoomType.Siege) Tip("siege");
             switch (node.Type)
             {
                 case RoomType.Shrine:
@@ -703,6 +747,11 @@ namespace Quintessence.Game
                     Feel.DamageNumber.Spawn(player.transform.position + Vector3.up * 3.5f, "DESCANSO: +30% DE VIDA", new Color(0.5f, 1f, 0.55f), 1.1f, 1.8f);
                     Run.RoomCleared();
                     OpenDoors();
+                    break;
+                case RoomType.Siege:
+                    // as ondas de uma sala comum, repetidas ate o tempo acabar
+                    StartEncounter(RoomType.Combat, Run.Depth, EliteModifier.None);
+                    StartSiege();
                     break;
                 case RoomType.Trial:
                     // a luta e a de uma sala comum da mesma profundidade; o desafio vem por cima
@@ -764,6 +813,7 @@ namespace Quintessence.Game
                 if (p.Ember > 0 && emberPrefab != null) w.entries.Add(new WaveEntry { prefab = emberPrefab, count = p.Ember });
                 if (p.Sentinel > 0 && sentinelPrefab != null) w.entries.Add(new WaveEntry { prefab = sentinelPrefab, count = p.Sentinel });
                 if (p.Guard > 0) w.entries.Add(new WaveEntry { prefab = guardPrefab != null ? guardPrefab : meleePrefab, count = p.Guard });
+                if (p.Banner > 0) w.entries.Add(new WaveEntry { prefab = bannerPrefab != null ? bannerPrefab : rangedPrefab, count = p.Banner });
                 if (p.Drowned > 0) w.entries.Add(new WaveEntry { prefab = drownedPrefab != null ? drownedPrefab : lobberPrefab != null ? lobberPrefab : rangedPrefab, count = p.Drowned });
                 if (p.MiniBoss > 0 && miniBossPrefab != null) w.entries.Add(new WaveEntry { prefab = miniBossPrefab, count = p.MiniBoss });
                 if (p.Boss > 0) w.entries.Add(new WaveEntry { prefab = WeaverRun ? weaverPrefab : QueenRun ? queenPrefab : bossPrefab != null ? bossPrefab : brutePrefab, count = p.Boss });

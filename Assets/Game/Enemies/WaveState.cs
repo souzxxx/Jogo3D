@@ -16,6 +16,10 @@ namespace Quintessence.Enemies
         }
 
         public int CurrentWave => wave;
+        /// Cerco: depois da ultima onda volta para a primeira, ate alguem encerrar com ForceClear.
+        public bool Repeat { get; set; }
+        /// Quantas ondas ja nasceram (contando as repetidas).
+        public int Spawned { get; private set; }
         public int TotalWaves => sizes.Length;
         public int Alive => alive;
         public bool Cleared { get; private set; }
@@ -28,15 +32,20 @@ namespace Quintessence.Enemies
         public int Tick(float dt)
         {
             if (!started || Cleared || alive > 0) return -1;
-            if (wave >= sizes.Length - 1) { Cleared = true; return -1; }
+            if (sizes.Length == 0) { Cleared = true; return -1; }
+            if (wave >= sizes.Length - 1 && !Repeat) { Cleared = true; return -1; }
             if (wave >= 0 && (delay -= dt) > 0f) return -1;
-            wave++;
+            wave = wave >= sizes.Length - 1 ? 0 : wave + 1;
+            Spawned++;
             alive = sizes[wave];
             delay = delayBetween;
             return wave;
         }
 
         public void NotifyDeath() { if (alive > 0) alive--; }
+
+        /// Encerra a sala na hora (fim do Cerco): nada mais nasce e a sala conta como limpa.
+        public void ForceClear() { if (started) { Cleared = true; alive = 0; } }
 
         /// Inimigos que nascem no meio da onda (Divisores): a sala so limpa quando eles caem tambem.
         public void AddAlive(int count) { if (count > 0 && !Cleared) alive += count; }

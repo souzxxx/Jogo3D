@@ -286,6 +286,8 @@ namespace Quintessence.Game.PlayTests
                 float d = Vector3.Distance(e.transform.position, player.transform.position);
                 // o Xama cura os outros: e o primeiro alvo
                 if (e.Definition.attack == EnemyAttackKind.Heal) d *= 0.4f;
+                // o Porta-Estandarte fortalece o bando: tambem vem antes
+                if (e.Definition.auraRadius > 0f) d *= 0.5f;
                 if (d < bestD) { bestD = d; best = h; }
             }
             return best;

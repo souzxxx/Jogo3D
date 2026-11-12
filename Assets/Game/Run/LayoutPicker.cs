@@ -29,6 +29,6 @@ namespace Quintessence.Run
             return weights.Count - 1;
         }
 
-        public static bool UsesLayout(RoomType type) => type == RoomType.Combat || type == RoomType.Elite || type == RoomType.Trial;
+        public static bool UsesLayout(RoomType type) => type == RoomType.Combat || type == RoomType.Elite || type == RoomType.Trial || type == RoomType.Siege;
     }
 }
