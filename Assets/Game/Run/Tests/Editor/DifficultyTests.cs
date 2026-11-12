@@ -17,15 +17,15 @@ namespace Quintessence.Run.Tests
         }
 
         [Test]
-        public void First_Rooms_Are_Below_The_Sheet_And_Late_Rooms_Above()
+        public void First_Room_Uses_The_Sheet_And_The_Last_Layer_Is_Bounded()
         {
             var first = DifficultyCurve.For(RoomType.Combat, 0);
-            Assert.Less(first.Health, 1f);
-            Assert.Less(first.Damage, 1f);
-            var late = DifficultyCurve.For(RoomType.Combat, 6);
-            Assert.Greater(late.Health, 1f);
-            Assert.Greater(late.Damage, 1f);
-            Assert.LessOrEqual(late.Damage, 1.3f, "o dano nao dispara: a run tem 8 camadas");
+            Assert.AreEqual(1f, first.Health, 0.001f);
+            Assert.AreEqual(1f, first.Damage, 0.001f);
+            var last = DifficultyCurve.For(RoomType.Combat, 7);
+            Assert.AreEqual(1.49f, last.Health, 0.001f);
+            Assert.AreEqual(1.35f, last.Damage, 0.001f);
+            Assert.LessOrEqual(last.Damage, 1.4f, "o dano nao dispara: a run tem 8 camadas");
         }
 
         [Test]

@@ -14,15 +14,15 @@ namespace Quintessence.Run
 
     public static class DifficultyCurve
     {
-        /// Vida e dano dos inimigos crescem com a profundidade. As duas primeiras salas ficam abaixo da ficha,
-        /// para a run comecar leve; o tempo de aviso dos golpes nunca muda.
+        /// Vida e dano dos inimigos crescem com a profundidade: a primeira sala usa a ficha do inimigo e cada camada
+        /// soma 7% de vida e 5% de dano. O tempo de aviso dos golpes nunca muda.
         public static Difficulty For(RoomType type, int depth, EliteModifier modifier = EliteModifier.None)
         {
             var d = Difficulty.Base;
             if (type != RoomType.Combat && type != RoomType.Elite) return d;
             depth = Math.Max(0, depth);
-            d.Health = 0.85f + 0.07f * depth;
-            d.Damage = 0.8f + 0.05f * depth;
+            d.Health = 1f + 0.07f * depth;
+            d.Damage = 1f + 0.05f * depth;
             if (type != RoomType.Elite) return d;
             d.Size = 1.12f;
             switch (modifier)

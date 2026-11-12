@@ -114,7 +114,7 @@ O golpe de um elemento deixa a **marca** dele no inimigo. Acertar esse inimigo c
 | Bruto | Armadura: leva 40% do dano | O finalizador de Terra quebra a armadura |
 | Explosivo | Corre, avisa um círculo e explode | Sair do círculo; a explosão também fere os outros inimigos |
 
-Vida e dano sobem a cada camada (de 85% para 134% de vida, de 80% para 115% de dano). O tempo de aviso dos golpes nunca diminui.
+Vida e dano sobem a cada camada (de 100% para 149% de vida, de 100% para 135% de dano). O tempo de aviso dos golpes nunca diminui.
 
 ### Progressão
 

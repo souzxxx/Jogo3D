@@ -533,14 +533,14 @@ namespace Quintessence.Game.PlayTests
             hud.UseCamera(cam);
             for (int k = 0; k < 2000 && director.Busy; k++) yield return null;
 
-            // primeira sala (profundidade 0): inimigos abaixo da ficha
+            // primeira sala (profundidade 0): inimigos com os numeros da ficha
             for (int k = 0; k < 90 && Object.FindObjectsByType<EnemyBrain>(FindObjectsSortMode.None).Length == 0; k++) yield return null;
             var early = Object.FindObjectsByType<EnemyBrain>(FindObjectsSortMode.None);
             Assert.Greater(early.Length, 0, "a primeira sala deveria ter inimigos");
             foreach (var e in early)
             {
-                Assert.AreEqual(e.Definition.maxHealth * 0.85f, e.GetComponent<Health>().Max, 0.01f, "sala 1: 85% da vida da ficha");
-                Assert.AreEqual(0.8f, e.Scaling.Damage, 0.001f);
+                Assert.AreEqual(e.Definition.maxHealth, e.GetComponent<Health>().Max, 0.01f, "sala 1: a vida da ficha");
+                Assert.AreEqual(1f, e.Scaling.Damage, 0.001f);
             }
 
             // Elite Resistentes na profundidade 4
@@ -551,7 +551,7 @@ namespace Quintessence.Game.PlayTests
             for (int k = 0; k < 25; k++) yield return null;
             var elite = Object.FindObjectsByType<EnemyBrain>(FindObjectsSortMode.None);
             Assert.Greater(elite.Length, 0);
-            float want = (0.85f + 0.07f * 4) * 1.5f;
+            float want = (1f + 0.07f * 4) * 1.5f;
             foreach (var e in elite)
             {
                 Assert.AreEqual(e.Definition.maxHealth * want, e.GetComponent<Health>().Max, 0.05f, "Resistentes: +50% sobre a vida da profundidade");
@@ -571,7 +571,7 @@ namespace Quintessence.Game.PlayTests
             {
                 Assert.AreEqual(1.25f, e.Scaling.Speed, 0.001f);
                 Assert.AreEqual(e.Definition.moveSpeed * 1.25f, e.GetComponent<UnityEngine.AI.NavMeshAgent>().speed, 0.3f);
-                Assert.AreEqual(e.Definition.maxHealth * (0.85f + 0.07f * 4), e.GetComponent<Health>().Max, 0.05f);
+                Assert.AreEqual(e.Definition.maxHealth * (1f + 0.07f * 4), e.GetComponent<Health>().Max, 0.05f);
             }
             GameFlow.Layers = 8; GameFlow.Shrines = 3;
             Time.captureFramerate = 0;
