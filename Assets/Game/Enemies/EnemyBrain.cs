@@ -39,6 +39,7 @@ namespace Quintessence.Enemies
             if (Scaling.Wards > 0) health.Pool.Blocks = Scaling.Wards;
             if (definition.affinity != ElementType.None) (GetComponent<ElementalAffinity>() ?? gameObject.AddComponent<ElementalAffinity>()).Set(definition.affinity);
             if (definition.guardArc > 0f) (guard = GetComponent<FrontGuard>() ?? gameObject.AddComponent<FrontGuard>()).Configure(definition.guardArc, definition.guardDamageTaken);
+            if (definition.auraRadius > 0f) (GetComponent<RallyAura>() ?? gameObject.AddComponent<RallyAura>()).Configure(definition.auraRadius, definition.auraDamageMult, definition.auraSpeedMult);
             fsm = new EnemyFsm(definition.telegraphTime, definition.recoverTime, definition.cooldown * Scaling.Cooldown, definition.attackRange);
             agent.speed = definition.moveSpeed * Scaling.Speed;
             agent.updateRotation = false;
@@ -51,7 +52,16 @@ namespace Quintessence.Enemies
 
         public bool Armored { get; private set; }
         public EnemyScaling Scaling { get; private set; } = EnemyScaling.None;
-        float Damage => definition.damage * Scaling.Damage;
+        float Damage => definition.damage * Scaling.Damage * (Rallied ? rallyDamage : 1f);
+
+        // Porta-Estandarte por perto: bate mais e anda mais rapido enquanto a aura alcanca
+        float rallyUntil = -1f, rallyDamage = 1f, rallySpeed = 1f;
+        public bool Rallied => Time.time < rallyUntil;
+        public void Rally(float seconds, float damageMult, float speedMult)
+        {
+            rallyUntil = Mathf.Max(rallyUntil, Time.time + seconds);
+            rallyDamage = damageMult; rallySpeed = speedMult;
+        }
 
         void OnStatusApplied(Health target, StatusType type, float duration)
         {
@@ -212,7 +222,7 @@ namespace Quintessence.Enemies
         {
             if (!agent.enabled || !agent.isOnNavMesh) return;
             bool move = fsm.CanMove && canAct && hasTarget && moveMul > 0f;
-            agent.speed = definition.moveSpeed * Scaling.Speed * moveMul;
+            agent.speed = definition.moveSpeed * Scaling.Speed * moveMul * (Rallied ? rallySpeed : 1f);
             if (!move) { agent.isStopped = true; agent.velocity = Vector3.zero; return; }
 
             Vector3 goal = target.transform.position;

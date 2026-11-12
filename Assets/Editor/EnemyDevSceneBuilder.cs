@@ -526,6 +526,52 @@ public static class EnemyDevSceneBuilder
         return prefab;
     }
 
+    /// Porta-Estandarte: esqueleto guerreiro do pack com o cajado na mao e um estandarte do pack nas costas.
+    /// Fica atras do bando e atira de longe; enquanto vive, quem esta no circulo dele bate mais forte e anda mais rapido.
+    public static GameObject BannerPrefab()
+    {
+        const string warriorFbx = KK + "Skeletons/Characters/Skeleton_Warrior.fbx";
+        var ctrl = CombatDevSceneBuilder.Controller(warriorFbx, Dir + "Animation/PortaEstandarte.controller",
+            ("Idle", "Idle_Combat|Idle", 0f), ("Run", "Walking_A|Running_A", 0f), ("Attack", "1H_Melee_Attack_Chop|2H_Melee_Attack_Chop", 0.9f),
+            ("Hit", "Hit_A|Hit_B", 0.3f), ("Death", "Death_A|Death_B", 0f), ("Spawn", "Spawn_Ground|Skeletons_Awaken_Standing|Idle", 0.7f));
+        var def = Asset<EnemyDefinition>("PortaEstandarte", d =>
+        {
+            d.displayName = "Porta-Estandarte"; d.maxHealth = 46; d.moveSpeed = 2.8f;
+            d.attack = EnemyAttackKind.Projectile; d.damage = 6; d.knockback = 2;
+            d.attackRange = 9f; d.telegraphTime = 0.75f; d.recoverTime = 0.4f; d.cooldown = 2.3f;
+            d.projectileSpeed = 10f; d.projectileRange = 14f; d.keepDistance = 6.5f;
+            d.auraRadius = 6f; d.auraDamageMult = 1.25f; d.auraSpeedMult = 1.15f;
+        });
+        if (def.projectilePrefab == null) { def.projectilePrefab = ProjectilePrefab(); EditorUtility.SetDirty(def); }
+        var bone = LookDevBuilder.Mat("SkeletonBanner", KK + "Skeletons/Characters/skeleton_texture.png", new Color(0.86f, 0.74f, 0.66f), Color.black, 0f);
+        holds = new[] { ("Skeleton_Staff", "handslot.l", Vector3.zero) };
+        var prefab = EnemyPrefab("PortaEstandarte", "Skeletons/Characters/Skeleton_Warrior.fbx", def, ctrl, bone, 1.05f);
+        holds = null;
+        // o estandarte nas costas: a peca de parede do pack, fina e vermelha, presa ao peito e erguida acima da cabeca
+        var root = PrefabUtility.LoadPrefabContents(AssetDatabase.GetAssetPath(prefab));
+        Transform chest = null;
+        foreach (var t in root.GetComponentsInChildren<Transform>(true)) if (t.name == "chest") chest = t;
+        if (chest != null)
+        {
+            var flagMat = LookDevBuilder.Mat("DungeonProp", KK + "Dungeon/dungeon_texture.png", Color.white, Color.black, 0.018f);
+            var flag = LookDevBuilder.Spawn("Dungeon/banner_thin_red.fbx", Vector3.zero, 0, flagMat);
+            flag.name = "Banner";
+            flag.transform.SetParent(chest, false);
+            float s = BannerScale / Mathf.Max(0.0001f, chest.lossyScale.x);
+            flag.transform.localScale = Vector3.one * s;
+            flag.transform.localPosition = BannerOffset / Mathf.Max(0.0001f, chest.lossyScale.x);
+            flag.transform.localRotation = Quaternion.Euler(BannerEuler);
+        }
+        PrefabUtility.SaveAsPrefabAsset(root, AssetDatabase.GetAssetPath(prefab));
+        PrefabUtility.UnloadPrefabContents(root);
+        return AssetDatabase.LoadAssetAtPath<GameObject>(Dir + "Prefabs/PortaEstandarte.prefab");
+    }
+
+    // posicao do estandarte nas costas, em metros no mundo (ajustada pela captura do teste)
+    static readonly float BannerScale = 0.36f;
+    static readonly Vector3 BannerOffset = new(0f, 0.8f, -0.3f);
+    static readonly Vector3 BannerEuler = new(0f, 0f, 0f);
+
     /// Afogado: elemental de Agua da Cripta. Esqueleto mago palido e esverdeado com o cajado do pack; joga um orbe
     /// que deixa uma poca d'agua (encharca o heroi, marca os inimigos). Resiste a Agua, fraco a Terra.
     public static GameObject DrownedPrefab()

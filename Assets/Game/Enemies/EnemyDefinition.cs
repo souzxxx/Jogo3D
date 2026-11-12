@@ -55,6 +55,12 @@ namespace Quintessence.Enemies
         [Tooltip("Graus por segundo que o inimigo gira para encarar o heroi. Baixo = da para contornar.")]
         public float turnSpeed = 540f;
 
+        [Header("Aura (Porta-Estandarte)")]
+        [Tooltip("Raio em que os aliados ganham bonus. 0 = sem aura.")]
+        public float auraRadius;
+        public float auraDamageMult = 1.25f;
+        public float auraSpeedMult = 1.15f;
+
         [Header("Investida")]
         public float chargeDistance = 8f;
         public float chargeSpeed = 22f;
