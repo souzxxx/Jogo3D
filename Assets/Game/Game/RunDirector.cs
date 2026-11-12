@@ -383,6 +383,9 @@ namespace Quintessence.Game
         public void SetPaused(bool paused)
         {
             GameClock.SetPaused(paused);
+            if (paused && Run != null)
+                hud.PauseSummary = $"{HeroPassives.HeroName(GameFlow.StartElement)}  ·  nível {Run.Progress.Level}  ·  sala {Run.Depth + 1}/{Run.Map.LayerCount}  ·  {Biomes.Name(Biomes.For(Run.Depth, Run.Map.LayerCount))}"
+                    + $"  ·  {Plural(Run.Talents.Count, "talento", "talentos")}" + (GameFlow.Ascension > 0 ? $"  ·  Ascensão {GameFlow.Ascension}" : "");
             hud.ShowPause(paused, () => SetPaused(false), GameFlow.ToTitle);
             if (paused) hud.ShowMap(Run, false);
         }
