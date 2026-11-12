@@ -156,7 +156,7 @@ namespace Quintessence.Combat
         /// Impeto: cada inimigo derrotado adianta as recargas.
         void OnAnyDied(Health target, DamageInfo info)
         {
-            if (mods.SkillRefundOnKill <= 0f || target == health || target.Team == health.Team) return;
+            if (mods.SkillRefundOnKill <= 0f || target == health || target.Team == health.Team || info.NoCredit) return;
             // so criatura conta como abate (barril de polvora e boneco de treino nao andam pelo NavMesh)
             if (target.GetComponent<UnityEngine.AI.NavMeshAgent>() == null) return;
             for (int i = 0; i < skillCd.Length; i++) if (skillCd[i] > 0f) skillCd[i] -= mods.SkillRefundOnKill;

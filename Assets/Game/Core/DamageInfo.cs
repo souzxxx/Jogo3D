@@ -15,6 +15,8 @@ namespace Quintessence.Core
         public bool IsCrit;
         /// Dano causado por uma reacao elemental (nao aplica marca nem dispara outra reacao).
         public bool IsReaction;
+        /// Nao conta como abate do heroi (quem desmorona no fim do Cerco): sem XP, sem recarga, nao explode nem se divide.
+        public bool NoCredit;
 
         public DamageInfo(float amount, ElementType element, Team sourceTeam, GameObject source = null)
         {
@@ -27,6 +29,7 @@ namespace Quintessence.Core
             Knockback = 0f;
             IsCrit = false;
             IsReaction = false;
+            NoCredit = false;
         }
     }
 
