@@ -86,6 +86,17 @@ namespace Quintessence.Run
             return true;
         }
 
+        /// Volta uma run salva: sala atual, salas visitadas, Essencia e salas vencidas.
+        public void Restore(int currentId, IEnumerable<int> visited, int essence, int roomsCleared)
+        {
+            if (currentId >= 0 && currentId < Map.Nodes.Count) Current = Map.Get(currentId);
+            Visited.Clear();
+            if (visited != null) foreach (int v in visited) Visited.Add(v);
+            Visited.Add(Current.Id);
+            Essence = System.Math.Max(0, essence);
+            RoomsCleared = System.Math.Max(0, roomsCleared);
+        }
+
         public void RoomCleared() => RoomsCleared++;
         public void AddEssence(int amount) { if (amount > 0) Essence += amount; }
 

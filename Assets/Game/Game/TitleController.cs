@@ -26,6 +26,8 @@ namespace Quintessence.Game
             menu.Ascension = Ascension.Clamp(GameFlow.Ascension, MetaStore.Current.Wins);
             menu.OnPick = e => { GameFlow.Ascension = Ascension.Clamp(menu.Ascension, MetaStore.Current.Wins); GameFlow.StartRun(e); };
             menu.OnTutorial = GameFlow.StartTutorial;
+            var save = RunSaveStore.Load();
+            if (save != null) menu.ShowContinue(save.Summary, () => GameFlow.ContinueRun());
             menu.BindMeta(MetaStore.Current, MetaStore.Save, MetaStore.Reset, () => MetaStore.Current);
             for (int i = 0; i < 4; i++)
             {

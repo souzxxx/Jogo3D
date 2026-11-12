@@ -245,7 +245,64 @@ namespace Quintessence.Game
             Run.AddEssence(MetaStore.Current.StartEssence);
             Run.Rerolls = MetaStore.Current.Rerolls;
             hud.SetEssence(Run.Essence);
+            if (GameFlow.Resume != null) { RestoreFrom(GameFlow.Resume); GameFlow.Resume = null; }
             StartCoroutine(EnterRoom(Run.Current, true));
+        }
+
+        // ---------- save da run ----------
+
+        /// Esta run veio de um save (Continuar).
+        public bool Resumed { get; private set; }
+
+        /// Foto da run agora. Chamado ao entrar em cada sala; publico para os testes.
+        public void SaveRun()
+        {
+            if (GameFlow.Tutorial || Run == null || Finished) return;
+            var s = new RunSave
+            {
+                hero = (int)GameFlow.StartElement, seed = GameFlow.Seed, layers = GameFlow.Layers, shrines = GameFlow.Shrines, ascension = GameFlow.Ascension,
+                current = Run.Current.Id, depth = Run.Depth, visited = new List<int>(Run.Visited).ToArray(),
+                essence = Run.Essence, roomsCleared = Run.RoomsCleared, kills = Run.Kills, rerolls = Run.Rerolls, pacts = PactsTaken,
+                ranks = (int[])Run.SkillRank.Clone(),
+                level = Run.Progress.Level, xp = Run.Progress.Xp, pending = Run.Progress.PendingPicks, totalXp = Run.Progress.TotalXp,
+                health = playerHealth.Current, maxHealth = playerHealth.Max, baseMaxHealth = baseMaxHealth, curse = playerHealth.Pool.CurseMultiplier,
+                elapsed = Time.time - startTime, modifiers = player.Modifiers.ToJson(),
+            };
+            var talents = new List<string>();
+            foreach (var t in Run.Talents.Taken) talents.Add(t.Id);
+            s.talents = talents.ToArray();
+            var boons = new List<SavedBoon>();
+            foreach (var b in Run.Boons)
+                boons.Add(new SavedBoon { id = b.id, name = b.name, description = b.description, patron = (int)b.patron, stat = (int)b.stat, value = b.value });
+            s.boons = boons.ToArray();
+            var awakened = new List<int>();
+            foreach (var e in player.Loadout.Awakened) awakened.Add((int)e);
+            s.awakened = awakened.ToArray();
+            RunSaveStore.Save(s);
+        }
+
+        void RestoreFrom(RunSave s)
+        {
+            Run.Restore(s.current, s.visited, s.essence, s.roomsCleared);
+            Run.Kills = s.kills;
+            Run.Rerolls = s.rerolls;
+            for (int i = 0; i < Run.SkillRank.Length && i < s.ranks.Length; i++) Run.SkillRank[i] = Mathf.Clamp(s.ranks[i], 1, RunState.MaxSkillRank);
+            Run.Progress.Restore(s.level, s.xp, s.pending, s.totalXp);
+            foreach (var id in s.talents) Run.Talents.Restore(TalentCatalog.Find(id));
+            foreach (var b in s.boons)
+                Run.AddBoon(new Boon { id = b.id, name = b.name, description = b.description, patron = (ElementType)b.patron, stat = (BoonStat)b.stat, value = b.value });
+            foreach (int e in s.awakened) player.Awaken((ElementType)e);
+            // a foto dos modificadores ja traz passiva, Refugio, bencaos, talentos, pactos e graus: substitui o que o Start aplicou
+            player.Modifiers.FromJson(s.modifiers);
+            baseMaxHealth = s.baseMaxHealth;
+            playerHealth.Pool.SetMax(s.maxHealth);
+            playerHealth.Pool.SetCurrent(s.health);
+            playerHealth.Pool.CurseMultiplier = s.curse > 0f ? s.curse : 1f;
+            PactsTaken = s.pacts;
+            startTime = Time.time - s.elapsed;
+            hud.SetBoons(Run.Boons);
+            hud.SetEssence(Run.Essence);
+            Resumed = true;
         }
 
         void Update()
@@ -311,6 +368,7 @@ namespace Quintessence.Game
                 Run.Advance(node.Id);
             }
             Cleanup();
+            SaveRun();
             ApplyLayout(LayoutPicker.UsesLayout(node.Type) ? LayoutPicker.Pick(GameFlow.Seed, node.Id, layouts.Length) : -1);
             Dress(node.Type);
             if (node.Type == RoomType.Combat || node.Type == RoomType.Elite || node.Type == RoomType.Boss)
@@ -469,6 +527,7 @@ namespace Quintessence.Game
         {
             Finished = true;
             Victory = victory;
+            RunSaveStore.Clear(); // run acabou: nada para continuar
             hud.HidePrompt();
             hud.ShowMap(Run, false);
             yield return new WaitForSecondsRealtime(victory ? 1.6f : 1.2f);

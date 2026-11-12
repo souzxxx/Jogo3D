@@ -22,8 +22,28 @@ namespace Quintessence.Game
         /// Nivel de Ascensao da proxima run (0 = normal).
         public static int Ascension;
 
+        /// Run salva que a proxima cena de run deve retomar (nula = run nova).
+        public static RunSave Resume;
+
+        /// Retoma a run salva, do comeco da sala em que ela parou. Sem save valido, nao faz nada.
+        public static bool ContinueRun()
+        {
+            var save = RunSaveStore.Load();
+            if (save == null) return false;
+            Resume = save;
+            StartElement = (ElementType)save.hero;
+            Seed = save.seed; Layers = save.layers; Shrines = save.shrines; Ascension = save.ascension;
+            Tutorial = false;
+            GameClock.SetPaused(false);
+            SceneManager.LoadScene(RunScene);
+            return true;
+        }
+
         public static void StartRun(ElementType element)
         {
+            // run nova descarta a salva
+            Resume = null;
+            RunSaveStore.Clear();
             StartElement = element;
             Tutorial = false;
             Seed = Random.Range(1, int.MaxValue);

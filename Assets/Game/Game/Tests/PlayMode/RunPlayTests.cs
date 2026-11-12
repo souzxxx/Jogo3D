@@ -38,6 +38,9 @@ namespace Quintessence.Game.PlayTests
             PlayerPrefs.DeleteKey(TestSaveKey);
             MetaStore.UseKey(TestSaveKey);
             GameFlow.AutoPickTalents = true;
+            RunSaveStore.UseKey(TestSaveKey + ".run");
+            RunSaveStore.Clear();
+            GameFlow.Resume = null;
         }
 
         [TearDown]
@@ -46,6 +49,9 @@ namespace Quintessence.Game.PlayTests
             PlayerPrefs.DeleteKey(TestSaveKey);
             MetaStore.UseKey(MetaStore.DefaultKey);
             GameFlow.AutoPickTalents = false;
+            RunSaveStore.Clear();
+            RunSaveStore.UseKey(RunSaveStore.DefaultKey);
+            GameFlow.Resume = null;
         }
 
         [UnityTest, Timeout(600000)]
@@ -748,6 +754,83 @@ namespace Quintessence.Game.PlayTests
             // a morte de chefe tem uma pausa dramatica em tempo real (no teste ela dura centenas de quadros)
             for (int k = 0; k < 3000 && Object.FindFirstObjectByType<BossBrain>() != null; k++) yield return null;
             Assert.IsNull(Object.FindFirstObjectByType<BossBrain>(), "morto, ele some");
+            GameFlow.StartElement = ElementType.Fire;
+            GameFlow.Layers = 8; GameFlow.Shrines = 3;
+            Time.captureFramerate = 0;
+        }
+
+        [UnityTest, Timeout(600000)]
+        public IEnumerator Run_Is_Saved_And_Can_Be_Continued()
+        {
+            GameEvents.Clear();
+            Time.timeScale = 1f;
+            Time.captureFramerate = 30;
+            GameFlow.StartElement = ElementType.Air;
+            GameFlow.Seed = 5; GameFlow.Layers = 6; GameFlow.Shrines = 1; GameFlow.Ascension = 0;
+            yield return EditorSceneManager.LoadSceneAsyncInPlayMode("Assets/Scenes/Run.unity", new LoadSceneParameters(LoadSceneMode.Single));
+            yield return null;
+            yield return null;
+            var director = Object.FindFirstObjectByType<RunDirector>();
+            Object.FindFirstObjectByType<WaveSpawner>().enabled = false;
+            for (int k = 0; k < 2000 && director.Busy; k++) yield return null;
+            Assert.IsNotNull(RunSaveStore.Load(), "entrar na primeira sala ja grava a run");
+            var hero = Object.FindFirstObjectByType<PlayerController>();
+            var hp = hero.GetComponent<Health>();
+
+            // a run anda: elemento novo, talento, grau de skill, pacto, Essencia, dano levado
+            hero.Awaken(ElementType.Water);
+            director.Run.Talents.Take(TalentCatalog.Find("body_health"), hero.Modifiers);
+            director.Run.Deepen(ElementType.Air, hero.Modifiers);
+            director.ShowPact();
+            yield return null;
+            director.Run.AddEssence(77);
+            director.Interactables.First(i => i.Prompt.Contains("Sangue")).Use();
+            hp.TakeDamage(new DamageInfo(23f, ElementType.None, Team.Enemy));
+            director.Run.Advance(director.Run.Choices[0].Id);
+            director.Run.Kills = 9;
+            director.SaveRun();
+            int room = director.Run.Current.Id, essence = director.Run.Essence;
+            float life = hp.Current, max = hp.Max, damage = hero.Modifiers.DamageAll, range = hero.Modifiers.SkillRange(ElementType.Air);
+            float airCd = hero.Modifiers.SkillCooldown(ElementType.Air);
+            string mods = hero.Modifiers.ToJson();
+
+            // o jogador fecha a aba: no titulo aparece Continuar
+            yield return EditorSceneManager.LoadSceneAsyncInPlayMode("Assets/Scenes/Title.unity", new LoadSceneParameters(LoadSceneMode.Single));
+            for (int k = 0; k < 5; k++) yield return null;
+            Assert.IsNotNull(GameObject.Find("Continue"), "com run salva, o titulo oferece continuar");
+            Object.FindFirstObjectByType<TitleMenu>().UseCamera(Camera.main);
+            yield return null;
+            Shot(Camera.main, "docs/img/titulo_continuar.png");
+
+            Assert.IsTrue(GameFlow.ContinueRun());
+            for (int k = 0; k < 60 && SceneManager.GetActiveScene().name != GameFlow.RunScene; k++) yield return null;
+            for (int k = 0; k < 4; k++) yield return null;
+            director = Object.FindFirstObjectByType<RunDirector>();
+            Object.FindFirstObjectByType<WaveSpawner>().enabled = false;
+            for (int k = 0; k < 2000 && director.Busy; k++) yield return null;
+            hero = Object.FindFirstObjectByType<PlayerController>();
+            hp = hero.GetComponent<Health>();
+            Assert.IsTrue(director.Resumed);
+            Assert.AreEqual(ElementType.Air, hero.GetComponent<HeroSkin>().Shown, "volta o mesmo heroi (Vey)");
+            Assert.AreEqual(room, director.Run.Current.Id, "volta para a sala em que parou");
+            Assert.AreEqual(essence, director.Run.Essence);
+            Assert.AreEqual(2, hero.Loadout.Awakened.Count, "com a Agua desperta");
+            Assert.AreEqual(1, director.Run.Talents.Rank("body_health"));
+            Assert.AreEqual(2, director.Run.SkillRank[(int)ElementType.Air]);
+            Assert.IsTrue(director.Run.Boons.Any(b => b.name == "Pacto de Sangue"), "o pacto continua valendo");
+            Assert.AreEqual(9, director.Run.Kills);
+            Assert.AreEqual(max, hp.Max, 0.01f);
+            Assert.AreEqual(life, hp.Current, 0.01f, "a vida de quando entrou na sala");
+            Assert.AreEqual(damage, hero.Modifiers.DamageAll, 0.0001f, "o +25% do pacto nao some nem dobra");
+            Assert.AreEqual(range, hero.Modifiers.SkillRange(ElementType.Air), 0.0001f);
+            Assert.AreEqual(airCd, hero.Modifiers.SkillCooldown(ElementType.Air), 0.0001f);
+            Assert.AreEqual(mods, hero.Modifiers.ToJson(), "os modificadores voltam iguais");
+
+            // a run termina: o save some
+            hp.Pool.Invulnerable = false;
+            hp.TakeDamage(new DamageInfo(99999f, ElementType.None, Team.Enemy));
+            for (int k = 0; k < 3000 && RunSaveStore.Load() != null; k++) yield return null;
+            Assert.IsNull(RunSaveStore.Load(), "acabou a run, nao ha o que continuar");
             GameFlow.StartElement = ElementType.Fire;
             GameFlow.Layers = 8; GameFlow.Shrines = 3;
             Time.captureFramerate = 0;

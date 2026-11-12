@@ -31,6 +31,20 @@ namespace Quintessence.UI
             BuildAscension();
         }
 
+        /// Botao de continuar a run salva, no canto de cima. label: heroi e sala.
+        public void ShowContinue(string label, Action onContinue)
+        {
+            if (canvas == null) return;
+            var root = canvas.transform;
+            var old = root.Find("Continue");
+            if (old != null) Destroy(old.gameObject);
+            if (onContinue == null) return;
+            var box = UiKit.Rect("Continue", root, new Vector2(1, 1), new Vector2(-150, -150), new Vector2(290, 96));
+            var b = UiKit.Button(box, "CONTINUAR RUN", new Vector2(0.5f, 1), new Vector2(0, -32), new Vector2(284, 60), UiKit.Primary, onContinue);
+            b.transform.Find("Label").GetComponent<UnityEngine.UI.Text>().fontSize = 26;
+            UiKit.Text(UiKit.Rect("Info", box, new Vector2(0.5f, 0), new Vector2(0, 2), new Vector2(300, 28)), label, 19, UiKit.Cream, TextAnchor.MiddleCenter, false);
+        }
+
         /// Seletor de Ascensao: aparece depois da primeira vitoria (precisa do save, por isso nasce no BindMeta).
         void BuildAscension()
         {

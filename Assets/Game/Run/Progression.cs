@@ -37,6 +37,13 @@ namespace Quintessence.Run
             return gained;
         }
 
+        /// Volta um save: nivel, experiencia, escolhas pendentes e total.
+        public void Restore(int level, int xp, int pending, int total)
+        {
+            Level = Math.Max(1, Math.Min(MaxLevel, level));
+            Xp = Math.Max(0, xp); PendingPicks = Math.Max(0, pending); TotalXp = Math.Max(0, total);
+        }
+
         /// Talento extra sem subir de nivel (pacto).
         public void GrantPick() => PendingPicks++;
 
@@ -88,6 +95,14 @@ namespace Quintessence.Run
         public int Rank(string id) => ranks.TryGetValue(id, out int r) ? r : 0;
         public int Count => Taken.Count;
         public bool CanTake(Talent t) => Rank(t.Id) < t.MaxRank;
+
+        /// Volta um talento de um save sem aplicar de novo (os modificadores ja vem na foto).
+        public void Restore(Talent t)
+        {
+            if (t == null) return;
+            ranks[t.Id] = Rank(t.Id) + 1;
+            Taken.Add(t);
+        }
 
         public bool Take(Talent t, HeroModifiers mods)
         {

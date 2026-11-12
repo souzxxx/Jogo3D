@@ -33,6 +33,7 @@ namespace Quintessence.Game.PlayTests
             float taken = 0.5f; // o roteiro joga pior que uma pessoa: leva metade do dano
             GameFlow.AutoPickTalents = true;
             MetaStore.UseKey("quintessence.meta.test");
+            RunSaveStore.UseKey("quintessence.run.probe");
             PlayerPrefs.DeleteKey("quintessence.meta.test");
             foreach (var hero in Elements.All)
                 for (int seed = 1; seed <= 1; seed++)
@@ -107,6 +108,8 @@ namespace Quintessence.Game.PlayTests
                 }
             GameFlow.AutoPickTalents = false;
             MetaStore.UseKey(MetaStore.DefaultKey);
+            RunSaveStore.Clear();
+            RunSaveStore.UseKey(RunSaveStore.DefaultKey);
             GameFlow.Layers = 10; GameFlow.StartElement = ElementType.Fire;
             Time.captureFramerate = 0;
         }
