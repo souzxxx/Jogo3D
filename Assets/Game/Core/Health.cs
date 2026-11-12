@@ -40,7 +40,7 @@ namespace Quintessence.Core
             if (applied <= 0f)
             {
                 if (Pool.LastBlocked) GameEvents.RaiseHitBlocked(this, info);
-                else if (Pool.LastEvaded) GameEvents.RaiseEvaded(this);
+                else if (Pool.LastEvaded) GameEvents.RaiseEvaded(this, info);
                 else if (Pool.LastDodged) GameEvents.RaiseDodged(this, info);
                 return 0f;
             }

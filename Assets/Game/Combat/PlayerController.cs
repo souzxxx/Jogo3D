@@ -221,7 +221,7 @@ namespace Quintessence.Combat
         {
             if (target != health || !dash.IsDashing || info.SourceTeam == health.Team) return;
             // so golpe de inimigo de verdade: poca, respiradouro, espinhos e barril nao contam (senao enchia a barra na sala vazia)
-            if (info.IsReaction || info.Source == null || !info.Source.TryGetComponent(out Health attacker) || attacker.Team == health.Team) return;
+            if (!FromCreature(info)) return; // a explosao do Explosivo conta (ele e criatura); poca e barril nao
             if (Time.time - lastPerfect < 0.8f) return; // varios projeteis do mesmo golpe contam uma vez
             lastPerfect = Time.time;
             PerfectDodges++;
@@ -236,7 +236,12 @@ namespace Quintessence.Combat
         }
 
         /// Esquiva da passiva (Vey): o golpe nao entrou.
-        void OnEvaded(Health target) { if (target == health) DodgeHeal(); }
+        void OnEvaded(Health target, DamageInfo info) { if (target == health && FromCreature(info)) DodgeHeal(); }
+
+        /// O golpe veio de uma criatura inimiga (anda pela malha de navegacao): poca, respiradouro, espinhos e barril nao contam.
+        bool FromCreature(DamageInfo info) =>
+            info.SourceTeam != health.Team && info.Source != null && info.Source.TryGetComponent(out Health attacker) && attacker.Team != health.Team
+            && info.Source.GetComponent<UnityEngine.AI.NavMeshAgent>() != null;
 
         float lastDodgeHeal = -9f;
         /// Passo de Brisa: cada esquiva cura um pouco (no maximo uma vez a cada meio segundo).

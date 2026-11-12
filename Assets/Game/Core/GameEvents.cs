@@ -101,7 +101,7 @@ namespace Quintessence.Core
         /// (indice da onda comecando em 0, total de ondas)
         public static event Action<int, int> WaveStarted;
         /// Um golpe foi esquivado (passiva do Vey).
-        public static event Action<Health> Evaded;
+        public static event Action<Health, DamageInfo> Evaded;
         /// Um golpe passou por quem estava invulneravel (o heroi no meio do dash): esquiva perfeita.
         public static event Action<Health, DamageInfo> Dodged;
         /// O heroi fez uma esquiva perfeita (o combate ja deu a recompensa): so o aviso visual.
@@ -148,7 +148,7 @@ namespace Quintessence.Core
         public static void RaiseExploded(Vector3 point, float radius) => Exploded?.Invoke(point, radius);
         public static void RaisePuddleLanded(Vector3 point, float radius, ElementType element, float seconds) => PuddleLanded?.Invoke(point, radius, element, seconds);
         public static void RaiseQuintessenceBurst(string name, Vector3 point, float radius, ElementType hero) => QuintessenceBurst?.Invoke(name, point, radius, hero);
-        public static void RaiseEvaded(Health target) => Evaded?.Invoke(target);
+        public static void RaiseEvaded(Health target, DamageInfo info) => Evaded?.Invoke(target, info);
         public static void RaiseDodged(Health target, DamageInfo info) => Dodged?.Invoke(target, info);
         public static void RaisePerfectDodge(Vector3 at) => PerfectDodge?.Invoke(at);
         public static void RaiseQuintessenceCharge(float amount) => QuintessenceCharge?.Invoke(amount);
