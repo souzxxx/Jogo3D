@@ -442,7 +442,21 @@ namespace Quintessence.Game
         {
             if (target != playerHealth && target.Team == Team.Enemy && Run != null && !Finished
                 && (target.GetComponent<EnemyBrain>() != null || target.GetComponent<BossBrain>() != null)) GrantKillXp(target);
-            if (target == playerHealth && !Finished) StartCoroutine(Finish(false));
+            if (target == playerHealth && !Finished) { KilledBy = KillerName(info.Source); StartCoroutine(Finish(false)); }
+        }
+
+        /// Quem derrubou o heroi (para a tela de derrota e os testes).
+        public string KilledBy { get; private set; } = "";
+
+        public static string KillerName(GameObject source)
+        {
+            if (source == null) return "";
+            if (source.TryGetComponent(out EnemyBrain e) && e.Definition != null) return e.Definition.displayName;
+            if (source.TryGetComponent(out BossBrain b) && b.Definition != null) return b.Definition.displayName;
+            if (source.GetComponent<ExplosiveBarrel>() != null) return "Barril de pólvora";
+            if (source.GetComponent<SpikeTrap>() != null) return "Armadilha de espinhos";
+            if (source.GetComponent<EmberVent>() != null) return "Respiradouro de brasa";
+            return "";
         }
 
         IEnumerator Finish(bool victory)
@@ -457,6 +471,7 @@ namespace Quintessence.Game
             MetaStore.Save();
             ShardsEarned = shards;
             string stats = (GameFlow.Ascension > 0 ? $"Ascensão {GameFlow.Ascension}   ·   " : "") + $"{HeroPassives.HeroName(GameFlow.StartElement)}   ·   Nível {Run.Progress.Level}   ·   {Run.Kills} inimigos derrotados   ·   {Run.Talents.Count} talentos e {Run.Boons.Count} bênçãos"
+                + (!victory && KilledBy.Length > 0 ? $"\nDerrubado por: {KilledBy}" : "")
                 + $"\nSalas vencidas: {Run.RoomsCleared}   ·   Essência: {Run.Essence}   ·   Elementos: {player.Loadout.Awakened.Count}/4   ·   Tempo: {seconds / 60}:{seconds % 60:00}"
                 + $"\n+{shards} Fragmentos para o Refúgio (total: {MetaStore.Current.Shards})";
             Sfx.Play(victory ? "victory" : "defeat");

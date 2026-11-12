@@ -1112,8 +1112,12 @@ namespace Quintessence.Game.PlayTests
 
             // 6) morrer mostra o resultado, e jogar de novo comeca limpo
             hp.Pool.Invulnerable = false;
-            hp.TakeDamage(new DamageInfo(99999, ElementType.None, Team.Enemy));
+            var killer = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Game/Enemies/Prefabs/Ceifador.prefab");
+            var who = Object.Instantiate(killer, new Vector3(9f, 0, 6f), Quaternion.identity);
+            who.GetComponent<EnemyBrain>().enabled = false;
+            hp.TakeDamage(new DamageInfo(99999, ElementType.None, Team.Enemy, who));
             Assert.IsTrue(hp.IsDead);
+            Assert.AreEqual("Ceifador", director.KilledBy, "a derrota diz quem derrubou o heroi");
             Assert.IsTrue(director.Finished, "a morte do heroi deveria encerrar a run");
             for (float t = 5f; t > 0f && !hud.ResultVisible; t -= Time.unscaledDeltaTime) yield return null;
             Assert.IsTrue(hud.ResultVisible, "morrer deveria levar a tela de resultado");
