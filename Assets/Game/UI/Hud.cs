@@ -444,6 +444,7 @@ namespace Quintessence.UI
 
 
         public void SetRoom(string text) => roomText.text = text;
+        public string RoomLabel => roomText != null ? roomText.text : "";
 
         public void SetRoom(string text, RoomType type)
         {

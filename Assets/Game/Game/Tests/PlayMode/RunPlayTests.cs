@@ -840,6 +840,68 @@ namespace Quintessence.Game.PlayTests
             Time.captureFramerate = 0;
         }
 
+        [UnityTest, Timeout(300000)]
+        public IEnumerator Trial_Room_Gives_A_Talent_When_Passed_And_Nothing_When_Lost()
+        {
+            GameEvents.Clear();
+            Time.timeScale = 1f;
+            Time.captureFramerate = 30;
+            GameFlow.StartElement = ElementType.Water;
+            GameFlow.Seed = 3; GameFlow.Layers = 5; GameFlow.Shrines = 1;
+            yield return EditorSceneManager.LoadSceneAsyncInPlayMode("Assets/Scenes/Run.unity", new LoadSceneParameters(LoadSceneMode.Single));
+            yield return null;
+            yield return null;
+            var director = Object.FindFirstObjectByType<RunDirector>();
+            var hud = Object.FindFirstObjectByType<Hud>();
+            cam = Camera.main;
+            hud.UseCamera(cam);
+            Object.FindFirstObjectByType<WaveSpawner>().enabled = false;
+            for (int k = 0; k < 2000 && director.Busy; k++) yield return null;
+            var hp = Object.FindFirstObjectByType<PlayerController>().GetComponent<Health>();
+            int IdFor(TrialKind kind) { for (int i = 0; ; i++) if (Trials.Pick(GameFlow.Seed, i) == kind) return i; }
+
+            // Ileso: tres golpes ainda cumprem (dois juntos contam um)
+            director.StartTrial(new MapNode { Id = IdFor(TrialKind.Unscathed), Type = RoomType.Trial }, 2);
+            Assert.IsTrue(director.TrialActive);
+            Assert.AreEqual(TrialKind.Unscathed, director.TrialKind);
+            for (int k = 0; k < 20; k++) yield return null;
+            StringAssert.Contains("Provação · golpes 0/3", hud.RoomLabel);
+            Shot(cam, "docs/img/provacao.png");
+            hp.TakeDamage(new DamageInfo(4f, ElementType.None, Team.Enemy));
+            hp.TakeDamage(new DamageInfo(4f, ElementType.None, Team.Enemy));
+            Assert.AreEqual(1, director.TrialHits, "dois golpes no mesmo instante contam um");
+            for (int k = 0; k < 30; k++) yield return null;
+            hp.TakeDamage(new DamageInfo(4f, ElementType.None, Team.Enemy));
+            for (int k = 0; k < 30; k++) yield return null;
+            hp.TakeDamage(new DamageInfo(4f, ElementType.None, Team.Enemy));
+            Assert.AreEqual(3, director.TrialHits);
+            int talents = director.Run.Talents.Count, essence = director.Run.Essence;
+            GameEvents.RaiseRoomCleared();
+            for (int k = 0; k < 120 && director.Run.Talents.Count == talents; k++) yield return null;
+            Assert.AreEqual(true, director.LastTrialPassed);
+            Assert.IsFalse(director.TrialActive);
+            Assert.AreEqual(talents + 1, director.Run.Talents.Count, "cumprida, a Provacao da um talento extra");
+            Assert.GreaterOrEqual(director.Run.Essence, essence + Trials.BonusEssence);
+            StringAssert.Contains("cumprida", hud.RoomLabel);
+
+            // Contra o relogio: o tempo estoura e a sala limpa nao paga o premio
+            director.StartTrial(new MapNode { Id = IdFor(TrialKind.Clock), Type = RoomType.Trial }, 1);
+            Assert.AreEqual(TrialKind.Clock, director.TrialKind);
+            Assert.AreEqual(Trials.TimeLimit(1), director.TrialLimit, 0.01f);
+            for (int k = 0; k < 3000 && director.TrialElapsed <= director.TrialLimit; k++) yield return null;
+            Assert.Greater(director.TrialElapsed, director.TrialLimit, "o relogio estourou");
+            yield return null;
+            StringAssert.Contains("perdida", hud.RoomLabel);
+            talents = director.Run.Talents.Count;
+            GameEvents.RaiseRoomCleared();
+            for (int k = 0; k < 30; k++) yield return null;
+            Assert.AreEqual(false, director.LastTrialPassed);
+            Assert.AreEqual(talents, director.Run.Talents.Count, "perdida, sem talento extra");
+            GameFlow.StartElement = ElementType.Fire;
+            GameFlow.Layers = 8; GameFlow.Shrines = 3;
+            Time.captureFramerate = 0;
+        }
+
         [UnityTest, Timeout(600000)]
         public IEnumerator Elementals_And_The_Swarm()
         {

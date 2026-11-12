@@ -239,6 +239,84 @@ namespace Quintessence.Game
             GameEvents.BossSpawned += OnBossSpawned;
             GameEvents.ElementAwakened += OnAwakened;
             GameEvents.EnemySpawned += OnEnemySpawned;
+            GameEvents.DamageDealt += OnDamageDealt;
+        }
+
+        // ---------- Provacao ----------
+
+        public bool TrialActive { get; private set; }
+        public TrialKind TrialKind { get; private set; }
+        public float TrialLimit { get; private set; }
+        public float TrialElapsed { get; private set; }
+        public int TrialHits { get; private set; }
+        /// Resultado da ultima Provacao (null = nenhuma terminou nesta run).
+        public bool? LastTrialPassed { get; private set; }
+        float lastTrialHit = -99f;
+        string trialStatus = "";
+        bool trialLostShown;
+
+        /// Comeca a Provacao da sala: luta comum da profundidade com o desafio sorteado. Publico para os testes.
+        public void StartTrial(MapNode node, int waves)
+        {
+            TrialKind = Trials.Pick(GameFlow.Seed, node.Id);
+            TrialLimit = Trials.TimeLimit(waves);
+            TrialElapsed = 0f;
+            TrialHits = 0;
+            lastTrialHit = -99f;
+            trialLostShown = false;
+            TrialActive = true;
+            hud.ShowBanner("PROVAÇÃO", $"{Trials.Name(TrialKind)}: {Trials.Goal(TrialKind, TrialLimit)}", RoomInfo.Color(RoomType.Trial) * 1.25f, 4f);
+            UpdateTrialLabel();
+        }
+
+        void OnDamageDealt(Health target, DamageInfo info, float applied)
+        {
+            if (!TrialActive || target != playerHealth || applied <= 0f || Busy) return;
+            // varios projeteis de uma vez ou tiques de poca seguidos sao um golpe so
+            if (Time.time - lastTrialHit < Trials.HitWindow) return;
+            lastTrialHit = Time.time;
+            TrialHits++;
+            UpdateTrialLabel();
+        }
+
+        void TickTrial()
+        {
+            if (!TrialActive || Busy || Finished) return;
+            TrialElapsed += Time.deltaTime;
+            // o letreiro so muda quando o texto muda (um segundo a menos, um golpe a mais)
+            if (Trials.Status(TrialKind, TrialElapsed, TrialHits, TrialLimit) != trialStatus) UpdateTrialLabel();
+            if (!trialLostShown && !Trials.Holding(TrialKind, TrialElapsed, TrialHits, TrialLimit))
+            {
+                trialLostShown = true;
+                Feel.DamageNumber.Spawn(player.transform.position + Vector3.up * 3.6f, "PROVAÇÃO PERDIDA", new Color(0.66f, 0.68f, 0.74f), 1f, 1.8f);
+                Sfx.Play("block");
+            }
+        }
+
+        void UpdateTrialLabel()
+        {
+            if (!TrialActive || Run == null) return;
+            trialStatus = Trials.Status(TrialKind, TrialElapsed, TrialHits, TrialLimit);
+            hud.SetRoom($"Sala {Run.Depth + 1}/{Run.Map.LayerCount} · Provação · {trialStatus}", RoomType.Trial);
+        }
+
+        /// Fecha a Provacao com a sala limpa: cumprida, da um talento extra e Essencia.
+        void FinishTrial()
+        {
+            if (!TrialActive) return;
+            TrialActive = false;
+            bool passed = Trials.Holding(TrialKind, TrialElapsed, TrialHits, TrialLimit);
+            LastTrialPassed = passed;
+            if (passed)
+            {
+                Run.Progress.GrantPick();
+                Run.AddEssence(Trials.BonusEssence);
+                Feel.DamageNumber.Spawn(player.transform.position + Vector3.up * 3.9f, "PROVAÇÃO CUMPRIDA: TALENTO EXTRA", new Color(0.9f, 0.76f, 0.42f), 1.1f, 2.2f);
+                Sfx.Play("level_up");
+            }
+            else if (!trialLostShown)
+                Feel.DamageNumber.Spawn(player.transform.position + Vector3.up * 3.9f, "PROVAÇÃO PERDIDA", new Color(0.66f, 0.68f, 0.74f), 1f, 1.8f);
+            hud.SetRoom($"Sala {Run.Depth + 1}/{Run.Map.LayerCount} · Provação · {(passed ? "cumprida" : "perdida")}", RoomType.Trial);
         }
 
         void OnEnemySpawned(Health enemy)
@@ -289,6 +367,7 @@ namespace Quintessence.Game
             GameEvents.BossSpawned -= OnBossSpawned;
             GameEvents.ElementAwakened -= OnAwakened;
             GameEvents.EnemySpawned -= OnEnemySpawned;
+            GameEvents.DamageDealt -= OnDamageDealt;
         }
 
         void Start()
@@ -416,6 +495,7 @@ namespace Quintessence.Game
         void Update()
         {
             if (Finished) return;
+            TickTrial();
             if ((saveHealthTimer -= Time.unscaledDeltaTime) <= 0f) { saveHealthTimer = 2f; SyncSavedHealth(); }
             if (levelUpOpen) { }
             else if (MenuInput.InventoryPressed && !Busy && (!GameClock.Paused || hud.InventoryVisible)) SetInventory(!hud.InventoryVisible);
@@ -483,7 +563,8 @@ namespace Quintessence.Game
             SaveRun();
             ApplyLayout(LayoutPicker.UsesLayout(node.Type) ? PickLayout(node) : -1);
             Dress(node.Type);
-            if (node.Type == RoomType.Combat || node.Type == RoomType.Elite || node.Type == RoomType.Boss)
+            TrialActive = false;
+            if (node.Type == RoomType.Combat || node.Type == RoomType.Elite || node.Type == RoomType.Boss || node.Type == RoomType.Trial)
                 PlaceBiomeProps(Biomes.For(Run.Depth, Run.Map.LayerCount), GameFlow.Seed + node.Id * 7);
             DressBiome(Biomes.For(Run.Depth, Run.Map.LayerCount), true);
             player.Teleport(entryPoint, Vector3.forward);
@@ -495,6 +576,7 @@ namespace Quintessence.Game
             else if (node.Type == RoomType.Elite) Tip("elite");
             else if (node.Type == RoomType.Shop) Tip("shop");
             else if (node.Type == RoomType.Pact) Tip("pact");
+            else if (node.Type == RoomType.Trial) Tip("trial");
             switch (node.Type)
             {
                 case RoomType.Shrine:
@@ -524,6 +606,11 @@ namespace Quintessence.Game
                     Feel.DamageNumber.Spawn(player.transform.position + Vector3.up * 3.5f, "DESCANSO: +30% DE VIDA", new Color(0.5f, 1f, 0.55f), 1.1f, 1.8f);
                     Run.RoomCleared();
                     OpenDoors();
+                    break;
+                case RoomType.Trial:
+                    // a luta e a de uma sala comum da mesma profundidade; o desafio vem por cima
+                    StartEncounter(RoomType.Combat, Run.Depth, EliteModifier.None);
+                    StartTrial(node, EncounterPlanner.Plan(RoomType.Combat, Run.Depth, Biomes.For(Run.Depth, Run.Map.LayerCount)).Count);
                     break;
                 default:
                     StartEncounter(node.Type, Run.Depth, node.Type == RoomType.Elite ? DifficultyCurve.PickElite(GameFlow.Seed, node.Id) : EliteModifier.None);
@@ -612,6 +699,7 @@ namespace Quintessence.Game
                 essence /= 2;
             }
             if (player.Modifiers.HealOnRoomClear > 0f) playerHealth.Heal(playerHealth.Max * player.Modifiers.HealOnRoomClear);
+            FinishTrial();
             Run.AddEssence(Mathf.RoundToInt(essence * player.Modifiers.EssenceMult));
             hud.SetEssence(Run.Essence);
             if (node.Type == RoomType.Boss) { StartCoroutine(Finish(true)); return; }

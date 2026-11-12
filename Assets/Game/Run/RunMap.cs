@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Quintessence.Run
 {
-    public enum RoomType { Combat, Elite, Shrine, Rest, Boss, Master, Shop, Treasure, Pact }
+    public enum RoomType { Combat, Elite, Shrine, Rest, Boss, Master, Shop, Treasure, Pact, Trial }
     public enum RewardType { None, Essence, Health, Element, Boon }
 
     public class MapNode
@@ -36,13 +36,13 @@ namespace Quintessence.Run
         public static string Name(RoomType t) => t switch
         {
             RoomType.Combat => "Combate", RoomType.Elite => "Elite", RoomType.Shrine => "Santuário",
-            RoomType.Rest => "Descanso", RoomType.Boss => "Chefe", RoomType.Master => "Mestre", RoomType.Shop => "Loja", RoomType.Treasure => "Tesouro", RoomType.Pact => "Pacto", _ => t.ToString(),
+            RoomType.Rest => "Descanso", RoomType.Boss => "Chefe", RoomType.Master => "Mestre", RoomType.Shop => "Loja", RoomType.Treasure => "Tesouro", RoomType.Pact => "Pacto", RoomType.Trial => "Provação", _ => t.ToString(),
         };
 
         public static string Icon(RoomType t) => t switch
         {
             RoomType.Combat => "room_combat", RoomType.Elite => "room_elite", RoomType.Shrine => "room_shrine",
-            RoomType.Rest => "room_rest", RoomType.Boss => "room_boss", RoomType.Master => "room_master", RoomType.Shop => "room_shop", RoomType.Treasure => "room_treasure", RoomType.Pact => "room_pact", _ => "room_combat",
+            RoomType.Rest => "room_rest", RoomType.Boss => "room_boss", RoomType.Master => "room_master", RoomType.Shop => "room_shop", RoomType.Treasure => "room_treasure", RoomType.Pact => "room_pact", RoomType.Trial => "boon_skill", _ => "room_combat",
         };
 
         public static string Name(RewardType r) => r switch
@@ -55,7 +55,7 @@ namespace Quintessence.Run
             RoomType.Combat => new Color(0.72f, 0.3f, 0.26f), RoomType.Elite => new Color(0.55f, 0.38f, 0.62f),
             RoomType.Shrine => new Color(0.38f, 0.6f, 0.72f), RoomType.Rest => new Color(0.42f, 0.66f, 0.42f),
             RoomType.Boss => new Color(0.82f, 0.52f, 0.2f), RoomType.Master => new Color(0.82f, 0.7f, 0.38f), RoomType.Shop => new Color(0.36f, 0.62f, 0.56f),
-            RoomType.Treasure => new Color(0.78f, 0.56f, 0.26f), RoomType.Pact => new Color(0.62f, 0.26f, 0.4f), _ => UnityEngine.Color.white,
+            RoomType.Treasure => new Color(0.78f, 0.56f, 0.26f), RoomType.Pact => new Color(0.62f, 0.26f, 0.4f), RoomType.Trial => new Color(0.5f, 0.58f, 0.74f), _ => UnityEngine.Color.white,
         };
     }
 
@@ -79,7 +79,7 @@ namespace Quintessence.Run
                 bool shrine = shrineLayers.Contains(layer);
                 int width = edge ? 1 : shrine ? 1 + rng.Next(2) : 2 + rng.Next(2);
                 var list = new List<MapNode>();
-                bool restUsed = false, masterUsed = false, shopUsed = false, treasureUsed = false, pactUsed = false;
+                bool restUsed = false, masterUsed = false, shopUsed = false, treasureUsed = false, pactUsed = false, trialUsed = false;
                 for (int lane = 0; lane < width; lane++)
                 {
                     var n = new MapNode { Id = map.Nodes.Count, Layer = layer, Lane = lane };
@@ -95,6 +95,8 @@ namespace Quintessence.Run
                         else if (roll >= 58 && roll < 72 && !shopUsed && layer >= 2) { n.Type = RoomType.Shop; n.Reward = RewardType.None; shopUsed = true; }
                         else if (roll >= 72 && roll < 80 && !treasureUsed) { n.Type = RoomType.Treasure; n.Reward = RewardType.Essence; treasureUsed = true; }
                         else if (roll >= 80 && roll < 87 && !pactUsed && layer >= 2) { n.Type = RoomType.Pact; n.Reward = RewardType.None; pactUsed = true; }
+                        // Provacao: luta com desafio. Gasta o mesmo sorteio da sala comum para nao mudar o resto do mapa
+                        else if (roll >= 87 && roll < 95 && !trialUsed && layer >= 2) { rng.Next(3); n.Type = RoomType.Trial; n.Reward = RewardType.Essence; trialUsed = true; }
                         else { n.Type = RoomType.Combat; n.Reward = rng.Next(3) == 0 ? RewardType.Health : RewardType.Essence; }
                     }
                     map.Nodes.Add(n);

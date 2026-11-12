@@ -14,6 +14,6 @@ namespace Quintessence.Run
             }
         }
 
-        public static bool UsesLayout(RoomType type) => type == RoomType.Combat || type == RoomType.Elite;
+        public static bool UsesLayout(RoomType type) => type == RoomType.Combat || type == RoomType.Elite || type == RoomType.Trial;
     }
 }

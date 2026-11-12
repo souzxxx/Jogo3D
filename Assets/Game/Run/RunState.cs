@@ -192,7 +192,7 @@ namespace Quintessence.Run
         public static int EssenceReward(RoomType type, int depth) => type switch
         {
             RoomType.Elite => 2 * (10 + 2 * depth),
-            RoomType.Combat => 10 + 2 * depth,
+            RoomType.Combat or RoomType.Trial => 10 + 2 * depth,
             RoomType.Boss => 50,
             _ => 0,
         };
