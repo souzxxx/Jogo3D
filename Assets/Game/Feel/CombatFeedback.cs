@@ -91,6 +91,7 @@ namespace Quintessence.Feel
             GameEvents.PuddleLanded += OnPuddle;
             GameEvents.QuintessenceBurst += OnBurst;
             GameEvents.PerfectDodge += OnPerfectDodge;
+            GameEvents.Cadence += OnCadence;
             GameEvents.EnemyHealed += OnEnemyHealed;
             GameEvents.ChampionSpawned += OnChampion;
             GameEvents.Evaded += OnEvaded;
@@ -125,6 +126,7 @@ namespace Quintessence.Feel
             GameEvents.PuddleLanded -= OnPuddle;
             GameEvents.QuintessenceBurst -= OnBurst;
             GameEvents.PerfectDodge -= OnPerfectDodge;
+            GameEvents.Cadence -= OnCadence;
             GameEvents.EnemyHealed -= OnEnemyHealed;
             GameEvents.ChampionSpawned -= OnChampion;
             GameEvents.Evaded -= OnEvaded;
@@ -411,6 +413,11 @@ namespace Quintessence.Feel
             Ring(p, 40, 4f, 0.35f, 0.5f, 0.5f, new Color(0.95f, 0.9f, 0.7f));
             Sfx.Play("dash");
             Stop(0.06f);
+        }
+
+        void OnCadence(Vector3 at)
+        {
+            DamageNumber.Spawn(at + Vector3.up * 3.2f, "CADÊNCIA", new Color(0.98f, 0.78f, 0.42f), 0.75f, 0.8f);
         }
 
         void OnEvaded(Health target, DamageInfo info)

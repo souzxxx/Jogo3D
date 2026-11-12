@@ -207,6 +207,29 @@ namespace Quintessence.Run.Tests
             Assert.AreEqual(0.4f, m.FusionBonus, 1e-4f);
         }
 
+        [Test] public void Cadence_NeedsTwoElements_AndStacksPerRank()
+        {
+            var book = new TalentBook();
+            bool seenWithTwo = false;
+            for (int seed = 0; seed < 200; seed++)
+            {
+                var one = TalentCatalog.Offer(book, new[] { ElementType.Fire }, new System.Random(seed));
+                Assert.IsFalse(one.Any(t => t.Effect == TalentEffect.Cadence), "Cadencia pede dois elementos para alternar");
+                var two = TalentCatalog.Offer(book, new[] { ElementType.Fire, ElementType.Water }, new System.Random(seed));
+                seenWithTwo |= two.Any(t => t.Effect == TalentEffect.Cadence);
+            }
+            Assert.IsTrue(seenWithTwo, "com dois elementos a Cadencia aparece");
+            var cadence = TalentCatalog.All.First(t => t.Id == "body_cadence");
+            Assert.AreEqual(2, cadence.MaxRank);
+            var m = new HeroModifiers();
+            TalentCatalog.Apply(m, cadence);
+            TalentCatalog.Apply(m, cadence);
+            Assert.AreEqual(0.6f, m.CadenceBonus, 1e-4f);
+            m.Reset();
+            Assert.AreEqual(0f, m.CadenceBonus);
+            Assert.AreEqual(3f, HeroModifiers.CadenceWindow);
+        }
+
         [Test] public void Synergy_ThreeAndFivePointsOfAnElement_StrengthenIt()
         {
             var book = new TalentBook();

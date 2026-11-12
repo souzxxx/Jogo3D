@@ -69,6 +69,7 @@ namespace Quintessence.UI
             TalentEffect.StoneSkin => "boon_health",
             TalentEffect.Tailwind => "boon_dash",
             TalentEffect.Alchemy => "boon_element",
+            TalentEffect.Cadence => "boon_skill",
             _ => "boon_damage",
         };
 

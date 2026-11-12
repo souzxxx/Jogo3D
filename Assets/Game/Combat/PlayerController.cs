@@ -448,9 +448,25 @@ namespace Quintessence.Combat
             AttackHit?.Invoke(combo.CurrentIndex, hits);
         }
 
+        /// Quantas vezes a Cadencia entrou (para os testes e o resultado).
+        public int Cadences { get; private set; }
+        ElementType lastSkillElement = ElementType.None;
+        float lastSkillTime = -99f;
+
         void DoSkillHit()
         {
             var d = castDef;
+            // Cadencia: skill de outro elemento logo depois da anterior bate mais forte
+            float cadence = 1f;
+            if (mods.CadenceBonus > 0f && lastSkillElement != ElementType.None && lastSkillElement != castElement
+                && Time.time - lastSkillTime <= HeroModifiers.CadenceWindow)
+            {
+                cadence += mods.CadenceBonus;
+                Cadences++;
+                GameEvents.RaiseCadence(transform.position);
+            }
+            lastSkillElement = castElement;
+            lastSkillTime = Time.time;
             var origin = transform.position;
             float arc = d.skillArc;
             if (d.skillShape == SkillShape.Radial) arc = 360f;
@@ -464,7 +480,7 @@ namespace Quintessence.Combat
             // alem do proprio status, a skill aplica o efeito de assinatura do elemento (a Terra quebra armadura)
             bool second = d.finisherAppliesStatus && (!d.skillAppliesStatus || d.finisherStatus != d.skillStatus);
             float reach = d.skillRange * mods.SkillRange(castElement);
-            ShapedHit(castElement, origin, AimDirection, reach, arc, d.skillDamage * d.damageMultiplier, d.skillKnockback,
+            ShapedHit(castElement, origin, AimDirection, reach, arc, d.skillDamage * d.damageMultiplier * cadence, d.skillKnockback,
                 AttackKind.Skill, d.critChance, d.skillAppliesStatus, d.skillStatus, d.skillStatusDuration,
                 second, d.finisherStatus, d.finisherStatusDuration);
 

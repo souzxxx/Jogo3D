@@ -1604,6 +1604,9 @@ namespace Quintessence.Game.PlayTests
             hero.GetComponent<Health>().Pool.Invulnerable = true;
             hero.Awaken(ElementType.Earth);
             hero.Awaken(ElementType.Water);
+            hero.Modifiers.CadenceBonus = 0.3f; // Cadencia: o Pilar logo depois da Labareda entra na janela
+            int cadenceEvents = 0;
+            GameEvents.Cadence += _ => cadenceEvents++;
             hero.Teleport(new Vector3(0, 0.05f, -3f), Vector3.forward);
             var scripted = hero.gameObject.AddComponent<ScriptedInput>();
             hero.GetComponent<PlayerInputReader>().enabled = false;
@@ -1624,6 +1627,9 @@ namespace Quintessence.Game.PlayTests
             scripted.PressElementSkill(3); // Pilar de Pedra detona: Magma
             for (int k = 0; k < 36 && last != "Magma"; k++) yield return null;
             Assert.AreEqual("Magma", last, "Fogo + Terra fazem Magma");
+            for (int k = 0; k < 600 && hero.Cadences == 0; k++) yield return null;
+            Assert.GreaterOrEqual(hero.Cadences, 1, "skill de outro elemento logo depois da anterior entra na Cadencia");
+            Assert.AreEqual(hero.Cadences, cadenceEvents, "cada Cadencia avisa o feedback");
             Assert.IsTrue(DamageZone.Active.Any(z => z.Fusable), "o Magma deixa a poca no chao");
             // a pausa de impacto da reacao corre em tempo real: no teste ela dura muitos quadros
             for (int k = 0; k < 1500 && hero.IsCasting; k++) yield return null; // termina o Pilar antes de pedir a proxima skill

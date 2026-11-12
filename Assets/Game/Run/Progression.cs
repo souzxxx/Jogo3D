@@ -72,6 +72,7 @@ namespace Quintessence.Run
         ReactionBoost,
         Flank, SureFooted, BurstPower, Contagion, Alchemy,
         HunterInstinct, RisingTide, StoneSkin, Tailwind,
+        Cadence,
     }
 
     public class Talent
@@ -205,6 +206,7 @@ namespace Quintessence.Run
             Add("body_awaken", "Despertar Intenso", "A explosão da Quintessência causa +50%", ElementType.None, TalentEffect.BurstPower, 0.5f, 2);
             Add("body_contagion", "Contágio", "Quando um inimigo marcado cai, a marca pula para o vizinho mais perto", ElementType.None, TalentEffect.Contagion, 5f, 1);
             Add("body_alchemy", "Alquimia", "Fusões causam +40%", ElementType.None, TalentEffect.Alchemy, 0.4f, 2);
+            Add("body_cadence", "Cadência", "Skill de outro elemento até 3 s depois da anterior causa +30%", ElementType.None, TalentEffect.Cadence, 0.3f, 2);
             // assinaturas: um por heroi, so para ele
             void Signature(string id, string name, string text, ElementType hero, TalentEffect fx, float value) =>
                 list.Add(new Talent { Id = id, Name = name, Description = text, Element = ElementType.None, Effect = fx, Value = value, MaxRank = 1, Hero = hero });
@@ -282,6 +284,7 @@ namespace Quintessence.Run
                 case TalentEffect.BurstPower: m.BurstBonus += t.Value; break;
                 case TalentEffect.Contagion: m.MarkSpread = System.Math.Max(m.MarkSpread, t.Value); break;
                 case TalentEffect.Alchemy: m.FusionBonus += t.Value; break;
+                case TalentEffect.Cadence: m.CadenceBonus += t.Value; break;
                 case TalentEffect.HunterInstinct: m.ExecuteBonus += t.Value; break;
                 case TalentEffect.RisingTide: m.HealOnReaction += t.Value; break;
                 case TalentEffect.StoneSkin: m.MaxHealthAdd += t.Value; m.EarthBlocksAdd += 1; break;
@@ -304,6 +307,8 @@ namespace Quintessence.Run
                 if (t.Effect == TalentEffect.BurstPower && awakened.Count < 3) continue;
                 // Contagio so serve com reacao possivel (dois elementos); Alquimia so com Fusao (tres)
                 if (t.Effect == TalentEffect.Contagion && awakened.Count < 2) continue;
+                // Cadencia pede alternar skills de elementos diferentes
+                if (t.Effect == TalentEffect.Cadence && awakened.Count < 2) continue;
                 if (t.Effect == TalentEffect.Alchemy && awakened.Count < 3) continue;
                 pool.Add(t);
             }

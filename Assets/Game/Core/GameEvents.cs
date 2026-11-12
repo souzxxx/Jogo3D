@@ -151,6 +151,9 @@ namespace Quintessence.Core
         public static void RaiseEvaded(Health target, DamageInfo info) => Evaded?.Invoke(target, info);
         public static void RaiseDodged(Health target, DamageInfo info) => Dodged?.Invoke(target, info);
         public static void RaisePerfectDodge(Vector3 at) => PerfectDodge?.Invoke(at);
+        /// Uma skill de outro elemento entrou na janela da Cadencia.
+        public static event Action<Vector3> Cadence;
+        public static void RaiseCadence(Vector3 at) => Cadence?.Invoke(at);
         public static void RaiseQuintessenceCharge(float amount) => QuintessenceCharge?.Invoke(amount);
         public static void RaiseAmbient(int index) => AmbientChanged?.Invoke(index);
         public static void RaiseChampionSpawned(Health champion) => ChampionSpawned?.Invoke(champion);
@@ -172,7 +175,7 @@ namespace Quintessence.Core
             DamageDealt = null; Died = null; HitBlocked = null; Shattered = null; MarkApplied = null; ReactionTriggered = null;
             MarkCleared = null; StatusApplied = null; StatusEnded = null; AttackPerformed = null; ZoneSpawned = null;
             TelegraphStarted = null; TelegraphCancelled = null; AttackMissed = null; EnemySpawned = null; WaveStarted = null; ArmorChanged = null; Exploded = null; PuddleLanded = null; QuintessenceBurst = null;
-            EnemyHealed = null; ChampionSpawned = null; AmbientChanged = null; QuintessenceCharge = null; Evaded = null; Dodged = null; PerfectDodge = null;
+            EnemyHealed = null; ChampionSpawned = null; AmbientChanged = null; QuintessenceCharge = null; Evaded = null; Dodged = null; PerfectDodge = null; Cadence = null;
             BossSpawned = null; BossPhaseChanged = null; BossShieldChanged = null;
             ElementSwitched = null; ElementAwakened = null;
             QuintessenceMeterChanged = null; QuintessenceActiveChanged = null;

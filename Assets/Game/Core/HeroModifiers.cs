@@ -64,6 +64,10 @@ namespace Quintessence.Core
         public float DodgeHeal;
         /// Dano a mais em quem tem menos de 30% de vida (Instinto do Cacador, do Rax).
         public float ExecuteBonus;
+        /// Dano a mais na skill de outro elemento lancada logo depois da anterior (Cadencia).
+        public float CadenceBonus;
+        /// Janela da Cadencia, em segundos entre um golpe de skill e o seguinte.
+        public const float CadenceWindow = 3f;
 
         static int Pair(ElementType a, ElementType b) => System.Math.Min((int)a, (int)b) * 5 + System.Math.Max((int)a, (int)b);
         /// Multiplicador so da reacao daquele par (simetrico). 1 = sem bonus.
@@ -102,7 +106,7 @@ namespace Quintessence.Core
             BasicDamageMult = FinisherMult = EssenceMult = XpMult = 1f;
             Evasion = FireTrailSeconds = BurningBonus = WaterHealAdd = WaterFreezeSeconds = EarthThorns = AirHasteSeconds = SkillRefundOnKill = 0f;
             EarthBlocksAdd = DashChargesAdd = 0;
-            FlankBonus = BurstBonus = MarkSpread = FusionBonus = DodgeHeal = ExecuteBonus = 0f;
+            FlankBonus = BurstBonus = MarkSpread = FusionBonus = DodgeHeal = ExecuteBonus = CadenceBonus = 0f;
             SureFooted = false;
         }
     }
