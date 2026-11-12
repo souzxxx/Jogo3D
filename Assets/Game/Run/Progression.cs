@@ -206,7 +206,7 @@ namespace Quintessence.Run
             Add("body_awaken", "Despertar Intenso", "A explosão da Quintessência causa +50%", ElementType.None, TalentEffect.BurstPower, 0.5f, 2);
             Add("body_contagion", "Contágio", "Quando um inimigo marcado cai, a marca pula para o vizinho mais perto", ElementType.None, TalentEffect.Contagion, 5f, 1);
             Add("body_alchemy", "Alquimia", "Fusões causam +40%", ElementType.None, TalentEffect.Alchemy, 0.4f, 2);
-            Add("body_cadence", "Cadência", "Skill de outro elemento até 3 s depois da anterior causa +30%", ElementType.None, TalentEffect.Cadence, 0.3f, 2);
+            Add("body_cadence", "Cadência", "Skill de outro elemento até 3 s depois da anterior causa +15%", ElementType.None, TalentEffect.Cadence, 0.15f, 2);
             // assinaturas: um por heroi, so para ele
             void Signature(string id, string name, string text, ElementType hero, TalentEffect fx, float value) =>
                 list.Add(new Talent { Id = id, Name = name, Description = text, Element = ElementType.None, Effect = fx, Value = value, MaxRank = 1, Hero = hero });

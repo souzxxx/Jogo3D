@@ -224,7 +224,7 @@ namespace Quintessence.Run.Tests
             var m = new HeroModifiers();
             TalentCatalog.Apply(m, cadence);
             TalentCatalog.Apply(m, cadence);
-            Assert.AreEqual(0.6f, m.CadenceBonus, 1e-4f);
+            Assert.AreEqual(0.3f, m.CadenceBonus, 1e-4f); // +15% por nivel: a 24 runs, +30% por nivel venceu 7 de 7
             m.Reset();
             Assert.AreEqual(0f, m.CadenceBonus);
             Assert.AreEqual(3f, HeroModifiers.CadenceWindow);
