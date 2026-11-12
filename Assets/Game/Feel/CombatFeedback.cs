@@ -180,7 +180,7 @@ namespace Quintessence.Feel
             if (target != null && target == boss)
             {
                 var bp = target.transform.position + Vector3.up * 2f;
-                accents?.Emit(ElementType.Fire, bp, Vector3.forward, 180f, 200, 9f);
+                accents?.Emit(BossElement, bp, Vector3.forward, 180f, 200, 9f);
                 accents?.Emit(ElementType.Earth, bp, Vector3.forward, 180f, 120, 10f, Ash);
                 foreach (var e in Elements.All) Ring(bp + Vector3.up * (0.3f * (int)e), 70, 10f + 3f * (int)e, 0.5f, 1.1f, 0.8f, ElementColors.Of(e));
                 LightFlash(bp, Color.white, 22f, 24f, 1f);
@@ -293,12 +293,13 @@ namespace Quintessence.Feel
         {
             boss = b;
             var p = b.transform.position + Vector3.up * 2f;
-            Ring(p, 90, 14f, 0.6f, 1.4f, 0.7f, new Color(1f, 0.45f, 0.1f));
-            LightFlash(p, new Color(1f, 0.5f, 0.15f), 16f, 18f, 0.8f);
+            var bc = BossElement == ElementType.Fire ? new Color(1f, 0.45f, 0.1f) : ElementColors.Of(BossElement);
+            Ring(p, 90, 14f, 0.6f, 1.4f, 0.7f, bc);
+            LightFlash(p, bc, 16f, 18f, 0.8f);
             DamageNumber.Spawn(b.transform.position + Vector3.up * 6.5f, name.ToUpperInvariant(), new Color(1f, 0.7f, 0.3f), 1.7f, 2.4f);
             CameraShake.Add(0.8f);
-            // nasce das cinzas: brasas subindo e pedra voando em volta
-            accents?.Emit(ElementType.Fire, b.transform.position + Vector3.up, Vector3.forward, 180f, 90, 5f);
+            // nasce das cinzas: brasas subindo e pedra voando em volta (a Rainha, da agua)
+            accents?.Emit(BossElement, b.transform.position + Vector3.up, Vector3.forward, 180f, 90, 5f);
             accents?.Emit(ElementType.Earth, b.transform.position + Vector3.up * 0.4f, Vector3.forward, 180f, 40, 6f, Ash);
         }
 
@@ -331,13 +332,14 @@ namespace Quintessence.Feel
         {
             if (phase <= 1 || boss == null) return;
             var p = boss.transform.position + Vector3.up * 2f;
-            Ring(p, 100, 16f, 0.7f, 1.5f, 0.6f, new Color(1f, 0.35f, 0.1f));
-            Burst(p, Vector3.up, 180f, 120, 4f, 14f, 0.4f, 1.2f, 0.7f, new Color(1f, 0.5f, 0.15f));
-            LightFlash(p, new Color(1f, 0.4f, 0.1f), 18f, 20f, 0.6f);
+            var pc = BossElement == ElementType.Fire ? new Color(1f, 0.4f, 0.12f) : ElementColors.Of(BossElement);
+            Ring(p, 100, 16f, 0.7f, 1.5f, 0.6f, pc);
+            Burst(p, Vector3.up, 180f, 120, 4f, 14f, 0.4f, 1.2f, 0.7f, pc);
+            LightFlash(p, pc, 18f, 20f, 0.6f);
             DamageNumber.Spawn(boss.transform.position + Vector3.up * 6.5f, $"FASE {phase}", new Color(1f, 0.6f, 0.25f), 1.6f, 1.8f);
             CameraShake.Add(0.9f);
             Stop(0.15f);
-            accents?.Emit(ElementType.Fire, p, Vector3.forward, 180f, 110, 7f);
+            accents?.Emit(BossElement, p, Vector3.forward, 180f, 110, 7f);
             accents?.Emit(ElementType.Earth, p + Vector3.down, Vector3.forward, 180f, 50, 8f, Ash);
         }
 
@@ -453,6 +455,9 @@ namespace Quintessence.Feel
             Sfx.Play("cast_water");
             CameraShake.Add(0.25f);
         }
+
+        /// Elemento do chefe em cena (pela afinidade elemental dele; sem afinidade, Fogo: Guardiao e Tecela).
+        ElementType BossElement => boss != null && boss.TryGetComponent(out ElementalAffinity a) && a.Element != ElementType.None ? a.Element : ElementType.Fire;
 
         void OnExploded(Vector3 point, float radius)
         {
@@ -741,8 +746,8 @@ namespace Quintessence.Feel
                 {
                     bossEmit = 0.06f;
                     var bp = boss.transform.position + new Vector3(Random.Range(-0.8f, 0.8f), Random.Range(0.6f, 3f), Random.Range(-0.8f, 0.8f));
-                    accents?.Emit(ElementType.Fire, bp, Vector3.up, 40f, 1, 1.2f);
-                    if (Random.value < 0.35f) accents?.Emit(ElementType.Fire, bp, Vector3.up, 60f, 1, 0.8f, Ash);
+                    accents?.Emit(BossElement, bp, Vector3.up, 40f, 1, 1.2f);
+                    if (Random.value < 0.35f) accents?.Emit(BossElement, bp, Vector3.up, 60f, 1, 0.8f, Ash);
                 }
                 if (shieldUp && shieldCage != null)
                 {
