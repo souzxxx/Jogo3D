@@ -44,15 +44,24 @@ public static class HeroBuilder
     };
 
     /// As pecas saem do Blender com material proprio; aqui viram foscas como o resto do jogo.
-    static void MatteParts()
+    public static void MatteParts(string folder = "Assets/Art/Heroes")
     {
-        foreach (var guid in AssetDatabase.FindAssets("t:Model", new[] { "Assets/Art/Heroes" }))
+        foreach (var guid in AssetDatabase.FindAssets("t:Model", new[] { folder }))
         {
             string path = AssetDatabase.GUIDToAssetPath(guid);
             foreach (var m in AssetDatabase.LoadAllAssetsAtPath(path).OfType<Material>())
             {
                 if (m.HasProperty("_Smoothness")) m.SetFloat("_Smoothness", 0.12f);
                 if (m.HasProperty("_Metallic")) m.SetFloat("_Metallic", 0f);
+                // no chefe a brasa e fixa: nucleo e veios acesos, cristais com um brilho baixo
+                if (path.Contains("/Boss/") && (m.name == "Magic" || m.name == "Crystal") && m.HasProperty("_EmissionColor"))
+                {
+                    var ember = m.name == "Magic" ? new Color(0.95f, 0.36f, 0.1f) : new Color(0.81f, 0.49f, 0.17f);
+                    m.SetColor("_BaseColor", ember * (m.name == "Magic" ? 0.8f : 0.7f));
+                    m.EnableKeyword("_EMISSION");
+                    m.globalIlluminationFlags = MaterialGlobalIlluminationFlags.RealtimeEmissive;
+                    m.SetColor("_EmissionColor", ember * (m.name == "Magic" ? 1.0f : 0.2f));
+                }
                 // o pelo escuro do Rax sumia na sala escura (olhos pretos sobre pelo quase preto): clareia para um azul-ardosia
                 if (path.Contains("/Rax/") && m.name == "Fur" && m.HasProperty("_BaseColor"))
                     m.SetColor("_BaseColor", new Color(0.3f, 0.33f, 0.46f));
@@ -98,6 +107,21 @@ public static class HeroBuilder
         Debug.Log($"heroi {s.Name} ({s.Body}): {found}");
         if (ctrl != null) CombatDevSceneBuilder.Animator(model, ctrl);
         return model;
+    }
+
+    /// Prende uma peca modelada no espaco do corpo em repouso ao osso dado. O modelo precisa estar na origem, sem escala.
+    public static GameObject Attach(GameObject model, string assetPath, string bone)
+    {
+        var asset = AssetDatabase.LoadAssetAtPath<GameObject>(assetPath);
+        if (asset == null) { Debug.LogWarning("peca nao encontrada: " + assetPath); return null; }
+        Transform target = null;
+        foreach (var t in model.GetComponentsInChildren<Transform>(true)) if (t.name == bone) target = t;
+        if (target == null) { Debug.LogWarning(assetPath + ": osso nao encontrado: " + bone); return null; }
+        var part = (GameObject)PrefabUtility.InstantiatePrefab(asset);
+        part.name = System.IO.Path.GetFileNameWithoutExtension(assetPath);
+        part.transform.SetParent(model.transform, false);
+        part.transform.SetParent(target, true);
+        return part;
     }
 
     public static void Prepare()

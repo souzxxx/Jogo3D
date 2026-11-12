@@ -164,7 +164,7 @@ namespace Quintessence.Enemies
                         Point = line ? transform.position : strikePoint, Direction = strikeDir,
                         Radius = charge ? definition.chargeWidth : line ? 0.35f : kind == EnemyAttackKind.Heal ? definition.healRadius : definition.strikeRadius,
                         Length = charge ? ClearDistance(strikeDir, definition.chargeDistance) : line ? ClearDistance(strikeDir, definition.projectileRange) : 0f,
-                        Duration = definition.telegraphTime, IsLine = line, Friendly = kind == EnemyAttackKind.Heal, Source = gameObject,
+                        Duration = definition.telegraphTime, IsLine = line, Friendly = kind == EnemyAttackKind.Heal, Lobbed = kind == EnemyAttackKind.Lob, Source = gameObject,
                     });
                     Play("Attack", 0.08f);
                     break;

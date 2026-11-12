@@ -40,17 +40,16 @@ namespace Quintessence.Enemies.PlayTests
             brain.enabled = false;
             var hero = GameObject.FindGameObjectWithTag("Player");
             hero.GetComponent<Health>().Pool.Invulnerable = true;
-            Assert.IsNotNull(FindDeep(brain.transform, "Skeleton_Axe"), "machado na mao");
-            Assert.IsNotNull(FindDeep(brain.transform, "Skeleton_Shield_Large_A"), "escudo no braco");
-            int crystals = 0;
-            foreach (var t in brain.GetComponentsInChildren<Transform>()) if (t.name == "AmberCrystal") crystals++;
-            Assert.AreEqual(7, crystals, "cristais nas costas e nos ombros");
-
-            foreach (var n in new[] { "Skeleton_Axe", "Skeleton_Shield_Large_A" })
+            // o Guardiao tem pecas proprias, nao so o esqueleto do pack ampliado
+            foreach (var n in new[] { "boss_head", "boss_shoulders", "boss_back", "boss_core", "boss_weapon" })
             {
-                var r = FindDeep(brain.transform, n).GetComponentInChildren<Renderer>();
-                Assert.Greater(r.bounds.size.magnitude, 1f, n + " deveria ter tamanho de arma de chefe, nao de miniatura");
+                var part = FindDeep(brain.transform, n);
+                Assert.IsNotNull(part, "falta a peca " + n);
+                var r = part.GetComponentInChildren<Renderer>();
+                Assert.IsNotNull(r, n + " sem malha");
+                Assert.Greater(r.bounds.size.magnitude, n == "boss_core" ? 0.3f : 1f, n + " deveria ter tamanho de chefe, nao de miniatura");
             }
+            Assert.IsNull(FindDeep(brain.transform, "Skeleton_Axe"), "o machado do pack saiu");
             var cam = Camera.main;
             foreach (var b in cam.GetComponents<MonoBehaviour>()) if (b.GetType().Name == "FollowCamera") b.enabled = false;
             var rt = new RenderTexture(960, 540, 24, RenderTextureFormat.ARGB32, RenderTextureReadWrite.sRGB);

@@ -64,7 +64,9 @@ public static class EnemyDevSceneBuilder
         def.addPrefabs = new[] { add1, add2 };
         EditorUtility.SetDirty(def);
 
-        var ember = LookDevBuilder.Mat("SkeletonAsh", KK + "Skeletons/Characters/skeleton_texture.png", new Color(0.46f, 0.43f, 0.47f), Color.black, 0f);
+        AssetDatabase.Refresh();
+        HeroBuilder.MatteParts("Assets/Art/Boss");
+        var ember = LookDevBuilder.Mat("GuardianBody", "Assets/Art/Boss/boss_body_texture.png", Color.white, Color.black, 0f);
         var go = new GameObject("Guardiao");
         var col = go.AddComponent<CapsuleCollider>();
         col.height = 5f; col.radius = 1.3f; col.center = new Vector3(0, 2.5f, 0);
@@ -73,9 +75,16 @@ public static class EnemyDevSceneBuilder
         agent.radius = 1.3f; agent.height = 5f; agent.angularSpeed = 0f;
         var model = LookDevBuilder.Spawn("Skeletons/Characters/Skeleton_Warrior.fbx", Vector3.zero, 0, ember);
         model.name = "Model";
+        // as pecas proprias entram com o modelo na origem e sem escala (foram modeladas no espaco do corpo); depois ele e ampliado
+        model.transform.SetParent(null, false);
+        model.transform.SetPositionAndRotation(Vector3.zero, Quaternion.identity);
+        model.transform.localScale = Vector3.one;
+        foreach (var r in model.GetComponentsInChildren<Renderer>(true))
+            if (r.name == "Skeleton_Warrior_Helmet" || r.name == "Skeleton_Warrior_Cloak") r.gameObject.SetActive(false);
+        foreach (var (file, bone) in new[] { ("boss_head", "head"), ("boss_shoulders", "chest"), ("boss_back", "chest"), ("boss_core", "chest"), ("boss_weapon", "handslot.r") })
+            HeroBuilder.Attach(model, "Assets/Art/Boss/" + file + ".fbx", bone);
         model.transform.SetParent(go.transform, false);
         model.transform.localScale = Vector3.one * 2.3f;
-        DressGuardian(model.transform);
         var anim = CombatDevSceneBuilder.Animator(model, ctrl);
         go.AddComponent<BossBrain>().Bind(def, anim);
         var light = new GameObject("EmberLight").AddComponent<Light>();
