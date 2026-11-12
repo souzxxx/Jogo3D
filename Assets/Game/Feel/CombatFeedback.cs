@@ -19,6 +19,7 @@ namespace Quintessence.Feel
         public static Mesh DiscMesh { get; private set; }
         readonly Dictionary<GameObject, TelegraphVisual> telegraphs = new();
         readonly Dictionary<Health, float> affinityLabel = new();
+        readonly Dictionary<Health, float> guardLabel = new();
 
         ParticleSystem fx;
         readonly Dictionary<Health, TargetDisplay> displays = new();
@@ -149,6 +150,17 @@ namespace Quintessence.Feel
                         mult > 1f ? new Color(1f, 0.82f, 0.4f) : new Color(0.65f, 0.66f, 0.7f), 0.75f, 0.7f);
                 }
                 if (mult > 1f) size *= 1.25f; else if (mult < 1f) { size *= 0.8f; c = Steel; }
+            }
+            // escudo do Escudeiro: numero pequeno e cinza, rotulo e o som de bloqueio de vez em quando
+            if (enemy && target.TryGetComponent(out FrontGuard guard) && guard.LastBlocked)
+            {
+                size *= 0.75f; c = Steel;
+                if (!guardLabel.TryGetValue(target, out float gt) || Time.time - gt > 0.9f)
+                {
+                    guardLabel[target] = Time.time;
+                    DamageNumber.Spawn(target.transform.position + Vector3.up * 3.5f, "ESCUDO", new Color(0.72f, 0.76f, 0.84f), 0.75f, 0.7f);
+                    Sfx.Play("block");
+                }
             }
             DamageNumber.Spawn(target.transform.position + Vector3.up * 2.7f, Mathf.RoundToInt(applied) + (info.IsCrit ? "!" : ""),
                 enemy ? Color.Lerp(c, Color.white, 0.35f) : new Color(1f, 0.25f, 0.25f), size);
