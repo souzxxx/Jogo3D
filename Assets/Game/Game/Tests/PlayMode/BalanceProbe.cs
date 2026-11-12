@@ -34,7 +34,7 @@ namespace Quintessence.Game.PlayTests
         public IEnumerator Probe_Full_Runs()
         {
             var log = new System.Text.StringBuilder();
-            log.AppendLine($"# sonda: dano levado {ProbeTaken:0.##}, desvia de {ProbeDodge:P0} dos avisos, {ProbeSeeds} sementes por heroi{(ProbeRelaxed ? ", dificuldade Tranquila" : "")}");
+            log.AppendLine($"# sonda: dano levado {ProbeTaken:0.##}, desvia de {ProbeDodge:P0} dos avisos, {ProbeSeeds} sementes por heroi{(ProbeRelaxed ? ", dificuldade Tranquila" : "")}{(ProbeAscension > 0 ? $", Ascensao {ProbeAscension}" : "")}");
             // o roteiro desvia de todo aviso com reflexo perfeito, mas joga sem estrategia: dano cheio por padrao
             float taken = ProbeTaken;
             GameFlow.AutoPickTalents = true;
@@ -53,7 +53,7 @@ namespace Quintessence.Game.PlayTests
                     Time.timeScale = 1f;
                     Time.captureFramerate = 30;
                     GameEvents.Clear();
-                    GameFlow.StartElement = hero; GameFlow.Seed = seed * 7 + (int)hero; GameFlow.Layers = 10; GameFlow.Shrines = 3; GameFlow.Tutorial = false;
+                    GameFlow.StartElement = hero; GameFlow.Seed = seed * 7 + (int)hero; GameFlow.Layers = 10; GameFlow.Shrines = 3; GameFlow.Tutorial = false; GameFlow.Ascension = ProbeAscension;
                     yield return EditorSceneManager.LoadSceneAsyncInPlayMode("Assets/Scenes/Run.unity", new LoadSceneParameters(LoadSceneMode.Single));
                     yield return null; yield return null;
                     var director = Object.FindFirstObjectByType<RunDirector>();
@@ -157,6 +157,7 @@ namespace Quintessence.Game.PlayTests
             GameFlow.AutoPickTalents = false;
             MetaStore.UseKey(MetaStore.DefaultKey);
             GamePrefs.Force = null;
+            GameFlow.Ascension = 0;
             RunSaveStore.Clear();
             RunSaveStore.UseKey(RunSaveStore.DefaultKey);
             Tips.UseKey(Tips.DefaultKey);
@@ -170,6 +171,8 @@ namespace Quintessence.Game.PlayTests
         public static float ProbeDodge = 0.65f;
         /// Joga na dificuldade Tranquila (para medir se ela ajuda quem joga mal).
         public static bool ProbeRelaxed = false;
+        /// Nivel de Ascensao das runs da sonda (0 = sem).
+        public static int ProbeAscension = 0;
         System.Random dodgeRng = new(1);
         public static int ProbeSeeds = 3;
         /// Para investigar uma run so (None = todas).
