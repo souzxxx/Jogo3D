@@ -737,13 +737,18 @@ namespace Quintessence.Game.PlayTests
             var weaver = Object.Instantiate(prefab, new Vector3(0, 0, 2.5f), Quaternion.Euler(0, 180, 0)).GetComponent<BossBrain>();
             for (int k = 0; k < 40; k++) yield return null;
             Assert.AreEqual("Tecelã das Cinzas", name);
+            foreach (var n in new[] { "weaver_head", "weaver_mantle", "weaver_core", "weaver_staff", "weaver_shards" })
+                Assert.IsTrue(weaver.GetComponentsInChildren<Transform>(true).Any(t => t.name == n), "falta a peca " + n);
             for (int k = 0; k < 900 && weaver.Blinks == 0; k++) yield return null;
             Assert.Greater(weaver.Blinks, 0, "ela se teletransporta");
             for (int k = 0; k < 60; k++) yield return null;
             Assert.Greater(Vector3.Distance(weaver.transform.position, hero.transform.position), 4f, "e guarda distancia do heroi");
+            // so para a foto: ela parada a frente do heroi, sem o letreiro
             weaver.enabled = false;
+            weaver.GetComponent<UnityEngine.AI.NavMeshAgent>().Warp(hero.transform.position + new Vector3(1.5f, 0, 4.5f));
+            weaver.transform.rotation = Quaternion.Euler(0, 200, 0);
             hud.ShowBanner("", "", Color.clear, 0.01f);
-            for (int k = 0; k < 4; k++) yield return null;
+            for (int k = 0; k < 6; k++) yield return null;
             Shot(cam, "docs/img/chefe_tecela.png");
             weaver.enabled = true;
             var hp = weaver.GetComponent<Health>();
