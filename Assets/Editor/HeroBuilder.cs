@@ -72,7 +72,7 @@ public static class HeroBuilder
                     m.SetColor("_EmissionColor", heal * 0.5f);
                 }
                 // no chefe a brasa e fixa: nucleo e veios acesos, cristais com um brilho baixo
-                if ((path.Contains("/Boss/") || path.Contains("/Models/")) && (m.name == "Magic" || m.name == "Crystal") && m.HasProperty("_EmissionColor"))
+                if ((path.Contains("/Boss/") || path.Contains("/Boss2/") || path.Contains("/Models/")) && (m.name == "Magic" || m.name == "Crystal") && m.HasProperty("_EmissionColor"))
                 {
                     var ember = m.name == "Magic" ? new Color(0.95f, 0.36f, 0.1f) : new Color(0.81f, 0.49f, 0.17f);
                     m.SetColor("_BaseColor", ember * (m.name == "Magic" ? 0.8f : 0.7f));

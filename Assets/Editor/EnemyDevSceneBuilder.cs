@@ -141,7 +141,8 @@ public static class EnemyDevSceneBuilder
         {
             foreach (var r in model.GetComponentsInChildren<Renderer>(true))
                 if (r.name.Contains("Hat") || r.name.Contains("Staff")) { r.gameObject.SetActive(false); hidden.Add(r.name); }
-            foreach (var (file, bone) in new[] { ("weaver_head", "head"), ("weaver_mantle", "chest"), ("weaver_core", "chest"), ("weaver_staff", "handslot.r"), ("weaver_shards", "chest") })
+            foreach (var (file, bone) in new[] { ("weaver_head", "head"), ("weaver_mantle", "chest"), ("weaver_shoulder_l", "upperarm.l"), ("weaver_shoulder_r", "upperarm.r"),
+                ("weaver_core", "chest"), ("weaver_staff", "handslot.r"), ("weaver_shards", "chest") })
                 HeroBuilder.Attach(model, "Assets/Art/Boss2/" + file + ".fbx", bone);
         }
         Debug.Log("Tecela: arte propria " + art + ", escondidas: " + string.Join(", ", hidden));
