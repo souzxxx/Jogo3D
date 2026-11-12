@@ -36,6 +36,7 @@ namespace Quintessence.Enemies
             Scaling = spawner != null ? spawner.Scaling : EnemyScaling.None;
             if (Scaling.Health != 1f) health.Pool.SetMax(health.Max * Scaling.Health);
             if (Scaling.Size != 1f) transform.localScale *= Scaling.Size;
+            if (Scaling.Wards > 0) health.Pool.Blocks = Scaling.Wards;
             fsm = new EnemyFsm(definition.telegraphTime, definition.recoverTime, definition.cooldown * Scaling.Cooldown, definition.attackRange);
             agent.speed = definition.moveSpeed * Scaling.Speed;
             agent.updateRotation = false;
@@ -116,6 +117,7 @@ namespace Quintessence.Enemies
             if (agent.enabled) agent.enabled = false;
             if (body != null) body.enabled = false;
             Play("Death", 0.05f);
+            if (Scaling.Volatile && definition.attack != EnemyAttackKind.Explode) VolatileBurst.Spawn(transform.position, 2f, 0.85f, Damage * 0.9f);
             Destroy(gameObject, 1.5f);
         }
 

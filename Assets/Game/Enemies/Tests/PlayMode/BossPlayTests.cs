@@ -41,7 +41,7 @@ namespace Quintessence.Enemies.PlayTests
             var hero = GameObject.FindGameObjectWithTag("Player");
             hero.GetComponent<Health>().Pool.Invulnerable = true;
             // o Guardiao tem pecas proprias, nao so o esqueleto do pack ampliado
-            foreach (var n in new[] { "boss_head", "boss_shoulders", "boss_back", "boss_core", "boss_weapon" })
+            foreach (var n in new[] { "boss_head", "boss_shoulder_l", "boss_shoulder_r", "boss_back", "boss_core", "boss_weapon" })
             {
                 var part = FindDeep(brain.transform, n);
                 Assert.IsNotNull(part, "falta a peca " + n);

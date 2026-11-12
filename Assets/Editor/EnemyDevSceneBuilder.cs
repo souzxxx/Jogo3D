@@ -81,7 +81,7 @@ public static class EnemyDevSceneBuilder
         model.transform.localScale = Vector3.one;
         foreach (var r in model.GetComponentsInChildren<Renderer>(true))
             if (r.name == "Skeleton_Warrior_Helmet" || r.name == "Skeleton_Warrior_Cloak") r.gameObject.SetActive(false);
-        foreach (var (file, bone) in new[] { ("boss_head", "head"), ("boss_shoulders", "chest"), ("boss_back", "chest"), ("boss_core", "chest"), ("boss_weapon", "handslot.r") })
+        foreach (var (file, bone) in new[] { ("boss_head", "head"), ("boss_shoulder_l", "upperarm.l"), ("boss_shoulder_r", "upperarm.r"), ("boss_back", "chest"), ("boss_core", "chest"), ("boss_weapon", "handslot.r") })
             HeroBuilder.Attach(model, "Assets/Art/Boss/" + file + ".fbx", bone);
         model.transform.SetParent(go.transform, false);
         model.transform.localScale = Vector3.one * 2.3f;
