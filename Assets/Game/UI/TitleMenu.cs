@@ -81,10 +81,10 @@ namespace Quintessence.UI
             Line(-130, "Quintessence 3D", 34, new Color(0.88f, 0.74f, 0.42f), true);
             Line(-172, "Projeto de Jogos Digitais e Interação · Insper", 24, UiKit.Dim);
             Line(-236, "EQUIPE", 24, UiKit.Dim, true);
-            Line(-274, "Leonardo · combate e elementos", 26, UiKit.Cream);
-            Line(-308, "Enzo · inimigos, chefe e salas", 26, UiKit.Cream);
-            Line(-342, "Nicolas · run, progresso e interface", 26, UiKit.Cream);
-            Line(-376, "Miguel · visual, feedback e som", 26, UiKit.Cream);
+            Line(-274, "Leonardo de Souza · combate e elementos", 26, UiKit.Cream);
+            Line(-308, "Enzo Canavero · inimigos, chefe e salas", 26, UiKit.Cream);
+            Line(-342, "Nicolas Volf · run, progresso e interface", 26, UiKit.Cream);
+            Line(-376, "Miguel Damasio · visual, feedback e som", 26, UiKit.Cream);
             Line(-440, "ASSETS", 24, UiKit.Dim, true);
             Line(-478, "Modelos e animações: KayKit, de Kay Lousberg (CC0)", 24, UiKit.Cream);
             Line(-510, "Ícones: game-icons.net, de Lorc, Delapouite e outros (CC BY 3.0)", 24, UiKit.Cream);

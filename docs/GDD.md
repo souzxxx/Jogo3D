@@ -4,7 +4,7 @@
 > Tudo que está aqui existe no jogo, salvo o que está marcado como **[planejado]**.
 > Os trechos de lore marcados como **[proposta]** foram escritos para fechar o documento e precisam do ok do grupo.
 
-**Grupo:** Leonardo (combate), Enzo (inimigos e salas), Nicolas (run, meta e UI), Miguel (visual e som)
+**Grupo:** Leonardo de Souza (combate), Enzo Canavero (inimigos e salas), Nicolas Volf (run, meta e UI), Miguel Damasio (visual e som)
 **Plataforma:** navegador (WebGL), teclado e mouse
 **Gênero:** roguelite de ação com câmera de cima
 **Sessão:** uma run em 10 a 15 minutos

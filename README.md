@@ -2,7 +2,7 @@
 
 Action roguelite 3D de câmera top-down: você começa a run com um elemento, desperta os outros três e encadeia reações elementais até alcançar a Quintessência. Projeto 3D de Jogos Digitais e Interação (Insper).
 
-**Equipe:** Leonardo, Nicolas, Enzo, Miguel
+**Equipe:** Leonardo de Souza, Nicolas Volf, Enzo Canavero, Miguel Damasio
 **Engine:** Unity `6000.6.4f1` (URP). Use exatamente essa versão.
 
 ## Documentos
