@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Quintessence.Combat;
 using Quintessence.Core;
 using Quintessence.Run;
 using UnityEngine;
@@ -7,6 +8,7 @@ namespace Quintessence.Game
 {
     /// Poca de corrupcao no chao: fere quem estiver dentro, heroi ou inimigo, a cada meio segundo.
     /// Toma a cor do trecho; queima nos Saloes e no Jardim, encharca (deixa lento) na Cripta.
+    /// E marca os inimigos dentro com o elemento do trecho (Fogo, Agua, Terra): uma skill de outro elemento detona a reacao.
     public class CorruptionPool : MonoBehaviour
     {
         [SerializeField] Vector3 size = new(6f, 1.2f, 1.8f);
@@ -23,6 +25,19 @@ namespace Quintessence.Game
         readonly HashSet<Health> seen = new();
         public int Pulses { get; private set; }
         public StatusType Status => status;
+        ElementType element = ElementType.Fire;
+        /// Elemento com que a poca marca os inimigos dentro dela.
+        public ElementType Element => element;
+        public int Marks { get; private set; }
+        /// Uma poca marcou um inimigo (o diretor da a dica na primeira vez).
+        public static event System.Action Marked;
+
+        public static ElementType ElementFor(Biome biome) => biome switch
+        {
+            Biome.Crypt => ElementType.Water,
+            Biome.Garden => ElementType.Earth,
+            _ => ElementType.Fire,
+        };
 
         public void Bind(Vector3 area, Renderer[] ground, Renderer[] glowVeins) { size = area; surfaces = ground; veins = glowVeins; }
 
@@ -31,6 +46,7 @@ namespace Quintessence.Game
             var dresser = FindFirstObjectByType<BiomeDresser>();
             var c = dresser != null ? dresser.CrackColor : new Color(1f, 0.16f, 0.02f);
             if (dresser != null && dresser.Current == Biome.Crypt) status = StatusType.Soaked;
+            element = ElementFor(dresser != null ? dresser.Current : Biome.Ashes);
             // chao chamuscado com um fundo da cor do trecho; os veios brilham como as rachaduras da sala
             var block = new MaterialPropertyBlock();
             void Tint(Renderer[] list, Color baseColor, Color glow)
@@ -66,7 +82,20 @@ namespace Quintessence.Game
                 h.TakeDamage(new DamageInfo(hero ? heroDamage : damage, ElementType.None, from, gameObject) { Point = h.transform.position + Vector3.up * 0.4f, IsReaction = true });
                 // no heroi so a Cripta deixa efeito (encharca); a queimadura e para os inimigos
                 if (!h.IsDead && (!hero || status == StatusType.Soaked)) StatusHolder.GetOrAdd(h).Apply(status, 1.2f, from, gameObject);
+                if (!hero && !h.IsDead) Mark(h);
             }
+        }
+
+        /// Marca com o elemento da poca, sem tirar a marca que o heroi pos (outra marca fica onde esta).
+        void Mark(Health h)
+        {
+            var mark = h.GetComponent<ElementMark>();
+            if (mark == null) mark = h.gameObject.AddComponent<ElementMark>();
+            if (mark.State.HasMark && mark.State.Element != element) return;
+            mark.State.Hit(element, out _);
+            GameEvents.RaiseMarkApplied(element, h);
+            Marks++;
+            Marked?.Invoke();
         }
 
         /// O ponto esta dentro da area que fere (para a sonda de balanceamento desviar).

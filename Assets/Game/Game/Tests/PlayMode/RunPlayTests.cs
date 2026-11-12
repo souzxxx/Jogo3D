@@ -1291,6 +1291,31 @@ namespace Quintessence.Game.PlayTests
             for (int k = 0; k < 60 && pool.Pulses < 2; k++) yield return null;
             Assert.Less(heroHp.Current, heroBefore, "quem pisa na poca se fere");
             Assert.AreEqual(StatusType.Burn, pool.Status, "nos Saloes de Cinza ela queima");
+            // e marca os inimigos dentro com o elemento do trecho: uma skill de outro elemento detona
+            Assert.AreEqual(ElementType.Fire, pool.Element, "nos Saloes a poca marca com Fogo");
+            Assert.IsFalse(hero.TryGetComponent(out ElementMark heroMark) && heroMark.State.HasMark, "o heroi nao e marcado pela poca");
+            var meleePrefab = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Game/Enemies/Prefabs/Rastejante.prefab");
+            var soaked = Object.Instantiate(meleePrefab, new Vector3(1.2f, 0, 0.2f), Quaternion.identity).GetComponent<Health>();
+            var keeps = Object.Instantiate(meleePrefab, new Vector3(-1.2f, 0, 0.2f), Quaternion.identity).GetComponent<Health>();
+            soaked.GetComponent<EnemyBrain>().enabled = false;
+            keeps.GetComponent<EnemyBrain>().enabled = false;
+            keeps.gameObject.AddComponent<ElementMark>().State.Hit(ElementType.Earth, out _);
+            hero.Teleport(new Vector3(0, 0.05f, -4f), Vector3.forward);
+            int pulses = pool.Pulses;
+            for (int k = 0; k < 90 && pool.Pulses < pulses + 2; k++) yield return null;
+            Assert.AreEqual(ElementType.Fire, soaked.GetComponent<ElementMark>().State.Element, "inimigo na poca fica marcado com Fogo");
+            Assert.AreEqual(ElementType.Earth, keeps.GetComponent<ElementMark>().State.Element, "a marca que o heroi pos nao e trocada");
+            Assert.Greater(pool.Marks, 0);
+            Assert.AreEqual(Tips.Text("terrain"), hud.LastTip, "a primeira marca da poca traz a dica");
+            string reaction = null;
+            void OnReaction(ReactionEvent e) { if (e.Target == soaked.gameObject) reaction = e.Name; }
+            GameEvents.ReactionTriggered += OnReaction;
+            var table = UnityEditor.AssetDatabase.LoadAssetAtPath<ReactionTable>("Assets/Game/Combat/Data/Reactions.asset");
+            ElementCombat.Deliver(soaked, new DamageInfo(4f, ElementType.Water, Team.Player, hero.gameObject), table);
+            GameEvents.ReactionTriggered -= OnReaction;
+            Assert.IsNotNull(reaction, "Agua num inimigo marcado pela poca de Fogo vira reacao");
+            Object.Destroy(soaked.gameObject);
+            Object.Destroy(keeps.gameObject);
             Shot(cam, "docs/img/perigo_poca.png");
             Object.Destroy(pool.gameObject);
             heroHp.Heal(999);

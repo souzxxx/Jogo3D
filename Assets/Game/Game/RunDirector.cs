@@ -240,7 +240,10 @@ namespace Quintessence.Game
             GameEvents.ElementAwakened += OnAwakened;
             GameEvents.EnemySpawned += OnEnemySpawned;
             GameEvents.DamageDealt += OnDamageDealt;
+            CorruptionPool.Marked += OnPoolMarked;
         }
+
+        void OnPoolMarked() => Tip("terrain");
 
         // ---------- Provacao ----------
 
@@ -368,6 +371,7 @@ namespace Quintessence.Game
             GameEvents.ElementAwakened -= OnAwakened;
             GameEvents.EnemySpawned -= OnEnemySpawned;
             GameEvents.DamageDealt -= OnDamageDealt;
+            CorruptionPool.Marked -= OnPoolMarked;
         }
 
         void Start()

@@ -37,6 +37,7 @@ namespace Quintessence.Game
             "elite" => "Elite: inimigos com um traço especial e um inimigo forte no fim. Paga mais.",
             "shop" => "Loja: gaste Essência em cura, vida máxima, bênçãos e talentos.",
             "pact" => "Pacto: um ganho forte com um custo que dura a run toda. Dá para recusar.",
+            "terrain" => "A poça marca quem está dentro com o elemento do trecho: uma skill de outro elemento detona a reação.",
             "trial" => "Provação: cumpra o desafio do letreiro e ganhe um talento extra. Falhar só perde o prêmio.",
             "fusion" => "Três elementos: lance a skill do terceiro numa poça de Magma ou numa nuvem de Vapor. É uma Fusão.",
             "affinity" => "Elementais resistem ao próprio elemento e são fracos a outro: Água vence Fogo, Ar vence Pedra.",
