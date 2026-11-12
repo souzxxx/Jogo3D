@@ -188,7 +188,7 @@ public static class CombatDevSceneBuilder
         d.element = ElementType.Air;
         d.critChance = 0.2f;
         d.skillName = "Vendaval"; d.skillShape = SkillShape.Radial;
-        d.skillDamage = 10f; d.skillCooldown = 4f; d.skillRange = 4f; d.skillKnockback = 16f;
+        d.skillDamage = 13f; d.skillCooldown = 4f; d.skillRange = 4f; d.skillKnockback = 16f;
         d.dash = DashVariant.Plain; d.dashCharges = 2;
     });
 

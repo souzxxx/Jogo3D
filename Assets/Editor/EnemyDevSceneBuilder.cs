@@ -109,9 +109,9 @@ public static class EnemyDevSceneBuilder
         var def = Asset<BossDefinition>("Tecela", d =>
         {
             d.displayName = "Tecelã das Cinzas"; d.pattern = 1; d.maxHealth = 520f; d.moveSpeed = 2.6f;
-            d.cooldownByPhase = new[] { 1.6f, 1.25f, 0.95f };
-            d.fanDamage = 9f; d.fanCount = 4; d.fanCountLastPhase = 6; d.fanSpread = 18f;
-            d.eruptionDamage = 11f; d.eruptionCount = 4;
+            d.cooldownByPhase = new[] { 1.7f, 1.4f, 1.05f };
+            d.fanDamage = 7f; d.fanCount = 4; d.fanCountLastPhase = 6; d.fanSpread = 18f;
+            d.eruptionDamage = 9f; d.eruptionCount = 4;
             d.ringDamage = 11f; d.ringCount = 8;
             d.blinkWindup = 0.7f; d.blinkDistance = 7.5f; d.blinkDamage = 10f; d.blinkRadius = 2.2f;
             d.maxAdds = 3; d.addsPerPhaseChange = 2; d.addInterval = 9f;
