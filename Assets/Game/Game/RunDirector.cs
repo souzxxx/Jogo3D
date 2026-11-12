@@ -256,17 +256,34 @@ namespace Quintessence.Game
 
         // ---------- contagem para os Feitos ----------
         int quintessences, fusions, trialsPassed, shieldBreaks;
-        bool shieldUp;
+        bool shieldUp, shieldNeedsQuintessence;
         /// Feitos que esta run cumpriu (para a tela de resultado e os testes).
         public List<Feat> NewFeats { get; private set; } = new();
-        void OnQuintessence(bool on) { if (on && !Finished) quintessences++; }
+        void OnQuintessence(bool on) { if (on && !Finished) { quintessences++; GrantNow(); } }
         // a Fusao chega sem alvo (e uma area, nao um inimigo)
-        void OnReactionForFeats(ReactionEvent e) { if (!Finished && e.Target == null && !string.IsNullOrEmpty(e.Name)) fusions++; }
+        void OnReactionForFeats(ReactionEvent e) { if (!Finished && e.Target == null && !string.IsNullOrEmpty(e.Name)) { fusions++; GrantNow(); } }
         void OnBossShield(bool up, bool needsQuintessence)
         {
-            if (up) { shieldUp = true; return; }
-            if (shieldUp && !Finished) shieldBreaks++;
+            if (up) { shieldUp = true; shieldNeedsQuintessence = needsQuintessence; return; }
+            // so conta quebra de verdade: o escudo pedia Quintessencia e ela estava ativa (nao vale o escudo que so expirou)
+            if (shieldUp && shieldNeedsQuintessence && player != null && player.QuintessenceActive && !Finished) { shieldBreaks++; GrantNow(); }
             shieldUp = false;
+        }
+
+        /// Feitos que acontecem no meio da run sao pagos e gravados na hora: sair e continuar nao os perde.
+        void GrantNow()
+        {
+            if (Run == null || GameFlow.Tutorial) return;
+            var got = MetaStore.Current.GrantFeats(new RunRecord
+            {
+                Quintessences = quintessences, Fusions = fusions, TrialsPassed = trialsPassed, ShieldBreaks = shieldBreaks,
+            });
+            if (got.Count == 0) return;
+            NewFeats.AddRange(got);
+            MetaStore.Save();
+            foreach (var f in got)
+                Feel.DamageNumber.Spawn(player.transform.position + Vector3.up * 4.4f, "FEITO: " + Feats.Name(f).ToUpperInvariant(), new Color(0.9f, 0.76f, 0.42f), 1f, 2f);
+            Sfx.Play("feat");
         }
 
         void OnPuddleLanded(Vector3 point, float radius, ElementType element, float seconds) => WaterPuddle.Spawn(puddlePrefab, point, radius, element, seconds);
@@ -358,6 +375,7 @@ namespace Quintessence.Game
             if (passed)
             {
                 trialsPassed++;
+                GrantNow();
                 Run.Progress.GrantPick();
                 Run.AddEssence(Trials.BonusEssence);
                 Feel.DamageNumber.Spawn(player.transform.position + Vector3.up * 3.9f, "PROVAÇÃO CUMPRIDA: TALENTO EXTRA", new Color(0.9f, 0.76f, 0.42f), 1.1f, 2.2f);
@@ -813,11 +831,11 @@ namespace Quintessence.Game
             int unlockedNow = Ascension.Unlocked(MetaStore.Current.Wins);
             MasteryGained = Mastery.RunXp(Run.RoomsCleared, Run.Kills, victory);
             MasteryLevelsUp = MetaStore.Current.AddHeroXp(GameFlow.StartElement, MasteryGained);
-            NewFeats = MetaStore.Current.GrantFeats(new RunRecord
+            NewFeats.AddRange(MetaStore.Current.GrantFeats(new RunRecord
             {
                 Victory = victory, Ascension = GameFlow.Ascension, Kills = Run.Kills, Talents = Run.Talents.Count,
                 Quintessences = quintessences, Fusions = fusions, TrialsPassed = trialsPassed, ShieldBreaks = shieldBreaks,
-            });
+            }));
             NewAscension = unlockedNow > unlockedBefore ? unlockedNow : 0;
             MetaStore.Save();
             ShardsEarned = shards;
@@ -832,6 +850,8 @@ namespace Quintessence.Game
                 + (NewAscension > 0 ? $"\nAscensão {NewAscension} liberada: escolha no título para enfrentar inimigos mais fortes" : "");
             Sfx.Play(victory ? "victory" : "defeat");
             hud.ShowResult(victory, stats, GameFlow.RestartRun, GameFlow.ToTitle);
+            // feito novo: um sino depois do som do resultado
+            if (NewFeats.Count > 0) { yield return new WaitForSecondsRealtime(0.9f); Sfx.Play("feat"); }
         }
 
         // ---------- trechos da run ----------

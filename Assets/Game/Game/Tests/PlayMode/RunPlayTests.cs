@@ -917,6 +917,8 @@ namespace Quintessence.Game.PlayTests
             Assert.AreEqual(true, director.LastTrialPassed);
             Assert.IsFalse(director.TrialActive);
             Assert.AreEqual(talents + 1, director.Run.Talents.Count, "cumprida, a Provacao da um talento extra");
+            Assert.IsTrue(MetaStore.Current.Has(Feat.Trial), "o feito Provado e pago e gravado na hora");
+            Assert.Contains(Feat.Trial, director.NewFeats);
             Assert.GreaterOrEqual(director.Run.Essence, essence + Trials.BonusEssence);
             StringAssert.Contains("cumprida", hud.RoomLabel);
 
