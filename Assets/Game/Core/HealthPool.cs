@@ -12,6 +12,8 @@ namespace Quintessence.Core
         public float DamageTakenMultiplier { get; set; } = 1f;
         /// Segundo multiplicador, independente do de status (ex.: Quintessencia = 0.5).
         public float ExtraDamageTakenMultiplier { get; set; } = 1f;
+        /// Terceiro multiplicador, permanente na run (pactos).
+        public float CurseMultiplier { get; set; } = 1f;
         /// Golpes que serao totalmente bloqueados (dash de Terra da 1).
         public int Blocks { get; set; }
         /// O ultimo Damage() foi anulado por um bloqueio.
@@ -31,7 +33,7 @@ namespace Quintessence.Core
             LastBlocked = false;
             if (IsDead || Invulnerable || amount <= 0f) return 0f;
             if (Blocks > 0) { Blocks--; LastBlocked = true; return 0f; }
-            float applied = Math.Min(Current, amount * Math.Max(0f, DamageTakenMultiplier) * Math.Max(0f, ExtraDamageTakenMultiplier));
+            float applied = Math.Min(Current, amount * Math.Max(0f, DamageTakenMultiplier) * Math.Max(0f, ExtraDamageTakenMultiplier) * Math.Max(0f, CurseMultiplier));
             Current -= applied;
             return applied;
         }
