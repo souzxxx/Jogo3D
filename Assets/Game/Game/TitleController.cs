@@ -1,3 +1,4 @@
+using Quintessence.Run;
 using Quintessence.UI;
 using UnityEngine;
 
@@ -17,7 +18,8 @@ namespace Quintessence.Game
         {
             menu = FindFirstObjectByType<TitleMenu>();
             if (menu == null) menu = new GameObject("TitleMenu").AddComponent<TitleMenu>();
-            menu.OnPick = GameFlow.StartRun;
+            menu.Ascension = Ascension.Clamp(GameFlow.Ascension, MetaStore.Current.Wins);
+            menu.OnPick = e => { GameFlow.Ascension = Ascension.Clamp(menu.Ascension, MetaStore.Current.Wins); GameFlow.StartRun(e); };
             menu.OnTutorial = GameFlow.StartTutorial;
             menu.BindMeta(MetaStore.Current, MetaStore.Save, MetaStore.Reset, () => MetaStore.Current);
             for (int i = 0; i < 4; i++)

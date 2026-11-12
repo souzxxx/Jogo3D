@@ -21,6 +21,9 @@ namespace Quintessence.UI
         public bool RefugeOpen => refuge != null && refuge.gameObject.activeSelf;
 
         /// Liga o Refugio ao progresso salvo. save grava depois de cada compra; reset apaga tudo.
+        /// Nivel de Ascensao escolhido no titulo.
+        public int Ascension { get; set; }
+
         public void BindMeta(MetaProgress progress, Action onSave, Action onReset, Func<MetaProgress> onReload)
         {
             meta = progress; save = onSave; reset = onReset; reload = onReload;
@@ -222,6 +225,18 @@ namespace Quintessence.UI
                 UiKit.Text(UiKit.Rect("Name", card, new Vector2(0.5f, 1), new Vector2(0, -90), new Vector2(240, 48)), names[i], 38, UiKit.Cream);
                 UiKit.Image(UiKit.Rect("Rule", card, new Vector2(0.5f, 1), new Vector2(0, -148), new Vector2(72, 4)), null, Color.Lerp(c, UiKit.Cream, 0.2f));
                 UiKit.Text(UiKit.Rect("Note", card, new Vector2(0.5f, 0), new Vector2(0, 12), new Vector2(240, 58)), notes[i], 21, UiKit.Paper, TextAnchor.MiddleCenter, false);
+            }
+            // Ascensao: aparece depois da primeira vitoria
+            int unlocked = meta != null ? Quintessence.Run.Ascension.Unlocked(meta.Wins) : 0;
+            if (unlocked > 0)
+            {
+                Ascension = Mathf.Clamp(Ascension, 0, unlocked);
+                var asc = UiKit.Rect("Ascension", root, new Vector2(0.5f, 0), new Vector2(0, 136), new Vector2(1100, 44));
+                var label = UiKit.Text(UiKit.Rect("Label", asc, mid, Vector2.zero, new Vector2(900, 40)), "", 22, UiKit.Cream, TextAnchor.MiddleCenter, false);
+                void Refresh() => label.text = $"ASCENSÃO {Ascension}/{unlocked}  ·  {Quintessence.Run.Ascension.Describe(Ascension)}";
+                UiKit.Button(asc, "−", new Vector2(0, 0.5f), new Vector2(24, 0), new Vector2(48, 40), UiKit.Secondary, () => { Ascension = Mathf.Max(0, Ascension - 1); Refresh(); });
+                UiKit.Button(asc, "+", new Vector2(1, 0.5f), new Vector2(-24, 0), new Vector2(48, 40), UiKit.Secondary, () => { Ascension = Mathf.Min(unlocked, Ascension + 1); Refresh(); });
+                Refresh();
             }
             var open = UiKit.Button(root, "REFÚGIO", new Vector2(0.5f, 0), new Vector2(-330, 74), new Vector2(400, 58), UiKit.Primary, () => ShowRefuge(true));
             void Small(string label, float x, Action act) =>

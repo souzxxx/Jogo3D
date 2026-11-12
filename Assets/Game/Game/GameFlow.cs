@@ -19,6 +19,8 @@ namespace Quintessence.Game
         public static bool Tutorial;
         /// Testes: ao subir de nivel o primeiro talento oferecido e pego sozinho, sem abrir a escolha.
         public static bool AutoPickTalents;
+        /// Nivel de Ascensao da proxima run (0 = normal).
+        public static int Ascension;
 
         public static void StartRun(ElementType element)
         {

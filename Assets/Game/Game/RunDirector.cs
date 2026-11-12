@@ -162,12 +162,21 @@ namespace Quintessence.Game
         {
             GameEvents.RoomCleared += OnRoomCleared;
             GameEvents.Died += OnDied;
+            GameEvents.BossSpawned += OnBossSpawned;
+        }
+
+        /// O chefe nao passa pela escala das salas: a Ascensao entra aqui.
+        void OnBossSpawned(Health boss, string name)
+        {
+            if (GameFlow.Ascension <= 0 || boss == null) return;
+            boss.Pool.SetMax(boss.Max * Ascension.HealthMult(GameFlow.Ascension));
         }
 
         void OnDisable()
         {
             GameEvents.RoomCleared -= OnRoomCleared;
             GameEvents.Died -= OnDied;
+            GameEvents.BossSpawned -= OnBossSpawned;
         }
 
         void Start()
@@ -315,6 +324,8 @@ namespace Quintessence.Game
         public void StartEncounter(RoomType type, int depth, EliteModifier trait)
         {
             var diff = DifficultyCurve.For(type, depth, trait);
+            diff.Health *= Ascension.HealthMult(GameFlow.Ascension);
+            diff.Damage *= Ascension.DamageMult(GameFlow.Ascension);
             spawner.Scaling = new EnemyScaling { Health = diff.Health, Damage = diff.Damage, Speed = diff.Speed, Cooldown = diff.Cooldown, Size = diff.Size };
             CurrentTrait = trait;
             if (trait != EliteModifier.None)
@@ -404,10 +415,10 @@ namespace Quintessence.Game
             hud.ShowMap(Run, false);
             yield return new WaitForSecondsRealtime(victory ? 1.6f : 1.2f);
             int seconds = Mathf.RoundToInt(Time.time - startTime);
-            int shards = MetaStore.Current.EndRun(Run.RoomsCleared, victory);
+            int shards = MetaStore.Current.EndRun(Run.RoomsCleared, victory, Ascension.ShardMult(GameFlow.Ascension));
             MetaStore.Save();
             ShardsEarned = shards;
-            string stats = $"{HeroPassives.HeroName(GameFlow.StartElement)}   ·   Nível {Run.Progress.Level}   ·   {Run.Kills} inimigos derrotados   ·   {Run.Talents.Count} talentos e {Run.Boons.Count} bênçãos"
+            string stats = (GameFlow.Ascension > 0 ? $"Ascensão {GameFlow.Ascension}   ·   " : "") + $"{HeroPassives.HeroName(GameFlow.StartElement)}   ·   Nível {Run.Progress.Level}   ·   {Run.Kills} inimigos derrotados   ·   {Run.Talents.Count} talentos e {Run.Boons.Count} bênçãos"
                 + $"\nSalas vencidas: {Run.RoomsCleared}   ·   Essência: {Run.Essence}   ·   Elementos: {player.Loadout.Awakened.Count}/4   ·   Tempo: {seconds / 60}:{seconds % 60:00}"
                 + $"\n+{shards} Fragmentos para o Refúgio (total: {MetaStore.Current.Shards})";
             Sfx.Play(victory ? "victory" : "defeat");

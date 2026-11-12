@@ -8,6 +8,7 @@ namespace Quintessence.Run
     {
         DamageAll, DamageElement, ReactionPower, CritChance, MoveSpeed, DashCooldown, SkillCooldown,
         MaxHealth, QuintessenceGain, HealOnReaction, HealOnRoomClear, SwitchStrike, StatusDuration,
+        BasicDamage, Finisher, XpGain, EssenceGain, BurningBonus, WaterHeal, EarthThorns, AirHaste, SkillRefund,
     }
 
     [Serializable]
@@ -40,6 +41,9 @@ namespace Quintessence.Run
             BoonStat.HealOnRoomClear => "boon_rest",
             BoonStat.SwitchStrike => "boon_switch",
             BoonStat.StatusDuration => "boon_status",
+            BoonStat.BasicDamage => "boon_damage", BoonStat.Finisher => "boon_crit", BoonStat.XpGain => "boon_skill",
+            BoonStat.EssenceGain => "essence", BoonStat.BurningBonus => "boon_element", BoonStat.WaterHeal => "boon_leech",
+            BoonStat.EarthThorns => "boon_status", BoonStat.AirHaste => "boon_speed", BoonStat.SkillRefund => "boon_skill",
             _ => "boon",
         };
 
@@ -60,6 +64,15 @@ namespace Quintessence.Run
                 case BoonStat.HealOnRoomClear: m.HealOnRoomClear += b.value; break;
                 case BoonStat.SwitchStrike: m.SwitchStrikeAdd += b.value; break;
                 case BoonStat.StatusDuration: m.StatusDurationMult += b.value; break;
+                case BoonStat.BasicDamage: m.BasicDamageMult += b.value; break;
+                case BoonStat.Finisher: m.FinisherMult += b.value; break;
+                case BoonStat.XpGain: m.XpMult += b.value; break;
+                case BoonStat.EssenceGain: m.EssenceMult += b.value; break;
+                case BoonStat.BurningBonus: m.BurningBonus += b.value; break;
+                case BoonStat.WaterHeal: m.WaterHealAdd += b.value; break;
+                case BoonStat.EarthThorns: m.EarthThorns += b.value; break;
+                case BoonStat.AirHaste: m.AirHasteSeconds += b.value; break;
+                case BoonStat.SkillRefund: m.SkillRefundOnKill += b.value; break;
             }
         }
     }

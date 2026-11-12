@@ -71,9 +71,9 @@ namespace Quintessence.Run
             Math.Max(0, roomsCleared) * ShardsPerRoom + (victory ? ShardsForVictory : 0);
 
         /// Fecha uma run: soma os Fragmentos ganhos e atualiza os recordes. Devolve quanto ganhou.
-        public int EndRun(int roomsCleared, bool victory)
+        public int EndRun(int roomsCleared, bool victory, float shardMult = 1f)
         {
-            int earned = Reward(roomsCleared, victory);
+            int earned = (int)Math.Round(Reward(roomsCleared, victory) * Math.Max(1f, shardMult));
             Shards += earned;
             Runs++;
             if (victory) Wins++;

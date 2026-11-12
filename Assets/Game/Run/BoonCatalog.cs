@@ -34,6 +34,16 @@ namespace Quintessence.Run
             Add("air_speed", "Passo Leve", "+12% de velocidade", ElementType.Air, BoonStat.MoveSpeed, 0.12f);
             Add("air_dash", "Rajada", "Dash recarrega 25% mais rápido", ElementType.Air, BoonStat.DashCooldown, 0.25f);
 
+            Add("fire_burning", "Carvão Vivo", "+20% de dano em quem está Queimando", ElementType.Fire, BoonStat.BurningBonus, 0.2f);
+            Add("water_heal", "Orvalho", "Maré cura mais 4% da vida", ElementType.Water, BoonStat.WaterHeal, 0.04f);
+            Add("earth_thorns", "Casca de Espinhos", "Golpe bloqueado devolve 10 de dano de Terra", ElementType.Earth, BoonStat.EarthThorns, 10f);
+            Add("air_haste", "Rabo de Vento", "Vendaval dá 2 s de pressa", ElementType.Air, BoonStat.AirHaste, 2f);
+            Add("all_basic", "Mão Firme", "Combo básico causa +12%", ElementType.None, BoonStat.BasicDamage, 0.12f);
+            Add("all_finisher", "Golpe Final", "Terceiro golpe causa +25%", ElementType.None, BoonStat.Finisher, 0.25f);
+            Add("all_xp", "Curiosidade", "+20% de experiência", ElementType.None, BoonStat.XpGain, 0.2f);
+            Add("all_essence", "Faro de Ouro", "+25% de Essência", ElementType.None, BoonStat.EssenceGain, 0.25f);
+            Add("all_refund", "Sede de Luta", "Cada abate adianta 0,3 s das skills", ElementType.None, BoonStat.SkillRefund, 0.3f);
+
             Add("all_dmg", "Golpe Certeiro", "+10% de dano em tudo", ElementType.None, BoonStat.DamageAll, 0.1f);
             Add("all_switch", "Mão Pesada", "Golpe básico em inimigo marcado causa +25%", ElementType.None, BoonStat.SwitchStrike, 0.25f);
             Add("all_quint", "Centelha Prismática", "Quintessência enche 30% mais rápido", ElementType.None, BoonStat.QuintessenceGain, 0.3f);
