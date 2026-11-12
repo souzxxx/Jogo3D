@@ -230,6 +230,9 @@ namespace Quintessence.Feel
             var v = TelegraphVisual.Create(e, flatMaterial, RingMesh, DiscMesh);
             v.transform.SetParent(transform, true);
             if (e.Source != null) telegraphs[e.Source] = v;
+            // a bomba some junto com o aviso se o arremessador for interrompido
+            if (e.Lobbed && e.Source != null)
+                LobbedBomb.Spawn(e.Source.transform.position + Vector3.up * 1.6f, e.Point + Vector3.up * 0.2f, e.Duration, flatMaterial).transform.SetParent(v.transform, true);
         }
 
         void OnTelegraphCancelled(GameObject source)
