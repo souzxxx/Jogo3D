@@ -2,10 +2,16 @@ using UnityEngine;
 
 namespace Quintessence.Game
 {
-    /// O mercador da loja: acompanha o heroi com o corpo, cumprimenta quando ele chega perto e reage a cada compra.
+    /// Personagem que atende o heroi (Mercador da loja, Mestre das bencaos): acompanha com o corpo, cumprimenta quando ele chega perto e reage.
     public class Merchant : MonoBehaviour
     {
         static readonly Color Voice = new(0.93f, 0.88f, 0.78f);
+        [SerializeField] string greetLine = "Bem-vindo! Essência compra tudo aqui.";
+        [SerializeField] string thankLine = "Boa escolha!";
+        [SerializeField] string refuseLine = "Falta Essência...";
+
+        /// Troca as falas (o Mestre usa o mesmo comportamento do Mercador).
+        public void SetLines(string greet, string thank, string refuse) { greetLine = greet; thankLine = thank; refuseLine = refuse; }
         Animator animator;
         Transform customer;
         float hold;
@@ -21,8 +27,8 @@ namespace Quintessence.Game
             animator = GetComponent<Animator>();
         }
 
-        public void Thank() => React("Thanks", 1.1f, "Boa escolha!");
-        public void Refuse() => React("Refuse", 0.6f, "Falta Essência...");
+        public void Thank() => React("Thanks", 1.1f, thankLine);
+        public void Refuse() => React("Refuse", 0.6f, refuseLine);
 
         void React(string state, float seconds, string line)
         {
@@ -48,7 +54,7 @@ namespace Quintessence.Game
             if (!Greeted && to.magnitude < 7.5f)
             {
                 Greeted = true;
-                React("Greet", 1.1f, "Bem-vindo! Essência compra tudo aqui.");
+                React("Greet", 1.1f, greetLine);
             }
             if (hold > 0f && (hold -= Time.deltaTime) <= 0f && animator != null && current != "Idle")
             {

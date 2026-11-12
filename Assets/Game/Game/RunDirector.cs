@@ -37,6 +37,7 @@ namespace Quintessence.Game
         [SerializeField] GameObject bottlePrefab;
         [SerializeField] GameObject elixirPrefab;
         [SerializeField] GameObject shopDecorPrefab;
+        [SerializeField] GameObject masterPrefab;
         [SerializeField] GameObject dummyPrefab;
         [Tooltip("Cenario proprio por tipo de sala, na ordem do enum RoomType (nulo = nenhum).")]
         [SerializeField] GameObject[] decorByRoom = new GameObject[0];
@@ -145,6 +146,8 @@ namespace Quintessence.Game
         }
         public string CurrentDecor { get; private set; } = "";
         public void BindLayouts(RoomLayout[] list) => layouts = list;
+        public void BindMaster(GameObject prefab) => masterPrefab = prefab;
+
         public void BindShop(GameObject table, GameObject bottle, GameObject elixir, GameObject decor)
         {
             tablePrefab = table; bottlePrefab = bottle; elixirPrefab = elixir; shopDecorPrefab = decor;
@@ -462,7 +465,7 @@ namespace Quintessence.Game
                     OpenDoors();
                     break;
                 case RoomType.Master:
-                    if (!SetupBoons()) { Run.RoomCleared(); OpenDoors(); }
+                    if (!SetupBoons(true)) { Run.RoomCleared(); OpenDoors(); }
                     break;
                 case RoomType.Treasure:
                     SetupTreasure();
@@ -647,7 +650,7 @@ namespace Quintessence.Game
         /// Monta a sala de Descanso (so o cenario). Para as capturas.
         public void ShowRest() { Cleanup(); ApplyLayout(-1); Dress(RoomType.Rest); }
         /// Monta a sala do Mestre sem passar pelo mapa. Para as capturas.
-        public void ShowMaster() { Cleanup(); ApplyLayout(-1); Dress(RoomType.Master); SetupBoons(); }
+        public void ShowMaster() { Cleanup(); ApplyLayout(-1); Dress(RoomType.Master); SetupBoons(true); }
 
         void SetupTreasure()
         {
@@ -1107,11 +1110,26 @@ namespace Quintessence.Game
         }
 
         /// Tres bencaos para escolher uma. Devolve false se nao sobrou nenhuma para oferecer.
-        bool SetupBoons()
+        Merchant masterNpc;
+        /// O Mestre da sala atual, se houver (para os testes).
+        public Merchant MasterNpc => masterNpc;
+
+        /// withMaster: sala do Mestre, com ele atras dos baus. Recompensa de Elite vem so com os baus.
+        bool SetupBoons(bool withMaster = false)
         {
+            masterNpc = null;
             if (boonCatalog == null) return false;
             var offer = BoonPicker.Offer(boonCatalog.boons, Run.BoonIds, player.Loadout.Awakened, RoomRng(2));
             if (offer.Count == 0) return false;
+            if (withMaster && masterPrefab != null)
+            {
+                if (layoutRoot == null) layoutRoot = new GameObject("Layout").transform;
+                var m = Instantiate(masterPrefab, new Vector3(-6.8f, 0, -2.6f), Quaternion.Euler(0, 120, 0), layoutRoot);
+                m.name = "Mestre";
+                Label(m.transform, new Vector3(0, 3.2f, 0), "MESTRE", new Color(0.88f, 0.74f, 0.42f), 0.7f);
+                masterNpc = m.GetComponent<Merchant>();
+                if (masterNpc != null) masterNpc.Bind(player.transform);
+            }
             for (int i = 0; i < offer.Count; i++)
             {
                 var boon = offer[i];
@@ -1136,6 +1154,7 @@ namespace Quintessence.Game
                     Use = () =>
                     {
                         Sfx.Play("pickup");
+                        if (masterNpc != null) masterNpc.Thank();
                         GrantBoon(boon);
                         Feel.DamageNumber.Spawn(player.transform.position + Vector3.up * 3.6f, boon.name.ToUpperInvariant() + "!", c, 1.2f, 1.6f);
                         foreach (var it in interactables) if (it.Object != null) Destroy(it.Object);

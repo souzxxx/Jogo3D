@@ -1019,6 +1019,9 @@ namespace Quintessence.Game.PlayTests
             director.ShowMaster();
             for (int k = 0; k < 20; k++) yield return null;
             Assert.AreEqual("MasterDecor", director.CurrentDecor);
+            Assert.IsNotNull(director.MasterNpc, "a sala do Mestre tem o Mestre");
+            for (int k = 0; k < 20 && !director.MasterNpc.Greeted; k++) yield return null;
+            Assert.IsTrue(director.MasterNpc.Greeted, "ele cumprimenta o heroi");
             Shot(cam, "docs/img/sala_mestre.png");
             director.ShowTreasure();
             for (int k = 0; k < 20; k++) yield return null;

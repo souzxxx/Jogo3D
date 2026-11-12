@@ -73,6 +73,7 @@ public static class GameSceneBuilder
         director.BindLayouts(Layouts());
         director.BindTutorial(DummyPrefab());
         director.BindDecor(RoomDecors());
+        director.BindMaster(MasterPrefab());
         director.BindBiomeProps(BiomePropSets());
         director.BindProps(Prop("wall_doorway", 1f), bannerPrefabs, Prop("column", 1f), Prop("chest_gold", 1f), stone);
         EditorUtility.SetDirty(director);
@@ -285,6 +286,28 @@ public static class GameSceneBuilder
             sets[b] = new RunDirector.BiomeProps { props = list.ToArray() };
         }
         return sets;
+    }
+
+    /// O Mestre da sala de bencaos: o mesmo corpo do Mercador, com o cajado e outra paleta.
+    static GameObject MasterPrefab()
+    {
+        const string dir = "Assets/Game/Game/Prefabs/";
+        var ctrl = AssetDatabase.LoadAssetAtPath<RuntimeAnimatorController>(dir + "Merchant.controller");
+        var robe = LookDevBuilder.Mat("Master", CombatDevSceneBuilder.KK + "Adventurers/Props/knight_texture.png", new Color(0.86f, 0.82f, 0.92f), Color.black, 0f);
+        var who = LookDevBuilder.Spawn("Adventurers/Characters/Mage.fbx", Vector3.zero, 0, robe);
+        who.name = "Mestre";
+        who.transform.SetParent(null, false);
+        LookDevBuilder.Hide(who, "1H_Wand", "Spellbook_open");
+        if (ctrl != null) CombatDevSceneBuilder.Animator(who, ctrl);
+        var npc = who.AddComponent<Merchant>();
+        npc.SetLines("Escolha uma bênção, aprendiz.", "Que ela te sirva bem.", "");
+        var lamp = new GameObject("MasterLight").AddComponent<Light>();
+        lamp.transform.SetParent(who.transform, false);
+        lamp.transform.localPosition = new Vector3(0, 2.6f, 1.2f);
+        lamp.type = LightType.Point; lamp.color = new Color(1f, 0.85f, 0.6f); lamp.intensity = 1.6f; lamp.range = 5f;
+        var prefab = PrefabUtility.SaveAsPrefabAsset(who, dir + "Master.prefab");
+        Object.DestroyImmediate(who);
+        return prefab;
     }
 
     /// Boneco de treino: apanha, nao revida e volta depois de cair.
