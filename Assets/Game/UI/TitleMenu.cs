@@ -126,6 +126,10 @@ namespace Quintessence.UI
 
         void Update()
         {
+            // Esc (ou B/Start no controle) fecha o painel aberto e volta para as cartas
+            bool back = (UnityEngine.InputSystem.Keyboard.current != null && UnityEngine.InputSystem.Keyboard.current.escapeKey.wasPressedThisFrame)
+                || (UnityEngine.InputSystem.Gamepad.current != null && (UnityEngine.InputSystem.Gamepad.current.buttonEast.wasPressedThisFrame || UnityEngine.InputSystem.Gamepad.current.startButton.wasPressedThisFrame));
+            if (back) CloseOverlay();
             if (quintPip == null) return;
             // o quinto ponto do emblema respira devagar
             float k = 1f + 0.12f * Mathf.Sin(Time.unscaledTime * 1.6f);
@@ -133,6 +137,14 @@ namespace Quintessence.UI
         }
 
         public bool SheetOpen => sheet != null && sheet.gameObject.activeSelf;
+
+        /// Fecha o painel que estiver aberto (Grimorio, Feitos, Opcoes, Creditos ou Refugio). Devolve se havia algum.
+        public bool CloseOverlay()
+        {
+            if (SheetOpen) { sheet.gameObject.SetActive(false); FocusFirstCard(); return true; }
+            if (RefugeOpen) { ShowRefuge(false); FocusFirstCard(); return true; }
+            return false;
+        }
 
         /// Painel simples por cima do titulo (opcoes, creditos): titulo, conteudo e Voltar.
         RectTransform OpenSheet(string heading, float height, float width = 1000f)

@@ -102,6 +102,9 @@ namespace Quintessence.Game.PlayTests
             Assert.IsTrue(menu.SheetOpen);
             Assert.IsNotNull(GameObject.Find("Feat9"), "os dez feitos aparecem");
             Shot(Camera.main, "docs/img/feitos.png");
+            Assert.IsTrue(menu.CloseOverlay(), "Esc fecha o painel");
+            Assert.IsFalse(menu.SheetOpen);
+            Assert.IsFalse(menu.CloseOverlay(), "sem painel aberto, nada a fechar");
             menu.ShowCredits();
             yield return null; yield return null;
             Shot(Camera.main, "docs/img/creditos.png");
