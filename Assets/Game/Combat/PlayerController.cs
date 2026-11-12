@@ -128,6 +128,7 @@ namespace Quintessence.Combat
             GameEvents.ReactionTriggered += OnReaction;
             GameEvents.QuintessenceCharge += OnCharge;
             GameEvents.Dodged += OnDodged;
+            GameEvents.Evaded += OnEvaded;
             GameEvents.HitBlocked += OnBlocked;
             GameEvents.Died += OnAnyDied;
         }
@@ -138,6 +139,7 @@ namespace Quintessence.Combat
             GameEvents.ReactionTriggered -= OnReaction;
             GameEvents.QuintessenceCharge -= OnCharge;
             GameEvents.Dodged -= OnDodged;
+            GameEvents.Evaded -= OnEvaded;
             GameEvents.HitBlocked -= OnBlocked;
             GameEvents.Died -= OnAnyDied;
         }
@@ -224,12 +226,25 @@ namespace Quintessence.Combat
             lastPerfect = Time.time;
             PerfectDodges++;
             perfectCrit = true;
+            DodgeHeal();
             if (!quint.Active)
             {
                 quint.AddMeter(PerfectDodgeCharge * mods.QuintessenceGainMult);
                 GameEvents.RaiseQuintessenceMeter(quint.Normalized);
             }
             GameEvents.RaisePerfectDodge(transform.position);
+        }
+
+        /// Esquiva da passiva (Vey): o golpe nao entrou.
+        void OnEvaded(Health target) { if (target == health) DodgeHeal(); }
+
+        float lastDodgeHeal = -9f;
+        /// Passo de Brisa: cada esquiva cura um pouco (no maximo uma vez a cada meio segundo).
+        void DodgeHeal()
+        {
+            if (mods.DodgeHeal <= 0f || health.IsDead || Time.time - lastDodgeHeal < 0.5f) return;
+            lastDodgeHeal = Time.time;
+            health.Heal(health.Max * mods.DodgeHeal);
         }
 
         ElementType hero;
