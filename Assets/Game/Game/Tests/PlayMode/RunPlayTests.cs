@@ -237,7 +237,7 @@ namespace Quintessence.Game.PlayTests
                     var to = target.transform.position - player.transform.position; to.y = 0;
                     float d = to.magnitude;
                     input.AimPoint = target.transform.position;
-                    input.Move = d > 2.6f ? new Vector2(to.x / d, to.z / d) : Vector2.zero;
+                    input.Move = d > 2.6f ? SteerTo(target.transform.position) : Vector2.zero;
                     input.AttackHeld = d < 3.6f;
                     if (d < 4.5f && player.AnySkillReady) input.PressSkill();
                 }
@@ -255,7 +255,7 @@ namespace Quintessence.Game.PlayTests
                     }
                     var to = pick.Position - player.transform.position; to.y = 0;
                     float d = to.magnitude;
-                    input.Move = d > 1.4f ? new Vector2(to.x / d, to.z / d) : Vector2.zero;
+                    input.Move = d > 1.4f ? SteerTo(pick.Position) : Vector2.zero;
                     if (d < 2.2f && sinceInteract > 0.4f) { sinceInteract = 0f; input.PressInteract(); }
                 }
                 else input.Move = Vector2.zero;
@@ -361,7 +361,7 @@ namespace Quintessence.Game.PlayTests
                     float d = to.magnitude;
                     input.AimPoint = target.transform.position;
                     float reach = target.GetComponent<BossBrain>() != null ? 1f : 0f; // o chefe e largo
-                    input.Move = d > 2.6f + reach ? new Vector2(to.x / d, to.z / d) : Vector2.zero;
+                    input.Move = d > 2.6f + reach ? SteerTo(target.transform.position) : Vector2.zero;
                     input.AttackHeld = d < 3.6f + reach;
                     if (d < 4.5f + reach && player.AnySkillReady) input.PressSkill();
                 }
@@ -385,7 +385,7 @@ namespace Quintessence.Game.PlayTests
                     var to = goal - player.transform.position; to.y = 0;
                     float d = to.magnitude;
                     input.AimPoint = goal;
-                    input.Move = d > 1.4f ? new Vector2(to.x / d, to.z / d) : Vector2.zero;
+                    input.Move = d > 1.4f ? SteerTo(goal) : Vector2.zero;
                     if (d < 2.2f && sinceInteract > 0.4f) { sinceInteract = 0f; input.PressInteract(); }
                 }
                 else input.Move = Vector2.zero;
@@ -423,6 +423,25 @@ namespace Quintessence.Game.PlayTests
 
         /// O roteiro anda em linha reta ate o alvo; com cobertura na sala ele pode encostar numa peca.
         /// Se ficar parado tentando andar, da um passo de lado e tenta de novo.
+        static readonly UnityEngine.AI.NavMeshPath navPath = new();
+
+        /// Anda ate goal contornando mesas, cantoneiras e escombros pelo NavMesh (como a sonda de balanceamento).
+        Vector2 SteerTo(Vector3 goal)
+        {
+            var from = player.transform.position;
+            var straight = goal - from; straight.y = 0f;
+            var fallback = straight.sqrMagnitude > 0.01f ? new Vector2(straight.x, straight.z).normalized : Vector2.zero;
+            if (!UnityEngine.AI.NavMesh.SamplePosition(from, out var a, 2f, UnityEngine.AI.NavMesh.AllAreas)) return fallback;
+            if (!UnityEngine.AI.NavMesh.SamplePosition(goal, out var b, 3f, UnityEngine.AI.NavMesh.AllAreas)) return fallback;
+            if (!UnityEngine.AI.NavMesh.CalculatePath(a.position, b.position, UnityEngine.AI.NavMesh.AllAreas, navPath) || navPath.corners.Length < 2) return fallback;
+            for (int i = 1; i < navPath.corners.Length; i++)
+            {
+                var d = navPath.corners[i] - from; d.y = 0f;
+                if (d.sqrMagnitude > 0.09f) return new Vector2(d.x, d.z).normalized;
+            }
+            return fallback;
+        }
+
         void Unstick(float dt)
         {
             var pos = player.transform.position;
@@ -493,7 +512,7 @@ namespace Quintessence.Game.PlayTests
                     var to = target.transform.position - player.transform.position; to.y = 0;
                     float d = to.magnitude;
                     input.AimPoint = target.transform.position;
-                    input.Move = d > 2.6f ? new Vector2(to.x / d, to.z / d) : Vector2.zero;
+                    input.Move = d > 2.6f ? SteerTo(target.transform.position) : Vector2.zero;
                     input.AttackHeld = d < 3.6f;
                     if (d < 4.5f && player.AnySkillReady) input.PressSkill();
                 }
@@ -505,7 +524,7 @@ namespace Quintessence.Game.PlayTests
                     var door = director.Interactables[Mathf.Clamp(idx, 0, director.Interactables.Count - 1)];
                     var to = door.Position - player.transform.position; to.y = 0;
                     float d = to.magnitude;
-                    input.Move = d > 1.4f ? new Vector2(to.x / d, to.z / d) : Vector2.zero;
+                    input.Move = d > 1.4f ? SteerTo(door.Position) : Vector2.zero;
                     if (d < 2.2f && sinceInteract > 0.4f) { sinceInteract = 0f; input.PressInteract(); }
                 }
                 else input.Move = Vector2.zero;
@@ -1012,7 +1031,8 @@ namespace Quintessence.Game.PlayTests
             hud.HideTip();
             var path = new UnityEngine.AI.NavMeshPath();
             foreach (var (name, file, biome) in new[] { ("Forja", "forja", Biome.Ashes), ("Cisterna", "cisterna", Biome.Crypt), ("Canais", "canais", Biome.Crypt),
-                ("Bosque de Pedra", "bosque", Biome.Garden), ("Pedreira", "pedreira", Biome.Garden) })
+                ("Bosque de Pedra", "bosque", Biome.Garden), ("Pedreira", "pedreira", Biome.Garden),
+                ("Refeitório", "refeitorio", Biome.Ashes), ("Arsenal", "arsenal", Biome.Ashes), ("Ossário", "ossario", Biome.Crypt), ("Clareira", "clareira", Biome.Garden) })
             {
                 int index = director.LayoutIndex(name);
                 Assert.GreaterOrEqual(index, 0, "falta o arranjo " + name);

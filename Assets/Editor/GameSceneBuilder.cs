@@ -675,6 +675,23 @@ public static class GameSceneBuilder
         Home(Make("26_Pedreira", "Pedreira", (rubble, -5f, 2.4f, 30), (rubble, -1f, 3.4f, 120), (rubble, 3.6f, 2f, 200), (rubble, 6.4f, -1f, 80),
             (spikes, -3f, 0f, 0), (spikes, 2.4f, -0.8f, 0), (column, -6.8f, -3.2f, 0)), Quintessence.Run.Biome.Garden);
         Home(Make("27_Canais", "Canais", (strip, -3.4f, 1.2f, 90), (strip, 3.4f, 1.2f, 90), (pillar, 0f, 3.6f, 0), (pillar, -7f, -2.8f, 0), (pillar, 7f, -2.8f, 0)), Quintessence.Run.Biome.Crypt);
+        // segunda leva (cantoneiras: 0 = quina a sudoeste, cada +90 gira no sentido horario): mobilia do proprio pack (mesas, barris, baus, cantoneiras, escombros grandes) muda a leitura da sala
+        var table = Obstacle("table_long", 1f);
+        var tableBroken = Obstacle("table_long_broken", 1f);
+        var keg = Obstacle("keg", 1f);
+        var trunk = Obstacle("trunk_large_A", 1f);
+        var boxes = Obstacle("box_stacked", 1f);
+        var corner = Obstacle("barrier_corner", 1f);
+        var bigRubble = Obstacle("rubble_large", 0.8f);
+        var shrinePillar = Obstacle("pillar_decorated", 0.8f);
+        Make("28_Refeitorio", "Refeitório", (table, -4.2f, 1.4f, 0), (table, 4.2f, 1.4f, 0), (tableBroken, 0f, 3.6f, 90), (keg, -7.4f, -2.6f, 0), (keg, 7.4f, -2.6f, 0),
+            (barrel, -1.2f, -1.4f, 0));
+        Home(Make("29_Arsenal", "Arsenal", (boxes, -6f, 2.6f, 10), (trunk, -3.2f, 3.4f, 0), (vent, -2.8f, 0.2f, 0), (vent, 2.8f, 0.2f, 0), (trunk, 3.4f, 3.4f, 180),
+            (boxes, 6f, 2.6f, -10), (powder, 0f, 2.4f, 0)), Quintessence.Run.Biome.Ashes);
+        Home(Make("30_Ossario", "Ossário", (corner, -5f, 2.6f, 90), (corner, 5f, 2.6f, 180), (corner, -5f, -1.6f, 0), (corner, 5f, -1.6f, 270),
+            (pool, 0f, 0.8f, 0), (shrinePillar, 0f, 3.7f, 0)), Quintessence.Run.Biome.Crypt);
+        Home(Make("31_Clareira", "Clareira", (bigRubble, -4.6f, 2.6f, 20), (bigRubble, 4.6f, 2.6f, 160), (bigRubble, -5.8f, -1.8f, 70), (bigRubble, 5.8f, -1.8f, 110),
+            (shrinePillar, 0f, 1f, 0), (spikes, -2.6f, 0.4f, 0), (spikes, 2.6f, 0.4f, 0)), Quintessence.Run.Biome.Garden);
         return list.ToArray();
     }
 

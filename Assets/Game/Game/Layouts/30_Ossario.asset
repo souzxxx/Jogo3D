@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e2ca81051d317428ea372b142d2aa5d1, type: 3}
+  m_Name: 30_Ossario
+  m_EditorClassIdentifier: Quintessence.Game::Quintessence.Game.RoomLayout
+  displayName: "Oss\xE1rio"
+  pieces:
+  - prefab: {fileID: 2604929694383642127, guid: 2759fe8728ae14f78b179b0dd6720d8f, type: 3}
+    position: {x: -5, y: 0, z: 2.6}
+    rotation: 90
+  - prefab: {fileID: 2604929694383642127, guid: 2759fe8728ae14f78b179b0dd6720d8f, type: 3}
+    position: {x: 5, y: 0, z: 2.6}
+    rotation: 180
+  - prefab: {fileID: 2604929694383642127, guid: 2759fe8728ae14f78b179b0dd6720d8f, type: 3}
+    position: {x: -5, y: 0, z: -1.6}
+    rotation: 0
+  - prefab: {fileID: 2604929694383642127, guid: 2759fe8728ae14f78b179b0dd6720d8f, type: 3}
+    position: {x: 5, y: 0, z: -1.6}
+    rotation: 270
+  - prefab: {fileID: 8913281005482464855, guid: e8ad8f442fce740b5bc305da1da42fa0, type: 3}
+    position: {x: 0, y: 0, z: 0.8}
+    rotation: 0
+  - prefab: {fileID: 572711486763307510, guid: fa78f2f9287644d92a5656c82d04f661, type: 3}
+    position: {x: 0, y: 0, z: 3.7}
+    rotation: 0
+  biomes: 01000000i

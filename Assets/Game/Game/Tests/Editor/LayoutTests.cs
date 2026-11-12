@@ -76,7 +76,7 @@ namespace Quintessence.Game.Tests
             foreach (var b in new[] { Biome.Ashes, Biome.Crypt, Biome.Garden })
             {
                 var home = all.Where(l => l.biomes != null && l.biomes.Contains(b)).ToList();
-                Assert.GreaterOrEqual(home.Count, 1, Biomes.Name(b) + " tem arranjo proprio");
+                Assert.GreaterOrEqual(home.Count, 2, Biomes.Name(b) + " tem pelo menos dois arranjos proprios");
                 foreach (var l in home)
                 {
                     Assert.AreEqual(3, l.WeightFor(b), l.displayName);

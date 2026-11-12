@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e2ca81051d317428ea372b142d2aa5d1, type: 3}
+  m_Name: 28_Refeitorio
+  m_EditorClassIdentifier: Quintessence.Game::Quintessence.Game.RoomLayout
+  displayName: "Refeit\xF3rio"
+  pieces:
+  - prefab: {fileID: 4569421191210249927, guid: d7a72dc0763c141c990690fe1775a83f, type: 3}
+    position: {x: -4.2, y: 0, z: 1.4}
+    rotation: 0
+  - prefab: {fileID: 4569421191210249927, guid: d7a72dc0763c141c990690fe1775a83f, type: 3}
+    position: {x: 4.2, y: 0, z: 1.4}
+    rotation: 0
+  - prefab: {fileID: 5638055707228935583, guid: 25b94f78beef94189a786f650e4bdbf4, type: 3}
+    position: {x: 0, y: 0, z: 3.6}
+    rotation: 90
+  - prefab: {fileID: 4126950667018598213, guid: dc0a4780f308c46928188523ceb25538, type: 3}
+    position: {x: -7.4, y: 0, z: -2.6}
+    rotation: 0
+  - prefab: {fileID: 4126950667018598213, guid: dc0a4780f308c46928188523ceb25538, type: 3}
+    position: {x: 7.4, y: 0, z: -2.6}
+    rotation: 0
+  - prefab: {fileID: 5341355624455383154, guid: eee25d6d458ed48c88f035437a6fc0e9, type: 3}
+    position: {x: -1.2, y: 0, z: -1.4}
+    rotation: 0
+  biomes: 
