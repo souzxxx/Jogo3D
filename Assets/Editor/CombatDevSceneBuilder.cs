@@ -60,13 +60,16 @@ public static class CombatDevSceneBuilder
             ("Dualwield_Melee_Attack_Slice|1H_Melee_Attack_Slice_Diagonal", "Dualwield_Melee_Attack_Stab|1H_Melee_Attack_Slice_Horizontal", "Dualwield_Melee_Attack_Chop|2H_Melee_Attack_Chop"),
         };
         for (int h = 0; h < 4; h++)
+        {
+            var kit = HeroKit.Of(Elements.All[h]);
             heroCtrls[h] = Controller(HeroFbx, AnimDir + "Hero_" + HeroBuilder.Specs[h].Name + ".controller",
                 ("Idle", "Idle", 0f), ("Run", "Running_A", 0f),
                 ("DashF", "Dodge_Forward", 0.3f), ("DashB", "Dodge_Backward", 0.3f), ("DashL", "Dodge_Left", 0.3f), ("DashR", "Dodge_Right", 0.3f),
-                ("Attack0", combos[h].a, 0.34f), ("Attack1", combos[h].b, 0.34f), ("Attack2", combos[h].c, 0.5f),
+                ("Attack0", combos[h].a, kit.Steps[0].Duration + 0.04f), ("Attack1", combos[h].b, kit.Steps[1].Duration + 0.04f), ("Attack2", combos[h].c, kit.Steps[2].Duration + 0.05f),
                 ("SkillFire", "Spellcast_Shoot", 0.4f), ("SkillWater", "2H_Melee_Attack_Slice", 0.45f),
                 ("SkillEarth", "Spellcast_Raise", 0.6f), ("SkillAir", "2H_Melee_Attack_Spinning|2H_Melee_Attack_Spin", 0.45f),
                 ("Hit", "Hit_A", 0.3f), ("Death", "Death_A", 0f), ("Quint", "Cheer", 0.7f));
+        }
         dummyCtrl = Controller(MinionFbx, AnimDir + "Dummy.controller", ("Idle", "Idle_Combat", 0f));
 
         var root = LookDevBuilder.BeginArena(rootName);

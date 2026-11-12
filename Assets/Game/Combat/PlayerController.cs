@@ -54,6 +54,10 @@ namespace Quintessence.Combat
         public bool IsDashing => dash.IsDashing;
         public bool IsAttacking => combo.IsAttacking;
         public bool IsCasting => castLeft > 0f;
+        /// Kit de golpe basico em uso (nulo ate a run escolher o heroi: vale o que esta no Inspector).
+        public HeroKit Kit { get; private set; }
+        public float AttackRange => attackRange;
+        public float AttackArc => attackArc;
         public DashState Dash => dash;
         public ComboState Combo => combo;
         public LoadoutState Loadout => loadout;
@@ -191,6 +195,10 @@ namespace Quintessence.Combat
             mods.Reset();
             for (int i = 0; i < skillCd.Length; i++) skillCd[i] = 0f;
             if (TryGetComponent(out HeroSkin skin)) skin.Show(starting);
+            // cada heroi golpeia do seu jeito: ritmo, alcance e abertura do combo vem do kit dele
+            Kit = HeroKit.Of(starting);
+            combo = new ComboState(Kit.Steps);
+            attackRange = Kit.Range; attackArc = Kit.Arc; baseCritChance = Kit.CritChance;
             GameEvents.RaiseElementAwakened(starting);
             GameEvents.RaiseElementSwitched(ElementType.None, starting);
         }
