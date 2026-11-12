@@ -256,6 +256,15 @@ namespace Quintessence.Game
             GameEvents.QuintessenceActiveChanged += OnQuintessence;
             GameEvents.ReactionTriggered += OnReactionForFeats;
             GameEvents.BossShieldChanged += OnBossShield;
+            GameEvents.AttackPerformed += OnAttackForTrial;
+        }
+
+        // Pes no Chao: cada dash do heroi conta
+        void OnAttackForTrial(AttackEvent e)
+        {
+            if (!TrialActive || Busy || e.Kind != AttackKind.Dash || player == null || e.Source != player.gameObject) return;
+            TrialDashes++;
+            UpdateTrialLabel();
         }
 
         // ---------- contagem para os Feitos ----------
@@ -301,6 +310,7 @@ namespace Quintessence.Game
         public float TrialLimit { get; private set; }
         public float TrialElapsed { get; private set; }
         public int TrialHits { get; private set; }
+        public int TrialDashes { get; private set; }
         /// Resultado da ultima Provacao (null = nenhuma terminou nesta run).
         public bool? LastTrialPassed { get; private set; }
         float lastTrialHit = -99f, lastTrialCounted = -99f;
@@ -309,7 +319,7 @@ namespace Quintessence.Game
         int restoredTrialLost = -1;
         bool trialForfeit;
         public int MasteryPicksLeft => masteryPicks;
-        bool TrialHolding => !trialForfeit && Trials.Holding(TrialKind, TrialElapsed, TrialHits, TrialLimit);
+        bool TrialHolding => !trialForfeit && Trials.Holding(TrialKind, TrialElapsed, TrialHits, TrialLimit, TrialDashes);
         string trialStatus = "";
         bool trialLostShown;
 
@@ -320,6 +330,7 @@ namespace Quintessence.Game
             TrialLimit = Trials.TimeLimit(waves);
             TrialElapsed = 0f;
             TrialHits = 0;
+            TrialDashes = 0;
             lastTrialHit = lastTrialCounted = -99f;
             lastTrialSource = null;
             trialLostShown = false;
@@ -350,7 +361,7 @@ namespace Quintessence.Game
             if (!TrialActive || Busy || Finished) return;
             TrialElapsed += Time.deltaTime;
             // o letreiro so muda quando o texto muda (um segundo a menos, um golpe a mais)
-            if ((TrialHolding ? Trials.Status(TrialKind, TrialElapsed, TrialHits, TrialLimit) : "perdida") != trialStatus) UpdateTrialLabel();
+            if ((TrialHolding ? Trials.Status(TrialKind, TrialElapsed, TrialHits, TrialLimit, TrialDashes) : "perdida") != trialStatus) UpdateTrialLabel();
             if (!trialLostShown && !TrialHolding)
             {
                 trialLostShown = true;
@@ -365,7 +376,7 @@ namespace Quintessence.Game
         void UpdateTrialLabel()
         {
             if (!TrialActive || Run == null) return;
-            trialStatus = (TrialHolding ? Trials.Status(TrialKind, TrialElapsed, TrialHits, TrialLimit) : "perdida");
+            trialStatus = (TrialHolding ? Trials.Status(TrialKind, TrialElapsed, TrialHits, TrialLimit, TrialDashes) : "perdida");
             hud.SetRoom($"Sala {Run.Depth + 1}/{Run.Map.LayerCount} · Provação · {trialStatus}", RoomType.Trial);
         }
 
@@ -444,6 +455,7 @@ namespace Quintessence.Game
             GameEvents.QuintessenceActiveChanged -= OnQuintessence;
             GameEvents.ReactionTriggered -= OnReactionForFeats;
             GameEvents.BossShieldChanged -= OnBossShield;
+            GameEvents.AttackPerformed -= OnAttackForTrial;
         }
 
         void Start()
@@ -647,7 +659,8 @@ namespace Quintessence.Game
             Dress(node.Type);
             TrialActive = false;
             if (node.Type == RoomType.Combat || node.Type == RoomType.Elite || node.Type == RoomType.Boss || node.Type == RoomType.Trial)
-                PlaceBiomeProps(Biomes.For(Run.Depth, Run.Map.LayerCount), GameFlow.Seed + node.Id * 7);
+                // a sala da Rainha Afogada e um salao alagado: adereços da Cripta em vez dos do Coracao
+                PlaceBiomeProps(node.Type == RoomType.Boss && QueenRun ? Biome.Crypt : Biomes.For(Run.Depth, Run.Map.LayerCount), GameFlow.Seed + node.Id * 7);
             DressBiome(Biomes.For(Run.Depth, Run.Map.LayerCount), true);
             // a Rainha Afogada alaga o Coracao: a luz e a cor da sala final viram as da Cripta (o nome continua o do Coracao)
             if (node.Type == RoomType.Boss && QueenRun && dresser != null) dresser.Apply(Biome.Crypt);

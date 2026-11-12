@@ -949,6 +949,17 @@ namespace Quintessence.Game.PlayTests
             for (int k = 0; k < 30; k++) yield return null;
             Assert.AreEqual(false, director.LastTrialPassed);
             Assert.AreEqual(talents, director.Run.Talents.Count, "perdida, sem talento extra");
+
+            // Pes no Chao: um dash e ela se perde
+            director.StartTrial(new MapNode { Id = IdFor(TrialKind.Grounded), Type = RoomType.Trial }, 2);
+            Assert.AreEqual(TrialKind.Grounded, director.TrialKind);
+            for (int k = 0; k < 5; k++) yield return null;
+            StringAssert.Contains("sem dash", hud.RoomLabel);
+            var heroGo = Object.FindFirstObjectByType<PlayerController>().gameObject;
+            GameEvents.RaiseAttackPerformed(new AttackEvent { Kind = AttackKind.Dash, Source = heroGo, Origin = heroGo.transform.position, Direction = Vector3.forward });
+            Assert.AreEqual(1, director.TrialDashes);
+            for (int k = 0; k < 5; k++) yield return null;
+            StringAssert.Contains("perdida", hud.RoomLabel);
             GameFlow.StartElement = ElementType.Fire;
             GameFlow.Layers = 8; GameFlow.Shrines = 3;
             Time.captureFramerate = 0;
