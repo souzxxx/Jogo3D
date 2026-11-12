@@ -96,7 +96,7 @@ namespace Quintessence.Combat
         ElementDefinition fallback, castDef;
         Vector3 dashDir, castPoint;
         bool wasDashing, castHit;
-        float castLeft, castT, dashSpeed, armorLeft;
+        float castLeft, castT, dashSpeed, armorLeft, hasteLeft;
         int quintCycle;
         const float InputBuffer = 0.25f;
         float dashBuffer, skillBuffer;
@@ -118,8 +118,33 @@ namespace Quintessence.Combat
             Input ??= GetComponent<IPlayerInput>();
         }
 
-        void OnEnable() => GameEvents.ReactionTriggered += OnReaction;
-        void OnDisable() => GameEvents.ReactionTriggered -= OnReaction;
+        void OnEnable()
+        {
+            GameEvents.ReactionTriggered += OnReaction;
+            GameEvents.HitBlocked += OnBlocked;
+            GameEvents.Died += OnAnyDied;
+        }
+
+        void OnDisable()
+        {
+            GameEvents.ReactionTriggered -= OnReaction;
+            GameEvents.HitBlocked -= OnBlocked;
+            GameEvents.Died -= OnAnyDied;
+        }
+
+        /// Espinhos de Pedra: o golpe que o Pilar bloqueou volta como dano de Terra em volta do heroi.
+        void OnBlocked(Health target, DamageInfo info)
+        {
+            if (target != health || mods.EarthThorns <= 0f) return;
+            ShapedHit(ElementType.Earth, transform.position, AimDirection, 3.2f, 360f, mods.EarthThorns, 5f, AttackKind.Skill, 0f, false, default, 0f);
+        }
+
+        /// Impeto: cada inimigo derrotado adianta as recargas.
+        void OnAnyDied(Health target, DamageInfo info)
+        {
+            if (mods.SkillRefundOnKill <= 0f || target == health || target.Team == health.Team) return;
+            for (int i = 0; i < skillCd.Length; i++) if (skillCd[i] > 0f) skillCd[i] -= mods.SkillRefundOnKill;
+        }
 
         void Start()
         {
@@ -153,7 +178,7 @@ namespace Quintessence.Combat
         /// 0 = pronta, 1 = acabou de usar.
         public float SkillCooldown01(ElementType e)
         {
-            float cd = Def(e).skillCooldown * mods.SkillCooldownMult;
+            float cd = Def(e).skillCooldown * mods.SkillCooldown(e);
             return cd <= 0f ? 0f : Mathf.Clamp01(skillCd[(int)e] / cd);
         }
 
@@ -208,7 +233,9 @@ namespace Quintessence.Combat
             }
 
             dash.Cooldown = dashCooldown * mods.DashCooldownMult;
+            if (dash.MaxCharges != 1 + mods.DashChargesAdd) dash.SetMaxCharges(1 + mods.DashChargesAdd);
             float moveMul = mods.MoveSpeedMult;
+            if (hasteLeft > 0f) { hasteLeft -= dt; moveMul *= 1.35f; }
             bool canAct = true;
             if (TryGetComponent(out StatusHolder status)) { moveMul *= status.State.MoveMultiplier; canAct = status.State.CanAct; }
 
@@ -268,7 +295,7 @@ namespace Quintessence.Combat
                     castLeft = castDef.skillCastTime;
                     castT = 0f;
                     castHit = false;
-                    skillCd[ei] = castDef.skillCooldown * mods.SkillCooldownMult;
+                    skillCd[ei] = castDef.skillCooldown * mods.SkillCooldown(cast);
                     SkillStarted?.Invoke(cast);
                 }
                 else
@@ -309,7 +336,9 @@ namespace Quintessence.Combat
             var step = combo.Current;
             bool finisher = combo.CurrentIndex == combo.StepCount - 1;
             // golpe basico: sem elemento, sem marca e sem status. Ele bate mais forte em quem ja esta marcado.
-            int hits = ShapedHit(ElementType.None, transform.position, AimDirection, attackRange, attackArc, step.Damage, step.Knockback,
+            float boost = mods.BasicDamageMult * (finisher ? mods.FinisherMult : 1f);
+            int hits = ShapedHit(ElementType.None, transform.position, AimDirection, attackRange, attackArc, step.Damage * boost,
+                step.Knockback * (finisher ? mods.FinisherMult : 1f),
                 finisher ? AttackKind.Finisher : AttackKind.Basic, baseCritChance, false, default, 0f);
             AttackHit?.Invoke(combo.CurrentIndex, hits);
         }
@@ -329,23 +358,30 @@ namespace Quintessence.Combat
             }
             // alem do proprio status, a skill aplica o efeito de assinatura do elemento (a Terra quebra armadura)
             bool second = d.finisherAppliesStatus && (!d.skillAppliesStatus || d.finisherStatus != d.skillStatus);
-            ShapedHit(castElement, origin, AimDirection, d.skillRange, arc, d.skillDamage * d.damageMultiplier, d.skillKnockback,
+            float reach = d.skillRange * mods.SkillRange(castElement);
+            ShapedHit(castElement, origin, AimDirection, reach, arc, d.skillDamage * d.damageMultiplier, d.skillKnockback,
                 AttackKind.Skill, d.critChance, d.skillAppliesStatus, d.skillStatus, d.skillStatusDuration,
                 second, d.finisherStatus, d.finisherStatusDuration);
 
             // o papel de cada elemento alem do dano: Agua cuida, Terra protege, Ar e a fuga
             switch (castElement)
             {
+                case ElementType.Fire:
+                    if (mods.FireTrailSeconds > 0f)
+                        DamageZone.Spawn(origin + AimDirection * (reach * 0.55f), reach * 0.45f, mods.FireTrailSeconds, 0.5f, 4f * mods.Damage(ElementType.Fire),
+                            ElementType.Fire, health.Team, gameObject, reactions).WithStatus(StatusType.Burn, 2f);
+                    break;
                 case ElementType.Water:
-                    if (waterSkillHeal > 0f) health.Heal(health.Max * waterSkillHeal);
+                    if (waterSkillHeal + mods.WaterHealAdd > 0f) health.Heal(health.Max * (waterSkillHeal + mods.WaterHealAdd));
                     if (TryGetComponent(out StatusHolder own)) own.ClearNegative();
                     break;
                 case ElementType.Earth:
-                    health.Pool.Blocks = Mathf.Max(health.Pool.Blocks, 1);
+                    health.Pool.Blocks = Mathf.Max(health.Pool.Blocks, 1 + mods.EarthBlocksAdd);
                     armorLeft = earthSkillGuard;
                     break;
                 case ElementType.Air:
                     dash.Refill();
+                    if (mods.AirHasteSeconds > 0f) hasteLeft = mods.AirHasteSeconds;
                     break;
             }
         }
@@ -398,6 +434,7 @@ namespace Quintessence.Combat
                 float chance = critChance + mods.CritChanceAdd;
                 bool crit = chance > 0f && UnityEngine.Random.value < chance;
                 float marked = basic && target.TryGetComponent(out ElementMark m) && m.State.HasMark ? 1f + markedTargetBonus + mods.SwitchStrikeAdd : 1f;
+                if (mods.BurningBonus > 0f && target.TryGetComponent(out StatusHolder burning) && burning.State.Has(StatusType.Burn)) marked *= 1f + mods.BurningBonus;
                 var info = new DamageInfo(damage * mods.Damage(element) * marked * (crit ? critMultiplier : 1f), element, health.Team, gameObject)
                 {
                     Point = overlap[i].ClosestPoint(origin),
@@ -409,6 +446,8 @@ namespace Quintessence.Combat
                 hits++;
                 if (applyStatus && !target.IsDead)
                     StatusHolder.GetOrAdd(target).Apply(statusType, statusDuration * mods.StatusDurationMult, health.Team, gameObject);
+                if (kind == AttackKind.Skill && castElement == ElementType.Water && mods.WaterFreezeSeconds > 0f && !target.IsDead)
+                    StatusHolder.GetOrAdd(target).Apply(StatusType.Frozen, mods.WaterFreezeSeconds, health.Team, gameObject);
                 if (applySecond && !target.IsDead)
                     StatusHolder.GetOrAdd(target).Apply(secondType, secondDuration * mods.StatusDurationMult, health.Team, gameObject);
             }
