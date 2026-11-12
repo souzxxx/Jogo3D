@@ -106,8 +106,11 @@ namespace Quintessence.UI
                 string syn = Synergy.Hint(talents, t);
                 string rankLine = (t.MaxRank > 1 ? $"Grau {rank + 1} de {t.MaxRank}" : "") + (syn.Length > 0 ? (t.MaxRank > 1 ? "  ·  " : "") + syn : "");
                 if (rankLine.Length > 0)
-                    UiKit.Text(UiKit.Rect("Rank", card, new Vector2(0.5f, 1), new Vector2(0, -350), new Vector2(330, 26)), rankLine, 18,
-                        syn.EndsWith("!") ? new Color(0.9f, 0.76f, 0.42f) : UiKit.Dim, TextAnchor.MiddleCenter, false);
+                {
+                    var rankText = UiKit.Text(UiKit.Rect("Rank", card, new Vector2(0.5f, 1), new Vector2(0, -350), new Vector2(330, 26)), rankLine, 18,
+                        syn.Contains("!") ? new Color(0.9f, 0.76f, 0.42f) : UiKit.Dim, TextAnchor.MiddleCenter, false);
+                    rankText.resizeTextForBestFit = true; rankText.resizeTextMinSize = 12; rankText.resizeTextMaxSize = 18;
+                }
                 var b = UiKit.Button(card, $"Escolher  [{i + 1}]", new Vector2(0.5f, 0), new Vector2(0, 26), new Vector2(300, 60), UiKit.Primary, () => pick(index));
                 if (i == 0) UiKit.Focus(b.gameObject);
             }

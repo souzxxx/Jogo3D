@@ -224,6 +224,8 @@ namespace Quintessence.Run.Tests
             Assert.AreEqual(1f, m.Damage(ElementType.Water), 1e-4f, "os outros elementos nao mudam");
             // talento de reacao conta para os dois elementos do par
             var steam = TalentCatalog.All.First(t => t.Effect == TalentEffect.ReactionBoost && ((t.Element == ElementType.Fire && t.Second == ElementType.Water) || (t.Element == ElementType.Water && t.Second == ElementType.Fire)));
+            StringAssert.StartsWith("Sintonia: ", Synergy.Hint(book, steam), "talento de reacao mostra os dois elementos");
+            StringAssert.Contains("Água 1/3", Synergy.Hint(book, steam));
             book.Take(steam, m);
             Assert.AreEqual(4, Synergy.Points(book, ElementType.Fire));
             Assert.AreEqual(1, Synergy.Points(book, ElementType.Water));
@@ -239,6 +241,20 @@ namespace Quintessence.Run.Tests
             Assert.AreEqual(1f, clean.Damage(ElementType.Fire));
             Assert.AreEqual(2, Synergy.Tier(restored, ElementType.Fire));
             Assert.AreEqual("", Synergy.Hint(book, T("body_basic")), "talento de corpo nao entra na Sintonia");
+        }
+
+        [Test] public void Synergy_OneReactionTalent_CanRaiseBothElements()
+        {
+            var book = new TalentBook();
+            var m = new HeroModifiers();
+            Talent T(string id) => TalentCatalog.All.First(t => t.Id == id);
+            book.Take(T("fire_trail"), m); book.Take(T("fire_range"), m);
+            book.Take(T("water_heal"), m); book.Take(T("water_freeze"), m);
+            var steam = TalentCatalog.All.First(t => t.Effect == TalentEffect.ReactionBoost && ((t.Element == ElementType.Fire && t.Second == ElementType.Water) || (t.Element == ElementType.Water && t.Second == ElementType.Fire)));
+            book.Take(steam, m);
+            Assert.AreEqual(2, book.LastSynergies.Count, "Fogo e Agua chegam a 3 juntos");
+            Assert.AreEqual(1f + Synergy.DamageBonus, m.Damage(ElementType.Fire), 1e-4f);
+            Assert.AreEqual(1f + Synergy.DamageBonus, m.Damage(ElementType.Water), 1e-4f);
         }
     }
 }

@@ -105,9 +105,10 @@ namespace Quintessence.Run
             Taken.Add(t);
         }
 
-        /// Elemento e grau da Sintonia que o ultimo Take subiu (None/0 = nenhuma). Para a tela avisar.
-        public ElementType LastSynergy { get; private set; }
-        public int LastSynergyTier { get; private set; }
+        /// Sintonias que o ultimo Take subiu (um talento de reacao pode subir duas). Para a tela avisar.
+        public readonly List<(ElementType element, int tier)> LastSynergies = new();
+        public ElementType LastSynergy => LastSynergies.Count > 0 ? LastSynergies[LastSynergies.Count - 1].element : ElementType.None;
+        public int LastSynergyTier => LastSynergies.Count > 0 ? LastSynergies[LastSynergies.Count - 1].tier : 0;
 
         public bool Take(Talent t, HeroModifiers mods)
         {
@@ -116,7 +117,7 @@ namespace Quintessence.Run
             ranks[t.Id] = Rank(t.Id) + 1;
             Taken.Add(t);
             TalentCatalog.Apply(mods, t);
-            LastSynergy = ElementType.None; LastSynergyTier = 0;
+            LastSynergies.Clear();
             Raise(t.Element, beforeA, mods);
             Raise(t.Second, beforeB, mods);
             return true;
@@ -127,7 +128,7 @@ namespace Quintessence.Run
             if (e == ElementType.None) return;
             int now = Synergy.Tier(this, e);
             for (int tier = before + 1; tier <= now; tier++) Synergy.Apply(mods, e, tier);
-            if (now > before) { LastSynergy = e; LastSynergyTier = now; }
+            if (now > before) LastSynergies.Add((e, now));
         }
     }
 
@@ -163,12 +164,18 @@ namespace Quintessence.Run
         /// O que o cartao do talento mostra: quantos pontos de Sintonia ele leva o elemento a ter, e ate onde.
         public static string Hint(TalentBook book, Talent t)
         {
-            var e = t.Element;
-            if (e == ElementType.None) return "";
+            if (t.Element == ElementType.None) return "";
+            if (t.Second == ElementType.None) return "Sintonia de " + Part(book, t.Element);
+            // talento de reacao: soma para os dois elementos do par
+            return "Sintonia: " + Part(book, t.Element) + " e " + Part(book, t.Second);
+        }
+
+        static string Part(TalentBook book, ElementType e)
+        {
             int after = Points(book, e) + 1;
+            if (after > Tier2) return $"{ElementName(e)} completa";
             int goal = after <= Tier1 ? Tier1 : Tier2;
-            if (after > Tier2) return $"Sintonia de {ElementName(e)} completa";
-            return $"Sintonia de {ElementName(e)} {after}/{goal}" + (after == Tier1 || after == Tier2 ? "!" : "");
+            return $"{ElementName(e)} {after}/{goal}" + (after == Tier1 || after == Tier2 ? "!" : "");
         }
 
         public static string Describe(int tier) => tier == 1 ? "skill +20% de dano" : tier == 2 ? "skill recarrega 15% mais rápido" : "";

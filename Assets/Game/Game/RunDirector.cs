@@ -859,7 +859,9 @@ namespace Quintessence.Game
 
         void OnDied(Health target, DamageInfo info)
         {
-            if (target != playerHealth && target.Team == Team.Enemy && Run != null && !Finished
+            // quem desmorona no fim do Cerco (fonte = spawner) nao conta como abate do heroi
+            bool collapsed = spawner != null && info.Source == spawner.gameObject;
+            if (target != playerHealth && target.Team == Team.Enemy && Run != null && !Finished && !collapsed
                 && (target.GetComponent<EnemyBrain>() != null || target.GetComponent<BossBrain>() != null)) GrantKillXp(target);
             if (target == playerHealth && !Finished) { KilledBy = KillerName(info.Source); StartCoroutine(Finish(false)); }
         }
@@ -1168,13 +1170,11 @@ namespace Quintessence.Game
             if (masteryPicks > 0) masteryPicks--;
             Run.Talents.Take(t, player.Modifiers);
             ApplyMaxHealth();
-            if (Run.Talents.LastSynergyTier > 0)
-            {
-                var se = Run.Talents.LastSynergy;
-                Feel.DamageNumber.Spawn(player.transform.position + Vector3.up * 4.4f, $"SINTONIA DE {Synergy.ElementName(se).ToUpperInvariant()}: {Synergy.Describe(Run.Talents.LastSynergyTier)}",
+            int line = 0;
+            foreach (var (se, tier) in Run.Talents.LastSynergies)
+                Feel.DamageNumber.Spawn(player.transform.position + Vector3.up * (4.4f + 0.7f * line++), $"SINTONIA DE {Synergy.ElementName(se).ToUpperInvariant()}: {Synergy.Describe(tier)}",
                     Color.Lerp(ElementColors.Of(se), Color.white, 0.3f), 1.05f, 2.4f);
-                Sfx.Play("feat");
-            }
+            if (Run.Talents.LastSynergies.Count > 0) Sfx.Play("feat");
             Sfx.Play("pickup");
             if (levelUpOpen)
             {
