@@ -65,8 +65,17 @@ namespace Quintessence.UI
             Refresh();
         }
 
+        readonly UnityEngine.UI.Text[] heroWinLabels = new UnityEngine.UI.Text[4];
+
         void UpdateRefugeLabel()
         {
+            // vitorias de cada heroi no canto da carta dele
+            for (int i = 0; i < heroWinLabels.Length; i++)
+                if (heroWinLabels[i] != null && meta != null)
+                {
+                    int w = meta.HeroWins(Elements.All[i]);
+                    heroWinLabels[i].text = w > 0 ? (w == 1 ? "1 vitória" : $"{w} vitórias") : "";
+                }
             if (refugeLabel != null && meta != null) refugeLabel.text = $"REFÚGIO  ·  {meta.Shards} Fragmentos";
         }
 
@@ -220,12 +229,14 @@ namespace Quintessence.UI
                 "Melhorias que ficam para todas as runs. Cada sala vencida rende 3 Fragmentos; vencer o Guardião, mais 15.", 23, UiKit.Dim, TextAnchor.MiddleCenter, false);
             UiKit.Text(UiKit.Rect("Wallet", box, new Vector2(0.5f, 1), new Vector2(0, -160), new Vector2(900, 40)),
                 $"{meta.Shards} Fragmentos   ·   runs: {meta.Runs}   ·   vitórias: {meta.Wins}   ·   recorde: {meta.BestRooms} salas", 27, new Color(0.88f, 0.74f, 0.42f));
+            UiKit.Text(UiKit.Rect("HeroWins", box, new Vector2(0.5f, 1), new Vector2(0, -192), new Vector2(900, 28)),
+                $"Vitórias por herói:   Rax {meta.HeroWins(ElementType.Fire)}   ·   Liora {meta.HeroWins(ElementType.Water)}   ·   Brann {meta.HeroWins(ElementType.Earth)}   ·   Vey {meta.HeroWins(ElementType.Air)}", 21, UiKit.Dim, TextAnchor.MiddleCenter, false);
 
             for (int i = 0; i < MetaInfo.Count; i++)
             {
                 var u = (MetaUpgrade)i;
                 int level = meta.Level(u), max = MetaInfo.MaxLevel(u);
-                var row = UiKit.Box("Row" + i, box, new Vector2(0.5f, 1), new Vector2(0, -226 - i * 88), new Vector2(1080, 80), 0.5f);
+                var row = UiKit.Box("Row" + i, box, new Vector2(0.5f, 1), new Vector2(0, -240 - i * 86), new Vector2(1080, 78), 0.5f);
                 var disc = UiKit.Rect("Disc", row, new Vector2(0, 0.5f), new Vector2(16, 0), new Vector2(60, 60));
                 UiKit.Image(disc, UiKit.Circle, new Color(0.16f, 0.14f, 0.2f));
                 UiKit.Image(UiKit.Rect("Icon", disc, center, Vector2.zero, new Vector2(40, 40)), UiKit.Icon(MetaInfo.Icon(u)), UiKit.Cream);
@@ -312,6 +323,7 @@ namespace Quintessence.UI
                 UiKit.Text(UiKit.Rect("Name", card, new Vector2(0.5f, 1), new Vector2(0, -90), new Vector2(240, 48)), names[i], 38, UiKit.Cream);
                 UiKit.Image(UiKit.Rect("Rule", card, new Vector2(0.5f, 1), new Vector2(0, -148), new Vector2(72, 4)), null, Color.Lerp(c, UiKit.Cream, 0.2f));
                 UiKit.Text(UiKit.Rect("Note", card, new Vector2(0.5f, 0), new Vector2(0, 12), new Vector2(240, 58)), notes[i], 21, UiKit.Paper, TextAnchor.MiddleCenter, false);
+                heroWinLabels[i] = UiKit.Text(UiKit.Rect("Wins", card, new Vector2(1, 1), new Vector2(-38, -18), new Vector2(70, 22)), "", 17, new Color(0.9f, 0.76f, 0.42f), TextAnchor.MiddleRight, false);
             }
             var open = UiKit.Button(root, "REFÚGIO", new Vector2(0.5f, 0), new Vector2(-440, 74), new Vector2(360, 58), UiKit.Primary, () => ShowRefuge(true));
             void Small(string label, float x, Action act) =>

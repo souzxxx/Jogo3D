@@ -51,6 +51,9 @@ namespace Quintessence.Run
         public int Runs { get; private set; }
         public int Wins { get; private set; }
         public int BestRooms { get; private set; }
+        readonly int[] heroWins = new int[5];
+        /// Vitorias com o heroi daquele elemento.
+        public int HeroWins(ElementType hero) => (int)hero >= 1 && (int)hero <= 4 ? heroWins[(int)hero] : 0;
 
         public int Level(MetaUpgrade u) => levels[(int)u];
         public bool Maxed(MetaUpgrade u) => Level(u) >= MetaInfo.MaxLevel(u);
@@ -71,8 +74,9 @@ namespace Quintessence.Run
             Math.Max(0, roomsCleared) * ShardsPerRoom + (victory ? ShardsForVictory : 0);
 
         /// Fecha uma run: soma os Fragmentos ganhos e atualiza os recordes. Devolve quanto ganhou.
-        public int EndRun(int roomsCleared, bool victory, float shardMult = 1f)
+        public int EndRun(int roomsCleared, bool victory, float shardMult = 1f, ElementType hero = ElementType.None)
         {
+            if (victory && (int)hero >= 1 && (int)hero <= 4) heroWins[(int)hero]++;
             int earned = (int)Math.Round(Reward(roomsCleared, victory) * Math.Max(1f, shardMult));
             Shards += earned;
             Runs++;
@@ -95,8 +99,8 @@ namespace Quintessence.Run
             m.XpMult += MetaInfo.PerLevel(MetaUpgrade.Wisdom) * Level(MetaUpgrade.Wisdom);
         }
 
-        /// "v1;fragmentos;runs;vitorias;recorde;n0,n1,n2,n3,n4"
-        public string Serialize() => $"v1;{Shards};{Runs};{Wins};{BestRooms};{string.Join(",", levels)}";
+        /// "v1;fragmentos;runs;vitorias;recorde;niveis;vitorias por heroi" (o ultimo campo e opcional: saves antigos nao tem)
+        public string Serialize() => $"v1;{Shards};{Runs};{Wins};{BestRooms};{string.Join(",", levels)};{heroWins[1]},{heroWins[2]},{heroWins[3]},{heroWins[4]}";
 
         /// Le um save. Texto vazio, cortado ou adulterado vira progresso zerado ou valores dentro dos limites, nunca erro.
         public static MetaProgress Parse(string text)
@@ -112,6 +116,11 @@ namespace Quintessence.Run
             var lv = parts[5].Split(',');
             for (int i = 0; i < MetaInfo.Count && i < lv.Length; i++)
                 p.levels[i] = Read(lv[i], 0, MetaInfo.MaxLevel((MetaUpgrade)i));
+            if (parts.Length >= 7)
+            {
+                var hw = parts[6].Split(',');
+                for (int i = 0; i < 4 && i < hw.Length; i++) p.heroWins[i + 1] = Read(hw[i], 0, p.Wins);
+            }
             return p;
         }
 

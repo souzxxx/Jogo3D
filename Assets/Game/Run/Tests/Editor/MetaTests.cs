@@ -154,5 +154,19 @@ namespace Quintessence.Run.Tests
             Assert.AreEqual(0, p.Level(MetaUpgrade.Wisdom));
             Assert.AreEqual(0, p.Rerolls);
         }
+
+        [Test] public void Victories_AreCounted_PerHero_AndSurviveSaving()
+        {
+            var p = new MetaProgress();
+            p.EndRun(10, true, 1f, ElementType.Water);
+            p.EndRun(10, true, 1f, ElementType.Water);
+            p.EndRun(4, false, 1f, ElementType.Fire);
+            Assert.AreEqual(2, p.HeroWins(ElementType.Water));
+            Assert.AreEqual(0, p.HeroWins(ElementType.Fire), "derrota nao conta");
+            var back = MetaProgress.Parse(p.Serialize());
+            Assert.AreEqual(2, back.HeroWins(ElementType.Water));
+            Assert.AreEqual(2, back.Wins);
+            Assert.AreEqual(0, MetaProgress.Parse("v1;40;3;1;7;2,1,0,3,1").HeroWins(ElementType.Water), "save antigo, sem o campo novo");
+        }
     }
 }

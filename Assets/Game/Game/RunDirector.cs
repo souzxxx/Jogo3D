@@ -563,7 +563,7 @@ namespace Quintessence.Game
             yield return new WaitForSecondsRealtime(victory ? 1.6f : 1.2f);
             int seconds = Mathf.RoundToInt(Time.time - startTime);
             int unlockedBefore = Ascension.Unlocked(MetaStore.Current.Wins);
-            int shards = MetaStore.Current.EndRun(Run.RoomsCleared, victory, Ascension.ShardMult(GameFlow.Ascension));
+            int shards = MetaStore.Current.EndRun(Run.RoomsCleared, victory, Ascension.ShardMult(GameFlow.Ascension), GameFlow.StartElement);
             int unlockedNow = Ascension.Unlocked(MetaStore.Current.Wins);
             NewAscension = unlockedNow > unlockedBefore ? unlockedNow : 0;
             MetaStore.Save();
