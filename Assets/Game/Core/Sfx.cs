@@ -24,6 +24,24 @@ namespace Quintessence.Core
         }
     }
 
+    /// Dificuldade escolhida nas opcoes. Tranquila: o heroi recebe 35% menos dano de tudo (inimigos, chefes, perigos).
+    public static class GamePrefs
+    {
+        const string RelaxedKey = "game.relaxed";
+        public const float RelaxedDamageTaken = 0.65f;
+        static int relaxed = -1;
+        /// Os testes fixam a dificuldade aqui sem tocar na escolha guardada de quem joga.
+        public static bool? Force;
+
+        public static bool Relaxed
+        {
+            get { if (Force.HasValue) return Force.Value; if (relaxed < 0) relaxed = PlayerPrefs.GetInt(RelaxedKey, 0); return relaxed == 1; }
+            set { relaxed = value ? 1 : 0; PlayerPrefs.SetInt(RelaxedKey, relaxed); }
+        }
+
+        public static float HeroDamageTaken => Relaxed ? RelaxedDamageTaken : 1f;
+    }
+
     /// Volumes escolhidos pelo jogador (0..1), guardados entre sessoes.
     public static class AudioPrefs
     {

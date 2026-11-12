@@ -149,7 +149,7 @@ namespace Quintessence.UI
 
         public void ShowOptions()
         {
-            var box = OpenSheet("OPÇÕES", 560);
+            var box = OpenSheet("OPÇÕES", 640);
             UiOptions.Build(box, new Vector2(0, 10));
         }
 

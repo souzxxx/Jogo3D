@@ -517,6 +517,8 @@ namespace Quintessence.Game
         void Update()
         {
             if (Finished) return;
+            // a dificuldade pode mudar na pausa: vale na hora
+            if (playerHealth != null) playerHealth.Pool.AssistMultiplier = GameFlow.Tutorial ? 1f : GamePrefs.HeroDamageTaken;
             TickTrial();
             if ((saveHealthTimer -= Time.unscaledDeltaTime) <= 0f) { saveHealthTimer = 2f; SyncSavedHealth(); }
             if (levelUpOpen) { }
@@ -777,7 +779,7 @@ namespace Quintessence.Game
             ShardsEarned = shards;
             // o resultado ja esta gravado: fechar a aba durante a pausa abaixo nao perde a run
             yield return new WaitForSecondsRealtime(victory ? 1.6f : 1.2f);
-            string stats = (GameFlow.Ascension > 0 ? $"Ascensão {GameFlow.Ascension}   ·   " : "") + $"{HeroPassives.HeroName(GameFlow.StartElement)}   ·   Nível {Run.Progress.Level}   ·   {Plural(Run.Kills, "inimigo derrotado", "inimigos derrotados")}   ·   {Plural(Run.Talents.Count, "talento", "talentos")} e {Plural(Run.Boons.Count, "bênção", "bênçãos")}"
+            string stats = (GamePrefs.Relaxed ? "Tranquila   ·   " : "") + (GameFlow.Ascension > 0 ? $"Ascensão {GameFlow.Ascension}   ·   " : "") + $"{HeroPassives.HeroName(GameFlow.StartElement)}   ·   Nível {Run.Progress.Level}   ·   {Plural(Run.Kills, "inimigo derrotado", "inimigos derrotados")}   ·   {Plural(Run.Talents.Count, "talento", "talentos")} e {Plural(Run.Boons.Count, "bênção", "bênçãos")}"
                 + (!victory && KilledBy.Length > 0 ? $"\nDerrubado por: {KilledBy}" : "")
                 + $"\nSalas vencidas: {Run.RoomsCleared}   ·   Essência: {Run.Essence}   ·   Elementos: {player.Loadout.Awakened.Count}/4   ·   Tempo: {seconds / 60}:{seconds % 60:00}"
                 + $"\n+{shards} Fragmentos para o Refúgio (total: {MetaStore.Current.Shards})   ·   {HeroPassives.HeroName(GameFlow.StartElement)} +{MasteryGained} de maestria"

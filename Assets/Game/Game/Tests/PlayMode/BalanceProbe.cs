@@ -36,6 +36,7 @@ namespace Quintessence.Game.PlayTests
             // o roteiro desvia de todo aviso com reflexo perfeito, mas joga sem estrategia: dano cheio por padrao
             float taken = ProbeTaken;
             GameFlow.AutoPickTalents = true;
+            GamePrefs.Force = false; // a sonda mede a dificuldade Normal
             MetaStore.UseKey("quintessence.meta.test");
             RunSaveStore.UseKey("quintessence.run.probe");
             Tips.UseKey("quintessence.tips.probe");

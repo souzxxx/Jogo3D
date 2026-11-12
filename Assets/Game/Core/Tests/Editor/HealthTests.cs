@@ -3,6 +3,26 @@ using UnityEngine;
 
 namespace Quintessence.Core.Tests
 {
+    public class AssistTests
+    {
+        [Test] public void RelaxedDifficulty_CutsHeroDamage()
+        {
+            var p = new HealthPool(100);
+            p.AssistMultiplier = 0.65f;
+            p.Damage(20f);
+            Assert.AreEqual(87f, p.Current, 0.001f);
+            try
+            {
+                GamePrefs.Force = true;
+                Assert.IsTrue(GamePrefs.Relaxed);
+                Assert.AreEqual(GamePrefs.RelaxedDamageTaken, GamePrefs.HeroDamageTaken, 1e-4f);
+                GamePrefs.Force = false;
+                Assert.AreEqual(1f, GamePrefs.HeroDamageTaken);
+            }
+            finally { GamePrefs.Force = null; }
+        }
+    }
+
     public class HealthPoolTests
     {
         [Test] public void StartsFull() { var p = new HealthPool(100); Assert.AreEqual(100, p.Current); Assert.IsFalse(p.IsDead); }

@@ -12,6 +12,8 @@ namespace Quintessence.Core
         public float DamageTakenMultiplier { get; set; } = 1f;
         /// Segundo multiplicador, independente do de status (ex.: Quintessencia = 0.5).
         public float ExtraDamageTakenMultiplier { get; set; } = 1f;
+        /// Ajuda da dificuldade Tranquila (so no heroi). 1 = normal.
+        public float AssistMultiplier { get; set; } = 1f;
         /// Terceiro multiplicador, permanente na run (pactos).
         public float CurseMultiplier { get; set; } = 1f;
         /// Chance (0..1) de esquivar um golpe inteiro (passiva do Vey).
@@ -42,7 +44,7 @@ namespace Quintessence.Core
             if (IsDead || Invulnerable || amount <= 0f) return 0f;
             if (Evasion > 0f && (ForceEvade ?? dice.NextDouble() < Evasion)) { LastEvaded = true; return 0f; }
             if (Blocks > 0) { Blocks--; LastBlocked = true; return 0f; }
-            float applied = Math.Min(Current, amount * Math.Max(0f, DamageTakenMultiplier) * Math.Max(0f, ExtraDamageTakenMultiplier) * Math.Max(0f, CurseMultiplier));
+            float applied = Math.Min(Current, amount * Math.Max(0f, DamageTakenMultiplier) * Math.Max(0f, ExtraDamageTakenMultiplier) * Math.Max(0f, CurseMultiplier) * Math.Max(0f, AssistMultiplier));
             Current -= applied;
             return applied;
         }

@@ -7,7 +7,7 @@ namespace Quintessence.UI
     /// Opcoes que aparecem na pausa e no titulo: volume de musica e de efeitos, tela cheia e tremor de tela.
     public static class UiOptions
     {
-        /// Monta os tres controles em volta de pos (ancorados no centro de parent). Ocupa 660 x 240.
+        /// Monta os controles em volta de pos (ancorados no centro de parent). Ocupa 660 x 310.
         public static void Build(Transform parent, Vector2 pos)
         {
             Stepper(parent, pos + new Vector2(-170, 45), "MÚSICA", () => AudioPrefs.Music, v => AudioPrefs.Music = v);
@@ -29,7 +29,18 @@ namespace Quintessence.UI
             });
             label = b.transform.Find("Label").GetComponent<UnityEngine.UI.Text>();
             label.fontSize = 24;
+            UnityEngine.UI.Text difficultyLabel = null;
+            var d = UiKit.Button(parent, DifficultyLabel(), new Vector2(0.5f, 0.5f), pos + new Vector2(0, -152), new Vector2(640, 52), UiKit.Secondary, () =>
+            {
+                GamePrefs.Relaxed = !GamePrefs.Relaxed;
+                difficultyLabel.text = DifficultyLabel();
+            });
+            d.name = "Difficulty";
+            difficultyLabel = d.transform.Find("Label").GetComponent<UnityEngine.UI.Text>();
+            difficultyLabel.fontSize = 22;
         }
+
+        static string DifficultyLabel() => GamePrefs.Relaxed ? "Dificuldade: Tranquila (você recebe 35% menos dano)" : "Dificuldade: Normal";
 
         static string ShakeLabel() => FxPrefs.ScreenShake ? "Tremor de tela: sim" : "Tremor de tela: não";
 

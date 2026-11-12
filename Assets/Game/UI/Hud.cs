@@ -563,24 +563,24 @@ namespace Quintessence.UI
             bool hasBoons = boons != null && boons.Count > 0;
             // com bencaos, o painel sobe um pouco para a lista caber embaixo
             float top = hasBoons ? 110f : 30f;
-            UiKit.Box("Box", pausePanel, center, new Vector2(0, top), new Vector2(780, 640), 0.94f);
+            UiKit.Box("Box", pausePanel, center, new Vector2(0, top - 20), new Vector2(780, 680), 0.94f);
             var title = UiKit.Text(UiKit.Rect("Title", pausePanel, center, new Vector2(0, top + 262), new Vector2(700, 80)), "PAUSADO", 64, UiKit.Cream);
             title.font = GameFonts.Title;
             if (!string.IsNullOrEmpty(PauseSummary))
                 UiKit.Text(UiKit.Rect("Summary", pausePanel, center, new Vector2(0, top + 206), new Vector2(760, 28)), PauseSummary, 21, UiKit.Dim, TextAnchor.MiddleCenter, false);
             UiKit.Focus(UiKit.Button(pausePanel, "Continuar", center, new Vector2(0, top + 150), new Vector2(640, 70), UiKit.Primary, resume).gameObject);
             UiOptions.Build(pausePanel, new Vector2(0, top - 20));
-            UiKit.Button(pausePanel, "Menu principal", center, new Vector2(0, top - 235), new Vector2(640, 64), UiKit.Secondary, menu);
+            UiKit.Button(pausePanel, "Menu principal", center, new Vector2(0, top - 262), new Vector2(640, 64), UiKit.Secondary, menu);
             if (hasBoons)
             {
-                UiKit.Text(UiKit.Rect("BoonsTitle", pausePanel, center, new Vector2(0, top - 350), new Vector2(900, 36)), "BÊNÇÃOS", 26, UiKit.Dim);
+                UiKit.Text(UiKit.Rect("BoonsTitle", pausePanel, center, new Vector2(0, top - 372), new Vector2(900, 36)), "BÊNÇÃOS", 26, UiKit.Dim);
                 bool two = boons.Count > 4;
                 int rows = two ? (boons.Count + 1) / 2 : boons.Count;
                 for (int i = 0; i < boons.Count; i++)
                 {
                     float x = two ? (i < rows ? -430f : 430f) : 0f;
                     int row = two && i >= rows ? i - rows : i;
-                    UiKit.Text(UiKit.Rect("Boon" + i, pausePanel, center, new Vector2(x, top - 388 - row * 30), new Vector2(840, 30)),
+                    UiKit.Text(UiKit.Rect("Boon" + i, pausePanel, center, new Vector2(x, top - 408 - row * 30), new Vector2(840, 30)),
                         boons[i].name + " — " + boons[i].description, 22, UiKit.Cream, TextAnchor.MiddleCenter, false);
                 }
             }

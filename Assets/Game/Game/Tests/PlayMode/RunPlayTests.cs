@@ -45,6 +45,7 @@ namespace Quintessence.Game.PlayTests
             GameFlow.Resume = null;
             // a esquiva do Vey e sorteada: nos testes o golpe sempre entra (senao um golpe fatal falha 15% das vezes)
             HealthPool.ForceEvade = false;
+            GamePrefs.Force = false;
         }
 
         [TearDown]
@@ -54,6 +55,7 @@ namespace Quintessence.Game.PlayTests
             MetaStore.UseKey(MetaStore.DefaultKey);
             GameFlow.AutoPickTalents = false;
             HealthPool.ForceEvade = null;
+            GamePrefs.Force = null;
             RunSaveStore.Clear();
             RunSaveStore.UseKey(RunSaveStore.DefaultKey);
             Tips.ResetAll();
@@ -871,6 +873,18 @@ namespace Quintessence.Game.PlayTests
             for (int k = 0; k < 2000 && director.Busy; k++) yield return null;
             var hp = Object.FindFirstObjectByType<PlayerController>().GetComponent<Health>();
             int IdFor(TrialKind kind) { for (int i = 0; ; i++) if (Trials.Pick(GameFlow.Seed, i) == kind) return i; }
+            // dificuldade Tranquila: o heroi recebe 35% menos dano, e vale na hora (pode ser trocada na pausa)
+            GamePrefs.Force = true;
+            yield return null;
+            Assert.AreEqual(GamePrefs.RelaxedDamageTaken, hp.Pool.AssistMultiplier, 0.001f);
+            float full = hp.Current;
+            hp.TakeDamage(new DamageInfo(20f, ElementType.None, Team.Enemy));
+            Assert.AreEqual(full - 20f * GamePrefs.RelaxedDamageTaken, hp.Current, 0.01f);
+            GamePrefs.Force = false;
+            yield return null;
+            Assert.AreEqual(1f, hp.Pool.AssistMultiplier, 0.001f);
+            hp.Heal(999f);
+            for (int k = 0; k < 30; k++) yield return null;
 
             // Ileso: tres golpes ainda cumprem (dois juntos contam um)
             director.StartTrial(new MapNode { Id = IdFor(TrialKind.Unscathed), Type = RoomType.Trial }, 2);
