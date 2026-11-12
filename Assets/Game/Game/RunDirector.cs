@@ -281,7 +281,20 @@ namespace Quintessence.Game
             Run.AddEssence(MetaStore.Current.StartEssence);
             Run.Rerolls = MetaStore.Current.Rerolls;
             hud.SetEssence(Run.Essence);
-            if (GameFlow.Resume != null) { RestoreFrom(GameFlow.Resume); GameFlow.Resume = null; }
+            if (GameFlow.Resume != null)
+            {
+                var save = GameFlow.Resume;
+                GameFlow.Resume = null;
+                try { RestoreFrom(save); }
+                catch (System.Exception e)
+                {
+                    // save que nao serve mais (adulterado ou de outra versao): descarta e comeca uma run nova
+                    Debug.LogWarning("save da run descartado: " + e.Message);
+                    RunSaveStore.Clear();
+                    GameFlow.StartRun(GameFlow.StartElement);
+                    return;
+                }
+            }
             StartCoroutine(EnterRoom(Run.Current, true));
         }
 
@@ -315,10 +328,25 @@ namespace Quintessence.Game
             foreach (var e in player.Loadout.Awakened) awakened.Add((int)e);
             s.awakened = awakened.ToArray();
             RunSaveStore.Save(s);
+            currentSave = s;
+        }
+
+        RunSave currentSave;
+        float saveHealthTimer;
+
+        /// O save acompanha o dano levado na sala (so para baixo): sair e continuar nao devolve a vida. Publico para os testes.
+        public void SyncSavedHealth()
+        {
+            if (currentSave == null || Finished || playerHealth == null || playerHealth.IsDead) return;
+            if (playerHealth.Current >= currentSave.health - 0.5f) return;
+            currentSave.health = playerHealth.Current;
+            RunSaveStore.Save(currentSave);
         }
 
         void RestoreFrom(RunSave s)
         {
+            if (s.current < 0 || s.current >= Run.Map.Nodes.Count) throw new System.InvalidOperationException("a sala do save nao existe neste mapa");
+            foreach (int e in s.awakened) if (e < 1 || e > 4) throw new System.InvalidOperationException("elemento invalido no save");
             Run.Restore(s.current, s.visited, s.essence, s.roomsCleared);
             Run.Kills = s.kills;
             Run.Rerolls = s.rerolls;
@@ -344,6 +372,7 @@ namespace Quintessence.Game
         void Update()
         {
             if (Finished) return;
+            if ((saveHealthTimer -= Time.unscaledDeltaTime) <= 0f) { saveHealthTimer = 2f; SyncSavedHealth(); }
             if (levelUpOpen) { }
             else if (MenuInput.InventoryPressed && !Busy && (!GameClock.Paused || hud.InventoryVisible)) SetInventory(!hud.InventoryVisible);
             else if (MenuInput.PausePressed)
@@ -391,7 +420,7 @@ namespace Quintessence.Game
             if (paused && Run != null)
                 hud.PauseSummary = $"{HeroPassives.HeroName(GameFlow.StartElement)}  ·  nível {Run.Progress.Level}  ·  sala {Run.Depth + 1}/{Run.Map.LayerCount}  ·  {Biomes.Name(Biomes.For(Run.Depth, Run.Map.LayerCount))}"
                     + $"  ·  {Plural(Run.Talents.Count, "talento", "talentos")}" + (GameFlow.Ascension > 0 ? $"  ·  Ascensão {GameFlow.Ascension}" : "");
-            hud.ShowPause(paused, () => SetPaused(false), GameFlow.ToTitle);
+            hud.ShowPause(paused, () => SetPaused(false), () => { SyncSavedHealth(); GameFlow.ToTitle(); });
             if (paused) hud.ShowMap(Run, false);
         }
 
@@ -516,6 +545,7 @@ namespace Quintessence.Game
             foreach (var z in FindObjectsByType<DamageZone>(FindObjectsSortMode.None)) Destroy(z.gameObject);
             foreach (var p in FindObjectsByType<Projectile>(FindObjectsSortMode.None)) Destroy(p.gameObject);
             foreach (var t in FindObjectsByType<TimedLife>(FindObjectsSortMode.None)) Destroy(t.gameObject);
+            foreach (var v in FindObjectsByType<VolatileBurst>(FindObjectsSortMode.None)) Destroy(v.gameObject);
             foreach (var e in FindObjectsByType<EnemyBrain>(FindObjectsSortMode.None)) Destroy(e.gameObject);
             foreach (var b in FindObjectsByType<BossBrain>(FindObjectsSortMode.None)) Destroy(b.gameObject);
         }
@@ -564,6 +594,7 @@ namespace Quintessence.Game
             if (source.GetComponent<SpikeTrap>() != null) return "Armadilha de espinhos";
             if (source.GetComponent<EmberVent>() != null) return "Respiradouro de brasa";
             if (source.GetComponent<VolatileBurst>() != null) return "Explosão de um Volátil";
+            if (source.GetComponent<CorruptionPool>() != null) return "Poça de corrupção";
             return "";
         }
 
@@ -574,7 +605,6 @@ namespace Quintessence.Game
             RunSaveStore.Clear(); // run acabou: nada para continuar
             hud.HidePrompt();
             hud.ShowMap(Run, false);
-            yield return new WaitForSecondsRealtime(victory ? 1.6f : 1.2f);
             int seconds = Mathf.RoundToInt(Time.time - startTime);
             int unlockedBefore = Ascension.Unlocked(MetaStore.Current.Wins);
             int shards = MetaStore.Current.EndRun(Run.RoomsCleared, victory, Ascension.ShardMult(GameFlow.Ascension), GameFlow.StartElement);
@@ -582,6 +612,8 @@ namespace Quintessence.Game
             NewAscension = unlockedNow > unlockedBefore ? unlockedNow : 0;
             MetaStore.Save();
             ShardsEarned = shards;
+            // o resultado ja esta gravado: fechar a aba durante a pausa abaixo nao perde a run
+            yield return new WaitForSecondsRealtime(victory ? 1.6f : 1.2f);
             string stats = (GameFlow.Ascension > 0 ? $"Ascensão {GameFlow.Ascension}   ·   " : "") + $"{HeroPassives.HeroName(GameFlow.StartElement)}   ·   Nível {Run.Progress.Level}   ·   {Plural(Run.Kills, "inimigo derrotado", "inimigos derrotados")}   ·   {Plural(Run.Talents.Count, "talento", "talentos")} e {Plural(Run.Boons.Count, "bênção", "bênçãos")}"
                 + (!victory && KilledBy.Length > 0 ? $"\nDerrubado por: {KilledBy}" : "")
                 + $"\nSalas vencidas: {Run.RoomsCleared}   ·   Essência: {Run.Essence}   ·   Elementos: {player.Loadout.Awakened.Count}/4   ·   Tempo: {seconds / 60}:{seconds % 60:00}"
@@ -697,10 +729,11 @@ namespace Quintessence.Game
                     return true;
                 }),
             };
+            var pactRng = RoomRng(3);
             if (shuffle)
                 for (int k = offers.Length - 1; k > 0; k--)
                 {
-                    int j = rng.Next(k + 1);
+                    int j = pactRng.Next(k + 1);
                     (offers[k], offers[j]) = (offers[j], offers[k]);
                 }
             System.Array.Resize(ref offers, 3);
@@ -743,6 +776,14 @@ namespace Quintessence.Game
             }
         }
 
+        // ---------- sorteios ----------
+
+        /// Sorteio fixo por sala: sair e continuar mostra as mesmas ofertas (loja, bencaos, pacto).
+        System.Random RoomRng(int salt) => new(unchecked(GameFlow.Seed * 31 + Run.Current.Id * 7919 + salt * 104729));
+
+        /// Sorteio de talentos pelo estado da run: a mesma escolha volta igual depois de continuar; trocar muda.
+        System.Random TalentRng() => new(unchecked(GameFlow.Seed * 17 + Run.Talents.Count * 101 + Run.Rerolls * 7 + Run.Progress.Level * 13));
+
         // ---------- nivel e talentos ----------
 
         System.Random talentRng;
@@ -770,8 +811,7 @@ namespace Quintessence.Game
 
         void OpenLevelUp()
         {
-            Tip("level");
-            if (talentRng == null) talentRng = new System.Random(GameFlow.Seed);
+            talentRng = TalentRng();
             talentOffer = TalentCatalog.Offer(Run.Talents, player.Loadout.Awakened, talentRng);
             if (talentOffer.Count == 0) { while (Run.Progress.ConsumePick()) { } return; }
             if (GameFlow.AutoPickTalents) { PickTalent(0); return; }
@@ -779,15 +819,16 @@ namespace Quintessence.Game
             GameClock.SetPaused(true);
             hud.ShowMap(Run, false);
             hud.ShowLevelUp(Run.Progress.Level - Run.Progress.PendingPicks + 1, talentOffer, PickTalent, Run.Rerolls, RerollTalents);
+            Tip("level"); // depois do painel: a dica fica por cima dele
         }
 
         /// Troca as tres opcoes por outras (Intuicao, do Refugio). Publico para os testes.
         public void RerollTalents()
         {
             if (!levelUpOpen || Run.Rerolls <= 0) return;
-            var fresh = TalentCatalog.Offer(Run.Talents, player.Loadout.Awakened, talentRng);
-            if (fresh.Count == 0) return;
             Run.Rerolls--;
+            var fresh = TalentCatalog.Offer(Run.Talents, player.Loadout.Awakened, TalentRng());
+            if (fresh.Count == 0) { Run.Rerolls++; return; }
             talentOffer = fresh;
             Sfx.Play("ui_click");
             hud.ShowLevelUp(Run.Progress.Level - Run.Progress.PendingPicks + 1, talentOffer, PickTalent, Run.Rerolls, RerollTalents);
@@ -968,7 +1009,7 @@ namespace Quintessence.Game
             merchant = null;
             priceTags.Clear();
             var catalog = boonCatalog != null ? boonCatalog.boons : new List<Boon>();
-            var stock = ShopPlanner.Stock(catalog, Run.BoonIds, player.Loadout.Awakened, rng, Run.Depth);
+            var stock = ShopPlanner.Stock(catalog, Run.BoonIds, player.Loadout.Awakened, RoomRng(1), Run.Depth);
             // banca do mercador: prateleiras, balcao, ouro e o proprio (tudo do pack), some junto com o layout da sala
             if (shopDecorPrefab != null)
             {
@@ -1069,7 +1110,7 @@ namespace Quintessence.Game
         bool SetupBoons()
         {
             if (boonCatalog == null) return false;
-            var offer = BoonPicker.Offer(boonCatalog.boons, Run.BoonIds, player.Loadout.Awakened, rng);
+            var offer = BoonPicker.Offer(boonCatalog.boons, Run.BoonIds, player.Loadout.Awakened, RoomRng(2));
             if (offer.Count == 0) return false;
             for (int i = 0; i < offer.Count; i++)
             {

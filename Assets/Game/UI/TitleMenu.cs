@@ -32,6 +32,9 @@ namespace Quintessence.UI
         }
 
         /// Botao de continuar a run salva, no canto de cima. label: heroi e sala.
+        /// Ha uma run salva (o Refugio avisa que as compras so valem na proxima run nova).
+        public bool RunInProgress { get; private set; }
+
         public void ShowContinue(string label, Action onContinue)
         {
             if (canvas == null) return;
@@ -39,10 +42,13 @@ namespace Quintessence.UI
             var old = root.Find("Continue");
             if (old != null) Destroy(old.gameObject);
             if (onContinue == null) return;
+            RunInProgress = true;
             var box = UiKit.Rect("Continue", root, new Vector2(1, 1), new Vector2(-150, -150), new Vector2(290, 96));
             var b = UiKit.Button(box, "CONTINUAR RUN", new Vector2(0.5f, 1), new Vector2(0, -32), new Vector2(284, 60), UiKit.Primary, onContinue);
             b.transform.Find("Label").GetComponent<UnityEngine.UI.Text>().fontSize = 26;
             UiKit.Text(UiKit.Rect("Info", box, new Vector2(0.5f, 0), new Vector2(0, 2), new Vector2(300, 28)), label, 19, UiKit.Cream, TextAnchor.MiddleCenter, false);
+            // abaixo do Refugio e das folhas: aberto um painel, o botao nao fica por cima
+            if (refuge != null) box.SetSiblingIndex(refuge.GetSiblingIndex());
         }
 
         /// Seletor de Ascensao: aparece depois da primeira vitoria (precisa do save, por isso nasce no BindMeta).
@@ -57,7 +63,7 @@ namespace Quintessence.UI
             if (unlocked <= 0) { Ascension = 0; return; }
             Ascension = Mathf.Clamp(Ascension, 0, unlocked);
             var asc = UiKit.Rect("Ascension", root, new Vector2(0.5f, 0), new Vector2(0, 122), new Vector2(860, 32));
-            asc.SetSiblingIndex(Mathf.Max(0, root.childCount - 4));
+            if (refuge != null) asc.SetSiblingIndex(refuge.GetSiblingIndex());
             var label = UiKit.Text(UiKit.Rect("Label", asc, mid, Vector2.zero, new Vector2(740, 30)), "", 20, UiKit.Cream, TextAnchor.MiddleCenter, false);
             void Refresh() => label.text = $"ASCENSÃO {Ascension}/{unlocked}  ·  {Quintessence.Run.Ascension.Describe(Ascension)}";
             UiKit.Button(asc, "−", new Vector2(0, 0.5f), new Vector2(22, 0), new Vector2(44, 30), UiKit.Secondary, () => { Ascension = Mathf.Max(0, Ascension - 1); Refresh(); });
@@ -229,6 +235,9 @@ namespace Quintessence.UI
                 "Melhorias que ficam para todas as runs. Cada sala vencida rende 3 Fragmentos; vencer o Guardião, mais 15.", 23, UiKit.Dim, TextAnchor.MiddleCenter, false);
             UiKit.Text(UiKit.Rect("Wallet", box, new Vector2(0.5f, 1), new Vector2(0, -160), new Vector2(900, 40)),
                 $"{meta.Shards} Fragmentos   ·   runs: {meta.Runs}   ·   vitórias: {meta.Wins}   ·   recorde: {meta.BestRooms} salas", 27, new Color(0.88f, 0.74f, 0.42f));
+            if (RunInProgress)
+                UiKit.Text(UiKit.Rect("Note", box, new Vector2(0.5f, 0), new Vector2(0, 112), new Vector2(1000, 28)),
+                    "Há uma run salva: as compras valem a partir da próxima run nova.", 20, new Color(0.9f, 0.76f, 0.42f), TextAnchor.MiddleCenter, false);
             UiKit.Text(UiKit.Rect("HeroWins", box, new Vector2(0.5f, 1), new Vector2(0, -192), new Vector2(900, 28)),
                 $"Vitórias por herói:   Rax {meta.HeroWins(ElementType.Fire)}   ·   Liora {meta.HeroWins(ElementType.Water)}   ·   Brann {meta.HeroWins(ElementType.Earth)}   ·   Vey {meta.HeroWins(ElementType.Air)}", 21, UiKit.Dim, TextAnchor.MiddleCenter, false);
 

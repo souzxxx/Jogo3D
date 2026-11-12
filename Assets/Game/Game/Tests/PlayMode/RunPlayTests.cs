@@ -852,6 +852,10 @@ namespace Quintessence.Game.PlayTests
             director.Run.Advance(director.Run.Choices[0].Id);
             director.Run.Kills = 9;
             director.SaveRun();
+            // dano levado depois de entrar na sala tambem fica no save (sair e continuar nao devolve a vida)
+            hp.TakeDamage(new DamageInfo(11f, ElementType.None, Team.Enemy));
+            director.SyncSavedHealth();
+            Assert.AreEqual(hp.Current, RunSaveStore.Load().health, 0.01f);
             int room = director.Run.Current.Id, essence = director.Run.Essence;
             float life = hp.Current, max = hp.Max, damage = hero.Modifiers.DamageAll, range = hero.Modifiers.SkillRange(ElementType.Air);
             float airCd = hero.Modifiers.SkillCooldown(ElementType.Air);

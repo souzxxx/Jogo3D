@@ -32,7 +32,8 @@ namespace Quintessence.Game
             if (save == null) return false;
             Resume = save;
             StartElement = (ElementType)save.hero;
-            Seed = save.seed; Layers = save.layers; Shrines = save.shrines; Ascension = save.ascension;
+            Seed = save.seed; Layers = save.layers; Shrines = save.shrines;
+            Ascension = Quintessence.Run.Ascension.Clamp(save.ascension, MetaStore.Current.Wins);
             Tutorial = false;
             GameClock.SetPaused(false);
             SceneManager.LoadScene(RunScene);

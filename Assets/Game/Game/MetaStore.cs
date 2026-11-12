@@ -22,6 +22,7 @@ namespace Quintessence.Game
         {
             current = new MetaProgress();
             Save();
+            RunSaveStore.Clear(); // apagar o progresso tambem descarta a run salva
         }
 
         /// Troca o save usado (os testes usam um proprio, para nao mexer no do jogador).

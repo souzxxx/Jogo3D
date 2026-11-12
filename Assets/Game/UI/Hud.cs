@@ -739,6 +739,7 @@ namespace Quintessence.UI
 
         public void ShowResult(bool victory, string stats, Action again, Action menu)
         {
+            if (tipRoot != null) tipRoot.gameObject.SetActive(false);
             resultPanel.gameObject.SetActive(true);
             foreach (Transform child in resultPanel) Destroy(child.gameObject);
             var center = new Vector2(0.5f, 0.5f);

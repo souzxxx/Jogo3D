@@ -50,7 +50,8 @@ namespace Quintessence.Game
             try
             {
                 var s = JsonUtility.FromJson<RunSave>(text);
-                if (s == null || s.version != RunSave.Version || s.layers < 3 || s.hero < 1 || s.hero > 4 || s.maxHealth <= 0f) return null;
+                if (s == null || s.version != RunSave.Version || s.layers < 3 || s.layers > 30 || s.hero < 1 || s.hero > 4 || s.maxHealth <= 0f || s.current < 0) return null;
+                if (s.awakened != null) foreach (int e in s.awakened) if (e < 1 || e > 4) return null;
                 return s;
             }
             catch (Exception) { return null; }
