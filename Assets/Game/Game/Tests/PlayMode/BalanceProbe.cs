@@ -40,6 +40,7 @@ namespace Quintessence.Game.PlayTests
             foreach (var hero in Elements.All)
                 for (int seed = 1; seed <= ProbeSeeds; seed++)
                 {
+                    if (OnlyHero != ElementType.None && (hero != OnlyHero || seed != OnlySeed)) continue;
                     Time.timeScale = 1f;
                     Time.captureFramerate = 30;
                     GameEvents.Clear();
@@ -78,6 +79,16 @@ namespace Quintessence.Game.PlayTests
                             rooms += $" {lastDepth + 1}:{director.Run.Current.Type}";
                         }
                         if (hp.Pool.ExtraDamageTakenMultiplier == 1f) hp.Pool.ExtraDamageTakenMultiplier = taken;
+                        // sala que nao termina: anota quem ficou vivo e onde, e desiste da run
+                        if (roomTime > 240f && stuckReport.Length == 0)
+                        {
+                            var alive = Object.FindObjectsByType<EnemyBrain>(FindObjectsSortMode.None).Where(e => !e.GetComponent<Health>().IsDead)
+                                .Select(e => { var ag = e.GetComponent<UnityEngine.AI.NavMeshAgent>(); return $"{e.Definition.displayName}@{e.transform.position.x:0.0},{e.transform.position.z:0.0} navmesh={ag.isOnNavMesh} fase={e.Phase} vida={e.GetComponent<Health>().Current:0}"; });
+                            var sp = Object.FindFirstObjectByType<WaveSpawner>();
+                            stuckReport = $"PRESO sala {director.Run.Depth + 1} layout '{director.CurrentLayout}' heroi@{player.transform.position.x:0.0},{player.transform.position.z:0.0} vivos(state)={sp?.State?.Alive} resgates={sp?.StallRescues}: " + string.Join(" | ", alive);
+                            Debug.Log("SONDA " + stuckReport);
+                            break;
+                        }
                         var target = Nearest();
                         input.AttackHeld = false;
                         // o escurecimento da troca de sala corre em tempo real e a sonda em tempo de jogo: o roteiro luta mesmo durante ele
@@ -107,7 +118,7 @@ namespace Quintessence.Game.PlayTests
                             var to = goal - player.transform.position; to.y = 0;
                             float d = to.magnitude;
                             input.AimPoint = goal;
-                            input.Move = d > 1.4f ? new Vector2(to.x / d, to.z / d) : Vector2.zero;
+                            input.Move = d > 1.4f ? SteerTo(goal) : Vector2.zero;
                             if (d < 2.2f && sinceInteract > 0.5f) { sinceInteract = 0f; if (!pick.Prompt.StartsWith("entrar")) tried++; pick.Use(); }
                         }
                         else input.Move = Vector2.zero;
@@ -117,6 +128,7 @@ namespace Quintessence.Game.PlayTests
                     GameEvents.TelegraphStarted -= ConsiderDodge;
                     string bossInfo = lastBoss == null ? "" : $" | chefe {lastBossName} fase {lastBossPhase + 1} vida {lastBossHp * 100f:0}% quebras {shieldBreaks}";
                     lastBoss = null; shieldBreaks = 0;
+                    if (stuckReport.Length > 0) { log.AppendLine(stuckReport); stuckReport = ""; }
                     string line = $"{HeroSkin.NameOf(hero)} seed {GameFlow.Seed}: {(director.Victory ? "VITORIA" : director.Finished ? "caiu na sala " + (director.Run.Depth + 1) + " (" + director.Run.Current.Type + ")" : "TEMPO ESGOTADO na sala " + (director.Run.Depth + 1))}"
                         + bossInfo + $" | dano: {string.Join(", ", damageBy.OrderByDescending(kv => kv.Value).Take(5).Select(kv => $"{kv.Key} {kv.Value:0}"))}" + $" | nivel {director.Run.Progress.Level} | abates {director.Run.Kills} | {clock:0}s | talentos: {string.Join(",", director.Run.Talents.Taken.Select(t => t.Id))}\n   {rooms}";
                     log.AppendLine(line);
@@ -135,6 +147,10 @@ namespace Quintessence.Game.PlayTests
         /// Quanto do dano o roteiro leva e quantas sementes por heroi. Mudar aqui para comparar.
         public static float ProbeTaken = 1f;
         public static int ProbeSeeds = 3;
+        /// Para investigar uma run so (None = todas).
+        public static ElementType OnlyHero = ElementType.None;
+        public static int OnlySeed = 1;
+        string stuckReport = "";
 
         BossBrain lastBoss;
         string lastBossName = "";
@@ -155,7 +171,7 @@ namespace Quintessence.Game.PlayTests
             float d = to.magnitude;
             input.AimPoint = target.transform.position;
             float reach = boss != null ? 1f : 0f;
-            input.Move = d > 2.6f + reach ? new Vector2(to.x / d, to.z / d) : Vector2.zero;
+            input.Move = d > 2.6f + reach ? SteerTo(target.transform.position) : Vector2.zero;
             input.AttackHeld = d < 3.6f + reach;
             if (player.QuintessenceReady) input.PressQuintessence();
             if (d > 4.5f + reach) return;
@@ -170,6 +186,25 @@ namespace Quintessence.Game.PlayTests
                 if (mark != ElementType.None) break; // detonar vem primeiro
             }
             if (pick != ElementType.None) input.PressElementSkill((int)pick);
+        }
+
+        static readonly UnityEngine.AI.NavMeshPath navPath = new();
+
+        /// Anda ate goal contornando barreiras pelo NavMesh (como uma pessoa daria a volta).
+        Vector2 SteerTo(Vector3 goal)
+        {
+            var from = player.transform.position;
+            var straight = goal - from; straight.y = 0f;
+            var fallback = straight.sqrMagnitude > 0.01f ? new Vector2(straight.x, straight.z).normalized : Vector2.zero;
+            if (!UnityEngine.AI.NavMesh.SamplePosition(from, out var a, 2f, UnityEngine.AI.NavMesh.AllAreas)) return fallback;
+            if (!UnityEngine.AI.NavMesh.SamplePosition(goal, out var b, 3f, UnityEngine.AI.NavMesh.AllAreas)) return fallback;
+            if (!UnityEngine.AI.NavMesh.CalculatePath(a.position, b.position, UnityEngine.AI.NavMesh.AllAreas, navPath) || navPath.corners.Length < 2) return fallback;
+            for (int i = 1; i < navPath.corners.Length; i++)
+            {
+                var d = navPath.corners[i] - from; d.y = 0f;
+                if (d.sqrMagnitude > 0.09f) return new Vector2(d.x, d.z).normalized;
+            }
+            return fallback;
         }
 
         void ConsiderDodge(TelegraphEvent e)

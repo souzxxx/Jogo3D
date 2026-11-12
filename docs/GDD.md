@@ -106,6 +106,8 @@ Uma skill deixa no inimigo a **marca** do elemento dela. Acertar esse inimigo co
 
 **Quintessência:** reações enchem o medidor. Com os quatro elementos despertos e o medidor cheio, R ativa 8 segundos em que até o golpe básico dispara uma reação e o herói leva metade do dano.
 
+**Fusões.** Magma e Vapor deixam área no chão. A skill de um terceiro elemento lançada sobre essa área vira uma fusão, que conta como reação: Obsidiana (Magma + Água, atordoa), Incêndio (Magma + Ar, espalha o fogo e queima), Ciclone (Vapor + Ar, puxa para o centro e cega) e Gêiser (Vapor + Terra, arremessa para fora e encharca).
+
 ### A run
 
 - Mapa ramificado de 10 camadas. Depois de cada sala, de uma a três portas mostram o tipo da próxima sala e a recompensa.
@@ -114,7 +116,7 @@ Uma skill deixa no inimigo a **marca** do elemento dela. Acertar esse inimigo co
 - **Santuário:** desperta um elemento à escolha ou **aprofunda uma skill que já tem** (graus II e III: +30% de dano e recarga 10% menor cada). É a escolha entre espalhar (mais reações) e concentrar. **Mestre:** uma de três bênçãos. **Loja:** poção, elixir e bênçãos por Essência. **Descanso:** cura 30%.
 - **Tesouro:** um baú com Essência e um gole de vida. **Pacto:** três pactos sorteados entre cinco, cada um com um ganho forte e um custo permanente: Sangue (+25% de dano, −20% de vida máxima), Vidro (skills 25% mais rápidas, recebe +25% de dano), Ganância (toda a Essência por um talento), Eco (reações +30%, −15% de vida máxima) e Pressa (mais velocidade e dash, recebe +15% de dano). Dá para recusar.
 - **Chefe:** cada run sorteia um de dois. A **Tecelã das Cinzas**, a antiga mestra do santuário, luta de longe: leques de brasa, erupções, anéis e teletransporte, mantendo distância. O **Guardião das Cinzas**, em três fases, com cinco ataques avisados: Pancada, Leque de brasas, Erupção, Investida (da segunda fase) e Anel de Cinzas com faixa segura (da terceira). Na última fase, os dois levantam um escudo que só a Quintessência quebra.
-- Dezoito arranjos de sala com cobertura e quatro perigos que ferem herói e inimigo: respiradouro de brasa, armadilha de espinhos, poça de corrupção (queima; na Cripta, encharca) e barril de pólvora (qualquer golpe acende; fere bem mais os inimigos e acende os barris vizinhos).
+- A sala da run tem 28 x 20 m e a câmera acompanha o herói. Vinte e dois arranjos de sala, alguns com estrutura feita de barreiras baixas (corredores, fortim, sala em L, galeria), e quatro perigos que ferem herói e inimigo: respiradouro de brasa, armadilha de espinhos, poça de corrupção (queima; na Cripta, encharca) e barril de pólvora (qualquer golpe acende; fere bem mais os inimigos e acende os barris vizinhos).
 
 ### Inimigos
 
@@ -127,6 +129,11 @@ Uma skill deixa no inimigo a **marca** do elemento dela. Acertar esse inimigo co
 | Ceifador | Avisa uma linha larga e atravessa a sala por ela | Sair da linha e bater enquanto ele se recupera |
 | Arremessador | Joga uma bomba onde o herói está | Sair do círculo avisado |
 | Xamã | Cura os aliados feridos em volta (aviso verde); sozinho, atira | Derrubar primeiro |
+| Cinzentos | Bando de três ou quatro, pequenos e rápidos | Skills de área |
+| Brasa Viva | Elemental de Fogo (Salões de Cinza): não queima, estoura ao morrer | Água, e sair do círculo depois |
+| Sentinela de Pedra | Torre parada de Terra (Jardim de Pedra), não é empurrada | Ar, ou fechar a distância |
+
+**Afinidade elemental:** inimigo elemental leva metade do dano do próprio elemento e 1,6 vez do elemento que o vence (Água vence Fogo, Terra vence Água, Ar vence Terra, Fogo vence Ar).
 
 Os tipos entram aos poucos: Ceifador na segunda sala, Arremessador na quarta, Xamã na quinta. Vida e dano sobem a cada camada (9% de vida e 6,5% de dano por camada). O tempo de aviso dos golpes nunca diminui.
 

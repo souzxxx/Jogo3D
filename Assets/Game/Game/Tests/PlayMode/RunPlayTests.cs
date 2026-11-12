@@ -728,8 +728,8 @@ namespace Quintessence.Game.PlayTests
             hero.GetComponent<Health>().Pool.Invulnerable = true;
             hero.Teleport(new Vector3(0, 0.05f, -4f), Vector3.forward);
             GameObject Load(string n) => UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Game/Enemies/Prefabs/" + n + ".prefab");
-            var ember = Object.Instantiate(Load("BrasaViva"), new Vector3(-3f, 0, 1f), Quaternion.Euler(0, 180, 0)).GetComponent<Health>();
-            var sentinel = Object.Instantiate(Load("Sentinela"), new Vector3(3.5f, 0, 2f), Quaternion.Euler(0, 200, 0)).GetComponent<Health>();
+            var ember = Object.Instantiate(Load("BrasaViva"), new Vector3(-2.6f, 0, 0.6f), Quaternion.Euler(0, 160, 0)).GetComponent<Health>();
+            var sentinel = Object.Instantiate(Load("Sentinela"), new Vector3(2.8f, 0, 1.2f), Quaternion.Euler(0, 200, 0)).GetComponent<Health>();
             for (int i = 0; i < 3; i++) Object.Instantiate(Load("Cinzento"), new Vector3(-0.8f + i * 0.8f, 0, 3.5f), Quaternion.Euler(0, 180, 0));
             for (int k = 0; k < 40; k++) yield return null;
             StatusHolder.GetOrAdd(ember).Apply(StatusType.Rooted, 60f, Team.Player, hero.gameObject);
@@ -749,6 +749,9 @@ namespace Quintessence.Game.PlayTests
             sentinel.TakeDamage(new DamageInfo(1f, ElementType.None, Team.Player, hero.gameObject) { Direction = Vector3.forward, Knockback = 20f });
             for (int k = 0; k < 40; k++) yield return null;
             Assert.Less(Vector3.Distance(at, sentinel.transform.position), 0.3f, "a Sentinela fica onde esta");
+            foreach (var n in new[] { "brasa_head", "brasa_body", "brasa_weapon" })
+                Assert.IsTrue(ember.GetComponentsInChildren<Transform>(true).Any(t => t.name == n), "falta a peca " + n);
+            Assert.IsTrue(sentinel.GetComponentsInChildren<Transform>(true).Any(t => t.name == "sentinela_base"), "a Sentinela tem o pedestal");
             Assert.Less(Object.FindObjectsByType<EnemyBrain>(FindObjectsSortMode.None).First(e => e.Definition.displayName == "Cinzento").transform.Find("Model").lossyScale.x, 0.8f, "Cinzento e pequeno");
 
             hud.ShowBanner("", "", Color.clear, 0.01f);
