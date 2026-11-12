@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Gera todos os efeitos e as duas musicas do jogo por sintese, usando so o ffmpeg.
+"""Gera todos os efeitos e as musicas do jogo por sintese, usando so o ffmpeg.
 Uso: python3 tools/gen_audio.py   (escreve em Assets/Resources/Audio)
 Cada som e um grafo de filtros: ondas por expressao (aevalsrc), ruido filtrado (anoisesrc) e eco curto.
 """
@@ -88,6 +88,33 @@ def music_boss(L=16):
     pad = f"0.05*(sin({P}*{q(220, L)}*t)+sin({P}*{q(293.66, L)}*t))*(0.6+0.4*sin({P}*t*2))"
     return [tone(f"{kick}+{bass}+{pad}", L)], "lowpass=f=5000"
 
+def music_crypt(L=32):
+    """Cripta Afogada: do menor, grave e abafado, com gotas agudas espacadas."""
+    pad = [(65.41, 16), (98.0, 8), (130.81, 32), (155.56, 16)]
+    parts = [f"0.075*sin({P}*{q(f, L)}*t)*(0.7+0.3*sin({P}*t/{per}))" for f, per in pad]
+    drips = [(1046.5, 1.3), (1568.0, 4.1), (1244.5, 6.7), (1046.5, 9.9), (1396.9, 13.2), (1174.7, 15.6),
+             (1568.0, 18.8), (1244.5, 21.1), (1046.5, 24.9), (1396.9, 27.3), (1174.7, 30.2)]
+    for f, at in drips:
+        parts.append(bell(f, at, 9.0, 0.035))
+    low = [261.63, 311.13, 392.0, 349.23, 311.13, 261.63, 233.08, 261.63]
+    for i, f in enumerate(low):
+        parts.append(bell(f, i * 4.0 + 2.0, 1.6, 0.045))
+    return [tone("+".join(parts), L)], "lowpass=f=2600"
+
+def music_garden(L=32):
+    """Jardim de Pedra: sol maior, claro, sinos em pentatonica."""
+    pad = [(98.0, 16), (146.83, 8), (196.0, 32), (246.94, 16)]
+    parts = [f"0.06*sin({P}*{q(f, L)}*t)*(0.7+0.3*sin({P}*t/{per}))" for f, per in pad]
+    scale = [392.0, 440.0, 493.88, 587.33, 659.25, 587.33, 493.88, 440.0, 392.0, 493.88, 587.33, 783.99, 659.25, 587.33, 493.88, 440.0,
+             392.0, 440.0, 587.33, 493.88]
+    for i, f in enumerate(scale):
+        if i % 5 == 4:
+            continue
+        parts.append(bell(f, i * 1.5 + 0.4, 2.6, 0.048))
+    return [tone("+".join(parts), L)], "lowpass=f=5200"
+
+S["music_crypt"] = music_crypt()
+S["music_garden"] = music_garden()
 S["music_ambient"] = music_ambient()
 S["music_boss"] = music_boss()
 

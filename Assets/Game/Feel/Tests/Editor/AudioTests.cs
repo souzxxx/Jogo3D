@@ -36,5 +36,16 @@ namespace Quintessence.Feel.Tests
             }
             finally { AudioPrefs.Music = music; AudioPrefs.Effects = effects; }
         }
+
+        [Test] public void EveryBiomeAmbient_Exists_AndIsLongEnoughToLoop()
+        {
+            foreach (var id in AudioDirector.AmbientTracks)
+            {
+                var clip = Resources.Load<AudioClip>("Audio/" + id);
+                Assert.IsNotNull(clip, "falta a musica " + id);
+                Assert.Greater(clip.length, 20f, id);
+            }
+            Assert.AreEqual(AudioDirector.AmbientTracks.Length, AudioDirector.AmbientTracks.Distinct().Count());
+        }
     }
 }

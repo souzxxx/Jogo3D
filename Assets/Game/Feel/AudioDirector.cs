@@ -18,6 +18,12 @@ namespace Quintessence.Feel
             "boss_spawn", "boss_phase", "victory", "defeat",
         };
         public const string AmbientMusic = "music_ambient", BossMusic = "music_boss";
+        /// Ambiente de cada trecho, pelo indice do GameEvents.AmbientChanged.
+        public static readonly string[] AmbientTracks = { AmbientMusic, "music_crypt", "music_garden" };
+        readonly AudioClip[] ambient = new AudioClip[AmbientTracks.Length];
+        int ambientNow, ambientWanted;
+        /// Faixa de ambiente tocando agora (para os testes).
+        public static string CurrentAmbient => instance != null && instance.musicA != null && instance.musicA.clip != null ? instance.musicA.clip.name : "";
 
         static AudioDirector instance;
         readonly Dictionary<string, AudioClip> clips = new();
@@ -46,6 +52,7 @@ namespace Quintessence.Feel
                 s.spatialBlend = 0f;
                 pool.Add(s);
             }
+            for (int i = 0; i < AmbientTracks.Length; i++) ambient[i] = Resources.Load<AudioClip>("Audio/" + AmbientTracks[i]);
             musicA = Music(AmbientMusic);
             musicB = Music(BossMusic);
             musicA.Play();
@@ -79,6 +86,7 @@ namespace Quintessence.Feel
         void OnScene(Scene scene, LoadSceneMode mode)
         {
             bossMusic = false;
+            ambientWanted = 0;
             Unsubscribe();
             Subscribe();
         }
@@ -98,6 +106,7 @@ namespace Quintessence.Feel
             GameEvents.QuintessenceActiveChanged += OnQuintessence;
             GameEvents.RoomCleared += OnRoomCleared;
             GameEvents.RoomCleared += OnRoomClearedMusic;
+            GameEvents.AmbientChanged += OnAmbient;
             GameEvents.WaveStarted += OnWave;
             GameEvents.BossSpawned += OnBoss;
             GameEvents.BossPhaseChanged += OnBossPhase;
@@ -120,6 +129,7 @@ namespace Quintessence.Feel
             GameEvents.QuintessenceActiveChanged -= OnQuintessence;
             GameEvents.RoomCleared -= OnRoomCleared;
             GameEvents.RoomCleared -= OnRoomClearedMusic;
+            GameEvents.AmbientChanged -= OnAmbient;
             GameEvents.WaveStarted -= OnWave;
             GameEvents.BossSpawned -= OnBoss;
             GameEvents.BossPhaseChanged -= OnBossPhase;
@@ -159,6 +169,7 @@ namespace Quintessence.Feel
         void OnQuintessence(bool on) => Play(on ? "quint_on" : "quint_off", 1f, 0f);
         // sala limpa (inclusive a do mini-chefe): a musica de luta volta para a de ambiente
         void OnRoomClearedMusic() => bossMusic = false;
+        void OnAmbient(int index) => ambientWanted = Mathf.Clamp(index, 0, AmbientTracks.Length - 1);
 
         void OnRoomCleared() => Play("room_clear", 0.9f, 0f);
         void OnWave(int index, int total) => Play("wave", 0.8f, 0f);
@@ -189,7 +200,15 @@ namespace Quintessence.Feel
         void Update()
         {
             float target = AudioPrefs.Music * 0.7f, dt = Time.unscaledDeltaTime;
-            musicA.volume = Mathf.MoveTowards(musicA.volume, bossMusic ? 0f : target, dt * 0.5f);
+            // troca de trecho: a faixa atual some, troca e volta
+            bool swapping = ambientWanted != ambientNow && ambient[ambientWanted] != null;
+            musicA.volume = Mathf.MoveTowards(musicA.volume, bossMusic || swapping ? 0f : target, dt * (swapping ? 0.8f : 0.5f));
+            if (swapping && musicA.volume <= 0.01f)
+            {
+                ambientNow = ambientWanted;
+                musicA.clip = ambient[ambientNow];
+                musicA.Play();
+            }
             musicB.volume = Mathf.MoveTowards(musicB.volume, bossMusic ? target : 0f, dt * 0.5f);
         }
     }
