@@ -223,7 +223,7 @@ Sprints sem data até confirmar a entrega. S0 é de todos e destrava o resto.
 - [ ] Regra de estilo (pedido do Leonardo em 11/11): tudo que criarmos espelha os assets do pack — fosco, cor contida, nada de neon
 - [ ] Personalizar o chefe (hoje é o esqueleto guerreiro do pack ampliado) — pedido do Leonardo em 11/11
 - [x] HUD com ícones de verdade e barra de habilidades (11/11). Falta: botões e telas de pausa/resultado
-- [ ] Menu de título com identidade própria (hoje está genérico) — pedido do Leonardo em 11/11
+- [x] Menu de título com identidade própria: altar dos cinco, aprendiz, emblema e pedestal que acende com o mouse (11/11)
 - [ ] Passada única de animação: trocar as animações genéricas do pack (ataques, skills, dash, inimigos) — combinado em 11/11 deixar pro fim
 - [ ] Trazer os heróis do Quintessence 2D (Rax, Liora, Brann, Vey) para o 3D no lugar do mago do pack — pedido do Leonardo em 11/11
 

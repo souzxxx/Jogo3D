@@ -8,6 +8,7 @@ namespace Quintessence.UI
     {
         public float hoverScale = 1.04f;
         bool over, down;
+        public bool Over => over;
 
         public void OnPointerEnter(PointerEventData e) => over = true;
         public void OnPointerExit(PointerEventData e) { over = false; down = false; }

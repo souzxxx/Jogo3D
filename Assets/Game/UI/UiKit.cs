@@ -14,7 +14,27 @@ namespace Quintessence.UI
         public static readonly Color Dim = new(0.62f, 0.59f, 0.72f);
         public static readonly Color Cream = new(0.93f, 0.88f, 0.78f);
 
-        static Sprite circle, ring, panel, frame;
+        static Sprite circle, ring, panel, frame, vignette;
+
+        /// Faixa escura em cima e embaixo, clara no meio: deixa o cenario aparecer atras de um menu.
+        public static Sprite VerticalVignette
+        {
+            get
+            {
+                if (vignette != null) return vignette;
+                const int h = 128;
+                var tex = new Texture2D(1, h, TextureFormat.RGBA32, false) { wrapMode = TextureWrapMode.Clamp };
+                for (int y = 0; y < h; y++)
+                {
+                    float t = y / (h - 1f);                       // 0 = base da tela, 1 = topo
+                    float top = Mathf.SmoothStep(0f, 1f, Mathf.InverseLerp(0.62f, 1f, t)) * 0.8f;
+                    float bottom = Mathf.SmoothStep(0f, 1f, Mathf.InverseLerp(0.56f, 0.12f, t)) * 0.86f;
+                    tex.SetPixel(0, y, new Color(1, 1, 1, Mathf.Max(0.12f, Mathf.Max(top, bottom))));
+                }
+                tex.Apply();
+                return vignette = Sprite.Create(tex, new Rect(0, 0, 1, h), new Vector2(0.5f, 0.5f), 100f);
+            }
+        }
         static readonly System.Collections.Generic.Dictionary<string, Sprite> icons = new();
 
         /// Painel de cantos arredondados (9-slice) e o contorno dele.

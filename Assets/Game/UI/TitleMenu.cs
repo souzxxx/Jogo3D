@@ -51,7 +51,28 @@ namespace Quintessence.UI
             return true;
         }
 
-        RectTransform sheet;
+        RectTransform sheet, quintPip;
+        readonly UiHover[] cards = new UiHover[4];
+
+        /// Carta de elemento sob o mouse (0 a 3), ou -1. A cena usa isto para acender o pedestal daquele elemento.
+        public int HoveredElement
+        {
+            get
+            {
+                if (RefugeOpen || SheetOpen) return -1;
+                for (int i = 0; i < cards.Length; i++) if (cards[i] != null && cards[i].Over) return i;
+                return -1;
+            }
+        }
+
+        void Update()
+        {
+            if (quintPip == null) return;
+            // o quinto ponto do emblema respira devagar
+            float k = 1f + 0.12f * Mathf.Sin(Time.unscaledTime * 1.6f);
+            quintPip.localScale = new Vector3(k, k, 1f);
+        }
+
         public bool SheetOpen => sheet != null && sheet.gameObject.activeSelf;
 
         /// Painel simples por cima do titulo (opcoes, creditos): titulo, conteudo e Voltar.
@@ -154,12 +175,25 @@ namespace Quintessence.UI
             UiKit.EnsureEventSystem();
             canvas = UiKit.Canvas("TitleCanvas", 10, transform);
             var root = canvas.transform;
-            UiKit.Image(UiKit.Stretch("Shade", root), null, new Color(0.03f, 0.02f, 0.06f, 0.55f));
-            var logo = UiKit.Text(UiKit.Rect("Title", root, new Vector2(0.5f, 1), new Vector2(0, -150), new Vector2(1600, 150)), "QUINTESSENCE", 128, UiKit.Paper);
+            // escuro so em cima e embaixo: o altar dos cinco aparece no meio da tela
+            UiKit.Image(UiKit.Stretch("Shade", root), UiKit.VerticalVignette, new Color(0.03f, 0.02f, 0.06f, 1f));
+            var logo = UiKit.Text(UiKit.Rect("Title", root, new Vector2(0.5f, 1), new Vector2(0, -36), new Vector2(1700, 150)), "QUINTESSENCE", 124, UiKit.Paper);
             logo.font = GameFonts.Title;
-            UiKit.Text(UiKit.Rect("Sub", root, new Vector2(0.5f, 1), new Vector2(0, -330), new Vector2(1400, 50)),
-                "Comece com um elemento. Desperte os outros três. Alcance o quinto estado.", 34, UiKit.Dim, TextAnchor.MiddleCenter, false);
-            UiKit.Text(UiKit.Rect("Pick", root, new Vector2(0.5f, 0.5f), new Vector2(0, 76), new Vector2(1000, 50)), "ESCOLHA O ELEMENTO INICIAL", 34, UiKit.Paper);
+            // emblema: os quatro elementos em volta do quinto, ligados por um fio
+            var emblem = UiKit.Rect("Emblem", root, new Vector2(0.5f, 1), new Vector2(0, -186), new Vector2(520, 44));
+            UiKit.Image(UiKit.Rect("Thread", emblem, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(520, 2)), null, new Color(0.93f, 0.88f, 0.78f, 0.35f));
+            float[] xs = { -150, -75, 75, 150 };
+            for (int i = 0; i < 4; i++)
+            {
+                var pip = UiKit.Rect("Pip" + i, emblem, new Vector2(0.5f, 0.5f), new Vector2(xs[i], 0), new Vector2(20, 20));
+                UiKit.Image(pip, UiKit.Circle, Color.Lerp(ElementColors.Of(Elements.All[i]), UiKit.Cream, 0.15f));
+            }
+            quintPip = UiKit.Rect("Quint", emblem, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(38, 38));
+            UiKit.Image(quintPip, UiKit.Ring, UiKit.Paper);
+            UiKit.Image(UiKit.Rect("Core", quintPip, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(16, 16)), UiKit.Circle, UiKit.Paper);
+            UiKit.Text(UiKit.Rect("Sub", root, new Vector2(0.5f, 1), new Vector2(0, -222), new Vector2(1400, 44)),
+                "Comece com um elemento. Desperte os outros três. Alcance o quinto estado.", 28, UiKit.Cream, TextAnchor.MiddleCenter, false);
+            UiKit.Text(UiKit.Rect("Pick", root, new Vector2(0.5f, 0.5f), new Vector2(0, -52), new Vector2(1000, 40)), "ESCOLHA O ELEMENTO INICIAL", 26, UiKit.Dim);
 
             string[] names = { "Fogo", "Água", "Terra", "Ar" };
             string[] notes = { "Agressivo\ndano contínuo", "Alcance\ne controle", "Pesado\nquebra armadura", "Mobilidade\ne crítico" };
@@ -171,23 +205,24 @@ namespace Quintessence.UI
                 var c = ElementColors.Of(e);
                 // carta escura com o elemento so no contorno, no medalhao e no filete: a cor entra como acento
                 var body = Color.Lerp(new Color(0.09f, 0.08f, 0.12f), c, 0.16f);
-                var b = UiKit.Button(root, "", mid, new Vector2((i - 1.5f) * 300f, -130), new Vector2(264, 330), body, () => OnPick?.Invoke(e), Color.Lerp(c, UiKit.Cream, 0.15f));
+                var b = UiKit.Button(root, "", mid, new Vector2((i - 1.5f) * 290f, -232), new Vector2(256, 290), body, () => OnPick?.Invoke(e), Color.Lerp(c, UiKit.Cream, 0.15f));
                 b.name = "Card_" + names[i];
                 b.GetComponent<UiHover>().hoverScale = 1.06f;
+                cards[i] = b.GetComponent<UiHover>();
                 Destroy(b.transform.Find("Sheen").gameObject); // o brilho de botao nao cabe numa carta alta
                 var card = b.transform;
-                UiKit.Image(UiKit.Rect("Halo", card, new Vector2(0.5f, 1), new Vector2(0, -22), new Vector2(136, 136)), UiKit.Circle, new Color(c.r, c.g, c.b, 0.16f));
-                var orb = UiKit.Rect("Orb", card, new Vector2(0.5f, 1), new Vector2(0, -32), new Vector2(116, 116));
+                UiKit.Image(UiKit.Rect("Halo", card, new Vector2(0.5f, 1), new Vector2(0, -14), new Vector2(120, 120)), UiKit.Circle, new Color(c.r, c.g, c.b, 0.16f));
+                var orb = UiKit.Rect("Orb", card, new Vector2(0.5f, 1), new Vector2(0, -22), new Vector2(104, 104));
                 UiKit.Image(orb, UiKit.Circle, Color.Lerp(c, new Color(0.05f, 0.04f, 0.08f), 0.35f));
                 UiKit.Image(UiKit.Stretch("Rim", orb), UiKit.Ring, Color.Lerp(c, UiKit.Cream, 0.45f));
-                UiKit.Image(UiKit.Rect("Icon", orb, mid, Vector2.zero, new Vector2(70, 70)), UiKit.Icon(iconNames[i]), UiKit.Cream);
-                UiKit.Text(UiKit.Rect("Name", card, new Vector2(0.5f, 1), new Vector2(0, -160), new Vector2(240, 56)), names[i], 46, UiKit.Cream);
-                UiKit.Image(UiKit.Rect("Rule", card, new Vector2(0.5f, 1), new Vector2(0, -220), new Vector2(72, 4)), null, Color.Lerp(c, UiKit.Cream, 0.2f));
-                UiKit.Text(UiKit.Rect("Note", card, new Vector2(0.5f, 0), new Vector2(0, 30), new Vector2(240, 68)), notes[i], 24, UiKit.Paper, TextAnchor.MiddleCenter, false);
+                UiKit.Image(UiKit.Rect("Icon", orb, mid, Vector2.zero, new Vector2(62, 62)), UiKit.Icon(iconNames[i]), UiKit.Cream);
+                UiKit.Text(UiKit.Rect("Name", card, new Vector2(0.5f, 1), new Vector2(0, -136), new Vector2(240, 52)), names[i], 42, UiKit.Cream);
+                UiKit.Image(UiKit.Rect("Rule", card, new Vector2(0.5f, 1), new Vector2(0, -190), new Vector2(72, 4)), null, Color.Lerp(c, UiKit.Cream, 0.2f));
+                UiKit.Text(UiKit.Rect("Note", card, new Vector2(0.5f, 0), new Vector2(0, 22), new Vector2(240, 64)), notes[i], 23, UiKit.Paper, TextAnchor.MiddleCenter, false);
             }
-            var open = UiKit.Button(root, "REFÚGIO", new Vector2(0.5f, 0), new Vector2(-330, 118), new Vector2(400, 64), UiKit.Primary, () => ShowRefuge(true));
+            var open = UiKit.Button(root, "REFÚGIO", new Vector2(0.5f, 0), new Vector2(-330, 74), new Vector2(400, 58), UiKit.Primary, () => ShowRefuge(true));
             void Small(string label, float x, Action act) =>
-                UiKit.Button(root, label, new Vector2(0.5f, 0), new Vector2(x, 118), new Vector2(200, 64), UiKit.Secondary, act)
+                UiKit.Button(root, label, new Vector2(0.5f, 0), new Vector2(x, 74), new Vector2(200, 58), UiKit.Secondary, act)
                     .transform.Find("Label").GetComponent<UnityEngine.UI.Text>().fontSize = 26;
             Small("TREINO", -10, () => OnTutorial?.Invoke());
             Small("OPÇÕES", 210, ShowOptions);
@@ -199,7 +234,7 @@ namespace Quintessence.UI
             sheet = UiKit.Stretch("Sheet", root);
             sheet.gameObject.SetActive(false);
             UpdateRefugeLabel();
-            UiKit.Text(UiKit.Rect("Keys", root, new Vector2(0.5f, 0), new Vector2(0, 44), new Vector2(1600, 30)),
+            UiKit.Text(UiKit.Rect("Keys", root, new Vector2(0.5f, 0), new Vector2(0, 24), new Vector2(1600, 30)),
                 "WASD mover · mouse mira · clique ataca · clique dir. skill · Espaço dash · Q/E troca elemento · R Quintessência · F interagir", 22, UiKit.Dim, TextAnchor.MiddleCenter, false);
         }
 

@@ -271,15 +271,53 @@ public static class GameSceneBuilder
         var root = LookDevBuilder.BeginArena("Title");
         var cam = LookDevBuilder.MakeCamera();
         cam.fieldOfView = 38;
-        cam.transform.SetPositionAndRotation(new Vector3(0, 6.5f, -12.5f), Quaternion.Euler(24, 0, 0));
-        Color[] colors = { new(1f, 0.38f, 0.08f), new(0.15f, 0.6f, 1f), new(0.72f, 0.5f, 0.2f), new(0.65f, 1f, 0.85f) };
+        cam.transform.SetPositionAndRotation(new Vector3(0, 5.6f, -11.5f), Quaternion.Euler(18, 0, 0));
+        // o bau decorativo do look-dev sai: o centro do palco e do altar
+        foreach (Transform child in root) if (child.name.StartsWith("chest")) { Object.DestroyImmediate(child.gameObject); break; }
+        var prop = LookDevBuilder.Mat("DungeonProp", CombatDevSceneBuilder.KK + "Dungeon/dungeon_texture.png", Color.white, Color.black, 0f);
+        Color[] colors = { new(0.86f, 0.36f, 0.14f), new(0.22f, 0.52f, 0.86f), new(0.66f, 0.5f, 0.24f), new(0.6f, 0.86f, 0.76f) };
+        GameObject Stone(string name, Vector3 pos, float size, Color c, float glow)
+        {
+            var st = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            Object.DestroyImmediate(st.GetComponent<Collider>());
+            st.name = name;
+            st.transform.SetParent(root, false);
+            st.transform.position = pos;
+            st.transform.localScale = Vector3.one * size;
+            st.GetComponent<Renderer>().sharedMaterial = LookDevBuilder.Mat("Title_" + name, null, c * 0.85f, c * glow, 0f);
+            return st;
+        }
+        // altar dos cinco: quatro pedestais em arco, um por elemento, e o do meio, mais alto, ainda apagado
         for (int i = 0; i < 4; i++)
         {
+            float x = (i - 1.5f) * 2.6f, z = 3.4f - Mathf.Abs(i - 1.5f) * 0.7f;
+            var col = LookDevBuilder.Spawn("Dungeon/column.fbx", new Vector3(x, 0, z), 0, prop);
+            var rs = col.GetComponentsInChildren<Renderer>();
+            var b = rs[0].bounds; foreach (var r in rs) b.Encapsulate(r.bounds);
+            Stone("ElementStone" + i, new Vector3(x, b.max.y + 0.42f, z), 0.8f, colors[i], 0.12f);
             var l = new GameObject("ElementLight" + i).AddComponent<Light>();
             l.transform.SetParent(root, false);
-            l.transform.position = new Vector3((i - 1.5f) * 4.5f, 2f, 3f);
-            l.type = LightType.Point; l.color = colors[i]; l.intensity = 5f; l.range = 8f;
+            l.transform.position = new Vector3(x, b.max.y + 1.1f, z - 0.9f);
+            l.type = LightType.Point; l.color = colors[i]; l.intensity = 1.4f; l.range = 6f;
         }
+        var mid = LookDevBuilder.Spawn("Dungeon/pillar_decorated.fbx", new Vector3(0, 0, 5.2f), 0, prop, 0.6f);
+        var mrs = mid.GetComponentsInChildren<Renderer>();
+        var mb = mrs[0].bounds; foreach (var r in mrs) mb.Encapsulate(r.bounds);
+        Stone("QuintStone", new Vector3(0, mb.max.y + 0.5f, 5.2f), 0.95f, new Color(0.72f, 0.7f, 0.76f), 0.05f);
+        var ql = new GameObject("QuintLight").AddComponent<Light>();
+        ql.transform.SetParent(root, false);
+        ql.transform.position = new Vector3(0, mb.max.y + 1.4f, 4.2f);
+        ql.type = LightType.Point; ql.color = new Color(0.9f, 0.88f, 1f); ql.intensity = 0.8f; ql.range = 7f;
+
+        // o aprendiz diante do altar, de costas para a camera
+        const string heroFbx = CombatDevSceneBuilder.KK + "Adventurers/Characters/Mage.fbx";
+        CombatDevSceneBuilder.Loop(heroFbx, "Idle");
+        var heroMat = LookDevBuilder.Mat("Hero", CombatDevSceneBuilder.KK + "Adventurers/Characters/mage_texture.png", Color.white, Color.black, 0f);
+        var hero = LookDevBuilder.Spawn("Adventurers/Characters/Mage.fbx", new Vector3(0, 0, 0.5f), 0, heroMat);
+        hero.name = "TitleHero";
+        LookDevBuilder.Hide(hero, "Spellbook", "1H_Wand");
+        var idle = CombatDevSceneBuilder.Controller(heroFbx, "Assets/Game/Game/Prefabs/TitleHero.controller", ("Idle", "Idle", 0f));
+        CombatDevSceneBuilder.Animator(hero, idle);
         var go = new GameObject("TitleController");
         go.transform.SetParent(root, false);
         go.AddComponent<TitleController>();
