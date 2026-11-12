@@ -517,10 +517,25 @@ namespace Quintessence.Game.PlayTests
             Object.FindFirstObjectByType<WaveSpawner>().enabled = false;
             for (int k = 0; k < 2000 && director.Busy; k++) yield return null;
             director.ShowShop();
-            Object.FindFirstObjectByType<PlayerController>().Teleport(new Vector3(0.5f, 0, -3.8f), Vector3.forward);
+            Object.FindFirstObjectByType<PlayerController>().Teleport(new Vector3(-0.5f, 0, -3.6f), Vector3.forward);
             for (int k = 0; k < 60; k++) yield return null;
             Assert.IsNotNull(GameObject.Find("Merchant"), "a loja tem um mercador");
-            Assert.GreaterOrEqual(director.Interactables.Count(i => i.Prompt.StartsWith("comprar")), 2);
+            var seller = director.ShopMerchant;
+            Assert.IsNotNull(seller, "o mercador reage ao heroi");
+            Assert.IsTrue(seller.Greeted, "com o heroi perto, ele cumprimenta");
+            var wares = director.Interactables.Where(i => i.Prompt.StartsWith("comprar")).ToList();
+            director.Run.TrySpend(director.Run.Essence);
+            wares[0].Use();
+            Assert.AreEqual("Falta Essência...", seller.LastLine);
+            director.Run.AddEssence(500);
+            wares[0].Use();
+            Assert.AreEqual("Boa escolha!", seller.LastLine);
+            // as demais continuam a venda para a foto
+
+            Assert.GreaterOrEqual(director.Interactables.Count(i => i.Prompt.StartsWith("comprar")), 1);
+            director.Run.TrySpend(director.Run.Essence - 30); // fica com 30: da para ver preco pago e preco fora do alcance
+            director.RefreshPrices();
+            for (int k = 0; k < 20; k++) yield return null;
             Shot(cam, "docs/img/loja_banca.png");
             GameFlow.Layers = 8; GameFlow.Shrines = 3;
             Time.captureFramerate = 0;

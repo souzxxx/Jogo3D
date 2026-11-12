@@ -128,13 +128,23 @@ public static class GameSceneBuilder
         // o mercador: o modelo de aventureiro do pack com outra paleta, parado atras do balcao
         const string fbx = CombatDevSceneBuilder.KK + "Adventurers/Characters/Mage.fbx";
         CombatDevSceneBuilder.Loop(fbx, "Idle");
-        var ctrl = CombatDevSceneBuilder.Controller(fbx, dir + "Merchant.controller", ("Idle", "Idle", 0f));
+        var ctrl = CombatDevSceneBuilder.Controller(fbx, dir + "Merchant.controller", ("Idle", "Idle", 0f),
+            ("Greet", "Interact|Cheer", 1.1f), ("Thanks", "Cheer", 1.1f), ("Refuse", "Hit_A|Hit_B", 0.6f));
         var cloth = LookDevBuilder.Mat("Merchant", CombatDevSceneBuilder.KK + "Adventurers/Props/rogue_texture.png", Color.white, Color.black, 0f);
         var who = LookDevBuilder.Spawn("Adventurers/Characters/Mage.fbx", new Vector3(-6.2f, 0, 0.75f), 180, cloth);
         who.name = "Merchant";
         LookDevBuilder.Hide(who, "1H_Wand", "2H_Staff", "Spellbook_open");
         who.transform.SetParent(root.transform, true);
         CombatDevSceneBuilder.Animator(who, ctrl);
+        who.AddComponent<Merchant>();
+
+        // luz propria para as estantes, que sumiam no escuro do fundo, e velas em cima dos barris
+        var shelfLight = new GameObject("ShelfLight").AddComponent<Light>();
+        shelfLight.transform.SetParent(root.transform, false);
+        shelfLight.transform.position = new Vector3(-6.2f, 2.4f, 1.5f);
+        shelfLight.type = LightType.Point; shelfLight.color = new Color(1f, 0.78f, 0.5f); shelfLight.intensity = 2.6f; shelfLight.range = 5f;
+        P("candle_triple", -9.0f, 0.2f, 0, 1f, 1.25f);
+        P("banner_patternA_green", -6.2f, 3.05f, 0, 1f, 1.5f);
 
         var lamp = new GameObject("StallLight").AddComponent<Light>();
         lamp.transform.SetParent(root.transform, false);

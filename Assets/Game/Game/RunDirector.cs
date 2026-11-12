@@ -440,8 +440,21 @@ namespace Quintessence.Game
         }
 
         /// Loja: cada item numa mesa do pack, com nome, efeito e preco. Da para sair sem comprar: as portas ja estao abertas.
+        Merchant merchant;
+        readonly List<(TextMesh label, int price)> priceTags = new();
+        static readonly Color CanPay = new(0.88f, 0.74f, 0.42f), CannotPay = new(0.78f, 0.36f, 0.32f);
+
+        /// Preco em dourado se a Essencia paga, em vermelho se nao. Refaz depois de cada compra.
+        public void RefreshPrices()
+        {
+            foreach (var (label, price) in priceTags)
+                if (label != null) label.color = Run.Essence >= price ? CanPay : CannotPay;
+        }
+
         void SetupShop()
         {
+            merchant = null;
+            priceTags.Clear();
             var catalog = boonCatalog != null ? boonCatalog.boons : new List<Boon>();
             var stock = ShopPlanner.Stock(catalog, Run.BoonIds, player.Loadout.Awakened, rng, Run.Depth);
             // banca do mercador: prateleiras, balcao, ouro e o proprio (tudo do pack), some junto com o layout da sala
@@ -449,8 +462,13 @@ namespace Quintessence.Game
             {
                 if (layoutRoot == null) layoutRoot = new GameObject("Layout").transform;
                 var decor = Instantiate(shopDecorPrefab, layoutRoot);
-                var merchant = decor.transform.Find("Merchant");
-                if (merchant != null) Label(merchant, new Vector3(0, 3.1f, 0), "MERCADOR", new Color(0.88f, 0.74f, 0.42f), 0.7f);
+                var stall = decor.transform.Find("Merchant");
+                if (stall != null)
+                {
+                    Label(stall, new Vector3(0, 3.1f, 0), "MERCADOR", new Color(0.88f, 0.74f, 0.42f), 0.7f);
+                    merchant = stall.GetComponent<Merchant>();
+                    if (merchant != null) merchant.Bind(player.transform);
+                }
             }
             for (int i = 0; i < stock.Count; i++)
             {
@@ -476,7 +494,7 @@ namespace Quintessence.Game
                 }
                 Label(root.transform, new Vector3(0, top + 2.8f, 0), Wrap(item.Name, 13), Cream, 0.72f);
                 Label(root.transform, new Vector3(0, top + 2.1f, 0), Wrap(item.Description, 16), new Color(0.8f, 0.76f, 0.7f), 0.5f);
-                Label(root.transform, new Vector3(0, top + 1.6f, 0), item.Price + " de Essência", new Color(0.88f, 0.74f, 0.42f), 0.62f);
+                priceTags.Add((Label(root.transform, new Vector3(0, top + 1.6f, 0), item.Price + " de Essência", CanPay, 0.62f), item.Price));
                 Glow(root.transform, new Vector3(0, top + 0.8f, -0.7f), c, 1.1f);
                 Interactable entry = null;
                 entry = new Interactable
@@ -488,6 +506,7 @@ namespace Quintessence.Game
                         {
                             Sfx.Play("block");
                             Feel.DamageNumber.Spawn(root.transform.position + Vector3.up * 3.6f, "ESSÊNCIA INSUFICIENTE", new Color(0.8f, 0.4f, 0.35f), 0.8f, 1f);
+                            if (merchant != null) merchant.Refuse();
                             return;
                         }
                         Sfx.Play("pickup");
@@ -501,11 +520,17 @@ namespace Quintessence.Game
                         Feel.DamageNumber.Spawn(player.transform.position + Vector3.up * 3.6f, item.Name.ToUpperInvariant() + "!", c, 1.1f, 1.4f);
                         interactables.Remove(entry);
                         Destroy(root);
+                        if (merchant != null) merchant.Thank();
+                        RefreshPrices();
                     },
                 };
                 interactables.Add(entry);
             }
+            RefreshPrices();
         }
+
+        /// O mercador da loja atual, se houver (para os testes).
+        public Merchant ShopMerchant => merchant;
 
         void ApplyMaxHealth()
         {
@@ -634,7 +659,7 @@ namespace Quintessence.Game
             l.type = LightType.Point; l.color = color; l.intensity = intensity; l.range = 5.5f;
         }
 
-        void Label(Transform parent, Vector3 localPos, string text, Color color, float scale = 1f)
+        TextMesh Label(Transform parent, Vector3 localPos, string text, Color color, float scale = 1f)
         {
             var go = new GameObject("Label");
             go.transform.SetParent(parent, false);
@@ -649,6 +674,7 @@ namespace Quintessence.Game
             t.color = color;
             go.GetComponent<MeshRenderer>().sharedMaterial = GameFonts.Display.material;
             go.AddComponent<FaceCamera>();
+            return t;
         }
     }
 }
