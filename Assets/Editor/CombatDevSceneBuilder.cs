@@ -188,7 +188,8 @@ public static class CombatDevSceneBuilder
         d.element = ElementType.Air;
         d.critChance = 0.2f;
         d.skillName = "Vendaval"; d.skillShape = SkillShape.Radial;
-        d.skillDamage = 13f; d.skillCooldown = 4f; d.skillRange = 4f; d.skillKnockback = 16f;
+        // Vendaval: empurrava longe demais para quem luta de adaga (o bando saia do alcance); mais dano, empurrao menor
+        d.skillDamage = 16f; d.skillCooldown = 4f; d.skillRange = 4f; d.skillKnockback = 9f;
         d.dash = DashVariant.Plain; d.dashCharges = 2;
     });
 
