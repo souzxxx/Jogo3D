@@ -32,10 +32,10 @@ public static class GameSceneBuilder
 
     static void BuildRun()
     {
-        LookDevBuilder.RoomW = RunW; LookDevBuilder.RoomD = RunD;
+        LookDevBuilder.RoomW = RunW; LookDevBuilder.RoomD = RunD; LookDevBuilder.SouthApron = true;
         SX = RunW / 5f * 1f; SZ = RunD / 4f;
         try { BuildRunScene(); }
-        finally { LookDevBuilder.RoomW = 5; LookDevBuilder.RoomD = 4; SX = SZ = 1f; }
+        finally { LookDevBuilder.RoomW = 5; LookDevBuilder.RoomD = 4; LookDevBuilder.SouthApron = false; SX = SZ = 1f; }
     }
 
     static void BuildRunScene() => CombatDevSceneBuilder.BuildPlayable("Run", RunPath, root =>

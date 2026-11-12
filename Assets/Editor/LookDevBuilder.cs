@@ -296,6 +296,8 @@ public static class LookDevBuilder
 
     /// Tamanho da sala em placas de piso (4 m cada). O titulo e as cenas de teste usam 5 x 4; a run usa uma maior.
     public static int RoomW = 5, RoomD = 4;
+    /// Sala da run: piso e mureta ao sul, fora da area de jogo, para a camera nao mostrar o vazio abaixo da sala.
+    public static bool SouthApron;
 
     static void Room()
     {
@@ -328,6 +330,20 @@ public static class LookDevBuilder
         }
         Spawn("Dungeon/wall_corner.fbx", new Vector3(-hx, 0, hz), 0, Dungeon);
         Spawn("Dungeon/wall_corner.fbx", new Vector3(hx, 0, hz), 270, Dungeon);
+        if (SouthApron)
+        {
+            // fora da sala, do lado da camera: duas fileiras de piso (nomes "floor": sem colisor, fora da malha de navegacao)
+            // e uma mureta baixa na borda. A camera olha de cima e de longe; sem isso a entrada mostra um vazio preto
+            for (int i = -1; i <= W; i++)
+            for (int j = 1; j <= 2; j++)
+                Spawn("Dungeon/floor_tile_large.fbx", new Vector3((i - (W - 1) / 2f) * T, -floorTop, -hz - (j - 0.5f) * T), 0, Dungeon);
+            // mureta continua: uma peca a cada meio piso, baixa para nao esconder o heroi na entrada
+            for (int i = 0; i < W * 2; i++)
+            {
+                var low = Spawn("Dungeon/wall_half.fbx", new Vector3((i - (W * 2 - 1) / 2f) * T / 2f, 0, -hz - 0.25f), 180, Dungeon);
+                low.transform.localScale = new Vector3(1f, 0.32f, 1f);
+            }
+        }
 
         // posicoes pensadas para 20 x 16 e esticadas para o tamanho da sala
         float sx = hx / 10f, sz = hz / 8f;

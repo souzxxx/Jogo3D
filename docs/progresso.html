@@ -35,6 +35,33 @@
   <h1>Quintessence 3D — Progresso</h1>
   <p class="sub">Entrega mais recente no topo. Escopo em <a href="ESCOPO.md">ESCOPO.md</a> · kanban em <a href="https://github.com/users/souzxxx/projects/4">GitHub Projects</a>.</p>
 
+  <section id="madrugada11">
+    <h2>Madrugada, décima primeira leva: conferido no navegador, calibrado para gente</h2>
+    <div class="meta"><span class="tag who">Leonardo</span><span class="tag who">Enzo</span><span class="tag who">Nicolas</span><span class="tag ok">527 testes de regra + 29 testes jogando, todos passando</span></div>
+    <div class="cols">
+      <div>
+        <h3>O que o build no Chrome mostrou</h3>
+        <ul>
+          <li><b>Desempenho:</b> 120 quadros por segundo cravados no Chrome (o limite da tela), com a sala de 28 x 20 e inimigos em cena</li>
+          <li><b>A primeira sala estava dura demais para quem está aprendendo:</b> a sonda que calibrava a dificuldade desviava de todo aviso com reflexo perfeito. Agora ela desvia de 65% dos avisos, como alguém que joga razoavelmente</li>
+          <li>Com isso: as duas primeiras salas viraram <b>aquecimento</b> (o inimigo bate 75% e depois 87%) e a <b>Liora</b>, que perdia as três runs da medição, ganhou arco de 65° no chicote e cura de 8% ao limpar a sala</li>
+          <li>Medição com desvio de 65%, antes do reforço da Liora: <b>5 de 12 runs vencidas</b> (Rax 2, Brann 2, Vey 1, Liora 0)</li>
+          <li><b>Borda da sala:</b> na entrada, a câmera mostrava um vazio preto embaixo da sala. Agora há uma mureta baixa e o piso continua além dela</li>
+        </ul>
+      </div>
+      <div>
+        <h3>Revisão de bugs do código da noite</h3>
+        <ul>
+          <li>Congelar não derrubava o escudo do Escudeiro (o gelo saía antes do dano). Corrigido: o gelo sai depois do golpe</li>
+          <li>O escudo olhava a posição de quem bateu; o Pilar de Pedra que nasce atrás dele era bloqueado. Agora vale a direção do golpe</li>
+          <li>Continuar uma run depois da primeira sala mostrava o próximo nível como "MAESTRIA". Corrigido</li>
+          <li>Na Provação Ileso, cada tique de poça contava um golpe; agora tiques seguidos contam um</li>
+          <li>Sair e continuar reabria uma Provação já perdida; agora o save lembra</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
   <section id="madrugada10">
     <h2>Madrugada, décima leva: arranjos de cada trecho</h2>
     <div class="meta"><span class="tag who">Nicolas</span><span class="tag who">Enzo</span><span class="tag ok">526 testes de regra + 29 testes jogando, todos passando</span></div>
