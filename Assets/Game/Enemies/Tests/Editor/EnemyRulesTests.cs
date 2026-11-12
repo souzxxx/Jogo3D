@@ -134,5 +134,15 @@ namespace Quintessence.Enemies.Tests
             Assert.AreEqual(-1, empty.Tick(0.1f));
             Assert.IsTrue(empty.Cleared, "sala sem onda limpa na hora, mesmo no Cerco");
         }
+
+        [Test] public void Siege_EndingBeforeTheFirstWave_StillClears()
+        {
+            var w = new WaveState(new[] { 2 }, 0f) { Repeat = true };
+            w.ForceClear();
+            Assert.IsTrue(w.Cleared);
+            Assert.IsFalse(w.Repeat);
+            w.Start();
+            Assert.AreEqual(-1, w.Tick(0.1f), "encerrado antes de comecar, nada nasce");
+        }
     }
 }

@@ -108,7 +108,8 @@ namespace Quintessence.Enemies
 
         void SpawnWave(int index)
         {
-            GameEvents.RaiseWaveStarted(index, waves.Count);
+            // no Cerco as ondas voltam: total 0 = "reforcos", sem contagem que pareca a ultima
+            GameEvents.RaiseWaveStarted(index, State != null && State.Repeat ? 0 : waves.Count);
             int total = waves[index].Size, k = 0;
             float offset = UnityEngine.Random.Range(0f, 360f);
             foreach (var entry in waves[index].entries)
@@ -144,7 +145,10 @@ namespace Quintessence.Enemies
         public void EndSiege()
         {
             if (State == null || State.Cleared) return;
+            CancelInvoke(nameof(Begin));
+            State.Repeat = false;
             State.ForceClear();
+            // a fonte e o proprio spawner: quem cai assim nao conta como abate do heroi, nao explode e nao se divide
             foreach (var brain in GetComponentsInChildren<EnemyBrain>())
                 if (brain.TryGetComponent(out Health h) && !h.IsDead)
                     h.TakeDamage(new DamageInfo(99999f, ElementType.None, Team.Player, gameObject) { IsReaction = true });

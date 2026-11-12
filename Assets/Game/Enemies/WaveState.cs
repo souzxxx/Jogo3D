@@ -45,7 +45,7 @@ namespace Quintessence.Enemies
         public void NotifyDeath() { if (alive > 0) alive--; }
 
         /// Encerra a sala na hora (fim do Cerco): nada mais nasce e a sala conta como limpa.
-        public void ForceClear() { if (started) { Cleared = true; alive = 0; } }
+        public void ForceClear() { Cleared = true; alive = 0; Repeat = false; }
 
         /// Inimigos que nascem no meio da onda (Divisores): a sala so limpa quando eles caem tambem.
         public void AddAlive(int count) { if (count > 0 && !Cleared) alive += count; }

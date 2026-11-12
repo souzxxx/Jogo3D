@@ -135,7 +135,8 @@ namespace Quintessence.Enemies
             if (body != null) body.enabled = false;
             Play("Death", 0.05f);
             // ajudante que cai junto com o chefe (o chefe mata os dele) nao explode nem se divide
-            bool killedByBoss = info.Source != null && info.Source.GetComponent<BossBrain>() != null;
+            // (o fim do Cerco tambem: a fonte e o spawner)
+            bool killedByBoss = info.Source != null && (info.Source.GetComponent<BossBrain>() != null || info.Source.GetComponent<WaveSpawner>() != null);
             if ((Scaling.Volatile || definition.burstOnDeath) && !killedByBoss && definition.attack != EnemyAttackKind.Explode) VolatileBurst.Spawn(transform.position, 2f, 0.85f, Damage * 0.7f);
             // Elite Divisores: o corpo vira dois Cinzentos (o Campeao e quem explode nao se dividem)
             if (Scaling.Splits && !killedByBoss && definition.attack != EnemyAttackKind.Explode && GetComponent<Champion>() == null)
