@@ -1,0 +1,273 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quintessence 3D — Novidades da noite</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    color-scheme: dark;
+    --bg: #0e0c16; --panel: #171423; --panel2: #1d1a2c; --line: #2c2740;
+    --text: #ece8f4; --dim: #a19bb8; --faint: #6f6987;
+    --gold: #e2b65c; --ok: #6fdc8c; --warn: #ffb454;
+    --fire: #e7713a; --water: #4c97e0; --earth: #c49a52; --air: #79d3b4; --quint: #c9b8ff;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.6 Inter, system-ui, -apple-system, sans-serif; }
+  a { color: var(--water); }
+  main { max-width: 1120px; margin: 0 auto; padding: 0 16px 80px; }
+
+  /* topo */
+  .hero { padding: 48px 0 28px; text-align: center; }
+  .kicker { color: var(--gold); font-weight: 600; letter-spacing: .14em; text-transform: uppercase; font-size: 13px; }
+  h1 { font-family: Cinzel, serif; font-size: clamp(30px, 6vw, 52px); line-height: 1.1; margin: 10px 0 14px; letter-spacing: .02em; }
+  .lead { max-width: 760px; margin: 0 auto; color: var(--dim); font-size: 17px; }
+  .orbs { display: flex; justify-content: center; gap: 10px; margin: 18px 0 0; }
+  .orbs span { width: 12px; height: 12px; border-radius: 50%; }
+  .video { margin: 26px 0 8px; }
+  video { display: block; width: 100%; border-radius: 12px; border: 1px solid var(--line); background: #000; }
+  .cap { color: var(--faint); font-size: 13px; text-align: center; margin-top: 6px; }
+
+  /* numeros */
+  .kpis { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin: 30px 0 10px; }
+  @media (min-width: 640px) { .kpis { grid-template-columns: repeat(4, 1fr); } }
+  @media (min-width: 1000px) { .kpis { grid-template-columns: repeat(7, 1fr); } }
+  .kpi { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; }
+  .kpi b { display: block; font-size: 30px; line-height: 1.1; font-weight: 700; }
+  .kpi span { color: var(--dim); font-size: 14px; }
+  .kpi small { display: block; color: var(--faint); font-size: 12.5px; margin-top: 2px; }
+
+  /* navegacao */
+  nav { position: sticky; top: 0; z-index: 5; background: rgba(14,12,22,.92); backdrop-filter: blur(6px); border-bottom: 1px solid var(--line); margin: 22px -16px 0; padding: 10px 16px; display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; }
+  nav::-webkit-scrollbar { display: none; }
+  nav a { flex: none; color: var(--text); text-decoration: none; font-size: 14px; font-weight: 500; padding: 5px 12px; border-radius: 999px; background: #ffffff0d; border: 1px solid var(--line); }
+  nav a:hover { border-color: var(--gold); }
+
+  /* secoes */
+  section { margin-top: 38px; scroll-margin-top: 64px; }
+  .sec-head { display: flex; align-items: baseline; flex-wrap: wrap; gap: 6px 14px; border-bottom: 2px solid var(--accent, var(--gold)); padding-bottom: 8px; margin-bottom: 16px; }
+  h2 { font-family: Cinzel, serif; font-size: 26px; margin: 0; color: var(--accent, var(--gold)); }
+  .who { display: flex; gap: 6px; flex-wrap: wrap; }
+  .who span { font-size: 12px; font-weight: 600; color: var(--dim); background: #ffffff0f; border-radius: 999px; padding: 2px 9px; }
+  .intro { color: var(--dim); margin: 0 0 14px; max-width: 860px; }
+  .cols { display: grid; grid-template-columns: 1.05fr 1fr; gap: 22px; align-items: start; }
+  @media (max-width: 860px) { .cols { grid-template-columns: 1fr; } }
+  ul.items { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+  ul.items li { background: var(--panel); border: 1px solid var(--line); border-left: 3px solid var(--accent, var(--gold)); border-radius: 10px; padding: 10px 14px; }
+  ul.items li b { color: var(--text); }
+  ul.items li .new { font-size: 11px; font-weight: 700; color: var(--bg); background: var(--accent, var(--gold)); border-radius: 4px; padding: 1px 6px; margin-left: 4px; vertical-align: 1px; }
+  .shots { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; }
+  .shots.two { grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); }
+  @media (max-width: 400px) { .shots, .shots.two { grid-template-columns: 1fr; } }
+  figure { margin: 0; }
+  figure a { display: block; }
+  figure img { display: block; width: 100%; height: auto; border-radius: 9px; border: 1px solid var(--line); background: #000; transition: border-color .15s; }
+  figure a:hover img { border-color: var(--accent, var(--gold)); }
+  figcaption { color: var(--faint); font-size: 13px; margin-top: 5px; line-height: 1.4; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 15px; }
+  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { color: var(--dim); font-weight: 600; font-size: 13px; text-transform: uppercase; letter-spacing: .04em; }
+  td.num { white-space: nowrap; font-weight: 600; }
+  .table-wrap { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 4px 6px; overflow-x: auto; }
+
+  .todo li { border-left-color: var(--warn) !important; }
+  footer { margin-top: 48px; padding-top: 18px; border-top: 1px solid var(--line); color: var(--faint); font-size: 14px; }
+  code { background: #ffffff12; padding: 1px 5px; border-radius: 4px; font-size: .9em; }
+</style>
+</head>
+<body>
+<main>
+
+  <header class="hero">
+    <div class="kicker">Quintessence 3D · noite de 11 para 12/11</div>
+    <h1>Tudo o que entrou na noite</h1>
+    <p class="lead">Das 22h às 9h30: <b>227 commits</b> no <code>main</code>, cada um no nome de quem cuida da frente, com os testes passando antes de cada commit. Mais heróis, monstros, salas, skills que combinam e um sistema de nível e build.</p>
+    <div class="orbs" aria-hidden="true"><span style="background:var(--fire)"></span><span style="background:var(--water)"></span><span style="background:var(--quint)"></span><span style="background:var(--earth)"></span><span style="background:var(--air)"></span></div>
+    <figure class="video">
+      <video src="img/run_manha.mp4" poster="img/run_manha_capa.jpg" controls muted playsinline preload="metadata"></video>
+      <figcaption class="cap">Uma run curta jogada pelo roteiro de teste, com o estado da manhã</figcaption>
+    </figure>
+  </header>
+
+  <div class="kpis">
+    <div class="kpi"><b style="color:var(--fire)">4</b><span>heróis jogáveis</span><small>era 1 (o aprendiz)</small></div>
+    <div class="kpi"><b style="color:var(--water)">14</b><span>tipos de inimigo</span><small>eram 4, + 3 mini-chefes</small></div>
+    <div class="kpi"><b style="color:var(--gold)">3</b><span>chefes finais</span><small>sorteados por run (era 1)</small></div>
+    <div class="kpi"><b style="color:var(--earth)">33</b><span>talentos</span><small>não existia nível nem talento</small></div>
+    <div class="kpi"><b style="color:var(--air)">31</b><span>arranjos de sala</span><small>eram 6, em 3 trechos</small></div>
+    <div class="kpi"><b style="color:var(--quint)">6</b><span>Fusões</span><small>terceiro elemento sobre uma reação</small></div>
+    <div class="kpi"><b style="color:var(--ok)">586</b><span>testes passando</span><small>549 de regra + 37 jogando</small></div>
+  </div>
+
+  <nav aria-label="Seções">
+    <a href="#herois">Heróis</a><a href="#combate">Combate</a><a href="#build">Nível e build</a><a href="#salas">Salas</a><a href="#monstros">Monstros e chefes</a><a href="#jogador">Para quem joga</a><a href="#qualidade">Qualidade</a><a href="#falta">Falta fazer</a>
+  </nav>
+
+  <section id="herois" style="--accent:var(--fire)">
+    <div class="sec-head"><h2>Heróis</h2><div class="who"><span>Leonardo</span><span>Miguel (arte)</span><span>Nicolas</span></div></div>
+    <p class="intro">Os quatro heróis do jogo 2D chegaram ao 3D, um por elemento inicial. As cabeças, caudas e armas foram modeladas no Blender sobre os corpos do pack KayKit, no mesmo acabamento fosco.</p>
+    <div class="cols">
+      <ul class="items">
+        <li><b>Rax</b> (Fogo, garras curtas e rápidas), <b>Liora</b> (Água, chicote longo e estreito), <b>Brann</b> (Terra, martelo lento e largo) e <b>Vey</b> (Ar, adagas velozes com mais crítico). Cada um tem golpe básico próprio.</li>
+        <li><b>Passiva de cada herói:</b> Rax +15% no combo; Liora cura ao limpar a sala; Brann +20 de vida; Vey mais velocidade, dash mais rápido, 25% de esquiva e cura a cada esquiva.</li>
+        <li><b>Despertar da Quintessência próprio:</b> Erupção do Caçador (queima), Maré da Fonte (encharca e cura), Rugido da Montanha (atordoa), Olho do Vendaval (empurra e cega). <span class="new">NOVO</span></li>
+        <li><b>Maestria:</b> cada run dá experiência ao herói usado; cinco níveis liberam vida, talento inicial, dano, troca e Essência. <span class="new">NOVO</span></li>
+        <li><b>Talento de assinatura</b>, só para o herói dele: Instinto do Caçador, Maré Crescente, Pele de Pedra e Vento de Cauda. <span class="new">NOVO</span></li>
+      </ul>
+      <div class="shots">
+        <figure><a href="img/herois.png"><img src="img/herois.png" alt="Rax, Liora, Brann e Vey dentro do jogo" loading="lazy"></a><figcaption>Os quatro dentro do jogo</figcaption></figure>
+        <figure><a href="img/herois_blender.png"><img src="img/herois_blender.png" alt="Os quatro heróis no Blender" loading="lazy"></a><figcaption>Peças próprias modeladas no Blender</figcaption></figure>
+        <figure><a href="img/maestria_inicio.png"><img src="img/maestria_inicio.png" alt="Painel de talento da maestria no começo da run do Brann" loading="lazy"></a><figcaption>Maestria: talento inicial no começo da run</figcaption></figure>
+      </div>
+    </div>
+  </section>
+
+  <section id="combate" style="--accent:var(--water)">
+    <div class="sec-head"><h2>Combate e skills que combinam</h2><div class="who"><span>Leonardo</span><span>Miguel (feedback)</span></div></div>
+    <p class="intro">O golpe básico é neutro, e as skills 1 a 4 têm papel próprio: a Labareda queima, a Maré cura e limpa, o Pilar bloqueia e o Vendaval recarrega o dash. Uma skill marca e a de outro elemento detona a reação. A noite foi para fazer tudo isso se combinar.</p>
+    <div class="cols">
+      <ul class="items">
+        <li><b>Seis Fusões:</b> a skill de um terceiro elemento sobre a área de uma reação vira Obsidiana, Incêndio, Ciclone, Gêiser, Barro Cozido ou Tempestade de Poeira. <span class="new">NOVO</span></li>
+        <li><b>Afinidade elemental:</b> elementais resistem ao próprio elemento e são fracos a outro, com os rótulos FRAQUEZA e RESISTE. <span class="new">NOVO</span></li>
+        <li><b>O cenário entra no combo:</b> a poça de corrupção marca quem está dentro com o elemento do trecho, e o Cristal de Ressonância estoura e marca o bando em volta. Até um herói de um elemento só consegue reação. <span class="new">NOVO</span></li>
+        <li><b>Esquiva perfeita:</b> dar dash através de um golpe enche 8% da Quintessência e deixa o próximo básico crítico. <span class="new">NOVO</span></li>
+        <li><b>Talentos de combo:</b> Cadência (skill de outro elemento logo depois da anterior causa +15% por nível), Contágio (a marca de quem cai pula para o vizinho), Alquimia (Fusões mais fortes), Flanqueador (golpe pelas costas) e seis talentos de reação, um por par. <span class="new">NOVO</span></li>
+      </ul>
+      <div class="shots">
+        <figure><a href="img/fusao_obsidiana.png"><img src="img/fusao_obsidiana.png" alt="Fusão Obsidiana" loading="lazy"></a><figcaption>Fusão Obsidiana: Maré sobre a lava do Magma</figcaption></figure>
+        <figure><a href="img/fx_elementos.png"><img src="img/fx_elementos.png" alt="Skill de Fogo, Água, Terra e Ar" loading="lazy"></a><figcaption>As quatro skills elementais</figcaption></figure>
+      </div>
+    </div>
+  </section>
+
+  <section id="build" style="--accent:var(--earth)">
+    <div class="sec-head"><h2>Nível, talentos e build</h2><div class="who"><span>Nicolas</span><span>Leonardo</span></div></div>
+    <p class="intro">Inimigo derrotado dá experiência, e cada nível oferece talentos para escolher com a sala limpa. Por cima disso vem o progresso permanente entre runs.</p>
+    <div class="cols">
+      <ul class="items">
+        <li><b>33 talentos</b> de corpo, de skill, de reação, de combo e de assinatura; os de skill só aparecem com o elemento desperto. <span class="new">NOVO</span></li>
+        <li><b>Sintonia:</b> 3 talentos de um elemento deixam a skill dele +20% mais forte; com 5, ela também recarrega 15% mais rápido. Aparece no cartão do talento e no inventário. <span class="new">NOVO</span></li>
+        <li><b>Santuário aprofunda:</b> além de despertar um elemento, sobe uma skill até o grau III, que ganha efeito de assinatura.</li>
+        <li><b>29 bênçãos</b>, Pacto que sorteia 3 de 5, Pergaminho de talento na Loja.</li>
+        <li><b>Refúgio com 8 melhorias permanentes</b> (novas: Sabedoria, Intuição para trocar as opções e Clarividência para ver 4 talentos), <b>Ascensão</b> em 5 níveis e <b>10 Feitos</b>. <span class="new">NOVO</span></li>
+        <li><b>Resultado da run com a linha Build:</b> Sintonia, Fusões, esquivas perfeitas, Cadências e talento de assinatura.</li>
+      </ul>
+      <div class="shots">
+        <figure><a href="img/nivel_talentos.png"><img src="img/nivel_talentos.png" alt="Escolha de talento ao subir de nível" loading="lazy"></a><figcaption>Escolha de talento ao subir de nível</figcaption></figure>
+        <figure><a href="img/inventario_sintonia.png"><img src="img/inventario_sintonia.png" alt="Inventário com a linha da Sintonia" loading="lazy"></a><figcaption>Inventário com talentos e Sintonia</figcaption></figure>
+        <figure><a href="img/feitos.png"><img src="img/feitos.png" alt="Painel dos dez Feitos" loading="lazy"></a><figcaption>Os dez Feitos</figcaption></figure>
+        <figure><a href="img/vitoria.png"><img src="img/vitoria.png" alt="Tela de vitória com Build, maestria, Feito e Ascensão" loading="lazy"></a><figcaption>Vitória: Build, maestria, Feito e Ascensão</figcaption></figure>
+      </div>
+    </div>
+  </section>
+
+  <section id="salas" style="--accent:var(--air)">
+    <div class="sec-head"><h2>Salas maiores e mais variadas</h2><div class="who"><span>Nicolas</span><span>Miguel (cenário)</span><span>Enzo</span></div></div>
+    <p class="intro">A run tem 10 salas por três trechos, Salões de Cinza, Cripta Afogada e Jardim de Pedra, até o Coração das Cinzas. Cada trecho tem pedra tingida, sua própria mistura de inimigos, música e adereços. A sala de luta cresceu para 28 x 20 m.</p>
+    <div class="cols">
+      <ul class="items">
+        <li><b>31 arranjos de sala</b> (eram 6): alguns com estrutura (Três Corredores, Fortim, Bastião em L, Galeria), 8 que só aparecem no próprio trecho e os últimos com a mobília do pack (Refeitório, Arsenal, Ossário, Clareira). <span class="new">NOVO</span></li>
+        <li><b>Perigos:</b> barril de pólvora que explode em cadeia, espinhos, respiradouro de brasa e poças de corrupção. A primeira sala vem sem perigos.</li>
+        <li><b>Salas novas:</b> Tesouro; Pacto; <b>Provação</b>, um desafio sorteado (contra o relógio, ileso ou sem dash) que paga um talento extra; e <b>Cerco</b>, 40 s de ondas sem fim que pagam uma bênção. <span class="new">NOVO</span></li>
+        <li><b>Cenário por tipo de sala:</b> Descanso, Mestre (o Mestre em pessoa), Tesouro, Pacto, Cerco e Provação, só com peças do pack e sem atrapalhar a luta.</li>
+        <li><b>Mapa</b> com faixas dos trechos e borda sul da sala, para a câmera não mostrar o vazio.</li>
+      </ul>
+      <div class="shots two">
+        <figure><a href="img/layouts_estrutura.png"><img src="img/layouts_estrutura.png" alt="A sala de 28 x 20 com os quatro arranjos com estrutura" loading="lazy"></a><figcaption>Arranjos com estrutura na sala de 28 x 20</figcaption></figure>
+        <figure><a href="img/biomas.png"><img src="img/biomas.png" alt="Os quatro trechos com seus adereços" loading="lazy"></a><figcaption>Os trechos com seus adereços</figcaption></figure>
+      </div>
+    </div>
+    <div class="shots" style="margin-top:12px">
+      <figure><a href="img/arranjo_refeitorio.png"><img src="img/arranjo_refeitorio.png" alt="Refeitório: mesas longas e barris" loading="lazy"></a><figcaption>Refeitório (qualquer trecho)</figcaption></figure>
+      <figure><a href="img/arranjo_arsenal.png"><img src="img/arranjo_arsenal.png" alt="Arsenal: caixotes, baús, respiradouros e barril de pólvora" loading="lazy"></a><figcaption>Arsenal (Salões de Cinza)</figcaption></figure>
+      <figure><a href="img/arranjo_ossario.png"><img src="img/arranjo_ossario.png" alt="Ossário: cantoneiras de pedra em volta de uma poça" loading="lazy"></a><figcaption>Ossário (Cripta Afogada)</figcaption></figure>
+      <figure><a href="img/arranjo_clareira.png"><img src="img/arranjo_clareira.png" alt="Clareira: escombros grandes em volta de um pilar, com espinhos" loading="lazy"></a><figcaption>Clareira (Jardim de Pedra)</figcaption></figure>
+      <figure><a href="img/provacao.png"><img src="img/provacao.png" alt="Entrada de uma Provação com o desafio no letreiro" loading="lazy"></a><figcaption>Provação: o desafio aparece no letreiro</figcaption></figure>
+      <figure><a href="img/salas_cenario.png"><img src="img/salas_cenario.png" alt="Descanso, Mestre, Tesouro e Pacto com cenário próprio" loading="lazy"></a><figcaption>Descanso, Mestre, Tesouro e Pacto</figcaption></figure>
+    </div>
+  </section>
+
+  <section id="monstros" style="--accent:#d76b6b">
+    <div class="sec-head"><h2>Monstros e chefes</h2><div class="who"><span>Enzo</span><span>Miguel (arte)</span></div></div>
+    <p class="intro">Cada inimigo novo pede uma resposta diferente do jogador. Todos foram montados com peças do pack e acessórios próprios, e todo ataque é avisado antes.</p>
+    <div class="cols">
+      <ul class="items">
+        <li><b>10 inimigos novos</b> (14 no total): Ceifador (investida em linha), Arremessador (bomba em área), Xamã (cura aliados), Cinzentos (enxame), um elemental por trecho (Brasa Viva, Afogado e Sentinela de Pedra), Escudeiro (de frente o escudo segura quase tudo: contorne, congele, enraíze ou atordoe), Porta-Estandarte (aura que fortalece o bando) e Espectro (reaparece nas suas costas). <span class="new">NOVO</span></li>
+        <li><b>Elite:</b> um Campeão na última onda e 7 traços anunciados na porta; os novos são Voláteis, Protegidos, Divisores (cada um que cai vira dois Cinzentos) e Espinhosos (devolvem parte do golpe básico).</li>
+        <li><b>3 mini-chefes</b> nas Elites mais adiante, sorteados por sala: Carrasco, Sacerdotisa Afogada e Colosso de Pedra. <span class="new">NOVO</span></li>
+        <li><b>3 chefes finais sorteados por run:</b> o Guardião das Cinzas, refeito com arte própria e ataques novos (Investida e Anel de Cinzas); a <b>Tecelã das Cinzas</b>, que luta de longe e se teletransporta; e a <b>Rainha Afogada</b>, com erupções que deixam poças e Afogados de reforço. O escudo da última fase cai com a Quintessência. <span class="new">NOVO</span></li>
+      </ul>
+      <div class="shots">
+        <figure><a href="img/inimigo_ceifador.png"><img src="img/inimigo_ceifador.png" alt="Ceifador avisando a investida em linha" loading="lazy"></a><figcaption>Ceifador avisando a investida</figcaption></figure>
+        <figure><a href="img/inimigos_elementais.png"><img src="img/inimigos_elementais.png" alt="Brasa Viva, Sentinela e Cinzentos" loading="lazy"></a><figcaption>Brasa Viva, Sentinela e Cinzentos</figcaption></figure>
+        <figure><a href="img/escudeiro_perto.png"><img src="img/escudeiro_perto.png" alt="Escudeiro de perto, com o escudo erguido" loading="lazy"></a><figcaption>Escudeiro</figcaption></figure>
+        <figure><a href="img/inimigo_estandarte.png"><img src="img/inimigo_estandarte.png" alt="Porta-Estandarte com o círculo carmim da aura" loading="lazy"></a><figcaption>Porta-Estandarte e a aura carmim</figcaption></figure>
+      </div>
+    </div>
+    <div class="shots" style="margin-top:12px">
+      <figure><a href="img/guardiao_novo.png"><img src="img/guardiao_novo.png" alt="Guardião das Cinzas com as peças próprias" loading="lazy"></a><figcaption>Guardião das Cinzas</figcaption></figure>
+      <figure><a href="img/chefe_tecela.png"><img src="img/chefe_tecela.png" alt="Tecelã no Coração das Cinzas" loading="lazy"></a><figcaption>Tecelã das Cinzas</figcaption></figure>
+      <figure><a href="img/chefe_rainha.png"><img src="img/chefe_rainha.png" alt="Rainha Afogada com as erupções avisadas no chão" loading="lazy"></a><figcaption>Rainha Afogada</figcaption></figure>
+      <figure><a href="img/mini_chefe.png"><img src="img/mini_chefe.png" alt="O Carrasco no Jardim de Pedra" loading="lazy"></a><figcaption>Carrasco, mini-chefe</figcaption></figure>
+      <figure><a href="img/colosso.png"><img src="img/colosso.png" alt="Colosso de Pedra de perto" loading="lazy"></a><figcaption>Colosso de Pedra, mini-chefe do Jardim</figcaption></figure>
+      <figure><a href="img/afogado_perto.png"><img src="img/afogado_perto.png" alt="Afogado ao lado de um Rastejante marcado com Água" loading="lazy"></a><figcaption>Afogado, o elemental da Cripta</figcaption></figure>
+    </div>
+  </section>
+
+  <section id="jogador" style="--accent:var(--quint)">
+    <div class="sec-head"><h2>Para quem joga</h2><div class="who"><span>Nicolas</span><span>Miguel</span></div></div>
+    <div class="cols">
+      <ul class="items">
+        <li><b>Continuar run:</b> o jogo salva ao entrar em cada sala, e o título oferece retomar. <span class="new">NOVO</span></li>
+        <li><b>Dicas de primeira vez</b>, uma vez por jogador, para cada mecânica nova (reação, Fusão, Escudeiro, esquiva perfeita, Cerco...).</li>
+        <li><b>Dificuldade Tranquila</b> (35% menos dano) nas Opções e na pausa; as duas primeiras salas servem de aquecimento.</li>
+        <li><b>Grimório</b> com heróis, maestria, inimigos, reações e Fusões; <b>Treino</b> com o herói escolhido; Esc fecha os painéis do título.</li>
+        <li>A pausa mostra o resumo da run, a derrota mostra quem derrubou o herói, os chefes entram com o nome no letreiro, o tremor de tela pode ser desligado e o jogo funciona com controle.</li>
+        <li><b>Som:</b> música própria da Cripta e do Jardim, com troca suave, e efeitos de subir de nível, Campeão, despertar, Feito e Divisor.</li>
+        <li><b>WebGL:</b> página de carregamento própria, sem a abertura da Unity, rodando a 120 FPS no Chrome; zip de 24,5 MB.</li>
+      </ul>
+      <div class="shots">
+        <figure><a href="img/titulo_continuar.png"><img src="img/titulo_continuar.png" alt="Título com Continuar run" loading="lazy"></a><figcaption>Título com Continuar run</figcaption></figure>
+        <figure><a href="img/grimorio.png"><img src="img/grimorio.png" alt="Grimório com heróis, inimigos, reações e Fusões" loading="lazy"></a><figcaption>Grimório</figcaption></figure>
+        <figure><a href="img/pausa.png"><img src="img/pausa.png" alt="Pausa com o resumo da run" loading="lazy"></a><figcaption>Pausa</figcaption></figure>
+        <figure><a href="img/webgl_navegador.jpg"><img src="img/webgl_navegador.jpg" alt="O jogo rodando no Chrome" loading="lazy"></a><figcaption>Rodando no navegador</figcaption></figure>
+      </div>
+    </div>
+  </section>
+
+  <section id="qualidade" style="--accent:var(--ok)">
+    <div class="sec-head"><h2>Qualidade e equilíbrio</h2><div class="who"><span>todos</span></div></div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>O quê</th><th>Como ficou</th></tr></thead>
+        <tbody>
+          <tr><td>Testes</td><td><b>549 de regra + 37 jogando</b>, todos passando antes de cada commit no <code>main</code></td></tr>
+          <tr><td>Revisões de bugs</td><td>Um agente separado revisou cada leva (mais de dez revisões na noite), e todos os achados foram corrigidos. Nenhum deles travava o jogo</td></tr>
+          <tr><td>Sonda de balanceamento</td><td>Um roteiro joga runs inteiras como um jogador razoável: desvia de 65% dos avisos, combina skills e quebra o escudo do chefe. A dificuldade foi calibrada para cerca de metade a dois terços de vitórias, sem Refúgio nem maestria</td></tr>
+          <tr><td>Última medição</td><td class="num">16 de 24 runs (Rax 4, Liora 5, Brann 4, Vey 3 de 6), nenhuma presa, nenhuma exceção</td></tr>
+          <tr><td>Ajustes pela sonda</td><td>Vey reforçado várias vezes (o último: esquiva de 20% para 25%, que levou ele de 1 para 3 de 6); Cadência baixada de +30% para +15%, porque quem pegava vencia sempre</td></tr>
+          <tr><td>Documentação</td><td><a href="progresso.html">progresso.html</a> (detalhe de cada leva, com fotos), GDD, README e <code>ARQUITETURA.md</code> com os contratos novos</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="falta" style="--accent:var(--warn)">
+    <div class="sec-head"><h2>Falta fazer (depende de vocês)</h2></div>
+    <ul class="items todo">
+      <li><b>Subir <code>Builds/Quintessence-WebGL.zip</code> no itch.io.</b> Nada foi enviado; o zip das 09h24 já foi conferido no Chrome.</li>
+      <li><b>Jogar uma run de verdade</b> e testar com controle: a dificuldade só foi medida pela sonda.</li>
+      <li><b>Olhar o Vey e a Cadência na mão.</b> Se o Vey ainda parecer frágil, o próximo ajuste é o empurrão do terceiro golpe das adagas.</li>
+      <li>Aprovar a lore marcada como proposta no GDD, colar o GDD no Milanote e alinhar a rubrica com o professor (semana de 16/11).</li>
+    </ul>
+  </section>
+
+  <footer>Quintessence 3D · Insper · página gerada em 12/11 a partir dos commits da noite. Detalhe leva a leva em <a href="progresso.html">progresso.html</a>.</footer>
+</main>
+</body>
+</html>
