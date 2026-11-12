@@ -20,6 +20,10 @@ public static class BuildTools
         PlayerSettings.defaultWebScreenWidth = 1280;
         PlayerSettings.defaultWebScreenHeight = 720;
         PlayerSettings.runInBackground = true;
+        // pagina de carregamento propria (fundo do titulo, barra nas cores do jogo, sem a marca da Unity)
+        PlayerSettings.WebGL.template = "PROJECT:Quintessence";
+        // sem a tela "Made with Unity" na abertura (opcional no Unity 6): o jogo abre direto no titulo
+        PlayerSettings.SplashScreen.show = false;
 
         var scenes = EditorBuildSettings.scenes.Where(s => s.enabled).Select(s => s.path).ToArray();
         if (scenes.Length == 0) { Debug.LogError("BUILD: nenhuma cena no Build Settings"); EditorApplication.Exit(1); return; }
