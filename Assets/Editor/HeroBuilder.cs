@@ -53,6 +53,15 @@ public static class HeroBuilder
             {
                 if (m.HasProperty("_Smoothness")) m.SetFloat("_Smoothness", 0.12f);
                 if (m.HasProperty("_Metallic")) m.SetFloat("_Metallic", 0f);
+                // adereços dos biomas: brasa, cogumelo e cristal acendem de leve; agua um pouco mais lisa
+                if (path.Contains("/Biomes/") && m.HasProperty("_EmissionColor") && (m.name == "Glow" || m.name == "Crystal"))
+                {
+                    var c = m.HasProperty("_BaseColor") ? m.GetColor("_BaseColor") : Color.white;
+                    m.EnableKeyword("_EMISSION");
+                    m.globalIlluminationFlags = MaterialGlobalIlluminationFlags.RealtimeEmissive;
+                    m.SetColor("_EmissionColor", c * (m.name == "Glow" ? (path.Contains("/Garden/") ? 0.7f : 1.1f) : 0.25f));
+                }
+                if (path.Contains("/Biomes/") && m.name == "Water" && m.HasProperty("_Smoothness")) m.SetFloat("_Smoothness", 0.55f);
                 // a pedra do cajado do Xama e verde-cura
                 if (path.Contains("/Enemies/") && m.name == "Magic" && m.HasProperty("_EmissionColor"))
                 {

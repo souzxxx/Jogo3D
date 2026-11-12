@@ -797,6 +797,9 @@ namespace Quintessence.Game.PlayTests
             hero.Teleport(new Vector3(0, 0.05f, -4.5f), Vector3.forward);
             foreach (Biome b in System.Enum.GetValues(typeof(Biome)))
             {
+                director.ApplyLayout(-1);
+                director.PlaceBiomeProps(b, 3);
+                Assert.AreEqual(4, director.BiomePropsPlaced, "cada trecho tem adereços proprios nas bordas da sala");
                 director.DressBiome(b, true);
                 Assert.AreEqual(b, director.CurrentBiome);
                 if (b != Biome.Ashes) Assert.AreEqual(Biomes.Name(b).ToUpperInvariant(), hud.LastBanner);

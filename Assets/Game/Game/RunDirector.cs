@@ -37,6 +37,9 @@ namespace Quintessence.Game
         [SerializeField] GameObject dummyPrefab;
         [Tooltip("Cenario proprio por tipo de sala, na ordem do enum RoomType (nulo = nenhum).")]
         [SerializeField] GameObject[] decorByRoom = new GameObject[0];
+        [System.Serializable] public class BiomeProps { public GameObject[] props = new GameObject[0]; }
+        [Tooltip("Adereços de cada trecho, na ordem do enum Biome.")]
+        [SerializeField] BiomeProps[] biomeProps = new BiomeProps[0];
         [SerializeField] Material matteMaterial;
         [Tooltip("Arranjos de cobertura das salas de combate; a run sorteia um por sala.")]
         [SerializeField] RoomLayout[] layouts = new RoomLayout[0];
@@ -92,6 +95,35 @@ namespace Quintessence.Game
 
         public void BindTutorial(GameObject dummy) => dummyPrefab = dummy;
         public void BindDecor(GameObject[] decors) => decorByRoom = decors;
+        public void BindBiomeProps(BiomeProps[] sets) => biomeProps = sets;
+
+        /// Onde os adereços do trecho entram: cantos da frente e as duas laterais, longe da entrada, das portas e dos layouts.
+        static readonly (Vector3 pos, float rot)[] PropSpots =
+        {
+            (new Vector3(-6.6f, 0, -7.1f), 20f), (new Vector3(6.6f, 0, -7.1f), -25f),
+            (new Vector3(-8.6f, 0, 0.1f), 90f), (new Vector3(8.5f, 0, -2.7f), -90f),
+        };
+        public int BiomePropsPlaced { get; private set; }
+
+        /// Espalha os adereços do trecho nas bordas da sala. Somem junto com o layout. Publico para os testes e as capturas.
+        public void PlaceBiomeProps(Biome biome, int seed)
+        {
+            BiomePropsPlaced = 0;
+            int b = (int)biome;
+            if (b >= biomeProps.Length || biomeProps[b] == null || biomeProps[b].props.Length == 0) return;
+            if (layoutRoot == null) layoutRoot = new GameObject("Layout").transform;
+            var set = biomeProps[b].props;
+            int start = Mathf.Abs(seed) % set.Length;
+            for (int i = 0; i < PropSpots.Length; i++)
+            {
+                var prefab = set[(start + i) % set.Length];
+                if (prefab == null) continue;
+                var (pos, rot) = PropSpots[i];
+                var go = Instantiate(prefab, pos, Quaternion.Euler(0, rot + ((seed + i * 37) % 3 - 1) * 12f, 0), layoutRoot);
+                go.name = prefab.name;
+                BiomePropsPlaced++;
+            }
+        }
 
         /// Poe o cenario proprio do tipo de sala (camas no Descanso, ouro no Tesouro...). Some junto com o layout.
         public void Dress(RoomType type)
@@ -277,6 +309,8 @@ namespace Quintessence.Game
             Cleanup();
             ApplyLayout(LayoutPicker.UsesLayout(node.Type) ? LayoutPicker.Pick(GameFlow.Seed, node.Id, layouts.Length) : -1);
             Dress(node.Type);
+            if (node.Type == RoomType.Combat || node.Type == RoomType.Elite || node.Type == RoomType.Boss)
+                PlaceBiomeProps(Biomes.For(Run.Depth, Run.Map.LayerCount), GameFlow.Seed + node.Id * 7);
             DressBiome(Biomes.For(Run.Depth, Run.Map.LayerCount), true);
             player.Teleport(entryPoint, Vector3.forward);
             hud.SetRoom($"Sala {Run.Depth + 1}/{Run.Map.LayerCount} · {RoomInfo.Name(node.Type)}", node.Type);

@@ -91,6 +91,60 @@ MonoBehaviour:
     patron: 4
     stat: 5
     value: 0.25
+  - id: fire_burning
+    name: "Carv\xE3o Vivo"
+    description: "+20% de dano em quem est\xE1 Queimando"
+    patron: 1
+    stat: 17
+    value: 0.2
+  - id: water_heal
+    name: Orvalho
+    description: "Mar\xE9 cura mais 4% da vida"
+    patron: 2
+    stat: 18
+    value: 0.04
+  - id: earth_thorns
+    name: Casca de Espinhos
+    description: Golpe bloqueado devolve 10 de dano de Terra
+    patron: 3
+    stat: 19
+    value: 10
+  - id: air_haste
+    name: Rabo de Vento
+    description: "Vendaval d\xE1 2 s de pressa"
+    patron: 4
+    stat: 20
+    value: 2
+  - id: all_basic
+    name: "M\xE3o Firme"
+    description: "Combo b\xE1sico causa +12%"
+    patron: 0
+    stat: 13
+    value: 0.12
+  - id: all_finisher
+    name: Golpe Final
+    description: Terceiro golpe causa +25%
+    patron: 0
+    stat: 14
+    value: 0.25
+  - id: all_xp
+    name: Curiosidade
+    description: "+20% de experi\xEAncia"
+    patron: 0
+    stat: 15
+    value: 0.2
+  - id: all_essence
+    name: Faro de Ouro
+    description: "+25% de Ess\xEAncia"
+    patron: 0
+    stat: 16
+    value: 0.25
+  - id: all_refund
+    name: Sede de Luta
+    description: Cada abate adianta 0,3 s das skills
+    patron: 0
+    stat: 21
+    value: 0.3
   - id: all_dmg
     name: Golpe Certeiro
     description: +10% de dano em tudo

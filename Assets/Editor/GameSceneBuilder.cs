@@ -71,6 +71,7 @@ public static class GameSceneBuilder
         director.BindLayouts(Layouts());
         director.BindTutorial(DummyPrefab());
         director.BindDecor(RoomDecors());
+        director.BindBiomeProps(BiomePropSets());
         director.BindProps(Prop("wall_doorway", 1f), bannerPrefabs, Prop("column", 1f), Prop("chest_gold", 1f), stone);
         EditorUtility.SetDirty(director);
         var hud = new GameObject("Hud");
@@ -229,6 +230,59 @@ public static class GameSceneBuilder
         }
         list[8] = Decor("PactDecor", new Color(0.8f, 0.35f, 0.45f), new Vector3(0, 2.8f, -1f), pact.ToArray());
         return list;
+    }
+
+    /// Adereços de cada trecho (modelados para o jogo), como obstaculos: colisor no miolo e recorte no NavMesh.
+    static RunDirector.BiomeProps[] BiomePropSets()
+    {
+        AssetDatabase.Refresh();
+        HeroBuilder.MatteParts("Assets/Art/Biomes");
+        const string dir = "Assets/Game/Game/Prefabs/Biomes/";
+        System.IO.Directory.CreateDirectory(dir);
+        AssetDatabase.Refresh();
+        // ordem do enum Biome: Ashes, Crypt, Garden, Heart
+        string[][] files =
+        {
+            new[] { "Ash/ash_brazier", "Ash/ash_beams", "Ash/ash_anvil", "Ash/ash_cage" },
+            new[] { "Crypt/crypt_sarcophagus", "Crypt/crypt_urns", "Crypt/crypt_statue", "Crypt/crypt_pool", "Crypt/crypt_stalagmites" },
+            new[] { "Garden/garden_tree", "Garden/garden_mushrooms", "Garden/garden_roots", "Garden/garden_planter", "Garden/garden_statue" },
+            new[] { "Heart/heart_spire", "Heart/heart_crystals" },
+        };
+        var sets = new RunDirector.BiomeProps[files.Length];
+        for (int b = 0; b < files.Length; b++)
+        {
+            var list = new List<GameObject>();
+            foreach (var f in files[b])
+            {
+                var asset = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Art/Biomes/" + f + ".fbx");
+                if (asset == null) { Debug.LogWarning("adereco nao encontrado: " + f); continue; }
+                string name = System.IO.Path.GetFileName(f);
+                var root = new GameObject(name);
+                var model = (GameObject)PrefabUtility.InstantiatePrefab(asset);
+                model.name = "Model";
+                model.transform.SetParent(root.transform, false);
+                // feitos com 1 a 2,5 m; ao lado das pecas do pack pediam um pouco mais de corpo
+                model.transform.localScale = Vector3.one * 1.35f;
+                var rs = model.GetComponentsInChildren<Renderer>();
+                if (rs.Length > 0)
+                {
+                    var bounds = rs[0].bounds; foreach (var r in rs) bounds.Encapsulate(r.bounds);
+                    // poca e bacia sao baixas: anda-se em volta, mas o colisor nao precisa subir
+                    var size = new Vector3(bounds.size.x * 0.75f, Mathf.Max(0.4f, bounds.size.y), bounds.size.z * 0.75f);
+                    var col = root.AddComponent<BoxCollider>();
+                    col.center = new Vector3(bounds.center.x, size.y / 2f, bounds.center.z); col.size = size;
+                    var carve = root.AddComponent<UnityEngine.AI.NavMeshObstacle>();
+                    carve.shape = UnityEngine.AI.NavMeshObstacleShape.Box;
+                    carve.center = col.center; carve.size = size + new Vector3(0.3f, 0, 0.3f);
+                    carve.carving = true;
+                    Debug.Log($"adereco {name}: tamanho {bounds.size}");
+                }
+                list.Add(PrefabUtility.SaveAsPrefabAsset(root, dir + name + ".prefab"));
+                Object.DestroyImmediate(root);
+            }
+            sets[b] = new RunDirector.BiomeProps { props = list.ToArray() };
+        }
+        return sets;
     }
 
     /// Boneco de treino: apanha, nao revida e volta depois de cair.
