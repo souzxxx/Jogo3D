@@ -390,6 +390,8 @@ namespace Quintessence.Combat
                 AttackKind.Skill, d.critChance, d.skillAppliesStatus, d.skillStatus, d.skillStatusDuration,
                 second, d.finisherStatus, d.finisherStatusDuration);
 
+            TryFuse(origin, reach, arc);
+
             // o papel de cada elemento alem do dano: Agua cuida, Terra protege, Ar e a fuga
             switch (castElement)
             {
@@ -410,6 +412,23 @@ namespace Quintessence.Combat
                     dash.Refill();
                     if (mods.AirHasteSeconds > 0f) hasteLeft = mods.AirHasteSeconds;
                     break;
+            }
+        }
+
+        /// Quantas fusoes este heroi ja fez (para os testes).
+        public int Fusions { get; private set; }
+
+        /// A skill pegou uma area de reacao de outros dois elementos: funde.
+        void TryFuse(Vector3 origin, float reach, float arc)
+        {
+            var zones = new List<DamageZone>(DamageZone.Active);
+            foreach (var z in zones)
+            {
+                if (z == null || !z.Fusable) continue;
+                var to = z.transform.position - origin; to.y = 0f;
+                if (to.magnitude > reach + z.Radius * 0.6f) continue;
+                if (arc < 359f && to.sqrMagnitude > 1f && Vector3.Angle(AimDirection, to) > arc * 0.5f + 15f) continue;
+                if (ElementCombat.Fuse(z, castElement, health.Team, gameObject, mods.ReactionPower)) Fusions++;
             }
         }
 

@@ -188,6 +188,33 @@ namespace Quintessence.Combat.Tests
             Assert.AreEqual(100 - 5 - 5 - 12, target.Current, 0.001f, "Vapor com +50%: 12 em vez de 8");
         }
 
+        [Test] public void FusionTable_IsSymmetric_AndNeedsAThirdElement()
+        {
+            Assert.AreEqual(FusionKind.Obsidian, FusionRules.Find(ElementType.Earth, ElementType.Fire, ElementType.Water));
+            Assert.AreEqual(FusionKind.Obsidian, FusionRules.Find(ElementType.Fire, ElementType.Earth, ElementType.Water));
+            Assert.AreEqual(FusionKind.Cyclone, FusionRules.Find(ElementType.Water, ElementType.Fire, ElementType.Air));
+            Assert.AreEqual(FusionKind.None, FusionRules.Find(ElementType.Fire, ElementType.Earth, ElementType.Fire), "elemento do par nao funde");
+            Assert.AreEqual(FusionKind.None, FusionRules.Find(ElementType.Water, ElementType.Earth, ElementType.Fire), "Lama nao deixa area");
+            foreach (FusionKind k in System.Enum.GetValues(typeof(FusionKind)))
+                if (k != FusionKind.None) { Assert.IsNotEmpty(FusionRules.Name(k)); Assert.IsNotEmpty(FusionRules.Describe(k)); Assert.Greater(FusionRules.Stats(k).damage, 0f); }
+        }
+
+        [Test] public void Fusion_HitsTheArea_AppliesItsEffect_AndConsumesTheZone()
+        {
+            string reaction = null;
+            GameEvents.ReactionTriggered += e => reaction = e.Name;
+            var zone = DamageZone.Spawn(Vector3.zero, 2f, 4f, 0.5f, 0f, ElementType.Earth, Team.Player, null, table, true).WithPair(ElementType.Fire, ElementType.Earth);
+            Assert.IsTrue(ElementCombat.Fuse(zone, ElementType.Water, Team.Player, null));
+            Assert.AreEqual("Obsidiana", reaction);
+            Assert.Less(target.Current, 100f);
+            Assert.Less(bystander.Current, 100f, "pega quem esta na area");
+            Assert.IsTrue(target.GetComponent<StatusHolder>().State.Has(StatusType.Stun), "Obsidiana atordoa");
+            Assert.IsTrue(zone == null, "a area some");
+            var other = DamageZone.Spawn(Vector3.zero, 2f, 4f, 0.5f, 0f, ElementType.Earth, Team.Player, null, table, true).WithPair(ElementType.Fire, ElementType.Earth);
+            Assert.IsFalse(ElementCombat.Fuse(other, ElementType.Earth, Team.Player, null), "elemento do proprio par nao funde");
+            Object.DestroyImmediate(other.gameObject);
+        }
+
         [Test] public void ReactionDamageDoesNotChainReactions()
         {
             int reactions = 0;

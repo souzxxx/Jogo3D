@@ -15,6 +15,19 @@ namespace Quintessence.Combat
         bool fromReaction, appliesStatus;
         StatusType status;
         HeroModifiers mods;
+        static readonly List<DamageZone> active = new();
+        /// Areas no chao agora (as de reacao podem virar fusao).
+        public static IReadOnlyList<DamageZone> Active => active;
+        /// Par de elementos da reacao que criou a area (None = area que nao e de reacao).
+        public ElementType PairA { get; private set; }
+        public ElementType PairB { get; private set; }
+        public float Radius => radius;
+        public bool Fusable => PairA != ElementType.None;
+
+        void OnEnable() => active.Add(this);
+        void OnDisable() => active.Remove(this);
+
+        public DamageZone WithPair(ElementType a, ElementType b) { PairA = a; PairB = b; return this; }
         static readonly Collider[] buffer = new Collider[32];
         static readonly HashSet<Health> seen = new();
 

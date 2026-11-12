@@ -59,6 +59,38 @@ namespace Quintessence.Combat
             return applied;
         }
 
+        /// Fusao: a skill de um terceiro elemento sobre uma area de reacao. Fere e aplica o efeito em volta e consome a area.
+        public static bool Fuse(DamageZone zone, ElementType third, Team team, GameObject source, float power = 1f)
+        {
+            if (zone == null || !zone.Fusable) return false;
+            var kind = FusionRules.Find(zone.PairA, zone.PairB, third);
+            if (kind == FusionKind.None) return false;
+            var st = FusionRules.Stats(kind);
+            var center = zone.transform.position;
+            float radius = zone.Radius * st.radiusMult + 0.5f;
+            GameEvents.RaiseReaction(new ReactionEvent
+            {
+                Mark = zone.PairA, Trigger = third, Point = center, Target = null, Source = source, Name = FusionRules.Name(kind), Radius = radius,
+            });
+            int n = Physics.OverlapSphereNonAlloc(center + Vector3.up, radius, buffer, ~0, QueryTriggerInteraction.Collide);
+            seen.Clear();
+            for (int i = 0; i < n; i++)
+            {
+                var h = buffer[i].GetComponentInParent<Health>();
+                if (h == null || h.Team == team || h.IsDead || !seen.Add(h)) continue;
+                var dir = h.transform.position - center; dir.y = 0f;
+                dir = dir.sqrMagnitude > 0.01f ? dir.normalized : Vector3.forward;
+                if (st.knockback < 0f) dir = -dir; // Ciclone puxa para o centro
+                h.TakeDamage(new DamageInfo(st.damage * power, st.element, team, source)
+                {
+                    IsReaction = true, Point = h.transform.position + Vector3.up * 1.2f, Direction = dir, Knockback = Mathf.Abs(st.knockback),
+                });
+                if (!h.IsDead) StatusHolder.GetOrAdd(h).Apply(st.status, st.statusTime, team, source);
+            }
+            if (Application.isPlaying) Object.Destroy(zone.gameObject); else Object.DestroyImmediate(zone.gameObject);
+            return true;
+        }
+
         static void React(Health target, ElementType markElement, DamageInfo info, ReactionTable table, float power, HeroModifiers mods = null)
         {
             var r = table != null ? table.Find(markElement, info.Element) : null;
@@ -96,6 +128,7 @@ namespace Quintessence.Combat
             var zone = DamageZone.Spawn(center, radius, r.zoneDuration, r.zoneInterval, r.zoneDamage * power,
                 info.Element, info.SourceTeam, info.Source, table, fromReaction: true);
             if (r.zoneAppliesStatus) zone.WithStatus(r.zoneStatus, r.zoneStatusDuration);
+            zone.WithPair(markElement, info.Element);
         }
     }
 }
