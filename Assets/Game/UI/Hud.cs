@@ -682,6 +682,11 @@ namespace Quintessence.UI
                     UiKit.Text(UiKit.Rect("Boon" + i, box, new Vector2(0, 1), new Vector2(744, y), new Vector2(540, 32)),
                         boons[i].name + " — " + boons[i].description, 21, UiKit.Cream, TextAnchor.MiddleLeft, false);
                 }
+            // fusoes: a skill de um terceiro elemento sobre a area de Magma ou de Vapor
+            int awakenedCount = hero != null ? hero.AwakenedElements.Count : 0;
+            UiKit.Text(UiKit.Rect("Fusions", box, new Vector2(0, 1), new Vector2(60, -688), new Vector2(1200, 26)),
+                "FUSÕES (3 elementos): Obsidiana · Magma + Água   Incêndio · Magma + Ar   Ciclone · Vapor + Ar   Gêiser · Vapor + Terra",
+                17, awakenedCount >= 3 ? UiKit.Cream : UiKit.Dim, TextAnchor.MiddleLeft, false);
             if (talents != null && talents.Count > 0)
             {
                 var seen = new List<string>();
@@ -692,7 +697,7 @@ namespace Quintessence.UI
                     seen.Add(t.Id);
                     parts.Add(t.MaxRank > 1 ? $"{t.Name} {talents.Rank(t.Id)}/{t.MaxRank}" : t.Name);
                 }
-                var tl = UiKit.Text(UiKit.Rect("Talents", box, new Vector2(0, 1), new Vector2(60, -702), new Vector2(1200, 60)),
+                var tl = UiKit.Text(UiKit.Rect("Talents", box, new Vector2(0, 1), new Vector2(60, -722), new Vector2(1200, 50)),
                     $"TALENTOS (nível {progress?.Level ?? 1}):  " + string.Join("  ·  ", parts), 21, UiKit.Cream, TextAnchor.UpperLeft, false);
                 tl.horizontalOverflow = HorizontalWrapMode.Wrap;
             }

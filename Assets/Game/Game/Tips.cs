@@ -37,6 +37,7 @@ namespace Quintessence.Game
             "elite" => "Elite: inimigos com um traço especial e um inimigo forte no fim. Paga mais.",
             "shop" => "Loja: gaste Essência em cura, vida máxima, bênçãos e talentos.",
             "pact" => "Pacto: um ganho forte com um custo que dura a run toda. Dá para recusar.",
+            "fusion" => "Três elementos: lance a skill do terceiro numa poça de Magma ou numa nuvem de Vapor. É uma Fusão.",
             "quint" => "Quatro elementos despertos: cause reações para encher a Quintessência e aperte R.",
             _ => "",
         };

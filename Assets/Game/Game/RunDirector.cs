@@ -239,6 +239,7 @@ namespace Quintessence.Game
             if (player == null || Run == null || GameFlow.Tutorial) return;
             int n = player.Loadout.Awakened.Count;
             if (n == 2) Tip("react");
+            else if (n == 3) Tip("fusion");
             else if (n >= 4) Tip("quint");
         }
 

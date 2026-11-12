@@ -199,6 +199,15 @@ namespace Quintessence.UI
             }, 80);
             UiKit.Text(UiKit.Rect("Hint", box, new Vector2(0.5f, 0), new Vector2(0, 112), new Vector2(1500, 30)),
                 "Uma skill marca o inimigo; a skill de outro elemento detona a reação. O golpe básico não tem elemento.", 20, UiKit.Dim, TextAnchor.MiddleCenter, false);
+            // fusoes: abaixo das reacoes
+            UiKit.Text(UiKit.Rect("FusH", box, new Vector2(0, 1), new Vector2(1130, -650), new Vector2(500, 30)), "FUSÕES · TERCEIRO ELEMENTO", 22, UiKit.Dim, TextAnchor.MiddleLeft);
+            var fusions = new[] { FusionKind.Obsidian, FusionKind.Wildfire, FusionKind.Cyclone, FusionKind.Geyser };
+            for (int i = 0; i < fusions.Length; i++)
+            {
+                var f = UiKit.Text(UiKit.Rect("Fus" + i, box, new Vector2(0, 1), new Vector2(1130, -684 - i * 30), new Vector2(500, 28)),
+                    $"{FusionRules.Name(fusions[i])}: {FusionRules.Describe(fusions[i])}", 16, UiKit.Paper, TextAnchor.MiddleLeft, false);
+                f.horizontalOverflow = HorizontalWrapMode.Wrap;
+            }
         }
 
         public void ShowCredits()

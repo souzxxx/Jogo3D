@@ -707,6 +707,66 @@ namespace Quintessence.Game.PlayTests
         }
 
         [UnityTest, Timeout(600000)]
+        public IEnumerator Third_Skill_On_Magma_Makes_A_Fusion()
+        {
+            GameEvents.Clear();
+            Time.timeScale = 1f;
+            Time.captureFramerate = 30;
+            GameFlow.StartElement = ElementType.Fire;
+            GameFlow.Seed = 3; GameFlow.Layers = 5; GameFlow.Shrines = 1;
+            yield return EditorSceneManager.LoadSceneAsyncInPlayMode("Assets/Scenes/Run.unity", new LoadSceneParameters(LoadSceneMode.Single));
+            yield return null;
+            yield return null;
+            var director = Object.FindFirstObjectByType<RunDirector>();
+            var hud = Object.FindFirstObjectByType<Hud>();
+            cam = Camera.main;
+            hud.UseCamera(cam);
+            Object.FindFirstObjectByType<WaveSpawner>().enabled = false;
+            for (int k = 0; k < 2000 && director.Busy; k++) yield return null;
+            director.ApplyLayout(-1);
+            var hero = Object.FindFirstObjectByType<PlayerController>();
+            hero.GetComponent<Health>().Pool.Invulnerable = true;
+            hero.Awaken(ElementType.Earth);
+            hero.Awaken(ElementType.Water);
+            hero.Teleport(new Vector3(0, 0.05f, -3f), Vector3.forward);
+            var scripted = hero.gameObject.AddComponent<ScriptedInput>();
+            hero.GetComponent<PlayerInputReader>().enabled = false;
+            hero.Input = scripted;
+            var brutePrefab = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Game/Enemies/Prefabs/Bruto.prefab");
+            var brute = Object.Instantiate(brutePrefab, new Vector3(0, 0, 0.5f), Quaternion.Euler(0, 180, 0));
+            yield return null;
+            StatusHolder.GetOrAdd(brute.GetComponent<Health>()).Apply(StatusType.Rooted, 60f, Team.Player, hero.gameObject);
+            for (int k = 0; k < 30; k++) yield return null; // termina de nascer
+            scripted.AimPoint = brute.transform.position;
+            string last = "", started = "", denied = "";
+            GameEvents.ReactionTriggered += e => last = e.Name;
+            hero.SkillStarted += e => started += e + " ";
+            hero.SkillDenied += e => denied += e + " ";
+            scripted.PressElementSkill(1); // Labareda marca de Fogo
+            for (int k = 0; k < 36; k++) { scripted.AimPoint = brute.transform.position; yield return null; }
+            for (int k = 0; k < 60 && hero.IsCasting; k++) yield return null;
+            scripted.PressElementSkill(3); // Pilar de Pedra detona: Magma
+            for (int k = 0; k < 36 && last != "Magma"; k++) yield return null;
+            Assert.AreEqual("Magma", last, "Fogo + Terra fazem Magma");
+            Assert.IsTrue(DamageZone.Active.Any(z => z.Fusable), "o Magma deixa a poca no chao");
+            // a pausa de impacto da reacao corre em tempo real: no teste ela dura muitos quadros
+            for (int k = 0; k < 1500 && hero.IsCasting; k++) yield return null; // termina o Pilar antes de pedir a proxima skill
+            var pool = DamageZone.Active.First(z => z.Fusable);
+            scripted.AimPoint = pool.transform.position;
+            scripted.PressElementSkill(2); // Mare sobre a poca: Obsidiana
+            for (int k = 0; k < 1500 && hero.Fusions == 0; k++) yield return null;
+            Assert.AreEqual(1, hero.Fusions, $"a terceira skill funde (recarga da Agua {hero.SkillCooldown01(ElementType.Water):0.00}, distancia {Vector3.Distance(hero.transform.position, pool != null ? pool.transform.position : Vector3.zero):0.0}, poca viva {pool != null}, ultima reacao {last}, raio {(pool != null ? pool.Radius : -1f)}, lancadas {started}, negadas {denied}, elementos {string.Join(",", hero.Loadout.Awakened)}, pode agir {!hero.TryGetComponent(out StatusHolder sh) || sh.State.CanAct})");
+            Assert.AreEqual("Obsidiana", last);
+            Assert.IsFalse(DamageZone.Active.Any(z => z.Fusable), "a fusao consome a poca");
+            hud.ShowBanner("", "", Color.clear, 0.01f);
+            hud.ShowTip("", 0.01f);
+            for (int k = 0; k < 3; k++) yield return null;
+            Shot(cam, "docs/img/fusao_obsidiana.png");
+            GameFlow.Layers = 8; GameFlow.Shrines = 3;
+            Time.captureFramerate = 0;
+        }
+
+        [UnityTest, Timeout(600000)]
         public IEnumerator Weaver_Keeps_Distance_And_Blinks()
         {
             GameEvents.Clear();
