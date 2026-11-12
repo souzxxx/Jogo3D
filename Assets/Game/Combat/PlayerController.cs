@@ -218,6 +218,8 @@ namespace Quintessence.Combat
         void OnDodged(Health target, DamageInfo info)
         {
             if (target != health || !dash.IsDashing || info.SourceTeam == health.Team) return;
+            // so golpe de inimigo de verdade: poca, respiradouro, espinhos e barril nao contam (senao enchia a barra na sala vazia)
+            if (info.IsReaction || info.Source == null || !info.Source.TryGetComponent(out Health attacker) || attacker.Team == health.Team) return;
             if (Time.time - lastPerfect < 0.8f) return; // varios projeteis do mesmo golpe contam uma vez
             lastPerfect = Time.time;
             PerfectDodges++;
@@ -484,7 +486,8 @@ namespace Quintessence.Combat
                 var to = z.transform.position - origin; to.y = 0f;
                 if (to.magnitude > reach + z.Radius * 0.6f) continue;
                 if (arc < 359f && to.sqrMagnitude > 1f && Vector3.Angle(AimDirection, to) > arc * 0.5f + 15f) continue;
-                if (ElementCombat.Fuse(z, castElement, health.Team, gameObject, mods.ReactionPower * (1f + mods.FusionBonus))) Fusions++;
+                // uma Fusao por skill: areas vizinhas nao viram varias de uma vez
+                if (ElementCombat.Fuse(z, castElement, health.Team, gameObject, mods.ReactionPower * (1f + mods.FusionBonus))) { Fusions++; break; }
             }
         }
 

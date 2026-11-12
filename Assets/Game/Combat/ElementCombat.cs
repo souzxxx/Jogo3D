@@ -89,6 +89,8 @@ namespace Quintessence.Combat
                 });
                 if (!h.IsDead) StatusHolder.GetOrAdd(h).Apply(st.status, st.statusTime, team, source);
             }
+            // sai da lista de areas ja (o Destroy so vale no fim do quadro): nada a renova no mesmo quadro
+            zone.enabled = false;
             if (Application.isPlaying) Object.Destroy(zone.gameObject); else Object.DestroyImmediate(zone.gameObject);
             return true;
         }
