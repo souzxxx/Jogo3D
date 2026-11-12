@@ -30,7 +30,7 @@ namespace Quintessence.Game
 
         public static string Text(string id) => id switch
         {
-            "start" => "Clique esquerdo ataca. A tecla 1 a 4 solta a skill do elemento. Espaço desvia.",
+            "start" => "Clique esquerdo ataca. As teclas 1 a 4 soltam as skills dos elementos. Espaço desvia.",
             "level" => "Subiu de nível: escolha um talento com 1, 2 ou 3.",
             "shrine" => "Santuário: desperte um elemento novo ou aprofunde uma skill que você já tem.",
             "react" => "Duas skills! Marque com uma e detone com a outra: isso é uma reação.",
