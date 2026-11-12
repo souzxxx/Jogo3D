@@ -70,6 +70,7 @@ namespace Quintessence.Run
         EarthBlocks, EarthRange, EarthThorns,
         AirDashCharge, AirRange, AirHaste,
         ReactionBoost,
+        Flank, SureFooted, BurstPower,
     }
 
     public class Talent
@@ -130,6 +131,9 @@ namespace Quintessence.Run
             Add("body_health", "Vigor", "+12 de vida máxima", ElementType.None, TalentEffect.MaxHealth, 12f, 3);
             Add("body_refund", "Ímpeto", "Cada inimigo derrotado adianta 0,4 s das skills", ElementType.None, TalentEffect.SkillRefundOnKill, 0.4f, 2);
             Add("body_essence", "Colecionador", "+20% de Essência", ElementType.None, TalentEffect.Essence, 0.2f, 2);
+            Add("body_flank", "Flanqueador", "Golpes pelas costas do alvo causam +25%", ElementType.None, TalentEffect.Flank, 0.25f, 2);
+            Add("body_footing", "Pés Firmes", "Encharcado, você não fica lento", ElementType.None, TalentEffect.SureFooted, 1f, 1);
+            Add("body_awaken", "Despertar Intenso", "A explosão da Quintessência causa +50%", ElementType.None, TalentEffect.BurstPower, 0.5f, 2);
 
             Add("fire_trail", "Rastro de Brasa", "Labareda deixa o chão em chamas por 3 s", ElementType.Fire, TalentEffect.FireTrail, 3f, 1);
             Add("fire_range", "Fornalha", "Labareda alcança 20% mais longe", ElementType.Fire, TalentEffect.FireRange, 0.2f, 2);
@@ -195,6 +199,9 @@ namespace Quintessence.Run
                 case TalentEffect.AirRange: m.AddSkillRange(ElementType.Air, t.Value); break;
                 case TalentEffect.AirHaste: m.AirHasteSeconds += t.Value; break;
                 case TalentEffect.ReactionBoost: m.AddReactionBonus(t.Element, t.Second, t.Value); break;
+                case TalentEffect.Flank: m.FlankBonus += t.Value; break;
+                case TalentEffect.SureFooted: m.SureFooted = true; break;
+                case TalentEffect.BurstPower: m.BurstBonus += t.Value; break;
             }
         }
 
@@ -207,6 +214,8 @@ namespace Quintessence.Run
                 if (!book.CanTake(t)) continue;
                 if (t.Element != ElementType.None && !Has(awakened, t.Element)) continue;
                 if (t.Second != ElementType.None && !Has(awakened, t.Second)) continue;
+                // o despertar so vale com os quatro elementos: oferece a partir do terceiro
+                if (t.Effect == TalentEffect.BurstPower && awakened.Count < 3) continue;
                 pool.Add(t);
             }
             var offer = new List<Talent>();

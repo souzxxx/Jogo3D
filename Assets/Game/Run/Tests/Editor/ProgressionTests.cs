@@ -170,5 +170,24 @@ namespace Quintessence.Run.Tests
             foreach (var a in Elements.All) foreach (var b in Elements.All) sb.Append(m.ReactionBonus(a, b)).Append(',');
             return sb.ToString();
         }
+
+        [Test] public void AwakeningTalent_OnlyComesWithThreeElements()
+        {
+            var book = new TalentBook();
+            for (int seed = 0; seed < 200; seed++)
+            {
+                var early = TalentCatalog.Offer(book, new[] { ElementType.Fire }, new System.Random(seed));
+                Assert.IsFalse(early.Any(t => t.Effect == TalentEffect.BurstPower), "com um elemento nao oferece o despertar");
+            }
+            bool seen = false;
+            for (int seed = 0; seed < 300 && !seen; seed++)
+                seen = TalentCatalog.Offer(book, new[] { ElementType.Fire, ElementType.Water, ElementType.Earth }, new System.Random(seed)).Any(t => t.Effect == TalentEffect.BurstPower);
+            Assert.IsTrue(seen, "com tres elementos ele aparece");
+            var m = new HeroModifiers();
+            TalentCatalog.Apply(m, TalentCatalog.All.First(t => t.Id == "body_footing"));
+            Assert.IsTrue(m.SureFooted);
+            TalentCatalog.Apply(m, TalentCatalog.All.First(t => t.Id == "body_flank"));
+            Assert.AreEqual(0.25f, m.FlankBonus, 1e-4f);
+        }
     }
 }

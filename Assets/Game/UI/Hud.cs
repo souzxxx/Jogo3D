@@ -61,6 +61,8 @@ namespace Quintessence.UI
             TalentEffect.Essence => "essence",
             TalentEffect.SkillRefundOnKill => "boon_skill",
             TalentEffect.Finisher => "boon_crit",
+            TalentEffect.SureFooted => "boon_speed",
+            TalentEffect.BurstPower => "quintessence",
             _ => "boon_damage",
         };
 

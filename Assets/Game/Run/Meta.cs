@@ -105,7 +105,7 @@ namespace Quintessence.Run
         {
             Feat.FirstWin => "Primeira Chama", Feat.AllHeroes => "Quatro Caminhos", Feat.MasteryFive => "Mestre",
             Feat.Ascended => "Ascendido", Feat.Quintessence => "O Quinto Estado", Feat.Trial => "Provado",
-            Feat.Fusion => "Alquimista", Feat.Horde => "Ceifa", Feat.ShieldBreak => "Escudo Partido", Feat.Collector => "Colecionador",
+            Feat.Fusion => "Alquimista", Feat.Horde => "Ceifa", Feat.ShieldBreak => "Escudo Partido", Feat.Collector => "Arsenal",
             _ => "",
         };
 
