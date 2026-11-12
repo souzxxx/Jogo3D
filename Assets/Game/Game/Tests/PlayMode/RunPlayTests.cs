@@ -1371,6 +1371,13 @@ namespace Quintessence.Game.PlayTests
             // espera a sala terminar de abrir (o escurecimento de entrada usa tempo real)
             for (int k = 0; k < 2000 && director.Busy; k++) yield return null;
             Assert.IsFalse(director.Busy, "a primeira sala nao terminou de abrir");
+            // visao da sala inteira para as fotos (a camera do jogo segue o heroi)
+            var follow = cam.GetComponent<FollowCamera>();
+            if (follow != null) follow.enabled = false;
+            var overview = Quaternion.Euler(52f, 0f, 0f);
+            cam.transform.SetPositionAndRotation(new Vector3(0, 0, 0.6f) - overview * Vector3.forward * 46f, overview);
+            hud.ShowBanner("", "", Color.clear, 0.01f);
+            hud.ShowTip("", 0.01f);
             for (int i = 0; i < director.LayoutCount; i++)
             {
                 director.ApplyLayout(i);

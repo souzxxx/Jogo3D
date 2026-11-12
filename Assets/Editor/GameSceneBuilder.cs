@@ -578,6 +578,15 @@ public static class GameSceneBuilder
         var pool = PoolPrefab("CorruptionPool", 3f, 3f, 7);
         Make("17_Travessia", "Travessia", (strip, -4.6f, 1.2f, 0), (strip, 4.6f, 1.2f, 0), (column, 0f, 3.4f, 0), (pillar, -7.2f, -3.2f, 0), (pillar, 7.2f, -3.2f, 0));
         Make("18_Charcos", "Charcos", (pool, -4.2f, 2.4f, 0), (pool, 3.8f, -0.4f, 0), (pool, -1.2f, -2.2f, 0), (pillar, 5.2f, 3.2f, 0), (box, -7.4f, -1.4f, 20));
+        // arranjos com estrutura: barreiras baixas mudam a forma da sala (corredores, um fortim, uma sala em L, uma galeria)
+        Make("19_Corredores", "Três Corredores", (barrier, -3.2f, -1.4f, 90), (barrier, -3.2f, 2.6f, 90), (barrier, 3.2f, -1.4f, 90), (barrier, 3.2f, 2.6f, 90),
+            (column, -6.8f, -4f, 0), (column, 6.8f, -4f, 0));
+        Make("20_Fortim", "Fortim", (barrier, 0f, 2.4f, 0), (barrier, -2.2f, 0.4f, 90), (barrier, 2.2f, 0.4f, 90), (powder, 0f, 0.8f, 0),
+            (pillar, -6f, -2.6f, 0), (pillar, 6f, -2.6f, 0));
+        Make("21_Bastiao", "Bastião em L", (barrier, 5.2f, -1f, 0), (barrier, 3.2f, -3f, 90), (rubble, 6f, -4f, 30), (crates, 6.8f, -5.6f, 10),
+            (pillar, -5f, 2f, 0), (column, -6f, -2f, 0));
+        Make("22_Galeria", "Galeria", (barrier, -5.5f, 2.4f, 30), (barrier, -1.8f, 0.2f, -30), (barrier, 1.8f, 2.4f, 30), (barrier, 5.5f, 0.2f, -30),
+            (spikes, 3.6f, -2.6f, 0), (column, -6.8f, -3.6f, 0));
         Make("6_Cruz", "Cruz", (barrier, 0f, 2.6f, 0), (barrier, -4.2f, -0.8f, 90), (barrier, 4.2f, -0.8f, 90), (vent, -4.2f, 3.6f, 0), (vent, 4.2f, 3.6f, 0));
         return list.ToArray();
     }
