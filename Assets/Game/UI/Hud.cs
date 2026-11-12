@@ -459,6 +459,23 @@ namespace Quintessence.UI
                 for (int i = 0; i < nodes.Count; i++)
                     pos[nodes[i].Id] = new Vector2(-w / 2 + w * layer / (map.LayerCount - 1f), (i - (nodes.Count - 1) / 2f) * (h / 3.2f));
             }
+            // faixas dos trechos atras dos nos: onde comeca a Cripta, o Jardim e o Coracao
+            float step = map.LayerCount > 1 ? w / (map.LayerCount - 1f) : w;
+            Color[] bandColor = { new(0.62f, 0.28f, 0.16f), new(0.22f, 0.42f, 0.56f), new(0.36f, 0.5f, 0.3f), new(0.66f, 0.2f, 0.18f) };
+            int first = 0;
+            for (int layer = 1; layer <= map.LayerCount; layer++)
+            {
+                var b = Biomes.For(first, map.LayerCount);
+                if (layer < map.LayerCount && Biomes.For(layer, map.LayerCount) == b) continue;
+                float x0 = -w / 2 + step * first - step / 2f, x1 = -w / 2 + step * (layer - 1) + step / 2f;
+                var band = UiKit.Rect("Band_" + b, mapContent, new Vector2(0.5f, 0.5f), new Vector2((x0 + x1) / 2f, 0), new Vector2(x1 - x0 - 6f, h + 90));
+                var bc = bandColor[(int)b];
+                UiKit.Image(band, UiKit.Panel, new Color(bc.r * 0.5f, bc.g * 0.5f, bc.b * 0.5f, 0.14f)).type = UnityEngine.UI.Image.Type.Sliced;
+                var name = UiKit.Rect("Name", band, new Vector2(0.5f, 1), new Vector2(0, -6), new Vector2(x1 - x0, 28));
+                name.pivot = new Vector2(0.5f, 1);
+                UiKit.Text(name, Biomes.Name(b).ToUpperInvariant(), 19, Color.Lerp(bc, UiKit.Cream, 0.45f));
+                first = layer;
+            }
             var choices = new HashSet<int>(run.Current.Next);
             foreach (var n in map.Nodes)
                 foreach (int next in n.Next)
