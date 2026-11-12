@@ -399,6 +399,8 @@ namespace Quintessence.Game.PlayTests
             Assert.IsTrue(director.Victory, $"o heroi caiu na sala {director.Run.Depth + 1} ({director.Run.Current.Type})");
             Assert.Contains(Feat.FirstWin, director.NewFeats, "a primeira vitoria cumpre o feito");
             Assert.IsTrue(MetaStore.Current.Has(Feat.FirstWin));
+            var build = director.BuildLine();
+            Assert.IsTrue(build.Length == 0 || build.StartsWith("\nBuild: "), "linha de build no resultado: " + build);
             Assert.IsTrue(sawDoors, "as portas deveriam abrir depois de limpar a sala");
             Assert.IsTrue(sawShrine, "o caminho passa por um santuario");
             Assert.AreEqual(4, maxDepth, "chegou a ultima camada");

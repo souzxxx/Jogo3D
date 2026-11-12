@@ -960,6 +960,24 @@ namespace Quintessence.Game
 
         static string Plural(int n, string one, string many) => n == 1 ? $"1 {one}" : $"{n} {many}";
 
+        /// Resumo do build para o fim da run: a maior Sintonia, Fusoes e esquivas perfeitas (so o que aconteceu).
+        public string BuildLine()
+        {
+            var parts = new List<string>();
+            ElementType best = ElementType.None;
+            int bestTier = 0;
+            foreach (var e in Elements.All)
+            {
+                int t = Synergy.Tier(Run.Talents, e);
+                if (t > bestTier) { bestTier = t; best = e; }
+            }
+            if (bestTier > 0) parts.Add($"Sintonia de {Synergy.ElementName(best)} {(bestTier == 2 ? "II" : "I")}");
+            if (player.Fusions > 0) parts.Add(Plural(player.Fusions, "Fusão", "Fusões"));
+            if (player.PerfectDodges > 0) parts.Add(Plural(player.PerfectDodges, "esquiva perfeita", "esquivas perfeitas"));
+            foreach (var t in Run.Talents.Taken) if (t.Hero != ElementType.None) { parts.Add(t.Name); break; }
+            return parts.Count > 0 ? "\nBuild: " + string.Join("   ·   ", parts) : "";
+        }
+
         public static string KillerName(GameObject source)
         {
             if (source == null) return "";
@@ -1000,6 +1018,7 @@ namespace Quintessence.Game
             string stats = (GamePrefs.Relaxed ? "Tranquila   ·   " : "") + (GameFlow.Ascension > 0 ? $"Ascensão {GameFlow.Ascension}   ·   " : "") + $"{HeroPassives.HeroName(GameFlow.StartElement)}   ·   Nível {Run.Progress.Level}   ·   {Plural(Run.Kills, "inimigo derrotado", "inimigos derrotados")}   ·   {Plural(Run.Talents.Count, "talento", "talentos")} e {Plural(Run.Boons.Count, "bênção", "bênçãos")}"
                 + (!victory && KilledBy.Length > 0 ? $"\nDerrubado por: {KilledBy}" : "")
                 + $"\nSalas vencidas: {Run.RoomsCleared}   ·   Essência: {Run.Essence}   ·   Elementos: {player.Loadout.Awakened.Count}/4   ·   Tempo: {seconds / 60}:{seconds % 60:00}"
+                + BuildLine()
                 + $"\n+{shards} Fragmentos para o Refúgio (total: {MetaStore.Current.Shards})   ·   {HeroPassives.HeroName(GameFlow.StartElement)} +{MasteryGained} de maestria"
                 + (MasteryLevelsUp > 0 ? $"\nMaestria {MetaStore.Current.MasteryLevel(GameFlow.StartElement)} de {HeroPassives.HeroName(GameFlow.StartElement)}: {Mastery.Perk(MetaStore.Current.MasteryLevel(GameFlow.StartElement))}" : "")
                 + (NewFeats.Count > 0 ? $"\nFeito{(NewFeats.Count > 1 ? "s" : "")}: {string.Join(", ", NewFeats.ConvertAll(Feats.Name))} (+{NewFeats.Count * Feats.Reward} Fragmentos)" : "")
