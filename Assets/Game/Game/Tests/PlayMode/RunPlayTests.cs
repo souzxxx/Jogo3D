@@ -600,6 +600,18 @@ namespace Quintessence.Game.PlayTests
                 Assert.IsTrue(t.Element == ElementType.None || t.Element == ElementType.Fire, "so talentos de corpo ou do elemento desperto: " + t.Id);
             for (int k = 0; k < 4; k++) yield return null;
             Shot(cam, "docs/img/nivel_talentos.png");
+            // pausado na escolha, comando de jogo nao vira acao (a tecla 1 escolhe o talento, nao solta a Labareda)
+            var scripted = hero.gameObject.AddComponent<ScriptedInput>();
+            hero.GetComponent<PlayerInputReader>().enabled = false;
+            var realInput = hero.Input;
+            hero.Input = scripted;
+            scripted.PressElementSkill(1);
+            scripted.PressDash();
+            for (int k = 0; k < 5; k++) yield return null;
+            Assert.IsFalse(hero.IsCasting, "pausado, a skill nao sai");
+            Assert.IsFalse(hero.IsDashing, "pausado, o dash nao sai");
+            Assert.AreEqual(0f, hero.SkillCooldown01(ElementType.Fire), "a recarga da Labareda nao foi gasta");
+            hero.Input = realInput;
 
             var picked = director.TalentOffer[1];
             director.PickTalent(1);

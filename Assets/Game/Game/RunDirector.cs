@@ -641,7 +641,7 @@ namespace Quintessence.Game
         public bool LevelUpOpen => levelUpOpen;
         public IReadOnlyList<Talent> TalentOffer => talentOffer;
 
-        /// Sem inimigo vivo na sala: a escolha de talento nunca interrompe a luta.
+        /// Sem inimigo vivo na sala: a escolha de talento nunca abre com inimigo em campo (entre ondas pode abrir; o spawner pausa junto).
         bool RoomQuiet => spawner == null || spawner.State == null || spawner.State.Alive <= 0;
 
         void GrantKillXp(Health enemy)
@@ -708,7 +708,7 @@ namespace Quintessence.Game
                 hud.ShowLevelUp(0, null, null);
                 GameClock.SetPaused(false);
                 // a tecla que escolheu o talento nao pode virar skill no quadro seguinte
-                if (player.Input != null) { player.Input.ConsumeElementSkill(); player.Input.ConsumeSkill(); }
+                // a tecla que escolheu nao vira skill: o heroi ignora comandos no quadro em que a pausa sai (GameClock.ResumedFrame)
             }
             var c = t.Element == ElementType.None ? new Color(0.9f, 0.76f, 0.42f) : ElementColors.Of(t.Element);
             Feel.DamageNumber.Spawn(player.transform.position + Vector3.up * 3.6f, t.Name.ToUpperInvariant() + "!", c, 1.1f, 1.5f);
