@@ -142,6 +142,9 @@ namespace Quintessence.Enemies
             GameEvents.RaiseBossPhase(phase + 1, BossRules.Phases);
             Summon(definition.addsPerPhaseChange);
             cooldown = 1.2f;
+            // rugido na troca de fase: ele para um instante, e e a deixa para o jogador se reposicionar
+            Play("Roar", 0.08f);
+            busy = Mathf.Max(busy, 0.9f);
             if (phase < BossRules.Phases - 1) return;
             bool canUse = hero != null && hero.AwakenedElements.Count >= 4;
             Shield.Raise(canUse);
@@ -221,7 +224,7 @@ namespace Quintessence.Enemies
                         Circle(p, definition.eruptionRadius, definition.eruptionWindup + i * 0.12f, definition.eruptionDamage, Vector3.up);
                     }
                     busy = definition.eruptionWindup + 0.3f;
-                    Play("Cast", 0.08f);
+                    Play("Summon", 0.08f);
                     break;
                 }
             }

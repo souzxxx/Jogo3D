@@ -55,8 +55,9 @@ public static class EnemyDevSceneBuilder
         const string fbx = KK + "Skeletons/Characters/Skeleton_Warrior.fbx";
         CombatDevSceneBuilder.Loop(fbx, "Idle", "Idle_Combat", "Walking_A", "Running_A");
         var ctrl = CombatDevSceneBuilder.Controller(fbx, Dir + "Animation/Guardiao.controller",
-            ("Idle", "Idle_Combat|Idle", 0f), ("Run", "Walking_A|Running_A", 0f), ("Attack", "2H_Melee_Attack_Chop|1H_Melee_Attack_Chop", 1.3f),
-            ("Cast", "Spellcast_Raise|Cheer|Idle", 1.1f), ("Death", "Death_B|Death_A", 0f), ("Spawn", "Spawn_Ground|Skeletons_Awaken_Standing|Idle", 1.2f));
+            ("Idle", "Idle_Combat|Idle", 0f), ("Run", "Walking_A|Running_A", 0f), ("Attack", "1H_Melee_Attack_Jump_Chop|2H_Melee_Attack_Chop|1H_Melee_Attack_Chop", 1.3f),
+            ("Cast", "Throw|Spellcast_Shoot|Cheer|Idle", 1.1f), ("Summon", "Spellcast_Summon|Spellcast_Raise|Cheer|Idle", 1.5f),
+            ("Roar", "Taunt|Cheer|Idle", 0.9f), ("Hit", "Hit_B|Hit_A", 0.35f), ("Death", "Death_B|Death_A", 0f), ("Spawn", "Spawn_Ground|Skeletons_Awaken_Standing|Idle", 1.2f));
         var def = Asset<BossDefinition>("Guardiao", d => { });
         def.projectilePrefab = ProjectilePrefab();
         def.addPrefabs = new[] { add1, add2 };
@@ -165,10 +166,10 @@ public static class EnemyDevSceneBuilder
         CombatDevSceneBuilder.Loop(mageFbx, "Idle", "Idle_Combat", "Running_A");
         var meleeCtrl = CombatDevSceneBuilder.Controller(minionFbx, Dir + "Animation/Rastejante.controller",
             ("Idle", "Idle_Combat|Idle", 0f), ("Run", "Running_A", 0f), ("Attack", "1H_Melee_Attack_Chop", 0.8f),
-            ("Death", "Death_A", 0f), ("Spawn", "Spawn_Ground|Skeletons_Awaken_Standing|Idle", 0.7f));
+            ("Hit", "Hit_A|Hit_B", 0.3f), ("Death", "Death_A", 0f), ("Spawn", "Spawn_Ground|Skeletons_Awaken_Standing|Idle", 0.7f));
         var rangedCtrl = CombatDevSceneBuilder.Controller(mageFbx, Dir + "Animation/Atirador.controller",
             ("Idle", "Idle_Combat|Idle", 0f), ("Run", "Running_A", 0f), ("Attack", "Spellcast_Shoot|Spellcast_Long", 0.95f),
-            ("Death", "Death_A", 0f), ("Spawn", "Spawn_Ground|Skeletons_Awaken_Standing|Idle", 0.7f));
+            ("Hit", "Hit_A|Hit_B", 0.3f), ("Death", "Death_A", 0f), ("Spawn", "Spawn_Ground|Skeletons_Awaken_Standing|Idle", 0.7f));
 
         var skel = LookDevBuilder.Mat("Skeleton", KK + "Skeletons/Characters/skeleton_texture.png", Color.white, Color.black, 0f);
         var shot = ProjectilePrefab();
@@ -198,10 +199,10 @@ public static class EnemyDevSceneBuilder
         CombatDevSceneBuilder.Loop(rogueFbx, "Idle", "Idle_Combat", "Running_A", "Running_B");
         var bruteCtrl = CombatDevSceneBuilder.Controller(warriorFbx, Dir + "Animation/Bruto.controller",
             ("Idle", "Idle_Combat|Idle", 0f), ("Run", "Walking_A|Running_A", 0f), ("Attack", "2H_Melee_Attack_Chop|1H_Melee_Attack_Chop", 1.25f),
-            ("Death", "Death_B|Death_A", 0f), ("Spawn", "Spawn_Ground|Skeletons_Awaken_Standing|Idle", 0.7f));
+            ("Hit", "Hit_B|Hit_A", 0.35f), ("Death", "Death_B|Death_A", 0f), ("Spawn", "Spawn_Ground|Skeletons_Awaken_Standing|Idle", 0.7f));
         var bomberCtrl = CombatDevSceneBuilder.Controller(rogueFbx, Dir + "Animation/Explosivo.controller",
-            ("Idle", "Idle_Combat|Idle", 0f), ("Run", "Running_B|Running_A", 0f), ("Attack", "Cheer|Spellcast_Raise|Idle", 0.75f),
-            ("Death", "Death_A", 0f), ("Spawn", "Spawn_Ground|Skeletons_Awaken_Standing|Idle", 0.7f));
+            ("Idle", "Idle_Combat|Idle", 0f), ("Run", "Running_B|Running_A", 0f), ("Attack", "Taunt|Cheer|Spellcast_Raise|Idle", 0.75f),
+            ("Hit", "Hit_A|Hit_B", 0.3f), ("Death", "Death_A", 0f), ("Spawn", "Spawn_Ground|Skeletons_Awaken_Standing|Idle", 0.7f));
         var bruteDef = Asset<EnemyDefinition>("Bruto", d =>
         {
             d.displayName = "Bruto"; d.maxHealth = 70; d.moveSpeed = 2.7f;

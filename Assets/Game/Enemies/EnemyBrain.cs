@@ -97,7 +97,17 @@ namespace Quintessence.Enemies
         public int Rescues { get; private set; }
         float safetyCheck;
 
-        void OnDamaged(DamageInfo info, float applied) => knock += info.Direction * info.Knockback;
+        void OnDamaged(DamageInfo info, float applied)
+        {
+            knock += info.Direction * info.Knockback;
+            // recua ao apanhar, mas so enquanto persegue: golpe ja avisado nao e cortado pela animacao
+            if (health.IsDead || fsm.Phase != EnemyPhase.Chase || applied <= 0f) return;
+            anim = null;
+            Play("Hit", 0.03f);
+            hitHold = 0.25f;
+        }
+
+        float hitHold;
 
         void OnDied(DamageInfo info)
         {
@@ -165,7 +175,8 @@ namespace Quintessence.Enemies
             if (canAct && face.sqrMagnitude > 0.01f)
                 transform.rotation = Quaternion.RotateTowards(transform.rotation, Quaternion.LookRotation(face), 540f * dt);
 
-            if (fsm.Phase == EnemyPhase.Chase)
+            if (hitHold > 0f) hitHold -= dt;
+            else if (fsm.Phase == EnemyPhase.Chase)
                 Play(!canAct ? "Idle" : agent.velocity.sqrMagnitude > 0.3f ? "Run" : "Idle", 0.12f);
         }
 
