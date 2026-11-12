@@ -278,9 +278,16 @@ public static class EnemyDevSceneBuilder
         var steel = LookDevBuilder.Mat("SkeletonCharger", tex, new Color(0.62f, 0.68f, 0.82f), Color.black, 0f);
         var moss = LookDevBuilder.Mat("SkeletonLobber", tex, new Color(0.78f, 0.8f, 0.56f), Color.black, 0f);
         var jade = LookDevBuilder.Mat("SkeletonShaman", tex, new Color(0.56f, 0.82f, 0.7f), Color.black, 0f);
-        charger = EnemyPrefab("Ceifador", "Skeletons/Characters/Skeleton_Rogue.fbx", chargerDef, chargerCtrl, steel, 1.12f, "Skeleton_Blade", "handslot.r");
+        AssetDatabase.Refresh();
+        HeroBuilder.MatteParts("Assets/Art/Enemies");
+        HeroBuilder.MatteParts("Assets/Resources/Models");
+        dress = (new[] { ("ceifador_head", "head"), ("ceifador_weapon", "handslot.r"), ("ceifador_back", "chest") }, new[] { "Skeleton_Rogue_Hood", "Skeleton_Rogue_Cape" });
+        charger = EnemyPrefab("Ceifador", "Skeletons/Characters/Skeleton_Rogue.fbx", chargerDef, chargerCtrl, steel, 1.12f);
+        dress = (new[] { ("arremessador_head", "head"), ("arremessador_back", "chest"), ("arremessador_weapon", "handslot.r") }, new string[0]);
         lobber = EnemyPrefab("Arremessador", "Skeletons/Characters/Skeleton_Minion.fbx", lobberDef, lobberCtrl, moss, 1.05f);
-        shaman = EnemyPrefab("Xama", "Skeletons/Characters/Skeleton_Mage.fbx", shamanDef, shamanCtrl, jade, 1.05f, "Skeleton_Staff", "handslot.r");
+        dress = (new[] { ("xama_head", "head"), ("xama_weapon", "handslot.r"), ("xama_back", "chest") }, new[] { "Skeleton_Mage_Hat" });
+        shaman = EnemyPrefab("Xama", "Skeletons/Characters/Skeleton_Mage.fbx", shamanDef, shamanCtrl, jade, 1.05f);
+        dress = default;
     }
 
     static T Asset<T>(string name, System.Action<T> init) where T : ScriptableObject
@@ -313,6 +320,9 @@ public static class EnemyDevSceneBuilder
         return prefab;
     }
 
+    /// Pecas proprias (arquivo, osso) e malhas do pack a esconder para o proximo EnemyPrefab.
+    static ((string file, string bone)[] parts, string[] hide) dress;
+
     static GameObject EnemyPrefab(string name, string fbx, EnemyDefinition def, RuntimeAnimatorController ctrl, Material mat, float scale = 1f,
         string prop = null, string bone = null)
     {
@@ -325,6 +335,16 @@ public static class EnemyDevSceneBuilder
         agent.radius = 0.5f; agent.height = 2.2f; agent.angularSpeed = 0f;
         var model = LookDevBuilder.Spawn(fbx, Vector3.zero, 0, mat);
         model.name = "Model";
+        if (dress.parts != null)
+        {
+            // as pecas entram com o modelo na origem e sem escala, como no chefe
+            model.transform.SetParent(null, false);
+            model.transform.SetPositionAndRotation(Vector3.zero, Quaternion.identity);
+            model.transform.localScale = Vector3.one;
+            foreach (var r in model.GetComponentsInChildren<Renderer>(true))
+                if (System.Array.IndexOf(dress.hide, r.name) >= 0) r.gameObject.SetActive(false);
+            foreach (var (partFile, partBone) in dress.parts) HeroBuilder.Attach(model, "Assets/Art/Enemies/" + partFile + ".fbx", partBone);
+        }
         model.transform.SetParent(go.transform, false);
         model.transform.localScale = Vector3.one * scale;
         col.height *= scale; col.radius *= scale; col.center *= scale;
