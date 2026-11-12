@@ -765,6 +765,26 @@ namespace Quintessence.Game.PlayTests
             Assert.IsFalse(director.Interactables.Any(i => i.Prompt.StartsWith("selar")), "um pacto por sala");
             Assert.IsTrue(director.Run.Boons.Any(b => b.name == "Pacto de Sangue"), "o pacto aparece no inventario");
 
+            // salas sem luta tem cenario proprio
+            director.ShowRest();
+            hero.Teleport(new Vector3(0, 0.05f, -2f), Vector3.forward);
+            for (int k = 0; k < 20; k++) yield return null;
+            Assert.AreEqual("RestDecor", director.CurrentDecor);
+            Assert.IsNotNull(GameObject.Find("bed_decorated"), "o Descanso tem camas");
+            Shot(cam, "docs/img/sala_descanso.png");
+            director.ShowMaster();
+            for (int k = 0; k < 20; k++) yield return null;
+            Assert.AreEqual("MasterDecor", director.CurrentDecor);
+            Shot(cam, "docs/img/sala_mestre.png");
+            director.ShowTreasure();
+            for (int k = 0; k < 20; k++) yield return null;
+            Assert.AreEqual("TreasureDecor", director.CurrentDecor);
+            Assert.IsNull(GameObject.Find("bed_decorated"), "o cenario da sala anterior some");
+            Shot(cam, "docs/img/sala_tesouro.png");
+            director.ShowPact();
+            for (int k = 0; k < 20; k++) yield return null;
+            Shot(cam, "docs/img/sala_pacto.png");
+
             // trechos: cada um troca o clima da sala
             director.ShowShrine();
             hero.Teleport(new Vector3(0, 0.05f, -4.5f), Vector3.forward);

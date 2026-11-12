@@ -35,6 +35,8 @@ namespace Quintessence.Game
         [SerializeField] GameObject elixirPrefab;
         [SerializeField] GameObject shopDecorPrefab;
         [SerializeField] GameObject dummyPrefab;
+        [Tooltip("Cenario proprio por tipo de sala, na ordem do enum RoomType (nulo = nenhum).")]
+        [SerializeField] GameObject[] decorByRoom = new GameObject[0];
         [SerializeField] Material matteMaterial;
         [Tooltip("Arranjos de cobertura das salas de combate; a run sorteia um por sala.")]
         [SerializeField] RoomLayout[] layouts = new RoomLayout[0];
@@ -89,6 +91,18 @@ namespace Quintessence.Game
         static readonly Color Cream = new(0.93f, 0.88f, 0.78f);
 
         public void BindTutorial(GameObject dummy) => dummyPrefab = dummy;
+        public void BindDecor(GameObject[] decors) => decorByRoom = decors;
+
+        /// Poe o cenario proprio do tipo de sala (camas no Descanso, ouro no Tesouro...). Some junto com o layout.
+        public void Dress(RoomType type)
+        {
+            int t = (int)type;
+            if (t >= decorByRoom.Length || decorByRoom[t] == null) return;
+            if (layoutRoot == null) layoutRoot = new GameObject("Layout").transform;
+            Instantiate(decorByRoom[t], layoutRoot);
+            CurrentDecor = decorByRoom[t].name;
+        }
+        public string CurrentDecor { get; private set; } = "";
         public void BindLayouts(RoomLayout[] list) => layouts = list;
         public void BindShop(GameObject table, GameObject bottle, GameObject elixir, GameObject decor)
         {
@@ -129,6 +143,7 @@ namespace Quintessence.Game
             if (layoutRoot != null) Destroy(layoutRoot.gameObject);
             layoutRoot = new GameObject("Layout").transform;
             CurrentLayout = "";
+            CurrentDecor = "";
             if (index < 0 || index >= layouts.Length || layouts[index] == null) return;
             CurrentLayout = layouts[index].displayName;
             foreach (var p in layouts[index].pieces)
@@ -252,6 +267,7 @@ namespace Quintessence.Game
             }
             Cleanup();
             ApplyLayout(LayoutPicker.UsesLayout(node.Type) ? LayoutPicker.Pick(GameFlow.Seed, node.Id, layouts.Length) : -1);
+            Dress(node.Type);
             DressBiome(Biomes.For(Run.Depth, Run.Map.LayerCount), true);
             player.Teleport(entryPoint, Vector3.forward);
             hud.SetRoom($"Sala {Run.Depth + 1}/{Run.Map.LayerCount} · {RoomInfo.Name(node.Type)}", node.Type);
@@ -414,9 +430,13 @@ namespace Quintessence.Game
         // ---------- tesouro e pacto ----------
 
         /// Monta a sala de Tesouro sem passar pelo mapa. Para os testes e as capturas.
-        public void ShowTreasure() { Cleanup(); ApplyLayout(-1); SetupTreasure(); }
+        public void ShowTreasure() { Cleanup(); ApplyLayout(-1); Dress(RoomType.Treasure); SetupTreasure(); }
         /// Monta a sala de Pacto sem passar pelo mapa. Para os testes e as capturas.
-        public void ShowPact() { Cleanup(); ApplyLayout(-1); SetupPact(); }
+        public void ShowPact() { Cleanup(); ApplyLayout(-1); Dress(RoomType.Pact); SetupPact(); }
+        /// Monta a sala de Descanso (so o cenario). Para as capturas.
+        public void ShowRest() { Cleanup(); ApplyLayout(-1); Dress(RoomType.Rest); }
+        /// Monta a sala do Mestre sem passar pelo mapa. Para as capturas.
+        public void ShowMaster() { Cleanup(); ApplyLayout(-1); Dress(RoomType.Master); SetupBoons(); }
 
         void SetupTreasure()
         {

@@ -70,6 +70,7 @@ public static class GameSceneBuilder
         var stone = LookDevBuilder.Mat("Stone", null, new Color(0.33f, 0.34f, 0.42f), Color.black, 0f);
         director.BindLayouts(Layouts());
         director.BindTutorial(DummyPrefab());
+        director.BindDecor(RoomDecors());
         director.BindProps(Prop("wall_doorway", 1f), bannerPrefabs, Prop("column", 1f), Prop("chest_gold", 1f), stone);
         EditorUtility.SetDirty(director);
         var hud = new GameObject("Hud");
@@ -159,6 +160,75 @@ public static class GameSceneBuilder
         var prefab = PrefabUtility.SaveAsPrefabAsset(root, dir + "ShopDecor.prefab");
         Object.DestroyImmediate(root);
         return prefab;
+    }
+
+    /// Cenario proprio de uma sala sem luta, so com pecas do pack. pieces: (modelo, x, z, rotacao, escala, y, solido).
+    static GameObject Decor(string name, Color lightColor, Vector3 lightPos, params (string model, float x, float z, float rot, float scale, float y, bool solid)[] pieces)
+    {
+        const string dir = "Assets/Game/Game/Prefabs/";
+        var mat = LookDevBuilder.Mat("DungeonProp", CombatDevSceneBuilder.KK + "Dungeon/dungeon_texture.png", Color.white, Color.black, 0f);
+        var root = new GameObject(name);
+        foreach (var p in pieces)
+        {
+            var go = LookDevBuilder.Spawn("Dungeon/" + p.model + ".fbx", new Vector3(p.x, p.y, p.z), p.rot, mat, p.scale);
+            go.name = p.model;
+            go.transform.SetParent(root.transform, true);
+            if (!p.solid) continue;
+            var rs = go.GetComponentsInChildren<Renderer>();
+            if (rs.Length == 0) continue;
+            var b = rs[0].bounds; foreach (var r in rs) b.Encapsulate(r.bounds);
+            var col = root.AddComponent<BoxCollider>();
+            col.center = b.center; col.size = b.size;
+        }
+        var lamp = new GameObject("DecorLight").AddComponent<Light>();
+        lamp.transform.SetParent(root.transform, false);
+        lamp.transform.position = lightPos;
+        lamp.type = LightType.Point; lamp.color = lightColor; lamp.intensity = 2.2f; lamp.range = 8f;
+        var prefab = PrefabUtility.SaveAsPrefabAsset(root, dir + name + ".prefab");
+        Object.DestroyImmediate(root);
+        return prefab;
+    }
+
+    /// Um cenario por tipo de sala (na ordem do enum RoomType); nulo = sala sem cenario proprio.
+    static GameObject[] RoomDecors()
+    {
+        var warm = new Color(1f, 0.74f, 0.45f);
+        var list = new GameObject[9];
+        // Descanso: acampamento com camas, mesa posta e barril
+        list[3] = Decor("RestDecor", warm, new Vector3(0, 2.6f, 1f),
+            ("bed_decorated", -7.6f, 2.6f, 90, 1f, 0f, true), ("bed_floor", -7.6f, -0.6f, 90, 1f, 0f, false), ("bed_floor", -7.6f, -2.6f, 80, 1f, 0f, false),
+            ("table_medium_decorated_A", 6.6f, 1.6f, 0, 1f, 0f, true), ("stool", 5.2f, 1.2f, 20, 1f, 0f, false), ("stool", 6.9f, 0.1f, -30, 1f, 0f, false),
+            ("keg_decorated", 8.4f, -2.2f, -60, 1f, 0f, true), ("barrel_small_stack", 8.3f, 3.8f, 10, 1f, 0f, true),
+            ("candle_triple", -8.6f, 0.8f, 0, 1f, 0f, false), ("candle_lit", 0.9f, 1.4f, 0, 1f, 0f, false), ("candle_lit", -0.9f, 1.4f, 0, 1f, 0f, false),
+            ("box_small_decorated", -5.8f, 3.9f, 25, 1f, 0f, false), ("banner_green", -7.6f, 3.9f, 0, 1f, 1.6f, false));
+        // Mestre: sala de estudo, com estantes, colunas e velas
+        list[5] = Decor("MasterDecor", new Color(1f, 0.82f, 0.5f), new Vector3(0, 3f, 2.4f),
+            ("shelf_large", -8.7f, 1.2f, 90, 1f, 0f, true), ("shelf_large", 8.7f, 1.2f, -90, 1f, 0f, true),
+            ("column", -6.2f, 3.6f, 0, 1f, 0f, true), ("column", 6.2f, 3.6f, 0, 1f, 0f, true),
+            ("candle_triple", -3f, 1.6f, 0, 1f, 0f, false), ("candle_triple", 3f, 1.6f, 0, 1f, 0f, false),
+            ("table_small_decorated_A", -8.4f, -2.4f, 90, 1f, 0f, true), ("chair", -7.4f, -2.4f, 90, 1f, 0f, false),
+            ("banner_patternA_yellow", -3f, 3.9f, 0, 1f, 1.6f, false), ("banner_patternA_yellow", 3f, 3.9f, 0, 1f, 1.6f, false));
+        // Tesouro: ouro pelo chao, baus e trofeus
+        list[7] = Decor("TreasureDecor", new Color(1f, 0.8f, 0.42f), new Vector3(0, 2.6f, -0.6f),
+            ("coin_stack_large", -1.5f, 0.2f, 10, 1f, 0f, false), ("coin_stack_medium", 1.4f, 0.1f, 40, 1f, 0f, false), ("coin_stack_small", 1.9f, 1.2f, 0, 1f, 0f, false),
+            ("coin_stack_small", -1.9f, 1.3f, 70, 1f, 0f, false), ("coin_stack_medium", -0.6f, -0.7f, 20, 1f, 0f, false), ("coin_stack_large", 0.9f, -0.8f, 0, 1f, 0f, false),
+            ("trunk_large_A", -7.8f, 2.4f, 90, 1f, 0f, true), ("trunk_medium_B", -7.9f, 0.2f, 80, 1f, 0f, true), ("trunk_large_C", 7.8f, 2.4f, -90, 1f, 0f, true),
+            ("chest", 7.8f, 0f, -80, 1f, 0f, true), ("sword_shield_gold", -5.4f, 3.95f, 0, 1f, 1.5f, false), ("sword_shield_gold", 5.4f, 3.95f, 0, 1f, 1.5f, false),
+            ("barrel_large_decorated", -8.2f, -2.6f, 0, 1f, 0f, true), ("box_stacked", 8.2f, -2.8f, 15, 1f, 0f, true));
+        // Pacto: sala fria, escombros, armas quebradas e um circulo de velas
+        var pact = new List<(string, float, float, float, float, float, bool)>
+        {
+            ("rubble_half", -7.6f, 2.6f, 30, 0.55f, 0f, true), ("rubble_half", 7.4f, -2.4f, 200, 0.55f, 0f, true),
+            ("sword_shield_broken", -6f, 3.95f, 0, 1f, 1.5f, false), ("sword_shield_broken", 6f, 3.95f, 0, 1f, 1.5f, false),
+            ("table_long_broken", 7.6f, 2.8f, 80, 1f, 0f, true), ("banner_patternC_red", 0f, 3.95f, 0, 1f, 1.6f, false),
+        };
+        for (int i = 0; i < 10; i++)
+        {
+            float a = i * 36f * Mathf.Deg2Rad;
+            pact.Add((i % 2 == 0 ? "candle_thin_lit" : "candle_melted", Mathf.Sin(a) * 8.2f * 0.82f, -1.6f + Mathf.Cos(a) * 2.2f - 1.2f, i * 40f, 1f, 0f, false));
+        }
+        list[8] = Decor("PactDecor", new Color(0.8f, 0.35f, 0.45f), new Vector3(0, 2.8f, -1f), pact.ToArray());
+        return list;
     }
 
     /// Boneco de treino: apanha, nao revida e volta depois de cair.
@@ -345,6 +415,11 @@ public static class GameSceneBuilder
         Make("10_Trincheira", "Trincheira", (barrier, -3f, 0.4f, 0), (barrier, 3f, 0.4f, 0), (barrier, -6.6f, -2f, 90), (barrier, 6.6f, -2f, 90), (spikes, 0f, 3f, 0), (powder, -7.2f, 3.4f, 0), (powder, 7.2f, 3.4f, 0));
         Make("11_Escombros", "Escombros", (rubble, -5.6f, 2.6f, 40), (rubble, 5.2f, 2.2f, 150), (rubble, -1.5f, 0.2f, 80), (pillar, 3f, -1.8f, 0), (pillar, -5f, -2.4f, 0), (vent, 1.8f, 2.8f, 0), (box, 7.2f, -3.4f, 20));
         Make("12_Camara", "Câmara", (vent, 0f, 0.4f, 0), (spikes, -4.6f, 2.6f, 0), (spikes, 4.6f, 2.6f, 0), (pillar, -5f, -2.2f, 0), (pillar, 5f, -2.2f, 0), (powder, 0f, 3.6f, 0));
+        var wall = Obstacle("wall_half", 1f);
+        Make("13_Ponte", "Ponte", (wall, -6f, 0.5f, 0), (wall, 6f, 0.5f, 0), (column, 0f, 2.8f, 0), (powder, -8.2f, 3.2f, 0), (powder, 8.2f, 3.2f, 0));
+        Make("14_Anel", "Anel", (crates, 0f, 0.8f, 15), (barrel, 1.7f, 0.1f, 0), (box, -1.6f, 1.7f, 30), (pillar, -5.6f, 0.5f, 0), (pillar, 5.6f, 0.5f, 0), (vent, 0f, 3.4f, 0));
+        Make("15_Diagonal", "Diagonal", (barrier, -4.6f, 2.2f, 45), (barrier, -1.4f, -0.6f, 45), (barrier, 3.6f, 1.6f, -45), (column, 6.6f, -2.6f, 0), (spikes, 0.6f, 3.1f, 0));
+        Make("16_Colunata", "Colunata", (column, -6f, 2.6f, 0), (column, -2f, 2.6f, 0), (column, 2f, 2.6f, 0), (column, 6f, 2.6f, 0), (column, -4f, -1.6f, 0), (column, 4f, -1.6f, 0), (powder, 0f, 0.5f, 0));
         Make("6_Cruz", "Cruz", (barrier, 0f, 2.6f, 0), (barrier, -4.2f, -0.8f, 90), (barrier, 4.2f, -0.8f, 90), (vent, -4.2f, 3.6f, 0), (vent, 4.2f, 3.6f, 0));
         return list.ToArray();
     }
