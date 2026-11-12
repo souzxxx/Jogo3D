@@ -62,7 +62,7 @@ public static class EnemyDevSceneBuilder
         def.addPrefabs = new[] { add1, add2 };
         EditorUtility.SetDirty(def);
 
-        var ember = LookDevBuilder.Mat("SkeletonAsh", KK + "Skeletons/Characters/skeleton_texture.png", new Color(0.62f, 0.5f, 0.5f), Color.black, 0f);
+        var ember = LookDevBuilder.Mat("SkeletonAsh", KK + "Skeletons/Characters/skeleton_texture.png", new Color(0.46f, 0.43f, 0.47f), Color.black, 0f);
         var go = new GameObject("Guardiao");
         var col = go.AddComponent<CapsuleCollider>();
         col.height = 5f; col.radius = 1.3f; col.center = new Vector3(0, 2.5f, 0);
@@ -73,6 +73,7 @@ public static class EnemyDevSceneBuilder
         model.name = "Model";
         model.transform.SetParent(go.transform, false);
         model.transform.localScale = Vector3.one * 2.3f;
+        DressGuardian(model.transform);
         var anim = CombatDevSceneBuilder.Animator(model, ctrl);
         go.AddComponent<BossBrain>().Bind(def, anim);
         var light = new GameObject("EmberLight").AddComponent<Light>();
@@ -82,6 +83,58 @@ public static class EnemyDevSceneBuilder
         var prefab = PrefabUtility.SaveAsPrefabAsset(go, Dir + "Prefabs/Guardiao.prefab");
         Object.DestroyImmediate(go);
         return prefab;
+    }
+
+    /// O que faz do esqueleto do pack o Guardiao das Cinzas: machado e escudo do pack nas maos e os cristais ambar
+    /// da corrupcao crescendo nas costas e nos ombros.
+    static void DressGuardian(Transform model)
+    {
+        Transform Bone(string name)
+        {
+            foreach (var t in model.GetComponentsInChildren<Transform>(true)) if (t.name == name) return t;
+            Debug.LogWarning("Guardiao: osso nao encontrado: " + name);
+            return model;
+        }
+        var gear = LookDevBuilder.Mat("SkeletonGear", KK + "Skeletons/Props/skeleton_texture.png", new Color(0.7f, 0.66f, 0.68f), Color.black, 0f);
+        void Hold(string prop, string bone, Vector3 euler, float scale)
+        {
+            var go = LookDevBuilder.Spawn("Skeletons/Props/" + prop + ".fbx", Vector3.zero, 0, gear);
+            go.name = prop;
+            go.transform.SetParent(Bone(bone), false);
+            go.transform.localPosition = Vector3.zero;
+            go.transform.localRotation = Quaternion.Euler(euler);
+            // os ossos da mao vem do FBX com escala propria: acerta para a peca ficar do tamanho do modelo
+            float boneScale = Mathf.Max(0.0001f, go.transform.parent.lossyScale.x);
+            // e a peca do pack tambem tem escala de importacao, que o Spawn zera
+            var source = AssetDatabase.LoadAssetAtPath<GameObject>(KK + "Skeletons/Props/" + prop + ".fbx");
+            float native = source != null ? source.transform.localScale.x : 1f;
+            go.transform.localScale = Vector3.one * (scale * native * model.lossyScale.x / boneScale);
+            Debug.Log($"Guardiao: {prop} escala nativa {native}, osso {boneScale}, modelo {model.lossyScale.x}");
+        }
+        Hold("Skeleton_Axe", "handslot.r", Vector3.zero, 1.05f);
+        Hold("Skeleton_Shield_Large_A", "handslot.l", new Vector3(0, 180, 0), 1f);
+
+        var amber = LookDevBuilder.Mat("Glow_Amber", null, new Color(0.85f, 0.5f, 0.16f) * 0.6f, new Color(0.85f, 0.5f, 0.16f) * 0.55f, 0f);
+        void Crystal(string bone, Vector3 pos, Vector3 euler, float width, float height)
+        {
+            var go = new GameObject("AmberCrystal");
+            go.transform.SetParent(Bone(bone), false);
+            go.transform.localPosition = pos;
+            go.transform.localRotation = Quaternion.Euler(euler);
+            go.transform.localScale = new Vector3(width, height, width);
+            go.AddComponent<MeshFilter>().sharedMesh = LookDevBuilder.CrystalMesh();
+            go.AddComponent<MeshRenderer>().sharedMaterial = amber;
+        }
+        // costas: um leque de cristais saindo por tras
+        Crystal("chest", new Vector3(0f, 0.05f, -0.22f), new Vector3(-35, 0, 0), 0.2f, 0.62f);
+        Crystal("chest", new Vector3(-0.2f, 0.02f, -0.2f), new Vector3(-30, 0, 28), 0.16f, 0.48f);
+        Crystal("chest", new Vector3(0.2f, 0.02f, -0.2f), new Vector3(-30, 0, -28), 0.16f, 0.48f);
+        // ombros
+        Crystal("chest", new Vector3(-0.36f, 0.16f, 0f), new Vector3(0, 0, 38), 0.15f, 0.4f);
+        Crystal("chest", new Vector3(0.36f, 0.16f, 0f), new Vector3(0, 0, -38), 0.15f, 0.4f);
+        // mais dois, grandes, abrindo o leque
+        Crystal("chest", new Vector3(-0.3f, -0.08f, -0.16f), new Vector3(-20, 0, 50), 0.14f, 0.4f);
+        Crystal("chest", new Vector3(0.3f, -0.08f, -0.16f), new Vector3(-20, 0, -50), 0.14f, 0.4f);
     }
 
     /// NavMesh da sala, sem o heroi (senao ele vira um buraco no mapa).

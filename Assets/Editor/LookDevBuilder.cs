@@ -387,7 +387,7 @@ public static class LookDevBuilder
 
     static Mesh crystal;
     /// Prisma hexagonal com ponta, base em y=0 e altura 1, normais chapadas.
-    static Mesh CrystalMesh()
+    public static Mesh CrystalMesh()
     {
         if (crystal != null) return crystal;
         const string path = Out + "Crystal.asset";

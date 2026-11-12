@@ -25,6 +25,58 @@ namespace Quintessence.Enemies.PlayTests
         Vector3 dodgeDir;
         float dodgeLeft;
 
+        [UnityTest, Timeout(300000)]
+        public IEnumerator Guardian_Wears_Axe_Shield_And_Amber_Crystals()
+        {
+            GameEvents.Clear();
+            Time.timeScale = 1f;
+            Time.captureFramerate = 30;
+            yield return EditorSceneManager.LoadSceneAsyncInPlayMode("Assets/Scenes/Dev/Enzo_Boss.unity", new LoadSceneParameters(LoadSceneMode.Single));
+            yield return null;
+            BossBrain brain = null;
+            for (int k = 0; k < 300 && brain == null; k++) { brain = Object.FindFirstObjectByType<BossBrain>(); yield return null; }
+            Assert.IsNotNull(brain, "o Guardiao deveria nascer");
+            for (int k = 0; k < 75; k++) yield return null; // termina de nascer
+            brain.enabled = false;
+            var hero = GameObject.FindGameObjectWithTag("Player");
+            hero.GetComponent<Health>().Pool.Invulnerable = true;
+            Assert.IsNotNull(FindDeep(brain.transform, "Skeleton_Axe"), "machado na mao");
+            Assert.IsNotNull(FindDeep(brain.transform, "Skeleton_Shield_Large_A"), "escudo no braco");
+            int crystals = 0;
+            foreach (var t in brain.GetComponentsInChildren<Transform>()) if (t.name == "AmberCrystal") crystals++;
+            Assert.AreEqual(7, crystals, "cristais nas costas e nos ombros");
+
+            foreach (var n in new[] { "Skeleton_Axe", "Skeleton_Shield_Large_A" })
+            {
+                var r = FindDeep(brain.transform, n).GetComponentInChildren<Renderer>();
+                Assert.Greater(r.bounds.size.magnitude, 1f, n + " deveria ter tamanho de arma de chefe, nao de miniatura");
+            }
+            var cam = Camera.main;
+            foreach (var b in cam.GetComponents<MonoBehaviour>()) if (b.GetType().Name == "FollowCamera") b.enabled = false;
+            var rt = new RenderTexture(960, 540, 24, RenderTextureFormat.ARGB32, RenderTextureReadWrite.sRGB);
+            var tex = new Texture2D(1920, 540, TextureFormat.RGB24, false);
+            var focus = brain.transform.position + Vector3.up * 2.6f;
+            var front = brain.transform.forward;
+            for (int view = 0; view < 2; view++)
+            {
+                // de frente e de costas
+                var dir = view == 0 ? front : -front;
+                cam.transform.position = focus + dir * 17f + Vector3.up * 6f;
+                cam.transform.LookAt(focus);
+                yield return null;
+                cam.targetTexture = rt; cam.Render(); cam.targetTexture = null;
+                RenderTexture.active = rt; tex.ReadPixels(new Rect(0, 0, 960, 540), view * 960, 0); RenderTexture.active = null;
+            }
+            System.IO.File.WriteAllBytes("docs/img/guardiao_novo.png", tex.EncodeToPNG());
+            Time.captureFramerate = 0;
+        }
+
+        static Transform FindDeep(Transform root, string name)
+        {
+            foreach (var t in root.GetComponentsInChildren<Transform>(true)) if (t.name == name) return t;
+            return null;
+        }
+
         [UnityTest, Timeout(900000)]
         public IEnumerator Guardian_Three_Phases_Shield_Needs_Quintessence_Then_Dies()
         {
