@@ -413,7 +413,7 @@ namespace Quintessence.Feel
             Stop(0.06f);
         }
 
-        void OnEvaded(Health target)
+        void OnEvaded(Health target, DamageInfo info)
         {
             if (target == null) return;
             var p = target.transform.position + Vector3.up * 1.2f;
