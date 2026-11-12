@@ -16,15 +16,17 @@ namespace Quintessence.Combat
         public static float Deliver(Health target, DamageInfo info, ReactionTable table, float reactionPower = 1f,
             ElementType forceReactionWith = ElementType.None, HeroModifiers mods = null)
         {
-            // Congelado: o proximo golpe direto estilhaca (+30%) e encerra o gelo
-            if (!info.IsReaction && target.TryGetComponent(out StatusHolder st) && st.State.Has(StatusType.Frozen))
-            {
-                info.Amount *= ShatterBonus;
-                st.Clear(StatusType.Frozen);
-                GameEvents.RaiseShattered(target);
-            }
+            // Congelado: o proximo golpe direto estilhaca (+30%) e encerra o gelo. O gelo sai depois do dano:
+            // quem olha o status durante o golpe (o escudo do Escudeiro) ainda ve o alvo congelado
+            bool shatter = !info.IsReaction && target.TryGetComponent(out StatusHolder st) && st.State.Has(StatusType.Frozen);
+            if (shatter) info.Amount *= ShatterBonus;
 
             float applied = target.TakeDamage(info);
+            if (shatter && target.TryGetComponent(out StatusHolder frozen))
+            {
+                frozen.Clear(StatusType.Frozen);
+                GameEvents.RaiseShattered(target);
+            }
             if (applied <= 0f || info.Element == ElementType.None || info.IsReaction) return applied;
 
             if (!target.TryGetComponent(out ElementMark mark))
