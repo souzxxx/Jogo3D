@@ -20,6 +20,8 @@ bbox em metros no espaço do Blender (X lateral, Y trás(+)/frente(−), Z altur
 | Ombreiras assimétricas | `boss_shoulders.fbx` | `chest` | 680 | -1.172, -0.413, 0.959 | 1.012, 0.538, 2.171 | Stone, StoneDark, Crystal, **Magic** (rachadura na ombreira de pedra) |
 | Capa rasgada + leque de cristais | `boss_back.fbx` | `chest` | 396 | -0.544, 0.14, 0.327 | 0.622, 0.954, 2.204 | Cloth, StoneDark, Crystal |
 | Espadão de pedra (2 mãos) | `boss_weapon.fbx` | `handslot.r` | 788 | -1.333, -2.46, 0.908 | -0.433, 0.64, 1.199 | Stone, StoneDark, Metal, Leather, Crystal, **Magic** (veio central) |
+| Ombreira esquerda de pedra (substitui a metade + de `boss_shoulders`) | `boss_shoulder_l.fbx` | `upperarm.l` | 344 | 0.167, -0.39, 0.957 | 0.905, 0.39, 1.699 | Stone, StoneDark, **Magic** (rachadura) |
+| Ombreira direita, cacho de cristais | `boss_shoulder_r.fbx` | `upperarm.r` | 336 | -1.175, -0.413, 0.978 | -0.221, 0.537, 2.038 | StoneDark, Stone, Crystal |
 | Escudo-torre partido (opcional) | `boss_shield.fbx` | `handslot.l` | 588 | 0.348, -0.978, 1.09 | 1.513, 0.835, 1.396 | Stone, StoneDark, Metal, Leather, Crystal, **Magic** (rachadura) |
 | Núcleo de brasa | `boss_core.fbx` | `chest` | 110 | -0.144, -0.492, 0.8 | 0.294, 0.073, 1.351 | **Magic** |
 
@@ -32,3 +34,9 @@ Notas:
 
 Previews: `preview_front.png`, `preview_back.png`, `preview_top.png` (escala nativa, pose `Idle`), `scale.png` e `scale_top.png` (Brann ao lado do chefe a 2,3x).
 Regerar: `_blender/boss.py` (peças + textura) e `_blender/preview.py -- boss` / `-- scale` (caminhos do PC remoto `~/quint_heroes`).
+
+## Rodada 7 — ombreiras por braço
+- `boss_shoulder_l.fbx` → `upperarm.l` e `boss_shoulder_r.fbx` → `upperarm.r` substituem `boss_shoulders.fbx` (que continua na pasta, presa ao `chest`; não usar as duas juntas).
+- O rig não tem osso de ombro/clavícula: a cadeia é `chest > upperarm.l/.r > lowerarm > wrist > hand > handslot`. A articulação do ombro fica em (±0.212, 0, 1.107).
+- Toda a geometria fica a |x| ≥ 0.17, por fora da articulação, para girar junto com o braço sem entrar no peito. Os cristais da direita apontam para fora e para trás, nunca para dentro.
+- Verificação: `preview_shoulders_idle.png` (Idle), `preview_shoulders_attack.png` e `_attack_b.png` (pico do `1H_Melee_Attack_Jump_Chop`, braço alto), `preview_shoulders_cheer.png` (Cheer, sem arma e escudo, teste de estresse).
