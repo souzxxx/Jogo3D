@@ -141,12 +141,15 @@ namespace Quintessence.Run
                     if (depth >= 5) waves.Add(new WavePlan { Melee = 1 + depth / 4, Ranged = 1, Charger = 1, Bomber = depth >= 7 ? 1 : 0 });
                     break;
                 case RoomType.Elite:
-                    waves.Add(new WavePlan { Melee = 1 + depth / 2, Ranged = 1, Bomber = 1, Charger = 1, Swarm = SwarmSize(depth) });
-                    // a primeira Elite chega com 1 ou 2 elementos: o Xama so entra da sexta sala em diante
-                    waves.Add(new WavePlan { Melee = 2 + depth / 3, Ranged = 1 + depth / 3, Brute = 1, Shaman = depth >= 5 ? 1 : 0 });
-                    // da sexta sala em diante a Elite fecha com o Carrasco no lugar do Bruto
-                    if (depth >= MiniBossDepth) waves.Add(new WavePlan { Melee = 2, Ranged = 1 + depth / 4, Bomber = 2, Lobber = 1, MiniBoss = 1 });
-                    else waves.Add(new WavePlan { Melee = 2, Ranged = 1 + depth / 4, Brute = depth >= 5 ? 1 : 0, Bomber = depth >= 5 ? 2 : 1, Lobber = 1 });
+                    waves.Add(new WavePlan { Melee = 1 + depth / 3, Ranged = 1, Bomber = 1, Charger = 1, Swarm = SwarmSize(depth) });
+                    if (depth >= MiniBossDepth)
+                    {
+                        // da sexta sala em diante: a onda pesada do meio e o Carrasco no fim
+                        waves.Add(new WavePlan { Melee = 2 + depth / 3, Ranged = 1 + depth / 3, Brute = 1, Shaman = 1 });
+                        waves.Add(new WavePlan { Melee = 2, Ranged = 1 + depth / 4, Bomber = 2, Lobber = 1, MiniBoss = 1 });
+                    }
+                    else // a primeira Elite chega com 1 ou 2 elementos: duas ondas leves e o Campeao
+                        waves.Add(new WavePlan { Melee = 3, Ranged = 1 + depth / 4, Bomber = 1, Lobber = 1, Charger = 1 });
                     break;
                 case RoomType.Boss: // o Guardiao das Cinzas chama os proprios reforcos
                     waves.Add(new WavePlan { Boss = 1 });

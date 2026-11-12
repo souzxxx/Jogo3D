@@ -26,6 +26,8 @@ namespace Quintessence.Run.Tests
             Assert.Greater(brann.MaxHealthAdd, 0f);
             Assert.Greater(vey.MoveSpeedMult, 1f);
             Assert.Less(vey.DashCooldownMult, 1f);
+            Assert.Greater(vey.Evasion, 0f, "Vey esquiva");
+            Assert.AreEqual(0f, brann.Evasion);
             Assert.AreEqual(1f, brann.BasicDamageMult);
             Assert.AreEqual(0f, rax.MaxHealthAdd);
         }
