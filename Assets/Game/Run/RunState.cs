@@ -97,6 +97,23 @@ namespace Quintessence.Run
             return waves;
         }
 
+        /// O trecho da run puxa a mistura de inimigos para um lado, sem mudar o total da onda:
+        /// a Cripta troca corpo a corpo por quem ataca de longe; o Jardim troca por quem bate pesado.
+        public static List<WavePlan> Plan(RoomType type, int depth, Biome biome)
+        {
+            var waves = Plan(type, depth);
+            if (type != RoomType.Combat && type != RoomType.Elite) return waves;
+            for (int i = 0; i < waves.Count; i++)
+            {
+                var w = waves[i];
+                if (w.Melee < 2) continue;
+                if (biome == Biome.Crypt) { w.Melee--; if (i % 2 == 0) w.Ranged++; else w.Lobber++; }
+                else if (biome == Biome.Garden) { w.Melee--; if (i % 2 == 0) w.Charger++; else w.Brute++; }
+                waves[i] = w;
+            }
+            return waves;
+        }
+
         public static int EssenceReward(RoomType type, int depth) => type switch
         {
             RoomType.Elite => 2 * (10 + 2 * depth),

@@ -307,12 +307,13 @@ namespace Quintessence.Game
                     $"ELITE {DifficultyCurve.Name(trait).ToUpperInvariant()}: {DifficultyCurve.Describe(trait)}", new Color(0.86f, 0.62f, 0.34f), 1f, 2.6f);
             }
             spawner.Champion = type == RoomType.Elite;
-            spawner.Run(BuildWaves(EncounterPlanner.Plan(type, depth)));
+            spawner.Run(BuildWaves(EncounterPlanner.Plan(type, depth, Run != null ? Biomes.For(depth, Run.Map.LayerCount) : Biome.Ashes)));
         }
 
         IEnumerator Fade(float from, float to, float seconds)
         {
-            for (float t = 0f; t < seconds; t += Time.unscaledDeltaTime)
+            // gravando quadro a quadro (testes), o relogio real nao acompanha o do jogo: o escurecimento segue o passo da captura
+            for (float t = 0f; t < seconds; t += Time.captureFramerate > 0 ? 1f / Time.captureFramerate : Time.unscaledDeltaTime)
             {
                 hud.SetFade(Mathf.Lerp(from, to, t / seconds));
                 yield return null;
@@ -389,7 +390,8 @@ namespace Quintessence.Game
             int shards = MetaStore.Current.EndRun(Run.RoomsCleared, victory);
             MetaStore.Save();
             ShardsEarned = shards;
-            string stats = $"Salas vencidas: {Run.RoomsCleared}   ·   Essência: {Run.Essence}   ·   Elementos: {player.Loadout.Awakened.Count}/4   ·   Tempo: {seconds / 60}:{seconds % 60:00}"
+            string stats = $"{HeroPassives.HeroName(GameFlow.StartElement)}   ·   Nível {Run.Progress.Level}   ·   {Run.Kills} inimigos derrotados   ·   {Run.Talents.Count} talentos e {Run.Boons.Count} bênçãos"
+                + $"\nSalas vencidas: {Run.RoomsCleared}   ·   Essência: {Run.Essence}   ·   Elementos: {player.Loadout.Awakened.Count}/4   ·   Tempo: {seconds / 60}:{seconds % 60:00}"
                 + $"\n+{shards} Fragmentos para o Refúgio (total: {MetaStore.Current.Shards})";
             Sfx.Play(victory ? "victory" : "defeat");
             hud.ShowResult(victory, stats, GameFlow.RestartRun, GameFlow.ToTitle);

@@ -40,6 +40,8 @@ namespace Quintessence.Core
         public float Length;
         public float Duration;
         public bool IsLine;
+        /// Algo e arremessado de Source ate Point e cai no fim do aviso (bomba do Arremessador).
+        public bool Lobbed;
         /// Nao e ataque no heroi (cura do Xama): desenha em verde.
         public bool Friendly;
         public GameObject Source;

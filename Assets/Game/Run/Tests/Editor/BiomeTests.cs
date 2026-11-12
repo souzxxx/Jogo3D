@@ -44,5 +44,20 @@ namespace Quintessence.Run.Tests
             Assert.AreEqual(0, EncounterPlanner.Plan(RoomType.Treasure, 3).Count);
             Assert.AreEqual(0, EncounterPlanner.Plan(RoomType.Pact, 3).Count);
         }
+
+        [Test] public void BiomeChangesTheMix_ButNotTheHeadcount()
+        {
+            foreach (var type in new[] { RoomType.Combat, RoomType.Elite })
+                for (int d = 0; d < 10; d++)
+                {
+                    int plain = EncounterPlanner.Plan(type, d).Sum(w => w.Total);
+                    foreach (Biome b in System.Enum.GetValues(typeof(Biome)))
+                        Assert.AreEqual(plain, EncounterPlanner.Plan(type, d, b).Sum(w => w.Total), $"{type} {d} {b}");
+                }
+            int Ranged(Biome b) => EncounterPlanner.Plan(RoomType.Combat, 4, b).Sum(w => w.Ranged + w.Lobber);
+            int Heavy(Biome b) => EncounterPlanner.Plan(RoomType.Combat, 4, b).Sum(w => w.Brute + w.Charger);
+            Assert.Greater(Ranged(Biome.Crypt), Ranged(Biome.Ashes), "a Cripta tem mais quem ataca de longe");
+            Assert.Greater(Heavy(Biome.Garden), Heavy(Biome.Ashes), "o Jardim tem mais quem bate pesado");
+        }
     }
 }

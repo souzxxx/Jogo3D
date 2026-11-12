@@ -10,7 +10,7 @@ namespace Quintessence.Game
     {
         struct Look
         {
-            public Color Sky, Equator, Ground, Fog, Sun, Torch, Crack, Crystal;
+            public Color Sky, Equator, Ground, Fog, Sun, Torch, Crack, Crystal, Stone;
             public float SunIntensity, CrackGlow, CrystalGlow;
         }
 
@@ -21,38 +21,39 @@ namespace Quintessence.Game
                 Sky = new Color(0.14f, 0.24f, 0.36f), Equator = new Color(0.1f, 0.17f, 0.25f), Ground = new Color(0.05f, 0.08f, 0.11f),
                 Fog = new Color(0.03f, 0.06f, 0.09f), Sun = new Color(0.62f, 0.78f, 0.95f), SunIntensity = 0.62f,
                 Torch = new Color(0.72f, 0.82f, 0.95f), Crack = new Color(0.2f, 0.52f, 0.62f), CrackGlow = 0.7f,
-                Crystal = new Color(0.45f, 0.68f, 0.74f), CrystalGlow = 0.4f,
+                Crystal = new Color(0.45f, 0.68f, 0.74f), CrystalGlow = 0.4f, Stone = new Color(0.4f, 0.54f, 0.66f),
             },
             Biome.Garden => new Look
             {
                 Sky = new Color(0.2f, 0.27f, 0.2f), Equator = new Color(0.15f, 0.19f, 0.14f), Ground = new Color(0.07f, 0.09f, 0.06f),
                 Fog = new Color(0.04f, 0.06f, 0.04f), Sun = new Color(0.95f, 0.88f, 0.62f), SunIntensity = 0.8f,
                 Torch = new Color(1f, 0.78f, 0.45f), Crack = new Color(0.42f, 0.6f, 0.26f), CrackGlow = 0.6f,
-                Crystal = new Color(0.5f, 0.7f, 0.5f), CrystalGlow = 0.4f,
+                Crystal = new Color(0.5f, 0.7f, 0.5f), CrystalGlow = 0.4f, Stone = new Color(0.52f, 0.58f, 0.46f),
             },
             Biome.Heart => new Look
             {
                 Sky = new Color(0.3f, 0.16f, 0.2f), Equator = new Color(0.22f, 0.12f, 0.14f), Ground = new Color(0.1f, 0.05f, 0.05f),
                 Fog = new Color(0.08f, 0.03f, 0.03f), Sun = new Color(1f, 0.5f, 0.36f), SunIntensity = 0.8f,
                 Torch = new Color(1f, 0.45f, 0.18f), Crack = new Color(1f, 0.2f, 0.04f), CrackGlow = 1.4f,
-                Crystal = new Color(0.9f, 0.4f, 0.14f), CrystalGlow = 0.7f,
+                Crystal = new Color(0.9f, 0.4f, 0.14f), CrystalGlow = 0.7f, Stone = new Color(0.6f, 0.44f, 0.5f),
             },
             _ => new Look
             {
                 Sky = new Color(0.22f, 0.2f, 0.36f), Equator = new Color(0.17f, 0.15f, 0.26f), Ground = new Color(0.09f, 0.07f, 0.11f),
                 Fog = new Color(0.05f, 0.04f, 0.09f), Sun = new Color(1f, 0.66f, 0.46f), SunIntensity = 0.75f,
                 Torch = new Color(1f, 0.55f, 0.2f), Crack = new Color(1f, 0.16f, 0.02f), CrackGlow = 1.15f,
-                Crystal = new Color(0.85f, 0.5f, 0.16f), CrystalGlow = 0.55f,
+                Crystal = new Color(0.85f, 0.5f, 0.16f), CrystalGlow = 0.55f, Stone = new Color(0.5f, 0.52f, 0.68f),
             },
         };
 
         readonly List<Light> torches = new(), cracksLights = new(), crystalLights = new();
-        readonly List<Renderer> cracks = new(), crystals = new();
+        readonly List<Renderer> cracks = new(), crystals = new(), stones = new();
         readonly List<ParticleSystem> flames = new(), sparks = new();
         Light sun;
         MaterialPropertyBlock block;
         public Biome Current { get; private set; }
         public Color CrackColor { get; private set; }
+        public int StoneCount { get; private set; }
 
         void Awake()
         {
@@ -68,6 +69,8 @@ namespace Quintessence.Game
             {
                 if (r.name == "EmberCrack") cracks.Add(r);
                 else if (r.name == "AmberCrystal") crystals.Add(r);
+                // piso e paredes usam o material "Dungeon": a pedra da sala muda de tom com o trecho
+                else if (r.sharedMaterial != null && r.sharedMaterial.name == "Dungeon") stones.Add(r);
             }
             foreach (var p in FindObjectsByType<ParticleSystem>(FindObjectsSortMode.None))
             {
@@ -92,6 +95,14 @@ namespace Quintessence.Game
             foreach (var l in crystalLights) if (l != null) l.color = k.Crystal;
             Tint(cracks, k.Crack * 0.6f, k.Crack * k.CrackGlow);
             Tint(crystals, k.Crystal * 0.6f, k.Crystal * k.CrystalGlow);
+            foreach (var r in stones)
+            {
+                if (r == null) continue;
+                r.GetPropertyBlock(block);
+                block.SetColor("_BaseColor", k.Stone);
+                r.SetPropertyBlock(block);
+            }
+            StoneCount = stones.Count;
             foreach (var p in flames) if (p != null) { var m = p.main; m.startColor = Color.Lerp(k.Torch, new Color(1f, 0.45f, 0.08f), biome == Biome.Crypt ? 0.25f : 0.8f); }
             foreach (var p in sparks) if (p != null) { var m = p.main; m.startColor = k.Crack; }
         }
