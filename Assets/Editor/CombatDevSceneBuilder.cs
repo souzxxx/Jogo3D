@@ -234,6 +234,8 @@ public static class CombatDevSceneBuilder
         var mud = Add("Lama", ElementType.Water, ElementType.Earth, 8, 2f, 0);
         mud.appliesStatus = true; mud.status = StatusType.Rooted; mud.statusDuration = 2;
         mud.appliesSecondStatus = true; mud.secondStatus = StatusType.Soaked; mud.secondStatusDuration = 5;
+        // e deixa um lamacal de 3,5 s que encharca (e pode virar Fusao com Fogo ou Ar)
+        mud.zoneDuration = 3.5f; mud.zoneInterval = 0.5f; mud.zoneAppliesStatus = true; mud.zoneStatus = StatusType.Soaked; mud.zoneStatusDuration = 0.8f;
         var blizzard = Add("Nevasca", ElementType.Water, ElementType.Air, 10, 2f, 0);
         blizzard.appliesStatus = true; blizzard.status = StatusType.Frozen; blizzard.statusDuration = 2;
         // simplificado: explosao de lascas em area maior, em vez de 6 projeteis

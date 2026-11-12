@@ -194,7 +194,11 @@ namespace Quintessence.Combat.Tests
             Assert.AreEqual(FusionKind.Obsidian, FusionRules.Find(ElementType.Fire, ElementType.Earth, ElementType.Water));
             Assert.AreEqual(FusionKind.Cyclone, FusionRules.Find(ElementType.Water, ElementType.Fire, ElementType.Air));
             Assert.AreEqual(FusionKind.None, FusionRules.Find(ElementType.Fire, ElementType.Earth, ElementType.Fire), "elemento do par nao funde");
-            Assert.AreEqual(FusionKind.None, FusionRules.Find(ElementType.Water, ElementType.Earth, ElementType.Fire), "Lama nao deixa area");
+            Assert.AreEqual(FusionKind.Kiln, FusionRules.Find(ElementType.Water, ElementType.Earth, ElementType.Fire), "Lama + Fogo: Barro Cozido");
+            Assert.AreEqual(FusionKind.DustStorm, FusionRules.Find(ElementType.Earth, ElementType.Water, ElementType.Air), "Lama + Ar: Tempestade de Poeira");
+            Assert.AreEqual(FusionKind.None, FusionRules.Find(ElementType.Water, ElementType.Earth, ElementType.Water));
+            var real = UnityEditor.AssetDatabase.LoadAssetAtPath<ReactionTable>("Assets/Game/Combat/Data/Reactions.asset");
+            Assert.Greater(real.Find(ElementType.Water, ElementType.Earth).zoneDuration, 0f, "a Lama deixa area no chao (a tabela do jogo)");
             foreach (FusionKind k in System.Enum.GetValues(typeof(FusionKind)))
                 if (k != FusionKind.None) { Assert.IsNotEmpty(FusionRules.Name(k)); Assert.IsNotEmpty(FusionRules.Describe(k)); Assert.Greater(FusionRules.Stats(k).damage, 0f); }
         }
