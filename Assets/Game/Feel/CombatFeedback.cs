@@ -86,6 +86,7 @@ namespace Quintessence.Feel
             GameEvents.BossPhaseChanged += OnBossPhase;
             GameEvents.BossShieldChanged += OnBossShield;
             GameEvents.Exploded += OnExploded;
+            GameEvents.EnemyHealed += OnEnemyHealed;
             GameEvents.RoomCleared += OnRoomCleared;
             GameEvents.Shattered += OnShattered;
             GameEvents.QuintessenceActiveChanged += OnQuintessence;
@@ -114,6 +115,7 @@ namespace Quintessence.Feel
             GameEvents.BossPhaseChanged -= OnBossPhase;
             GameEvents.BossShieldChanged -= OnBossShield;
             GameEvents.Exploded -= OnExploded;
+            GameEvents.EnemyHealed -= OnEnemyHealed;
             GameEvents.RoomCleared -= OnRoomCleared;
             GameEvents.Shattered -= OnShattered;
             GameEvents.QuintessenceActiveChanged -= OnQuintessence;
@@ -338,6 +340,16 @@ namespace Quintessence.Feel
             Burst(p, Vector3.up, 180f, 50, 4f, 11f, 0.25f, 0.6f, 0.5f, Steel);
             LightFlash(p, Steel, 8f, 6f, 0.3f);
             CameraShake.Add(0.4f);
+        }
+
+        /// Cura do Xama: numero verde e um sopro de folhas no aliado curado.
+        void OnEnemyHealed(Health target, float amount)
+        {
+            if (target == null) return;
+            var green = new Color(0.45f, 0.75f, 0.5f);
+            var p = target.transform.position + Vector3.up * 1.4f;
+            DamageNumber.Spawn(p + Vector3.up * 1.2f, "+" + Mathf.RoundToInt(amount), green, 0.8f, 0.9f);
+            accents?.Emit(ElementType.Air, p, Vector3.up, 60f, 10, 2.5f, green);
         }
 
         void OnExploded(Vector3 point, float radius)
