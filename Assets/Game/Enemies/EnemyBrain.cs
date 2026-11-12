@@ -115,15 +115,30 @@ namespace Quintessence.Enemies
         /// Quantas vezes o Espectro apareceu nas costas do heroi (para os testes).
         public int Ambushes { get; private set; }
 
-        /// Ponto nas costas do heroi, no chao navegavel e dentro da sala.
-        Vector3 AmbushPoint()
+        /// Emboscada valida desta vez (ponto achado e o Espectro nao esta enraizado). Sem ela, golpeia de onde esta.
+        bool ambushing;
+
+        /// Ponto nas costas do heroi: no chao navegavel, com visada livre a partir do heroi (nada de parede no meio)
+        /// e a pelo menos 1,2 m dele. Tenta as costas e depois o lado do Espectro; sem nenhum, nao ha emboscada.
+        bool TryAmbushPoint(out Vector3 point)
         {
+            point = default;
             var t = target.transform;
+            if (!NavMesh.SamplePosition(t.position, out var heroNav, 1.5f, NavMesh.AllAreas)) return false;
             var back = -t.forward; back.y = 0f;
-            if (back.sqrMagnitude < 0.01f) back = (transform.position - t.position).normalized;
-            var p = t.position + back.normalized * 1.6f;
-            if (!Arena.Contains(p)) p = t.position + (transform.position - t.position).normalized * 1.6f;
-            return NavMesh.SamplePosition(p, out var hit, 2f, NavMesh.AllAreas) ? hit.position : t.position;
+            var side = transform.position - t.position; side.y = 0f;
+            foreach (var dir in new[] { back, side })
+            {
+                if (dir.sqrMagnitude < 0.01f) continue;
+                var p = t.position + dir.normalized * 1.6f;
+                if (!Arena.Contains(p) || !NavMesh.SamplePosition(p, out var hit, 1f, NavMesh.AllAreas)) continue;
+                if (NavMesh.Raycast(heroNav.position, hit.position, out _, NavMesh.AllAreas)) continue; // parede entre os dois
+                var flat = hit.position - t.position; flat.y = 0f;
+                if (flat.magnitude < 1.2f) continue;
+                point = hit.position;
+                return true;
+            }
+            return false;
         }
 
         void OnDamaged(DamageInfo info, float applied)
@@ -149,7 +164,7 @@ namespace Quintessence.Enemies
             Play("Death", 0.05f);
             // ajudante que cai junto com o chefe (o chefe mata os dele) nao explode nem se divide
             // (o fim do Cerco tambem: a fonte e o spawner)
-            bool killedByBoss = info.Source != null && (info.Source.GetComponent<BossBrain>() != null || info.Source.GetComponent<WaveSpawner>() != null);
+            bool killedByBoss = info.NoCredit || (info.Source != null && info.Source.GetComponent<BossBrain>() != null);
             if ((Scaling.Volatile || definition.burstOnDeath) && !killedByBoss && definition.attack != EnemyAttackKind.Explode) VolatileBurst.Spawn(transform.position, 2f, 0.85f, Damage * 0.7f);
             // Elite Divisores: o corpo vira dois Cinzentos (o Campeao e quem explode nao se dividem)
             if (Scaling.Splits && !killedByBoss && definition.attack != EnemyAttackKind.Explode && GetComponent<Champion>() == null)
@@ -195,7 +210,13 @@ namespace Quintessence.Enemies
                     }
                     if (kind == EnemyAttackKind.Lob && hasTarget) strikePoint = target.transform.position;
                     // Espectro: avisa um circulo nas costas do heroi e aparece ali no fim do aviso
-                    if (kind == EnemyAttackKind.Ambush && hasTarget) strikePoint = AmbushPoint();
+                    if (kind == EnemyAttackKind.Ambush)
+                    {
+                        bool rooted = TryGetComponent(out StatusHolder st) && st.State.Has(StatusType.Rooted);
+                        var ambushAt = strikePoint;
+                        ambushing = hasTarget && !rooted && TryAmbushPoint(out ambushAt);
+                        if (ambushing) strikePoint = ambushAt;
+                    }
                     if (kind == EnemyAttackKind.Heal) strikePoint = transform.position;
                     bool line = kind == EnemyAttackKind.Projectile || kind == EnemyAttackKind.Charge;
                     bool charge = kind == EnemyAttackKind.Charge;
@@ -268,7 +289,7 @@ namespace Quintessence.Enemies
                 return;
             }
             if (definition.attack == EnemyAttackKind.Heal && healing) { HealAllies(); return; }
-            if (definition.attack == EnemyAttackKind.Ambush)
+            if (definition.attack == EnemyAttackKind.Ambush && ambushing)
             {
                 // some de onde esta e reaparece no circulo avisado; quem ficou parado nas costas leva o golpe
                 GameEvents.RaiseAttackPerformed(new AttackEvent { Origin = transform.position, Direction = Vector3.up, Element = ElementType.None, Range = 1.2f, Kind = AttackKind.Dash, Source = gameObject });
@@ -277,7 +298,7 @@ namespace Quintessence.Enemies
                 GameEvents.RaiseAttackPerformed(new AttackEvent { Origin = strikePoint, Direction = Vector3.up, Element = ElementType.None, Range = definition.strikeRadius, Kind = AttackKind.Dash, Source = gameObject });
                 if (target == null || target.IsDead) return;
                 var hit = target.transform.position - strikePoint; hit.y = 0f;
-                if (hit.sqrMagnitude > 0.01f) transform.rotation = Quaternion.LookRotation(hit);
+                if (hit.sqrMagnitude > 0.01f) { transform.rotation = Quaternion.LookRotation(hit); strikeDir = hit.normalized; } // termina o golpe de frente para o heroi
                 if (hit.magnitude > definition.strikeRadius + 0.3f) return;
                 target.TakeDamage(new DamageInfo(Damage, definition.element, health.Team, gameObject)
                 {

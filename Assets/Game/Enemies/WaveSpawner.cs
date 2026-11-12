@@ -151,7 +151,7 @@ namespace Quintessence.Enemies
             // a fonte e o proprio spawner: quem cai assim nao conta como abate do heroi, nao explode e nao se divide
             foreach (var brain in GetComponentsInChildren<EnemyBrain>())
                 if (brain.TryGetComponent(out Health h) && !h.IsDead)
-                    h.TakeDamage(new DamageInfo(99999f, ElementType.None, Team.Player, gameObject) { IsReaction = true });
+                    h.TakeDamage(new DamageInfo(99999f, ElementType.None, Team.Player, gameObject) { IsReaction = true, NoCredit = true });
         }
 
         /// Um Divisor caiu: nascem count Cinzentos em volta do corpo, que contam para a onda e nao se dividem de novo.
