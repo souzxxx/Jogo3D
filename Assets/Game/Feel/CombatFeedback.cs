@@ -358,6 +358,19 @@ namespace Quintessence.Feel
             l.transform.localPosition = new Vector3(0, 2.2f, 0);
             l.type = LightType.Point; l.color = amber; l.intensity = 2.4f; l.range = 5f;
             CameraShake.Add(0.35f);
+            // coroa de cristais flutuando sobre a cabeca: entra no espaco do modelo e depois segue o osso
+            var crown = Resources.Load<GameObject>("Models/campeao_crown");
+            var model = champion.transform.Find("Model");
+            if (crown == null || model == null) return;
+            Transform head = null;
+            foreach (var t in model.GetComponentsInChildren<Transform>()) if (t.name == "head") head = t;
+            if (head == null) return;
+            var c = Instantiate(crown, model);
+            c.name = "ChampionCrown";
+            c.transform.localPosition = new Vector3(0, -0.3f, 0);
+            c.transform.localRotation = Quaternion.identity;
+            c.transform.localScale = Vector3.one;
+            c.transform.SetParent(head, true);
         }
 
         /// Cura do Xama: numero verde e um sopro de folhas no aliado curado.
