@@ -124,7 +124,22 @@ namespace Quintessence.Run.Tests
             Assert.AreEqual(clean, Dump(m));
         }
 
-        static string Dump(HeroModifiers m)
+[Test] public void Deepen_RaisesTheSkill_UpToRankThree()
+        {
+            var run = new RunState(RunMapGenerator.Generate(1));
+            var m = new HeroModifiers();
+            Assert.AreEqual(1, run.SkillRank[(int)ElementType.Fire]);
+            Assert.IsTrue(run.Deepen(ElementType.Fire, m));
+            Assert.IsTrue(run.Deepen(ElementType.Fire, m));
+            Assert.IsFalse(run.Deepen(ElementType.Fire, m), "grau maximo e III");
+            Assert.AreEqual(3, run.SkillRank[(int)ElementType.Fire]);
+            Assert.AreEqual(1.6f, m.Damage(ElementType.Fire), 0.001f);
+            Assert.AreEqual(0.81f, m.SkillCooldown(ElementType.Fire), 0.001f);
+            Assert.AreEqual(1f, m.Damage(ElementType.Water), 0.001f, "so a skill aprofundada muda");
+            Assert.AreEqual("III", RunState.Roman(3));
+        }
+
+                static string Dump(HeroModifiers m)
         {
             var sb = new System.Text.StringBuilder();
             foreach (var f in typeof(HeroModifiers).GetFields()) sb.Append(f.Name).Append('=').Append(f.GetValue(m)).Append(';');

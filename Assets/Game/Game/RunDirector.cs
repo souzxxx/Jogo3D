@@ -693,12 +693,47 @@ namespace Quintessence.Game
                 return;
             }
             string[] names = { "", "Fogo", "Água", "Terra", "Ar" };
+            string[] skills = { "", "Labareda", "Maré", "Pilar de Pedra", "Vendaval" };
+            // a outra escolha do Santuario: em vez de despertar um elemento novo, aprofundar uma skill que ja tem
+            var deepen = new List<ElementType>();
+            foreach (var a in player.Loadout.Awakened) if (Run.SkillRank[(int)a] < RunState.MaxSkillRank) deepen.Add(a);
+            int total = missing.Count + deepen.Count;
+            // despertar vem primeiro na lista; aprofundar entra depois (mesma posicao no chao)
+            var later = new List<Interactable>();
+            for (int d = 0; d < deepen.Count; d++)
+            {
+                var e = deepen[d];
+                var c = ElementColors.Of(e);
+                int next = Run.SkillRank[(int)e] + 1;
+                var root = new GameObject("Deepen_" + e);
+                root.transform.position = new Vector3((missing.Count + d - (total - 1) / 2f) * 4.3f, 0, 0f);
+                float top = 1.25f;
+                if (shrinePrefab != null) Instantiate(shrinePrefab, root.transform).transform.localPosition = Vector3.zero;
+                Medal(root.transform, new Vector3(0, top + 0.75f, 0), "skill_" + e.ToString().ToLowerInvariant(), c, 1.05f);
+                Label(root.transform, new Vector3(0, top + 2.35f, 0), skills[(int)e] + " " + RunState.Roman(next), Cream, 0.72f);
+                Label(root.transform, new Vector3(0, top + 1.75f, 0), "+30% de dano\nrecarga 10% menor", new Color(0.8f, 0.76f, 0.7f), 0.5f);
+                Glow(root.transform, new Vector3(0, top + 0.7f, -0.7f), c, 1.4f);
+                later.Add(new Interactable
+                {
+                    Object = root, Prompt = "aprofundar " + skills[(int)e],
+                    Use = () =>
+                    {
+                        if (!Run.Deepen(e, player.Modifiers)) return;
+                        Sfx.Play("pickup");
+                        Feel.DamageNumber.Spawn(player.transform.position + Vector3.up * 3.6f, (skills[(int)e] + " " + RunState.Roman(next)).ToUpperInvariant() + "!", c, 1.3f, 1.8f);
+                        foreach (var it in interactables) if (it.Object != null) Destroy(it.Object);
+                        interactables.Clear();
+                        Run.RoomCleared();
+                        OpenDoors();
+                    },
+                });
+            }
             for (int i = 0; i < missing.Count; i++)
             {
                 var e = missing[i];
                 var c = ElementColors.Of(e);
                 var root = new GameObject("Shrine_" + e);
-                root.transform.position = new Vector3((i - (missing.Count - 1) / 2f) * 4.5f, 0, 0f);
+                root.transform.position = new Vector3((i - (total - 1) / 2f) * 4.3f, 0, 0f);
                 float top = 1.25f;
                 if (shrinePrefab != null) Instantiate(shrinePrefab, root.transform).transform.localPosition = Vector3.zero;
                 else Matte(GameObject.CreatePrimitive(PrimitiveType.Cube), root.transform, new Vector3(0, 0.6f, 0), new Vector3(1f, 1.2f, 1f), new Color(0.4f, 0.4f, 0.45f));
@@ -721,6 +756,7 @@ namespace Quintessence.Game
                     },
                 });
             }
+            interactables.AddRange(later);
         }
 
         /// Loja: cada item numa mesa do pack, com nome, efeito e preco. Da para sair sem comprar: as portas ja estao abertas.

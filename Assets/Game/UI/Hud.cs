@@ -567,7 +567,7 @@ namespace Quintessence.UI
                 UiKit.Image(disc, UiKit.Circle, has ? Color.Lerp(c, new Color(0.05f, 0.04f, 0.08f), 0.4f) : Slate);
                 UiKit.Image(UiKit.Rect("Icon", disc, center, Vector2.zero, new Vector2(42, 42)), UiKit.Icon(has ? SkillIcon[i + 1] : "lock"), has ? UiKit.Cream : new Color(1, 1, 1, 0.3f));
                 UiKit.Text(UiKit.Rect("Name", row, new Vector2(0, 0.5f), new Vector2(94, 20), new Vector2(470, 34)),
-                    $"{i + 1}  ·  {SkillName[i + 1]}", 28, has ? UiKit.Cream : UiKit.Dim, TextAnchor.MiddleLeft);
+                    $"{i + 1}  ·  {SkillName[i + 1]}" + (has && run != null && run.SkillRank[i + 1] > 1 ? " " + RunState.Roman(run.SkillRank[i + 1]) : ""), 28, has ? UiKit.Cream : UiKit.Dim, TextAnchor.MiddleLeft);
                 var note = UiKit.Text(UiKit.Rect("Role", row, new Vector2(0, 0.5f), new Vector2(94, -18), new Vector2(470, 44)),
                     has ? role[i + 1] : "Desperte este elemento num Santuário.", 20, has ? UiKit.Paper : UiKit.Dim, TextAnchor.MiddleLeft, false);
                 note.horizontalOverflow = HorizontalWrapMode.Wrap;

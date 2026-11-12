@@ -15,6 +15,23 @@ namespace Quintessence.Run
         public readonly Progression Progress = new();
         public readonly TalentBook Talents = new();
         public int Kills;
+        /// Grau de cada skill (indice do ElementType). 1 = como desperta; os Santuarios podem aprofundar ate MaxSkillRank.
+        public readonly int[] SkillRank = { 1, 1, 1, 1, 1 };
+        public const int MaxSkillRank = 3;
+        public const float RankDamage = 0.3f, RankCooldown = 0.9f;
+
+        /// Aprofunda a skill de um elemento ja desperto: +30% de dano e recarga 10% menor por grau.
+        public bool Deepen(Quintessence.Core.ElementType e, Quintessence.Core.HeroModifiers mods)
+        {
+            int i = (int)e;
+            if (i <= 0 || SkillRank[i] >= MaxSkillRank) return false;
+            SkillRank[i]++;
+            mods.AddElementDamage(e, RankDamage);
+            mods.ScaleSkillCooldown(e, RankCooldown);
+            return true;
+        }
+
+        public static string Roman(int rank) => rank switch { 1 => "I", 2 => "II", 3 => "III", _ => rank.ToString() };
         /// Trocas de oferta de talento que ainda restam nesta run.
         public int Rerolls;
 
