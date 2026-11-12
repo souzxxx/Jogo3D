@@ -1200,6 +1200,79 @@ namespace Quintessence.Game.PlayTests
         }
 
         [UnityTest, Timeout(600000)]
+        public IEnumerator Drowned_Queen_Floods_The_Arena()
+        {
+            GameEvents.Clear();
+            Time.timeScale = 1f;
+            Time.captureFramerate = 30;
+            GameFlow.StartElement = ElementType.Earth;
+            GameFlow.Seed = 7; GameFlow.Layers = 5; GameFlow.Shrines = 1;
+            yield return EditorSceneManager.LoadSceneAsyncInPlayMode("Assets/Scenes/Run.unity", new LoadSceneParameters(LoadSceneMode.Single));
+            yield return null;
+            yield return null;
+            var director = Object.FindFirstObjectByType<RunDirector>();
+            var hud = Object.FindFirstObjectByType<Hud>();
+            cam = Camera.main;
+            hud.UseCamera(cam);
+            Object.FindFirstObjectByType<WaveSpawner>().enabled = false;
+            for (int k = 0; k < 2000 && director.Busy; k++) yield return null;
+            Assert.IsTrue(director.QueenRun, "semente 7 (resto 1 por 6): o chefe final e a Rainha");
+            Assert.IsFalse(director.WeaverRun);
+            var hero = Object.FindFirstObjectByType<PlayerController>();
+            hero.GetComponent<Health>().Pool.Invulnerable = true;
+            hero.Teleport(new Vector3(0, 0.05f, -2f), Vector3.forward);
+            director.ApplyLayout(-1);
+            director.DressBiome(Biome.Crypt); // a sala final da Rainha fica com a luz da Cripta
+            string name = "";
+            GameEvents.BossSpawned += (_, n) => name = n;
+            var prefab = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Game/Enemies/Prefabs/Rainha.prefab");
+            Assert.IsNotNull(prefab, "o prefab da Rainha existe");
+            var queen = Object.Instantiate(prefab, new Vector3(0, 0, 3f), Quaternion.Euler(0, 180, 0)).GetComponent<BossBrain>();
+            for (int k = 0; k < 40; k++) yield return null;
+            Assert.AreEqual("Rainha Afogada", name);
+            Assert.AreEqual(ElementType.Water, queen.Definition.element);
+            Assert.IsTrue(queen.GetComponentsInChildren<Transform>(true).Any(t => t.name == "Skeleton_Staff"), "segura o cajado do pack");
+            // elemental de Agua: fraca a Terra
+            var hp = queen.GetComponent<Health>();
+            float full = hp.Current;
+            hp.TakeDamage(new DamageInfo(10f, ElementType.Earth, Team.Player, hero.gameObject));
+            Assert.AreEqual(full - 16f, hp.Current, 0.01f, "fraca a Terra");
+            // a Erupcao dela deixa pocas d'agua
+            for (int k = 0; k < 1500 && Object.FindFirstObjectByType<WaterPuddle>() == null; k++) yield return null;
+            Assert.IsNotNull(Object.FindFirstObjectByType<WaterPuddle>(), "a Erupcao da Rainha deixa poca");
+            hud.ShowBanner("", "", Color.clear, 0.01f);
+            hud.HideTip();
+            for (int k = 0; k < 6; k++) yield return null;
+            Shot(cam, "docs/img/chefe_rainha.png");
+            {
+                // de perto, de frente
+                queen.enabled = false;
+                queen.GetComponent<UnityEngine.AI.NavMeshAgent>().Warp(hero.transform.position + new Vector3(0.5f, 0, 5f));
+                queen.transform.rotation = Quaternion.Euler(0, 190, 0);
+                var follow = cam.GetComponent<FollowCamera>();
+                if (follow != null) follow.enabled = false;
+                var at = queen.transform.position;
+                float fov = cam.fieldOfView;
+                cam.transform.position = at + new Vector3(3f, 5.5f, -12f);
+                cam.transform.LookAt(at + Vector3.up * 2.6f);
+                cam.fieldOfView = 40f;
+                for (int k = 0; k < 4; k++) yield return null;
+                Shot(cam, "docs/img/rainha_perto.png");
+                cam.fieldOfView = fov;
+                if (follow != null) follow.enabled = true;
+                queen.enabled = true;
+            }
+            hp.TakeDamage(new DamageInfo(hp.Max * 0.75f, ElementType.None, Team.Player, hero.gameObject));
+            for (int k = 0; k < 30; k++) yield return null;
+            Assert.AreEqual(2, queen.Phase);
+            Assert.IsTrue(queen.Shield.Up, "chefe final: a ultima fase levanta o escudo");
+            Object.Destroy(queen.gameObject);
+            GameFlow.StartElement = ElementType.Fire;
+            GameFlow.Layers = 8; GameFlow.Shrines = 3;
+            Time.captureFramerate = 0;
+        }
+
+        [UnityTest, Timeout(600000)]
         public IEnumerator Weaver_Keeps_Distance_And_Blinks()
         {
             GameEvents.Clear();

@@ -64,7 +64,8 @@ public static class GameSceneBuilder
         EnemyDevSceneBuilder.ElementalPrefabs(out var swarm, out var ember, out var sentinel);
         director.BindElementals(swarm, ember, sentinel);
         director.BindGuard(EnemyDevSceneBuilder.GuardPrefab());
-        director.BindDrowned(EnemyDevSceneBuilder.DrownedPrefab(), PuddlePrefab());
+        var drowned = EnemyDevSceneBuilder.DrownedPrefab();
+        director.BindDrowned(drowned, PuddlePrefab());
         const string catalogPath = "Assets/Game/Run/Data/Boons.asset";
         var catalog = AssetDatabase.LoadAssetAtPath<Quintessence.Run.BoonCatalog>(catalogPath);
         if (catalog == null)
@@ -82,6 +83,7 @@ public static class GameSceneBuilder
         director.BindBoss(EnemyDevSceneBuilder.BossPrefab(melee, bomber));
         director.BindMiniBoss(EnemyDevSceneBuilder.MiniBossPrefab(melee, charger));
         director.BindWeaver(EnemyDevSceneBuilder.WeaverPrefab(ranged, melee));
+        director.BindQueen(EnemyDevSceneBuilder.QueenPrefab(drowned, melee));
         director.BindShop(Prop("table_small", 1f), Prop("bottle_A_labeled_green", 1.8f), Prop("bottle_B_brown", 1.8f), ShopDecor());
         // ordem do enum RoomType: Combat, Elite, Shrine, Rest, Boss, Master, Shop, Treasure, Pact
         string[] banners = { "banner_red", "banner_patternB_brown", "banner_blue", "banner_green", "banner_shield_red", "banner_patternA_yellow", "banner_patternA_green", "banner_yellow", "banner_patternC_red" };

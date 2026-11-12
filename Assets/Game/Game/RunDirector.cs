@@ -105,6 +105,10 @@ namespace Quintessence.Game
 
         /// O chefe final desta run: semente par traz a Tecela das Cinzas, impar o Guardiao.
         public bool WeaverRun => weaverPrefab != null && (GameFlow.Seed & 1) == 0;
+        /// Rainha Afogada: um terco das sementes impares (resto 1 por 6). As outras impares sao do Guardiao.
+        public bool QueenRun => queenPrefab != null && !WeaverRun && (((GameFlow.Seed % 6) + 6) % 6) == 1;
+        [SerializeField] GameObject queenPrefab;
+        public void BindQueen(GameObject prefab) => queenPrefab = prefab;
 
         public void BindExtraEnemies(GameObject charger, GameObject lobber, GameObject shaman)
         {
@@ -286,7 +290,7 @@ namespace Quintessence.Game
             Sfx.Play("feat");
         }
 
-        void OnPuddleLanded(Vector3 point, float radius, ElementType element, float seconds) => WaterPuddle.Spawn(puddlePrefab, point, radius, element, seconds);
+        void OnPuddleLanded(Vector3 point, float radius, ElementType element, float seconds) { if (seconds > 0f) WaterPuddle.Spawn(puddlePrefab, point, radius, element, seconds); }
 
         void OnPoolMarked() => Tip("terrain");
 
@@ -645,6 +649,8 @@ namespace Quintessence.Game
             if (node.Type == RoomType.Combat || node.Type == RoomType.Elite || node.Type == RoomType.Boss || node.Type == RoomType.Trial)
                 PlaceBiomeProps(Biomes.For(Run.Depth, Run.Map.LayerCount), GameFlow.Seed + node.Id * 7);
             DressBiome(Biomes.For(Run.Depth, Run.Map.LayerCount), true);
+            // a Rainha Afogada alaga o Coracao: a luz e a cor da sala final viram as da Cripta (o nome continua o do Coracao)
+            if (node.Type == RoomType.Boss && QueenRun && dresser != null) dresser.Apply(Biome.Crypt);
             player.Teleport(entryPoint, Vector3.forward);
             hud.SetRoom($"Sala {Run.Depth + 1}/{Run.Map.LayerCount} · {RoomInfo.Name(node.Type)}", node.Type);
             yield return null;
@@ -747,7 +753,7 @@ namespace Quintessence.Game
                 if (p.Guard > 0) w.entries.Add(new WaveEntry { prefab = guardPrefab != null ? guardPrefab : meleePrefab, count = p.Guard });
                 if (p.Drowned > 0) w.entries.Add(new WaveEntry { prefab = drownedPrefab != null ? drownedPrefab : lobberPrefab != null ? lobberPrefab : rangedPrefab, count = p.Drowned });
                 if (p.MiniBoss > 0 && miniBossPrefab != null) w.entries.Add(new WaveEntry { prefab = miniBossPrefab, count = p.MiniBoss });
-                if (p.Boss > 0) w.entries.Add(new WaveEntry { prefab = WeaverRun ? weaverPrefab : bossPrefab != null ? bossPrefab : brutePrefab, count = p.Boss });
+                if (p.Boss > 0) w.entries.Add(new WaveEntry { prefab = WeaverRun ? weaverPrefab : QueenRun ? queenPrefab : bossPrefab != null ? bossPrefab : brutePrefab, count = p.Boss });
                 waves.Add(w);
             }
             return waves;
