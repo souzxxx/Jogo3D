@@ -103,12 +103,12 @@ namespace Quintessence.UI
         public bool SheetOpen => sheet != null && sheet.gameObject.activeSelf;
 
         /// Painel simples por cima do titulo (opcoes, creditos): titulo, conteudo e Voltar.
-        RectTransform OpenSheet(string heading, float height)
+        RectTransform OpenSheet(string heading, float height, float width = 1000f)
         {
             foreach (Transform child in sheet) Destroy(child.gameObject);
             sheet.gameObject.SetActive(true);
             UiKit.Image(UiKit.Stretch("Shade", sheet), null, new Color(0.02f, 0.02f, 0.04f, 0.95f), true);
-            var box = UiKit.Box("Box", sheet, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(1000, height), 1f);
+            var box = UiKit.Box("Box", sheet, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(width, height), 1f);
             var title = UiKit.Text(UiKit.Rect("Title", box, new Vector2(0.5f, 1), new Vector2(0, -40), new Vector2(900, 70)), heading, 56, UiKit.Paper);
             title.font = GameFonts.Title;
             UiKit.Focus(UiKit.Button(box, "Voltar", new Vector2(0.5f, 0), new Vector2(0, 44), new Vector2(300, 60), UiKit.Primary, () => { sheet.gameObject.SetActive(false); FocusFirstCard(); }).gameObject);
@@ -119,6 +119,57 @@ namespace Quintessence.UI
         {
             var box = OpenSheet("OPÇÕES", 560);
             UiOptions.Build(box, new Vector2(0, 10));
+        }
+
+        /// Grimorio: herois, inimigos (e como lidar com cada um) e as seis reacoes.
+        public void ShowGrimoire()
+        {
+            var box = OpenSheet("GRIMÓRIO", 940, 1640);
+            var top = new Vector2(0, 1);
+            void Column(float x, string heading, (string name, string text, Color color)[] rows, float step)
+            {
+                UiKit.Text(UiKit.Rect("H_" + heading, box, top, new Vector2(x, -120), new Vector2(500, 32)), heading, 24, UiKit.Dim, TextAnchor.MiddleLeft);
+                for (int i = 0; i < rows.Length; i++)
+                {
+                    float y = -160 - i * step;
+                    UiKit.Text(UiKit.Rect("N", box, top, new Vector2(x, y), new Vector2(500, 30)), rows[i].name, 23, rows[i].color, TextAnchor.MiddleLeft);
+                    var t = UiKit.Text(UiKit.Rect("T", box, top, new Vector2(x, y - 30), new Vector2(500, step - 30)), rows[i].text, 18, UiKit.Paper, TextAnchor.UpperLeft, false);
+                    t.horizontalOverflow = HorizontalWrapMode.Wrap;
+                }
+            }
+            string[] element = { "", "Fogo", "Água", "Terra", "Ar" };
+            var heroes = new (string, string, Color)[4];
+            for (int i = 0; i < 4; i++)
+            {
+                var e = Elements.All[i];
+                heroes[i] = ($"{HeroPassives.HeroName(e)} · {element[(int)e]}",
+                    $"{HeroPassives.Style(e)}. {HeroPassives.Title(e)}: {HeroPassives.Describe(e)}.", Color.Lerp(ElementColors.Of(e), UiKit.Cream, 0.35f));
+            }
+            var foe = new Color(0.86f, 0.6f, 0.5f);
+            var gold = new Color(0.88f, 0.74f, 0.42f);
+            Column(70, "HERÓIS", heroes, 92);
+            Column(600, "INIMIGOS", new (string, string, Color)[]
+            {
+                ("Rastejante", "Vem em grupo. Área e reações limpam o bando.", foe),
+                ("Atirador", "Tiro em linha; recua se você chega perto. Feche com o dash.", foe),
+                ("Bruto", "Armadura: leva 40% do dano. O Pilar de Pedra quebra.", foe),
+                ("Explosivo", "Corre e explode. Saia do círculo; a explosão fere o bando.", foe),
+                ("Ceifador", "Avisa uma linha e atravessa a sala. Saia e bata na volta.", foe),
+                ("Arremessador", "Joga a bomba onde você está. Saia do círculo.", foe),
+                ("Xamã", "Cura os aliados feridos (aviso verde). Derrube primeiro.", foe),
+                ("Campeão e Carrasco", "Fecham as salas de Elite. Pagam mais Essência e experiência.", gold),
+            }, 74);
+            Column(1130, "REAÇÕES", new (string, string, Color)[]
+            {
+                ("Vapor · Fogo + Água", "Nuvem: quem está dentro erra metade dos ataques.", Color.Lerp(ElementColors.Of(ElementType.Fire), ElementColors.Of(ElementType.Water), 0.5f)),
+                ("Magma · Fogo + Terra", "Poça de lava que queima por 4 segundos.", Color.Lerp(ElementColors.Of(ElementType.Fire), ElementColors.Of(ElementType.Earth), 0.5f)),
+                ("Tempestade de Fogo · Fogo + Ar", "A maior explosão; deixa todos Queimando.", Color.Lerp(ElementColors.Of(ElementType.Fire), ElementColors.Of(ElementType.Air), 0.5f)),
+                ("Lama · Água + Terra", "Enraíza e encharca: ninguém sai do lugar.", Color.Lerp(ElementColors.Of(ElementType.Water), ElementColors.Of(ElementType.Earth), 0.5f)),
+                ("Nevasca · Água + Ar", "Congela; o próximo golpe estilhaça com +30%.", Color.Lerp(ElementColors.Of(ElementType.Water), ElementColors.Of(ElementType.Air), 0.5f)),
+                ("Estilhaços · Terra + Ar", "Lascas em área grande que empurram longe.", Color.Lerp(ElementColors.Of(ElementType.Earth), ElementColors.Of(ElementType.Air), 0.5f)),
+            }, 80);
+            UiKit.Text(UiKit.Rect("Hint", box, new Vector2(0.5f, 0), new Vector2(0, 112), new Vector2(1500, 30)),
+                "Uma skill marca o inimigo; a skill de outro elemento detona a reação. O golpe básico não tem elemento.", 20, UiKit.Dim, TextAnchor.MiddleCenter, false);
         }
 
         public void ShowCredits()
@@ -247,13 +298,14 @@ namespace Quintessence.UI
                 UiKit.Image(UiKit.Rect("Rule", card, new Vector2(0.5f, 1), new Vector2(0, -148), new Vector2(72, 4)), null, Color.Lerp(c, UiKit.Cream, 0.2f));
                 UiKit.Text(UiKit.Rect("Note", card, new Vector2(0.5f, 0), new Vector2(0, 12), new Vector2(240, 58)), notes[i], 21, UiKit.Paper, TextAnchor.MiddleCenter, false);
             }
-            var open = UiKit.Button(root, "REFÚGIO", new Vector2(0.5f, 0), new Vector2(-330, 74), new Vector2(400, 58), UiKit.Primary, () => ShowRefuge(true));
+            var open = UiKit.Button(root, "REFÚGIO", new Vector2(0.5f, 0), new Vector2(-440, 74), new Vector2(360, 58), UiKit.Primary, () => ShowRefuge(true));
             void Small(string label, float x, Action act) =>
                 UiKit.Button(root, label, new Vector2(0.5f, 0), new Vector2(x, 74), new Vector2(200, 58), UiKit.Secondary, act)
                     .transform.Find("Label").GetComponent<UnityEngine.UI.Text>().fontSize = 26;
-            Small("TREINO", -10, () => OnTutorial?.Invoke());
-            Small("OPÇÕES", 210, ShowOptions);
-            Small("CRÉDITOS", 430, ShowCredits);
+            Small("GRIMÓRIO", -140, ShowGrimoire);
+            Small("TREINO", 80, () => OnTutorial?.Invoke());
+            Small("OPÇÕES", 300, ShowOptions);
+            Small("CRÉDITOS", 520, ShowCredits);
             refugeLabel = open.transform.Find("Label").GetComponent<UnityEngine.UI.Text>();
             refugeLabel.fontSize = 26;
             refuge = UiKit.Stretch("Refuge", root);

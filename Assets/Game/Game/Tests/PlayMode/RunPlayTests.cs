@@ -84,6 +84,10 @@ namespace Quintessence.Game.PlayTests
             menu.ShowCredits();
             yield return null; yield return null;
             Shot(Camera.main, "docs/img/creditos.png");
+            menu.ShowGrimoire();
+            yield return null; yield return null;
+            Assert.IsTrue(menu.SheetOpen);
+            Shot(Camera.main, "docs/img/grimorio.png");
 
             menu.OnPick(ElementType.Water);
             for (int i = 0; i < 30 && SceneManager.GetActiveScene().name != GameFlow.RunScene; i++) yield return null;
