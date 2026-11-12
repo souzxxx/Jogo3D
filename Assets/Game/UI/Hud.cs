@@ -383,7 +383,8 @@ namespace Quintessence.UI
             {
                 tipRoot = UiKit.Box("Tip", canvas.transform, new Vector2(0.5f, 0), new Vector2(0, 330), new Vector2(1100, 54), 0.85f);
                 UiKit.Image(UiKit.Rect("Mark", tipRoot, new Vector2(0, 0.5f), new Vector2(14, 0), new Vector2(30, 30)), UiKit.Icon("boon_skill"), new Color(0.9f, 0.76f, 0.42f));
-                tipText = UiKit.Text(UiKit.Rect("Text", tipRoot, new Vector2(0.5f, 0.5f), new Vector2(18, 0), new Vector2(1040, 46)), "", 24, UiKit.Cream, TextAnchor.MiddleCenter, false);
+                tipText = UiKit.Text(UiKit.Rect("Text", tipRoot, new Vector2(0.5f, 0.5f), new Vector2(24, 0), new Vector2(1020, 46)), "", 24, UiKit.Cream, TextAnchor.MiddleCenter, false);
+                tipText.resizeTextForBestFit = true; tipText.resizeTextMinSize = 16; tipText.resizeTextMaxSize = 24;
             }
             LastTip = text;
             tipText.text = text;

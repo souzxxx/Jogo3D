@@ -20,6 +20,9 @@ namespace Quintessence.Game
         [SerializeField] GameObject bomberPrefab;
         [SerializeField] GameObject bossPrefab;
         [SerializeField] GameObject chargerPrefab;
+        [SerializeField] GameObject swarmPrefab;
+        [SerializeField] GameObject emberPrefab;
+        [SerializeField] GameObject sentinelPrefab;
         [SerializeField] GameObject miniBossPrefab;
         [Tooltip("Segundo chefe final; a run sorteia entre ele e o Guardiao pela semente.")]
         [SerializeField] GameObject weaverPrefab;
@@ -92,6 +95,7 @@ namespace Quintessence.Game
         }
 
         public void BindMiniBoss(GameObject prefab) => miniBossPrefab = prefab;
+        public void BindElementals(GameObject swarm, GameObject ember, GameObject sentinel) { swarmPrefab = swarm; emberPrefab = ember; sentinelPrefab = sentinel; }
         public void BindWeaver(GameObject prefab) => weaverPrefab = prefab;
 
         /// O chefe final desta run: semente par traz a Tecela das Cinzas, impar o Guardiao.
@@ -232,6 +236,12 @@ namespace Quintessence.Game
             GameEvents.Died += OnDied;
             GameEvents.BossSpawned += OnBossSpawned;
             GameEvents.ElementAwakened += OnAwakened;
+            GameEvents.EnemySpawned += OnEnemySpawned;
+        }
+
+        void OnEnemySpawned(Health enemy)
+        {
+            if (enemy != null && enemy.TryGetComponent(out ElementalAffinity _)) Tip("affinity");
         }
 
         void OnAwakened(ElementType e)
@@ -276,6 +286,7 @@ namespace Quintessence.Game
             GameEvents.Died -= OnDied;
             GameEvents.BossSpawned -= OnBossSpawned;
             GameEvents.ElementAwakened -= OnAwakened;
+            GameEvents.EnemySpawned -= OnEnemySpawned;
         }
 
         void Start()
@@ -559,6 +570,9 @@ namespace Quintessence.Game
                 if (p.Charger > 0 && chargerPrefab != null) w.entries.Add(new WaveEntry { prefab = chargerPrefab, count = p.Charger });
                 if (p.Lobber > 0 && lobberPrefab != null) w.entries.Add(new WaveEntry { prefab = lobberPrefab, count = p.Lobber });
                 if (p.Shaman > 0 && shamanPrefab != null) w.entries.Add(new WaveEntry { prefab = shamanPrefab, count = p.Shaman });
+                if (p.Swarm > 0 && swarmPrefab != null) w.entries.Add(new WaveEntry { prefab = swarmPrefab, count = p.Swarm });
+                if (p.Ember > 0 && emberPrefab != null) w.entries.Add(new WaveEntry { prefab = emberPrefab, count = p.Ember });
+                if (p.Sentinel > 0 && sentinelPrefab != null) w.entries.Add(new WaveEntry { prefab = sentinelPrefab, count = p.Sentinel });
                 if (p.MiniBoss > 0 && miniBossPrefab != null) w.entries.Add(new WaveEntry { prefab = miniBossPrefab, count = p.MiniBoss });
                 if (p.Boss > 0) w.entries.Add(new WaveEntry { prefab = WeaverRun ? weaverPrefab : bossPrefab != null ? bossPrefab : brutePrefab, count = p.Boss });
                 waves.Add(w);

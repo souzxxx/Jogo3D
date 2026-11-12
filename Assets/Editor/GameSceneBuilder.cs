@@ -61,6 +61,8 @@ public static class GameSceneBuilder
         director.Bind(melee, ranged, brute, bomber, flat);
         EnemyDevSceneBuilder.ExtraPrefabs(out var charger, out var lobber, out var shaman);
         director.BindExtraEnemies(charger, lobber, shaman);
+        EnemyDevSceneBuilder.ElementalPrefabs(out var swarm, out var ember, out var sentinel);
+        director.BindElementals(swarm, ember, sentinel);
         const string catalogPath = "Assets/Game/Run/Data/Boons.asset";
         var catalog = AssetDatabase.LoadAssetAtPath<Quintessence.Run.BoonCatalog>(catalogPath);
         if (catalog == null)

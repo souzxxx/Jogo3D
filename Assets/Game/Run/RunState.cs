@@ -114,11 +114,14 @@ namespace Quintessence.Run
     {
         public struct WavePlan
         {
-            public int Melee, Ranged, Brute, Bomber, Boss, Charger, Lobber, Shaman, MiniBoss;
-            public int Total => Melee + Ranged + Brute + Bomber + Boss + Charger + Lobber + Shaman + MiniBoss;
+            public int Melee, Ranged, Brute, Bomber, Boss, Charger, Lobber, Shaman, MiniBoss, Swarm, Ember, Sentinel;
+            public int Total => Melee + Ranged + Brute + Bomber + Boss + Charger + Lobber + Shaman + MiniBoss + Swarm + Ember + Sentinel;
         }
 
         public const int MiniBossDepth = 5;
+
+        /// Tamanho do bando de Cinzentos: nenhum nas duas primeiras salas, depois 3 e, do meio em diante, 4.
+        public static int SwarmSize(int depth) => depth < 2 ? 0 : depth < 5 ? 3 : 4;
 
         public static List<WavePlan> Plan(RoomType type, int depth)
         {
@@ -127,7 +130,8 @@ namespace Quintessence.Run
             {
                 case RoomType.Combat:
                     // os tipos novos entram aos poucos: Ceifador na segunda sala, Arremessador na quarta, Xama na quinta
-                    waves.Add(new WavePlan { Melee = 2 + depth / 2 - (depth >= 1 ? 1 : 0), Charger = depth >= 1 ? 1 + depth / 6 : 0, Bomber = depth >= 2 ? 1 + depth / 5 : 0 });
+                    // Cinzentos chegam em bando da terceira sala em diante
+                    waves.Add(new WavePlan { Melee = 2 + depth / 2 - (depth >= 1 ? 1 : 0), Charger = depth >= 1 ? 1 + depth / 6 : 0, Bomber = depth >= 2 ? 1 + depth / 5 : 0, Swarm = SwarmSize(depth) });
                     waves.Add(new WavePlan
                     {
                         Melee = 2 + depth / 3, Ranged = depth >= 1 ? 1 + depth / 3 - (depth >= 3 ? 1 : 0) : 0, Brute = depth >= 3 ? 1 : 0,
@@ -137,7 +141,7 @@ namespace Quintessence.Run
                     if (depth >= 5) waves.Add(new WavePlan { Melee = 1 + depth / 4, Ranged = 1, Charger = 1, Bomber = depth >= 7 ? 1 : 0 });
                     break;
                 case RoomType.Elite:
-                    waves.Add(new WavePlan { Melee = 1 + depth / 2, Ranged = 1, Bomber = 1, Charger = 1 });
+                    waves.Add(new WavePlan { Melee = 1 + depth / 2, Ranged = 1, Bomber = 1, Charger = 1, Swarm = SwarmSize(depth) });
                     // a primeira Elite chega com 1 ou 2 elementos: o Xama so entra da sexta sala em diante
                     waves.Add(new WavePlan { Melee = 2 + depth / 3, Ranged = 1 + depth / 3, Brute = 1, Shaman = depth >= 5 ? 1 : 0 });
                     // da sexta sala em diante a Elite fecha com o Carrasco no lugar do Bruto
@@ -160,9 +164,14 @@ namespace Quintessence.Run
             for (int i = 0; i < waves.Count; i++)
             {
                 var w = waves[i];
-                if (w.Melee < 2) continue;
-                if (biome == Biome.Crypt) { w.Melee--; if (i % 2 == 0) w.Ranged++; else w.Lobber++; }
-                else if (biome == Biome.Garden) { w.Melee--; if (i % 2 == 0) w.Charger++; else w.Brute++; }
+                if (w.Melee >= 2)
+                {
+                    if (biome == Biome.Crypt) { w.Melee--; if (i % 2 == 0) w.Ranged++; else w.Lobber++; }
+                    else if (biome == Biome.Garden) { w.Melee--; if (i % 2 == 0) w.Charger++; else w.Brute++; }
+                }
+                // os elementais do trecho: Brasa Viva nos Saloes de Cinza, Sentinela de Pedra no Jardim
+                if (i == 1 && biome == Biome.Ashes && depth >= 1 && w.Melee >= 1) { w.Melee--; w.Ember++; }
+                if (i == 1 && biome == Biome.Garden && w.Ranged >= 1) { w.Ranged--; w.Sentinel++; }
                 waves[i] = w;
             }
             return waves;

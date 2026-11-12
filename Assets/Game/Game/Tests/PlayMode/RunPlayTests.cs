@@ -707,6 +707,64 @@ namespace Quintessence.Game.PlayTests
         }
 
         [UnityTest, Timeout(600000)]
+        public IEnumerator Elementals_And_The_Swarm()
+        {
+            GameEvents.Clear();
+            Time.timeScale = 1f;
+            Time.captureFramerate = 30;
+            GameFlow.StartElement = ElementType.Water;
+            GameFlow.Seed = 3; GameFlow.Layers = 5; GameFlow.Shrines = 1;
+            yield return EditorSceneManager.LoadSceneAsyncInPlayMode("Assets/Scenes/Run.unity", new LoadSceneParameters(LoadSceneMode.Single));
+            yield return null;
+            yield return null;
+            var director = Object.FindFirstObjectByType<RunDirector>();
+            var hud = Object.FindFirstObjectByType<Hud>();
+            cam = Camera.main;
+            hud.UseCamera(cam);
+            Object.FindFirstObjectByType<WaveSpawner>().enabled = false;
+            for (int k = 0; k < 2000 && director.Busy; k++) yield return null;
+            director.ApplyLayout(-1);
+            var hero = Object.FindFirstObjectByType<PlayerController>();
+            hero.GetComponent<Health>().Pool.Invulnerable = true;
+            hero.Teleport(new Vector3(0, 0.05f, -4f), Vector3.forward);
+            GameObject Load(string n) => UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Game/Enemies/Prefabs/" + n + ".prefab");
+            var ember = Object.Instantiate(Load("BrasaViva"), new Vector3(-3f, 0, 1f), Quaternion.Euler(0, 180, 0)).GetComponent<Health>();
+            var sentinel = Object.Instantiate(Load("Sentinela"), new Vector3(3.5f, 0, 2f), Quaternion.Euler(0, 200, 0)).GetComponent<Health>();
+            for (int i = 0; i < 3; i++) Object.Instantiate(Load("Cinzento"), new Vector3(-0.8f + i * 0.8f, 0, 3.5f), Quaternion.Euler(0, 180, 0));
+            for (int k = 0; k < 40; k++) yield return null;
+            StatusHolder.GetOrAdd(ember).Apply(StatusType.Rooted, 60f, Team.Player, hero.gameObject);
+            Assert.AreEqual(Tips.Text("affinity"), hud.LastTip, "o primeiro elemental traz a dica de afinidade");
+
+            // Brasa Viva: resiste a Fogo, e fraca a Agua, nao queima
+            float full = ember.Current;
+            ember.TakeDamage(new DamageInfo(10f, ElementType.Fire, Team.Player, hero.gameObject));
+            Assert.AreEqual(full - 5f, ember.Current, 0.01f, "resiste ao Fogo");
+            ember.TakeDamage(new DamageInfo(10f, ElementType.Water, Team.Player, hero.gameObject));
+            Assert.AreEqual(full - 21f, ember.Current, 0.01f, "fraca a Agua");
+            StatusHolder.GetOrAdd(ember).Apply(StatusType.Burn, 3f, Team.Player, hero.gameObject);
+            Assert.IsFalse(ember.GetComponent<StatusHolder>().State.Has(StatusType.Burn));
+
+            // Sentinela: nao anda e nao e empurrada
+            var at = sentinel.transform.position;
+            sentinel.TakeDamage(new DamageInfo(1f, ElementType.None, Team.Player, hero.gameObject) { Direction = Vector3.forward, Knockback = 20f });
+            for (int k = 0; k < 40; k++) yield return null;
+            Assert.Less(Vector3.Distance(at, sentinel.transform.position), 0.3f, "a Sentinela fica onde esta");
+            Assert.Less(Object.FindObjectsByType<EnemyBrain>(FindObjectsSortMode.None).First(e => e.Definition.displayName == "Cinzento").transform.Find("Model").lossyScale.x, 0.8f, "Cinzento e pequeno");
+
+            hud.ShowBanner("", "", Color.clear, 0.01f);
+            for (int k = 0; k < 3; k++) yield return null;
+            Shot(cam, "docs/img/inimigos_elementais.png");
+
+            // morta, a Brasa estoura num circulo avisado
+            ember.TakeDamage(new DamageInfo(9999f, ElementType.Water, Team.Player, hero.gameObject));
+            yield return null;
+            Assert.IsNotNull(Object.FindFirstObjectByType<VolatileBurst>(), "a Brasa Viva estoura ao morrer");
+            GameFlow.StartElement = ElementType.Fire;
+            GameFlow.Layers = 8; GameFlow.Shrines = 3;
+            Time.captureFramerate = 0;
+        }
+
+        [UnityTest, Timeout(600000)]
         public IEnumerator Third_Skill_On_Magma_Makes_A_Fusion()
         {
             GameEvents.Clear();

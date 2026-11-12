@@ -59,5 +59,20 @@ namespace Quintessence.Run.Tests
             Assert.Greater(Ranged(Biome.Crypt), Ranged(Biome.Ashes), "a Cripta tem mais quem ataca de longe");
             Assert.Greater(Heavy(Biome.Garden), Heavy(Biome.Ashes), "o Jardim tem mais quem bate pesado");
         }
+
+        [Test] public void ElementalsBelongToTheirBiome_AndSwarmsComeFromTheThirdRoom()
+        {
+            int Count(Biome b, int d, System.Func<EncounterPlanner.WavePlan, int> f) => EncounterPlanner.Plan(RoomType.Combat, d, b).Sum(f);
+            Assert.Greater(Count(Biome.Ashes, 2, w => w.Ember), 0, "Brasa Viva nos Saloes de Cinza");
+            Assert.AreEqual(0, Count(Biome.Crypt, 4, w => w.Ember));
+            Assert.Greater(Count(Biome.Garden, 7, w => w.Sentinel), 0, "Sentinela no Jardim de Pedra");
+            Assert.AreEqual(0, Count(Biome.Ashes, 2, w => w.Sentinel));
+            Assert.AreEqual(0, EncounterPlanner.Plan(RoomType.Combat, 1).Sum(w => w.Swarm), "sem bando nas duas primeiras salas");
+            Assert.AreEqual(3, EncounterPlanner.Plan(RoomType.Combat, 2).Sum(w => w.Swarm));
+            foreach (Biome b in System.Enum.GetValues(typeof(Biome)))
+                for (int d = 0; d < 10; d++)
+                    foreach (var w in EncounterPlanner.Plan(RoomType.Combat, d, b))
+                        Assert.IsTrue(w.Melee >= 0 && w.Ranged >= 0, "nenhuma contagem negativa");
+        }
     }
 }

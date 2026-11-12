@@ -186,8 +186,11 @@ namespace Quintessence.UI
                 ("Ceifador", "Avisa uma linha e atravessa a sala. Saia e bata na volta.", foe),
                 ("Arremessador", "Joga a bomba onde você está. Saia do círculo.", foe),
                 ("Xamã", "Cura os aliados feridos (aviso verde). Derrube primeiro.", foe),
+                ("Cinzentos", "Bando pequeno e rápido. Skills de área resolvem.", foe),
+                ("Brasa Viva", "Elemental de Fogo: fraca a Água, estoura ao morrer.", foe),
+                ("Sentinela de Pedra", "Torre parada de Terra: fraca a Ar, não é empurrada.", foe),
                 ("Campeão, Carrasco e chefes", "Fecham as Elites. No fim: o Guardião (corpo a corpo) ou a Tecelã (de longe).", gold),
-            }, 74);
+            }, 58);
             Column(1130, "REAÇÕES", new (string, string, Color)[]
             {
                 ("Vapor · Fogo + Água", "Nuvem: quem está dentro erra metade dos ataques.", Color.Lerp(ElementColors.Of(ElementType.Fire), ElementColors.Of(ElementType.Water), 0.5f)),
