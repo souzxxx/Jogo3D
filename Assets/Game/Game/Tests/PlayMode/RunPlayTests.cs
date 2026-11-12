@@ -662,6 +662,8 @@ namespace Quintessence.Game.PlayTests
             // Clarividencia (Refugio): a escolha passa a mostrar quatro talentos, e a tecla 4 escolhe o quarto
             MetaStore.Current.AddShards(100);
             Assert.IsTrue(MetaStore.Current.TryBuy(MetaUpgrade.Clarity));
+            Assert.AreEqual(3, director.Run.TalentChoices, "comprada com a run em andamento, so vale na proxima");
+            director.Run.TalentChoices = MetaStore.Current.TalentChoices; // como numa run nova
             director.Run.Progress.AddXp(director.Run.Progress.XpToNext);
             for (int k = 0; k < 10 && !director.LevelUpOpen; k++) yield return null;
             Assert.AreEqual(4, director.TalentOffer.Count, "quatro opcoes com a Clarividencia");
@@ -1382,6 +1384,20 @@ namespace Quintessence.Game.PlayTests
             }
             for (int k = 0; k < 10; k++) yield return null;
             Assert.IsTrue(crystal == null, "o cristal some");
+
+            // a mesma reacao em dois alvos lado a lado deixa um lamacal so (senao a skill seguinte faria duas Fusoes)
+            var table = UnityEditor.AssetDatabase.LoadAssetAtPath<ReactionTable>("Assets/Game/Combat/Data/Reactions.asset");
+            var c = Object.Instantiate(Load("Rastejante"), new Vector3(3f, 0, 2f), Quaternion.identity).GetComponent<Health>();
+            var d = Object.Instantiate(Load("Rastejante"), new Vector3(4f, 0, 2f), Quaternion.identity).GetComponent<Health>();
+            yield return null; yield return null;
+            c.GetComponent<EnemyBrain>().enabled = false; d.GetComponent<EnemyBrain>().enabled = false;
+            foreach (var h in new[] { c, d })
+            {
+                ElementCombat.Deliver(h, new DamageInfo(1f, ElementType.Water, Team.Player, hero.gameObject), table);
+                ElementCombat.Deliver(h, new DamageInfo(1f, ElementType.Earth, Team.Player, hero.gameObject), table);
+            }
+            Assert.AreEqual(1, DamageZone.Active.Count(z => z != null && z.Fusable && ((z.PairA == ElementType.Water && z.PairB == ElementType.Earth) || (z.PairA == ElementType.Earth && z.PairB == ElementType.Water))),
+                "um lamacal so para os dois");
             GameFlow.Layers = 8; GameFlow.Shrines = 3;
             Time.captureFramerate = 0;
         }

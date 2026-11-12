@@ -32,6 +32,8 @@ namespace Quintessence.Game
         public string modifiers = "";
         /// Sala cuja Provacao ja foi perdida (-1 = nenhuma): continuar nao reabre o desafio.
         public int trialLost = -1;
+        /// Opcoes por escolha de talento da run (0 em save antigo = 3).
+        public int talentChoices;
 
         public string Summary => $"{HeroPassives.HeroName((ElementType)hero)} · sala {depth + 1}/{layers}" + (ascension > 0 ? $" · Ascensão {ascension}" : "");
     }

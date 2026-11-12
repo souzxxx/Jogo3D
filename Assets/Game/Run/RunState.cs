@@ -53,6 +53,8 @@ namespace Quintessence.Run
         public static string Roman(int rank) => rank switch { 1 => "I", 2 => "II", 3 => "III", _ => rank.ToString() };
         /// Trocas de oferta de talento que ainda restam nesta run.
         public int Rerolls;
+        /// Opcoes por escolha de talento nesta run (Clarividencia comprada antes dela). Fica gravado no save.
+        public int TalentChoices = 3;
 
         public void AddBoon(Boon b) { Boons.Add(b); BoonIds.Add(b.id); }
 

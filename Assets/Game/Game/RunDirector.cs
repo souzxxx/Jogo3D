@@ -596,6 +596,7 @@ namespace Quintessence.Game
             ApplyMaxHealth();
             Run.AddEssence(MetaStore.Current.StartEssence + Mastery.StartEssence(mastery));
             Run.Rerolls = MetaStore.Current.Rerolls + Mastery.ExtraRerolls(mastery);
+            Run.TalentChoices = MetaStore.Current.TalentChoices;
             for (int i = 0; i < Mastery.StartTalents(mastery); i++) { Run.Progress.GrantPick(); masteryPicks++; }
             hud.SetEssence(Run.Essence);
             if (GameFlow.Resume != null)
@@ -628,7 +629,7 @@ namespace Quintessence.Game
             {
                 hero = (int)GameFlow.StartElement, seed = GameFlow.Seed, layers = GameFlow.Layers, shrines = GameFlow.Shrines, ascension = GameFlow.Ascension,
                 current = Run.Current.Id, depth = Run.Depth, visited = new List<int>(Run.Visited).ToArray(),
-                essence = Run.Essence, roomsCleared = Run.RoomsCleared, kills = Run.Kills, rerolls = Run.Rerolls, pacts = PactsTaken,
+                essence = Run.Essence, roomsCleared = Run.RoomsCleared, kills = Run.Kills, rerolls = Run.Rerolls, pacts = PactsTaken, talentChoices = Run.TalentChoices,
                 ranks = (int[])Run.SkillRank.Clone(),
                 level = Run.Progress.Level, xp = Run.Progress.Xp, pending = Run.Progress.PendingPicks, totalXp = Run.Progress.TotalXp,
                 health = playerHealth.Current, maxHealth = playerHealth.Max, baseMaxHealth = baseMaxHealth, curse = playerHealth.Pool.CurseMultiplier,
@@ -668,6 +669,7 @@ namespace Quintessence.Game
             Run.Restore(s.current, s.visited, s.essence, s.roomsCleared);
             Run.Kills = s.kills;
             Run.Rerolls = s.rerolls;
+            Run.TalentChoices = s.talentChoices >= 3 ? s.talentChoices : 3; // save antigo: 3
             for (int i = 0; i < Run.SkillRank.Length && i < s.ranks.Length; i++) Run.SkillRank[i] = Mathf.Clamp(s.ranks[i], 1, RunState.MaxSkillRank);
             Run.Progress.Restore(s.level, s.xp, s.pending, s.totalXp);
             // a escolha da maestria so continua pendente se o save e da primeira sala e ela ainda nao foi usada
@@ -1192,7 +1194,7 @@ namespace Quintessence.Game
         void OpenLevelUp()
         {
             talentRng = TalentRng();
-            talentOffer = TalentCatalog.Offer(Run.Talents, player.Loadout.Awakened, talentRng, MetaStore.Current.TalentChoices);
+            talentOffer = TalentCatalog.Offer(Run.Talents, player.Loadout.Awakened, talentRng, Run.TalentChoices);
             if (talentOffer.Count == 0) { while (Run.Progress.ConsumePick()) { } masteryPicks = 0; return; }
             if (GameFlow.AutoPickTalents) { PickTalent(0); return; }
             levelUpOpen = true;
@@ -1207,7 +1209,7 @@ namespace Quintessence.Game
         {
             if (!levelUpOpen || Run.Rerolls <= 0) return;
             Run.Rerolls--;
-            var fresh = TalentCatalog.Offer(Run.Talents, player.Loadout.Awakened, TalentRng(), MetaStore.Current.TalentChoices);
+            var fresh = TalentCatalog.Offer(Run.Talents, player.Loadout.Awakened, TalentRng(), Run.TalentChoices);
             if (fresh.Count == 0) { Run.Rerolls++; return; }
             talentOffer = fresh;
             Sfx.Play("ui_click");
