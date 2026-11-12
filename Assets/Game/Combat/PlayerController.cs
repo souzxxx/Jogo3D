@@ -133,6 +133,7 @@ namespace Quintessence.Combat
 
         void OnDisable()
         {
+            ElementMark.SpreadRadius = 0f;
             GameEvents.ReactionTriggered -= OnReaction;
             GameEvents.QuintessenceCharge -= OnCharge;
             GameEvents.HitBlocked -= OnBlocked;
@@ -263,6 +264,7 @@ namespace Quintessence.Combat
         {
             if (health.IsDead || Input == null) return;
             // pausado (menu, inventario, escolha de talento) ou no quadro em que a pausa saiu: nenhum comando vira acao
+            ElementMark.SpreadRadius = mods.MarkSpread; // Contagio: as marcas dos inimigos leem daqui
             if (GameClock.Paused || Time.frameCount == GameClock.ResumedFrame) { dashBuffer = skillBuffer = 0f; return; }
             float dt = Time.deltaTime;
             for (int i = 0; i < skillCd.Length; i++) if (skillCd[i] > 0f) skillCd[i] -= dt;
@@ -458,7 +460,7 @@ namespace Quintessence.Combat
                 var to = z.transform.position - origin; to.y = 0f;
                 if (to.magnitude > reach + z.Radius * 0.6f) continue;
                 if (arc < 359f && to.sqrMagnitude > 1f && Vector3.Angle(AimDirection, to) > arc * 0.5f + 15f) continue;
-                if (ElementCombat.Fuse(z, castElement, health.Team, gameObject, mods.ReactionPower)) Fusions++;
+                if (ElementCombat.Fuse(z, castElement, health.Team, gameObject, mods.ReactionPower * (1f + mods.FusionBonus))) Fusions++;
             }
         }
 
