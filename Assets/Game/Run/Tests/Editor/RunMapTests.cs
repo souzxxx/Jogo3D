@@ -146,5 +146,16 @@ namespace Quintessence.Run.Tests
                 for (int d = 0; d < 8; d++)
                     foreach (var w in EncounterPlanner.Plan(t, d)) Assert.Greater(w.Total, 0);
         }
+
+        [Test] public void MiniBoss_ClosesTheLateEliteRooms_Only()
+        {
+            for (int d = 0; d < 10; d++)
+            {
+                int mini = EncounterPlanner.Plan(RoomType.Elite, d).Sum(w => w.MiniBoss);
+                Assert.AreEqual(d >= EncounterPlanner.MiniBossDepth ? 1 : 0, mini, "Elite na camada " + d);
+                Assert.AreEqual(0, EncounterPlanner.Plan(RoomType.Combat, d).Sum(w => w.MiniBoss));
+                if (mini > 0) Assert.AreEqual(1, EncounterPlanner.Plan(RoomType.Elite, d)[^1].MiniBoss, "ele vem na ultima onda");
+            }
+        }
     }
 }

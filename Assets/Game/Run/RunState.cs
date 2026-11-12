@@ -84,9 +84,11 @@ namespace Quintessence.Run
     {
         public struct WavePlan
         {
-            public int Melee, Ranged, Brute, Bomber, Boss, Charger, Lobber, Shaman;
-            public int Total => Melee + Ranged + Brute + Bomber + Boss + Charger + Lobber + Shaman;
+            public int Melee, Ranged, Brute, Bomber, Boss, Charger, Lobber, Shaman, MiniBoss;
+            public int Total => Melee + Ranged + Brute + Bomber + Boss + Charger + Lobber + Shaman + MiniBoss;
         }
+
+        public const int MiniBossDepth = 5;
 
         public static List<WavePlan> Plan(RoomType type, int depth)
         {
@@ -107,7 +109,9 @@ namespace Quintessence.Run
                 case RoomType.Elite:
                     waves.Add(new WavePlan { Melee = 1 + depth / 2, Ranged = 1, Bomber = 1, Charger = 1 });
                     waves.Add(new WavePlan { Melee = 2 + depth / 3, Ranged = 1 + depth / 3, Brute = 1, Shaman = 1 });
-                    waves.Add(new WavePlan { Melee = 2, Ranged = 1 + depth / 4, Brute = 1 + depth / 5, Bomber = 2, Lobber = 1 });
+                    // da sexta sala em diante a Elite fecha com o Carrasco no lugar do Bruto
+                    if (depth >= MiniBossDepth) waves.Add(new WavePlan { Melee = 2, Ranged = 1 + depth / 4, Bomber = 2, Lobber = 1, MiniBoss = 1 });
+                    else waves.Add(new WavePlan { Melee = 2, Ranged = 1 + depth / 4, Brute = 1 + depth / 5, Bomber = 2, Lobber = 1 });
                     break;
                 case RoomType.Boss: // o Guardiao das Cinzas chama os proprios reforcos
                     waves.Add(new WavePlan { Boss = 1 });

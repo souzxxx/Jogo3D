@@ -20,6 +20,7 @@ namespace Quintessence.Game
         [SerializeField] GameObject bomberPrefab;
         [SerializeField] GameObject bossPrefab;
         [SerializeField] GameObject chargerPrefab;
+        [SerializeField] GameObject miniBossPrefab;
         [SerializeField] GameObject lobberPrefab;
         [SerializeField] GameObject shamanPrefab;
         [SerializeField] Material flatMaterial;
@@ -77,6 +78,8 @@ namespace Quintessence.Game
         {
             meleePrefab = melee; rangedPrefab = ranged; brutePrefab = brute; bomberPrefab = bomber; flatMaterial = flat;
         }
+
+        public void BindMiniBoss(GameObject prefab) => miniBossPrefab = prefab;
 
         public void BindExtraEnemies(GameObject charger, GameObject lobber, GameObject shaman)
         {
@@ -368,7 +371,7 @@ namespace Quintessence.Game
                 Feel.DamageNumber.Spawn(player.transform.position + Vector3.up * 3.6f,
                     $"ELITE {DifficultyCurve.Name(trait).ToUpperInvariant()}: {DifficultyCurve.Describe(trait)}", new Color(0.86f, 0.62f, 0.34f), 1f, 2.6f);
             }
-            spawner.Champion = type == RoomType.Elite;
+            spawner.Champion = type == RoomType.Elite && depth < EncounterPlanner.MiniBossDepth;
             spawner.Run(BuildWaves(EncounterPlanner.Plan(type, depth, Run != null ? Biomes.For(depth, Run.Map.LayerCount) : Biome.Ashes)));
         }
 
@@ -396,6 +399,7 @@ namespace Quintessence.Game
                 if (p.Charger > 0 && chargerPrefab != null) w.entries.Add(new WaveEntry { prefab = chargerPrefab, count = p.Charger });
                 if (p.Lobber > 0 && lobberPrefab != null) w.entries.Add(new WaveEntry { prefab = lobberPrefab, count = p.Lobber });
                 if (p.Shaman > 0 && shamanPrefab != null) w.entries.Add(new WaveEntry { prefab = shamanPrefab, count = p.Shaman });
+                if (p.MiniBoss > 0 && miniBossPrefab != null) w.entries.Add(new WaveEntry { prefab = miniBossPrefab, count = p.MiniBoss });
                 if (p.Boss > 0) w.entries.Add(new WaveEntry { prefab = bossPrefab != null ? bossPrefab : brutePrefab, count = p.Boss });
                 waves.Add(w);
             }

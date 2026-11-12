@@ -679,6 +679,63 @@ namespace Quintessence.Game.PlayTests
         }
 
         [UnityTest, Timeout(600000)]
+        public IEnumerator MiniBoss_Has_Phases_But_No_Shield()
+        {
+            GameEvents.Clear();
+            Time.timeScale = 1f;
+            Time.captureFramerate = 30;
+            GameFlow.StartElement = ElementType.Earth;
+            GameFlow.Seed = 3; GameFlow.Layers = 5; GameFlow.Shrines = 1;
+            yield return EditorSceneManager.LoadSceneAsyncInPlayMode("Assets/Scenes/Run.unity", new LoadSceneParameters(LoadSceneMode.Single));
+            yield return null;
+            yield return null;
+            var director = Object.FindFirstObjectByType<RunDirector>();
+            var hud = Object.FindFirstObjectByType<Hud>();
+            cam = Camera.main;
+            hud.UseCamera(cam);
+            Object.FindFirstObjectByType<WaveSpawner>().enabled = false;
+            for (int k = 0; k < 2000 && director.Busy; k++) yield return null;
+            var hero = Object.FindFirstObjectByType<PlayerController>();
+            hero.GetComponent<Health>().Pool.Invulnerable = true;
+            hero.Teleport(new Vector3(-1.2f, 0.05f, -2.2f), Vector3.forward);
+            director.ApplyLayout(-1);
+            director.PlaceBiomeProps(Biome.Garden, 2);
+            director.DressBiome(Biome.Garden);
+            string name = "";
+            GameEvents.BossSpawned += (_, n) => name = n;
+            var prefab = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Game/Enemies/Prefabs/Carrasco.prefab");
+            Assert.IsNotNull(prefab, "o Carrasco existe");
+            var mini = Object.Instantiate(prefab, new Vector3(2.6f, 0, 1.6f), Quaternion.Euler(0, 210, 0)).GetComponent<BossBrain>();
+            for (int k = 0; k < 45; k++) yield return null;
+            Assert.AreEqual("Carrasco", name, "ele se anuncia como chefe (barra no alto)");
+            Assert.IsNotNull(mini.transform.Find("Model").GetComponentInChildren<Renderer>());
+            var hp = mini.GetComponent<Health>();
+            Assert.Less(hp.Max, 400f, "mini-chefe: bem menos vida que o Guardiao");
+            // so para a foto: para o Carrasco onde esta e tira o letreiro do trecho da frente
+            mini.enabled = false;
+            hud.ShowBanner("", "", Color.clear, 0.01f);
+            for (int k = 0; k < 4; k++) yield return null;
+            Shot(cam, "docs/img/mini_chefe.png");
+            mini.enabled = true;
+            // leva ate a ultima fase: ela acelera mas nao levanta escudo
+            hp.TakeDamage(new DamageInfo(hp.Max * 0.75f, ElementType.None, Team.Player, hero.gameObject));
+            for (int k = 0; k < 30; k++) yield return null;
+            Assert.AreEqual(2, mini.Phase, "terceira fase");
+            Assert.IsFalse(mini.Shield.Up, "o Carrasco nao tem o escudo da Quintessencia");
+            float before = hp.Current;
+            hp.TakeDamage(new DamageInfo(5f, ElementType.None, Team.Player, hero.gameObject));
+            Assert.Less(hp.Current, before, "na ultima fase ele continua levando dano");
+            hp.TakeDamage(new DamageInfo(9999f, ElementType.None, Team.Player, hero.gameObject));
+            Assert.IsTrue(hp.IsDead);
+            // a morte de chefe tem uma pausa dramatica em tempo real (no teste ela dura centenas de quadros)
+            for (int k = 0; k < 3000 && Object.FindFirstObjectByType<BossBrain>() != null; k++) yield return null;
+            Assert.IsNull(Object.FindFirstObjectByType<BossBrain>(), "morto, ele some");
+            GameFlow.StartElement = ElementType.Fire;
+            GameFlow.Layers = 8; GameFlow.Shrines = 3;
+            Time.captureFramerate = 0;
+        }
+
+        [UnityTest, Timeout(600000)]
         public IEnumerator Hazards_Treasure_Pact_And_Biomes()
         {
             GameEvents.Clear();
