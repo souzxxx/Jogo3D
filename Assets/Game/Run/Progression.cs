@@ -105,14 +105,73 @@ namespace Quintessence.Run
             Taken.Add(t);
         }
 
+        /// Elemento e grau da Sintonia que o ultimo Take subiu (None/0 = nenhuma). Para a tela avisar.
+        public ElementType LastSynergy { get; private set; }
+        public int LastSynergyTier { get; private set; }
+
         public bool Take(Talent t, HeroModifiers mods)
         {
             if (!CanTake(t)) return false;
+            int beforeA = Synergy.Tier(this, t.Element), beforeB = Synergy.Tier(this, t.Second);
             ranks[t.Id] = Rank(t.Id) + 1;
             Taken.Add(t);
             TalentCatalog.Apply(mods, t);
+            LastSynergy = ElementType.None; LastSynergyTier = 0;
+            Raise(t.Element, beforeA, mods);
+            Raise(t.Second, beforeB, mods);
             return true;
         }
+
+        void Raise(ElementType e, int before, HeroModifiers mods)
+        {
+            if (e == ElementType.None) return;
+            int now = Synergy.Tier(this, e);
+            for (int tier = before + 1; tier <= now; tier++) Synergy.Apply(mods, e, tier);
+            if (now > before) { LastSynergy = e; LastSynergyTier = now; }
+        }
+    }
+
+    /// Sintonia: concentrar talentos de um elemento (os da skill e os de reacao que o envolvem) fortalece aquele elemento.
+    /// Grau 1 (3 pontos): skill +20% de dano. Grau 2 (5 pontos): tambem recarrega 15% mais rapido.
+    public static class Synergy
+    {
+        public const int Tier1 = 3, Tier2 = 5;
+        public const float DamageBonus = 0.2f, CooldownFactor = 0.85f;
+
+        public static int Points(TalentBook book, ElementType e)
+        {
+            if (book == null || e == ElementType.None) return 0;
+            int n = 0;
+            foreach (var t in book.Taken) if (t.Element == e || t.Second == e) n++;
+            return n;
+        }
+
+        public static int Tier(TalentBook book, ElementType e) => TierFor(Points(book, e));
+        public static int TierFor(int points) => points >= Tier2 ? 2 : points >= Tier1 ? 1 : 0;
+
+        public static void Apply(HeroModifiers m, ElementType e, int tier)
+        {
+            if (tier == 1) m.AddElementDamage(e, DamageBonus);
+            else if (tier == 2) m.ScaleSkillCooldown(e, CooldownFactor);
+        }
+
+        public static string ElementName(ElementType e) => e switch
+        {
+            ElementType.Fire => "Fogo", ElementType.Water => "Água", ElementType.Earth => "Terra", ElementType.Air => "Ar", _ => "",
+        };
+
+        /// O que o cartao do talento mostra: quantos pontos de Sintonia ele leva o elemento a ter, e ate onde.
+        public static string Hint(TalentBook book, Talent t)
+        {
+            var e = t.Element;
+            if (e == ElementType.None) return "";
+            int after = Points(book, e) + 1;
+            int goal = after <= Tier1 ? Tier1 : Tier2;
+            if (after > Tier2) return $"Sintonia de {ElementName(e)} completa";
+            return $"Sintonia de {ElementName(e)} {after}/{goal}" + (after == Tier1 || after == Tier2 ? "!" : "");
+        }
+
+        public static string Describe(int tier) => tier == 1 ? "skill +20% de dano" : tier == 2 ? "skill recarrega 15% mais rápido" : "";
     }
 
     public static class TalentCatalog

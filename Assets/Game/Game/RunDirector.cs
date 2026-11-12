@@ -1168,6 +1168,13 @@ namespace Quintessence.Game
             if (masteryPicks > 0) masteryPicks--;
             Run.Talents.Take(t, player.Modifiers);
             ApplyMaxHealth();
+            if (Run.Talents.LastSynergyTier > 0)
+            {
+                var se = Run.Talents.LastSynergy;
+                Feel.DamageNumber.Spawn(player.transform.position + Vector3.up * 4.4f, $"SINTONIA DE {Synergy.ElementName(se).ToUpperInvariant()}: {Synergy.Describe(Run.Talents.LastSynergyTier)}",
+                    Color.Lerp(ElementColors.Of(se), Color.white, 0.3f), 1.05f, 2.4f);
+                Sfx.Play("feat");
+            }
             Sfx.Play("pickup");
             if (levelUpOpen)
             {

@@ -206,5 +206,39 @@ namespace Quintessence.Run.Tests
             TalentCatalog.Apply(m, TalentCatalog.All.First(t => t.Id == "body_alchemy"));
             Assert.AreEqual(0.4f, m.FusionBonus, 1e-4f);
         }
+
+        [Test] public void Synergy_ThreeAndFivePointsOfAnElement_StrengthenIt()
+        {
+            var book = new TalentBook();
+            var m = new HeroModifiers();
+            Talent T(string id) => TalentCatalog.All.First(t => t.Id == id);
+            book.Take(T("fire_trail"), m);
+            book.Take(T("fire_range"), m);
+            Assert.AreEqual(0, book.LastSynergyTier);
+            Assert.AreEqual(1f, m.Damage(ElementType.Fire), 1e-4f);
+            Assert.AreEqual("Sintonia de Fogo 3/3!", Synergy.Hint(book, T("fire_burning")), "o cartao avisa que este fecha a Sintonia");
+            book.Take(T("fire_burning"), m);
+            Assert.AreEqual(ElementType.Fire, book.LastSynergy);
+            Assert.AreEqual(1, book.LastSynergyTier);
+            Assert.AreEqual(1f + Synergy.DamageBonus, m.Damage(ElementType.Fire), 1e-4f, "grau 1: +20% no Fogo");
+            Assert.AreEqual(1f, m.Damage(ElementType.Water), 1e-4f, "os outros elementos nao mudam");
+            // talento de reacao conta para os dois elementos do par
+            var steam = TalentCatalog.All.First(t => t.Effect == TalentEffect.ReactionBoost && ((t.Element == ElementType.Fire && t.Second == ElementType.Water) || (t.Element == ElementType.Water && t.Second == ElementType.Fire)));
+            book.Take(steam, m);
+            Assert.AreEqual(4, Synergy.Points(book, ElementType.Fire));
+            Assert.AreEqual(1, Synergy.Points(book, ElementType.Water));
+            float cdBefore = m.SkillCooldown(ElementType.Fire);
+            book.Take(T("fire_range"), m); // segundo grau do mesmo talento tambem conta
+            Assert.AreEqual(2, book.LastSynergyTier, "cinco pontos: grau 2");
+            Assert.AreEqual(cdBefore * Synergy.CooldownFactor, m.SkillCooldown(ElementType.Fire), 1e-4f);
+            Assert.AreEqual(1f + Synergy.DamageBonus, m.Damage(ElementType.Fire), 1e-4f, "o bonus de dano nao dobra");
+            // voltar de um save nao aplica de novo
+            var restored = new TalentBook();
+            var clean = new HeroModifiers();
+            foreach (var t in book.Taken) restored.Restore(t);
+            Assert.AreEqual(1f, clean.Damage(ElementType.Fire));
+            Assert.AreEqual(2, Synergy.Tier(restored, ElementType.Fire));
+            Assert.AreEqual("", Synergy.Hint(book, T("body_basic")), "talento de corpo nao entra na Sintonia");
+        }
     }
 }
