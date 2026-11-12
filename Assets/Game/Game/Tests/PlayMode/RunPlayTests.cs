@@ -1212,6 +1212,49 @@ namespace Quintessence.Game.PlayTests
             Time.captureFramerate = 0;
         }
 
+        [UnityTest, Timeout(300000)]
+        public IEnumerator Shade_Appears_Behind_The_Hero()
+        {
+            GameEvents.Clear();
+            Time.timeScale = 1f;
+            Time.captureFramerate = 30;
+            GameFlow.StartElement = ElementType.Water;
+            GameFlow.Seed = 3; GameFlow.Layers = 5; GameFlow.Shrines = 1;
+            yield return EditorSceneManager.LoadSceneAsyncInPlayMode("Assets/Scenes/Run.unity", new LoadSceneParameters(LoadSceneMode.Single));
+            yield return null;
+            yield return null;
+            var director = Object.FindFirstObjectByType<RunDirector>();
+            var hud = Object.FindFirstObjectByType<Hud>();
+            cam = Camera.main;
+            hud.UseCamera(cam);
+            Object.FindFirstObjectByType<WaveSpawner>().enabled = false;
+            for (int k = 0; k < 2000 && director.Busy; k++) yield return null;
+            director.ApplyLayout(-1);
+            var hero = Object.FindFirstObjectByType<PlayerController>();
+            var hp = hero.GetComponent<Health>();
+            hp.Pool.Invulnerable = true;
+            hero.Teleport(new Vector3(0, 0.05f, 0f), Vector3.forward);
+            var prefab = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Game/Enemies/Prefabs/Espectro.prefab");
+            Assert.IsNotNull(prefab, "o prefab do Espectro existe");
+            var shade = Object.Instantiate(prefab, new Vector3(0, 0, 7f), Quaternion.Euler(0, 180, 0)).GetComponent<EnemyBrain>();
+            Assert.AreEqual(EnemyAttackKind.Ambush, shade.Definition.attack);
+            int warned = 0;
+            Vector3 warnedAt = default;
+            GameEvents.TelegraphStarted += e => { if (e.Source == shade.gameObject) { warned++; warnedAt = e.Point; } };
+            for (int k = 0; k < 1500 && shade.Ambushes == 0; k++) yield return null;
+            Assert.Greater(warned, 0, "avisa antes de aparecer");
+            Assert.Greater(shade.Ambushes, 0, "aparece no circulo avisado");
+            var behind = warnedAt - hero.transform.position; behind.y = 0f;
+            Assert.Less(behind.magnitude, 2.6f, "o circulo fica colado no heroi");
+            Assert.Less(Vector3.Distance(shade.transform.position, warnedAt), 0.8f, "e ele surge ali");
+            hud.ShowBanner("", "", Color.clear, 0.01f);
+            hud.HideTip();
+            Shot(cam, "docs/img/inimigo_espectro.png");
+            GameFlow.StartElement = ElementType.Fire;
+            GameFlow.Layers = 8; GameFlow.Shrines = 3;
+            Time.captureFramerate = 0;
+        }
+
         [UnityTest, Timeout(600000)]
         public IEnumerator Elementals_And_The_Swarm()
         {

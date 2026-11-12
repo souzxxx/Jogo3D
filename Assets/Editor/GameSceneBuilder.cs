@@ -65,6 +65,7 @@ public static class GameSceneBuilder
         director.BindElementals(swarm, ember, sentinel);
         director.BindGuard(EnemyDevSceneBuilder.GuardPrefab());
         director.BindBanner(EnemyDevSceneBuilder.BannerPrefab());
+        director.BindShade(EnemyDevSceneBuilder.ShadePrefab());
         var drowned = EnemyDevSceneBuilder.DrownedPrefab();
         director.BindDrowned(drowned, PuddlePrefab());
         const string catalogPath = "Assets/Game/Run/Data/Boons.asset";

@@ -118,5 +118,17 @@ namespace Quintessence.Run.Tests
             Assert.IsTrue(seen);
             Assert.AreEqual(0, EncounterPlanner.Plan(RoomType.Boss, 9).Sum(w => w.Banner));
         }
+
+        [Test] public void Shade_TakesTheSpotOfACharger_FromTheSixthRoom()
+        {
+            Assert.AreEqual(0, EncounterPlanner.Plan(RoomType.Combat, EncounterPlanner.ShadeDepth - 1).Sum(w => w.Shade), "nao aparece cedo");
+            for (int d = EncounterPlanner.ShadeDepth; d < 10; d++)
+            {
+                var plain = EncounterPlanner.Plan(RoomType.Combat, d);
+                Assert.AreEqual(1, plain[0].Shade, "sala comum " + d);
+                foreach (Biome b in System.Enum.GetValues(typeof(Biome)))
+                    Assert.AreEqual(plain.Sum(w => w.Total), EncounterPlanner.Plan(RoomType.Combat, d, b).Sum(w => w.Total), "troca, nao soma");
+            }
+        }
     }
 }

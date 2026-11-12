@@ -210,10 +210,11 @@ namespace Quintessence.UI
                 ("Xamã", "Cura os aliados feridos (aviso verde). Derrube primeiro.", foe),
                 ("Escudeiro", "Escudo na frente. Contorne, congele, enraíze ou use reações.", foe),
                 ("Porta-Estandarte", "Quem está no círculo dele bate mais e corre mais. Derrube primeiro.", foe),
+                ("Espectro", "Avisa um círculo nas suas costas e aparece ali. Não fique parado.", foe),
                 ("Cinzentos", "Bando pequeno e rápido. Skills de área resolvem.", foe),
-                ("Elementais", "Brasa Viva (Fogo, estoura), Afogado (Água, deixa poça) e Sentinela (Terra, torre).", foe),
-                ("Campeão, Carrasco e chefes", "Fecham as Elites. No fim: o Guardião, a Tecelã ou a Rainha Afogada.", gold),
-            }, 53);
+                ("Elementais", "Brasa Viva (Fogo), Afogado (Água) e Sentinela (Terra).", foe),
+                ("Campeão, Carrasco e chefes", "Fecham as Elites. No fim: Guardião, Tecelã ou Rainha.", gold),
+            }, 49);
             Column(1130, "REAÇÕES", new (string, string, Color)[]
             {
                 ("Vapor · Fogo + Água", "Nuvem: quem está dentro erra metade dos ataques.", Color.Lerp(ElementColors.Of(ElementType.Fire), ElementColors.Of(ElementType.Water), 0.5f)),

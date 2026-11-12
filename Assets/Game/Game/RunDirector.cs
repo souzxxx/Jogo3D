@@ -102,6 +102,8 @@ namespace Quintessence.Game
         public void BindGuard(GameObject guard) => guardPrefab = guard;
         [SerializeField] GameObject bannerPrefab;
         public void BindBanner(GameObject banner) => bannerPrefab = banner;
+        [SerializeField] GameObject shadePrefab;
+        public void BindShade(GameObject shade) => shadePrefab = shade;
         public void BindDrowned(GameObject drowned, GameObject puddle) { drownedPrefab = drowned; puddlePrefab = puddle; }
         public void BindWeaver(GameObject prefab) => weaverPrefab = prefab;
 
@@ -814,6 +816,7 @@ namespace Quintessence.Game
                 if (p.Sentinel > 0 && sentinelPrefab != null) w.entries.Add(new WaveEntry { prefab = sentinelPrefab, count = p.Sentinel });
                 if (p.Guard > 0) w.entries.Add(new WaveEntry { prefab = guardPrefab != null ? guardPrefab : meleePrefab, count = p.Guard });
                 if (p.Banner > 0) w.entries.Add(new WaveEntry { prefab = bannerPrefab != null ? bannerPrefab : rangedPrefab, count = p.Banner });
+                if (p.Shade > 0) w.entries.Add(new WaveEntry { prefab = shadePrefab != null ? shadePrefab : chargerPrefab != null ? chargerPrefab : meleePrefab, count = p.Shade });
                 if (p.Drowned > 0) w.entries.Add(new WaveEntry { prefab = drownedPrefab != null ? drownedPrefab : lobberPrefab != null ? lobberPrefab : rangedPrefab, count = p.Drowned });
                 if (p.MiniBoss > 0 && miniBossPrefab != null) w.entries.Add(new WaveEntry { prefab = miniBossPrefab, count = p.MiniBoss });
                 if (p.Boss > 0) w.entries.Add(new WaveEntry { prefab = WeaverRun ? weaverPrefab : QueenRun ? queenPrefab : bossPrefab != null ? bossPrefab : brutePrefab, count = p.Boss });

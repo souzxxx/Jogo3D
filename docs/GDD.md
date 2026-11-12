@@ -131,6 +131,7 @@ Uma skill deixa no inimigo a **marca** do elemento dela. Acertar esse inimigo co
 | Ceifador | Avisa uma linha larga e atravessa a sala por ela | Sair da linha e bater enquanto ele se recupera |
 | Arremessador | Joga uma bomba onde o herói está | Sair do círculo avisado |
 | Xamã | Cura os aliados feridos em volta (aviso verde); sozinho, atira | Derrubar primeiro |
+| Espectro | Avisa um círculo nas costas do herói e aparece ali para golpear | Não ficar parado: sair do círculo e bater enquanto ele se recompõe |
 | Porta-Estandarte | Fica atrás do bando e atira de longe; enquanto vive, quem está no círculo carmim dele bate 25% mais forte e anda 15% mais rápido | Derrubar primeiro: o bônus some na hora |
 | Escudeiro | Escudo na frente: golpe direto de frente leva 15%. Gira devagar e não recua quando o golpe bate no escudo | Contornar (ou dash) e bater pelas costas; reações, queimadura e zonas atravessam; atordoado, congelado, enraizado ou com armadura quebrada, o escudo cai |
 | Cinzentos | Bando de três ou quatro, pequenos e rápidos | Skills de área |
@@ -140,7 +141,7 @@ Uma skill deixa no inimigo a **marca** do elemento dela. Acertar esse inimigo co
 
 **Afinidade elemental:** inimigo elemental leva metade do dano do próprio elemento e 1,6 vez do elemento que o vence (Água vence Fogo, Terra vence Água, Ar vence Terra, Fogo vence Ar).
 
-Os tipos entram aos poucos: Ceifador na segunda sala, Cinzentos na terceira, Arremessador e Escudeiro na quarta, Xamã e Porta-Estandarte na quinta. Vida e dano sobem a cada camada (9% de vida e 6,5% de dano por camada). As duas primeiras salas são aquecimento: o inimigo bate 75% e depois 87% do normal. O tempo de aviso dos golpes nunca diminui.
+Os tipos entram aos poucos: Ceifador na segunda sala, Cinzentos na terceira, Arremessador e Escudeiro na quarta, Xamã e Porta-Estandarte na quinta, Espectro na sexta. Vida e dano sobem a cada camada (9% de vida e 6,5% de dano por camada). As duas primeiras salas são aquecimento: o inimigo bate 75% e depois 87% do normal. O tempo de aviso dos golpes nunca diminui.
 
 ### Progressão
 

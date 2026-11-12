@@ -114,8 +114,8 @@ namespace Quintessence.Run
     {
         public struct WavePlan
         {
-            public int Melee, Ranged, Brute, Bomber, Boss, Charger, Lobber, Shaman, MiniBoss, Swarm, Ember, Sentinel, Guard, Drowned, Banner;
-            public int Total => Melee + Ranged + Brute + Bomber + Boss + Charger + Lobber + Shaman + MiniBoss + Swarm + Ember + Sentinel + Guard + Drowned + Banner;
+            public int Melee, Ranged, Brute, Bomber, Boss, Charger, Lobber, Shaman, MiniBoss, Swarm, Ember, Sentinel, Guard, Drowned, Banner, Shade;
+            public int Total => Melee + Ranged + Brute + Bomber + Boss + Charger + Lobber + Shaman + MiniBoss + Swarm + Ember + Sentinel + Guard + Drowned + Banner + Shade;
         }
 
         public const int MiniBossDepth = 5;
@@ -123,6 +123,8 @@ namespace Quintessence.Run
         public const int GuardDepth = 3;
         /// O Porta-Estandarte vem da quinta sala em diante, no lugar de um Atirador da segunda onda.
         public const int BannerDepth = 4;
+        /// O Espectro vem da sexta sala em diante, no lugar de um Ceifador da primeira onda.
+        public const int ShadeDepth = 5;
 
         /// Tamanho do bando de Cinzentos: nenhum nas duas primeiras salas, depois 3 e, do meio em diante, 4.
         public static int SwarmSize(int depth) => depth < 2 ? 0 : depth < 5 ? 3 : 4;
@@ -165,6 +167,13 @@ namespace Quintessence.Run
                 var second = waves[1];
                 second.Ranged--; second.Banner++;
                 waves[1] = second;
+            }
+            // o Espectro toma o lugar de um Ceifador da primeira onda: quem fica parado leva pelas costas
+            if ((type == RoomType.Combat || type == RoomType.Elite) && depth >= ShadeDepth && waves.Count > 0 && waves[0].Charger >= 1)
+            {
+                var first = waves[0];
+                first.Charger--; first.Shade++;
+                waves[0] = first;
             }
             // o Escudeiro toma o lugar de um Rastejante na primeira onda: a sala nao fica maior, fica diferente
             if ((type == RoomType.Combat || type == RoomType.Elite) && depth >= GuardDepth && waves.Count > 0 && waves[0].Melee >= 2)
