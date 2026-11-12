@@ -1224,7 +1224,11 @@ namespace Quintessence.Game.PlayTests
             Assert.AreEqual(0, cleared, "no Cerco a sala nao limpa sozinha");
             Assert.GreaterOrEqual(spawner.State.Spawned, 3, "as ondas se repetem");
             hud.HideTip();
+            director.Dress(RoomType.Siege);
+            Assert.AreEqual("SiegeDecor", director.CurrentDecor, "o Cerco tem cenario proprio");
+            for (int k = 0; k < 3; k++) yield return null;
             Shot(cam, "docs/img/cerco.png");
+
             for (int k = 0; k < 3000 && director.SiegeActive; k++) yield return null;
             Assert.IsFalse(director.SiegeActive, "o tempo acaba");
             for (int k = 0; k < 60 && cleared == 0; k++) yield return null;
