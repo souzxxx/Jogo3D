@@ -62,6 +62,8 @@ namespace Quintessence.Core
         public float FusionBonus;
         /// Fracao da vida curada a cada esquiva (passiva ou perfeita). Passo de Brisa do Vey.
         public float DodgeHeal;
+        /// Dano a mais em quem tem menos de 30% de vida (Instinto do Cacador, do Rax).
+        public float ExecuteBonus;
 
         static int Pair(ElementType a, ElementType b) => System.Math.Min((int)a, (int)b) * 5 + System.Math.Max((int)a, (int)b);
         /// Multiplicador so da reacao daquele par (simetrico). 1 = sem bonus.
@@ -100,7 +102,7 @@ namespace Quintessence.Core
             BasicDamageMult = FinisherMult = EssenceMult = XpMult = 1f;
             Evasion = FireTrailSeconds = BurningBonus = WaterHealAdd = WaterFreezeSeconds = EarthThorns = AirHasteSeconds = SkillRefundOnKill = 0f;
             EarthBlocksAdd = DashChargesAdd = 0;
-            FlankBonus = BurstBonus = MarkSpread = FusionBonus = DodgeHeal = 0f;
+            FlankBonus = BurstBonus = MarkSpread = FusionBonus = DodgeHeal = ExecuteBonus = 0f;
             SureFooted = false;
         }
     }

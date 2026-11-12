@@ -555,6 +555,8 @@ namespace Quintessence.Combat
                 bool crit = (basic && perfectCrit) || (chance > 0f && UnityEngine.Random.value < chance);
                 float marked = basic && target.TryGetComponent(out ElementMark m) && m.State.HasMark ? 1f + markedTargetBonus + mods.SwitchStrikeAdd : 1f;
                 if (mods.BurningBonus > 0f && target.TryGetComponent(out StatusHolder burning) && burning.State.Has(StatusType.Burn)) marked *= 1f + mods.BurningBonus;
+                // Instinto do Cacador: quem esta quase caindo leva mais
+                if (mods.ExecuteBonus > 0f && target.Current < target.Max * 0.3f) marked *= 1f + mods.ExecuteBonus;
                 // Flanqueador: o heroi esta atras de quem ele acerta (medido do heroi, nao do ponto da skill: o Pilar nasce longe)
                 if (mods.FlankBonus > 0f && target.GetComponent<UnityEngine.AI.NavMeshAgent>() != null)
                 {
