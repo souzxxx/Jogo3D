@@ -113,6 +113,37 @@ namespace Quintessence.Game
         public void BindBanner(GameObject banner) => bannerPrefab = banner;
         [SerializeField] GameObject shadePrefab;
         public void BindShade(GameObject shade) => shadePrefab = shade;
+        [SerializeField] GameObject crystalPrefab;
+        public void BindCrystal(GameObject crystal) => crystalPrefab = crystal;
+
+        // pontos possiveis do Cristal de Ressonancia (fracoes da sala): longe da entrada e das portas
+        static readonly Vector3[] CrystalSpots =
+        {
+            new(-0.42f, 0, 0.18f), new(0.42f, 0, 0.18f), new(0f, 0, 0.42f), new(-0.62f, 0, 0.5f), new(0.62f, 0, 0.5f), new(0f, 0, -0.05f),
+        };
+
+        /// Poe os Cristais de Ressonancia da sala: um da segunda sala em diante, dois do meio da run. Publico para os testes.
+        public int PlaceCrystals(Biome biome, int seed, int count)
+        {
+            if (crystalPrefab == null || biome == Biome.Heart || count <= 0) return 0;
+            if (layoutRoot == null) layoutRoot = new GameObject("Layout").transform;
+            int placed = 0, start = Mathf.Abs(seed) % CrystalSpots.Length;
+            for (int i = 0; i < CrystalSpots.Length && placed < count; i++)
+            {
+                var f = CrystalSpots[(start + i) % CrystalSpots.Length];
+                var pos = new Vector3(f.x * Arena.HalfX, 0f, f.z * Arena.HalfZ);
+                // nao em cima de peca do arranjo (barreira, pilar, barril, poca) nem fora do chao navegavel
+                // (a esfera fica acima do piso: o colisor do chao nao conta)
+                if (Physics.CheckSphere(pos + Vector3.up * 1.2f, 0.9f, ~0, QueryTriggerInteraction.Ignore)) continue;
+                if (!UnityEngine.AI.NavMesh.SamplePosition(pos, out var hit, 0.6f, UnityEngine.AI.NavMesh.AllAreas)) continue;
+                var go = Instantiate(crystalPrefab, hit.position, Quaternion.Euler(0, (seed * 53 + i * 71) % 360, 0), layoutRoot);
+                go.name = crystalPrefab.name;
+                go.GetComponent<ResonanceCrystal>().SetElement(ResonanceCrystal.ElementFor(biome));
+                placed++;
+            }
+            if (placed > 0) Tip("crystal");
+            return placed;
+        }
         public void BindDrowned(GameObject drowned, GameObject puddle) { drownedPrefab = drowned; puddlePrefab = puddle; }
         public void BindWeaver(GameObject prefab) => weaverPrefab = prefab;
 
@@ -715,6 +746,9 @@ namespace Quintessence.Game
             if (node.Type == RoomType.Combat || node.Type == RoomType.Siege || node.Type == RoomType.Elite || node.Type == RoomType.Boss || node.Type == RoomType.Trial)
                 // a sala da Rainha Afogada e um salao alagado: adereços da Cripta em vez dos do Coracao
                 PlaceBiomeProps(node.Type == RoomType.Boss && QueenRun ? Biome.Crypt : Biomes.For(Run.Depth, Run.Map.LayerCount), GameFlow.Seed + node.Id * 7);
+            // Cristais de Ressonancia nas salas de luta, da segunda em diante (o chefe luta sem eles)
+            if (node.Type != RoomType.Boss && LayoutPicker.UsesLayout(node.Type) && Run.Depth >= 1)
+                PlaceCrystals(Biomes.For(Run.Depth, Run.Map.LayerCount), GameFlow.Seed + node.Id * 13, Run.Depth >= 4 ? 2 : 1);
             DressBiome(Biomes.For(Run.Depth, Run.Map.LayerCount), true);
             // a Rainha Afogada alaga o Coracao: a luz e a cor da sala final viram as da Cripta (o nome continua o do Coracao)
             if (node.Type == RoomType.Boss && QueenRun && dresser != null) dresser.Apply(Biome.Crypt);

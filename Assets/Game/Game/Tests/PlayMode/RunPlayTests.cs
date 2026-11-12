@@ -1322,6 +1322,56 @@ namespace Quintessence.Game.PlayTests
             Time.captureFramerate = 0;
         }
 
+        [UnityTest, Timeout(300000)]
+        public IEnumerator Resonance_Crystal_Marks_The_Pack()
+        {
+            GameEvents.Clear();
+            Time.timeScale = 1f;
+            Time.captureFramerate = 30;
+            GameFlow.StartElement = ElementType.Fire;
+            GameFlow.Seed = 3; GameFlow.Layers = 5; GameFlow.Shrines = 1;
+            yield return EditorSceneManager.LoadSceneAsyncInPlayMode("Assets/Scenes/Run.unity", new LoadSceneParameters(LoadSceneMode.Single));
+            yield return null;
+            yield return null;
+            var director = Object.FindFirstObjectByType<RunDirector>();
+            var hud = Object.FindFirstObjectByType<Hud>();
+            cam = Camera.main;
+            hud.UseCamera(cam);
+            Object.FindFirstObjectByType<WaveSpawner>().enabled = false;
+            for (int k = 0; k < 2000 && director.Busy; k++) yield return null;
+            director.ApplyLayout(-1);
+            director.DressBiome(Biome.Crypt);
+            var hero = Object.FindFirstObjectByType<PlayerController>();
+            hero.GetComponent<Health>().Pool.Invulnerable = true;
+            hero.Teleport(new Vector3(0, 0.05f, -5f), Vector3.forward);
+            Assert.AreEqual(2, director.PlaceCrystals(Biome.Crypt, 5, 2), "dois cristais na sala vazia");
+            Assert.AreEqual(Tips.Text("crystal"), hud.LastTip, "a primeira vez traz a dica");
+            var crystal = Object.FindObjectsByType<ResonanceCrystal>(FindObjectsSortMode.None).First();
+            Assert.AreEqual(ElementType.Water, crystal.Element, "na Cripta, cristal de Agua");
+            GameObject Load(string n) => UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Game/Enemies/Prefabs/" + n + ".prefab");
+            var a = Object.Instantiate(Load("Rastejante"), crystal.transform.position + new Vector3(1.5f, 0, 0.5f), Quaternion.identity).GetComponent<Health>();
+            var b = Object.Instantiate(Load("Rastejante"), crystal.transform.position + new Vector3(-1.4f, 0, -0.8f), Quaternion.identity).GetComponent<Health>();
+            yield return null; yield return null;
+            a.GetComponent<EnemyBrain>().enabled = false; b.GetComponent<EnemyBrain>().enabled = false;
+            for (int k = 0; k < 10; k++) yield return null;
+            hud.HideTip();
+            Shot(cam, "docs/img/cristal.png");
+            // um golpe estoura o cristal: o bando em volta fica marcado com Agua e encharcado
+            crystal.GetComponent<Health>().TakeDamage(new DamageInfo(5f, ElementType.None, Team.Player, hero.gameObject) { Direction = Vector3.forward });
+            yield return null;
+            Assert.AreEqual(2, crystal.Marked);
+            foreach (var e in new[] { a, b })
+            {
+                Assert.AreEqual(ElementType.Water, e.GetComponent<ElementMark>().State.Element, "marcado com o elemento do trecho");
+                Assert.IsTrue(e.GetComponent<StatusHolder>().State.Has(StatusType.Soaked), "e encharcado");
+                Assert.Less(e.Current, e.Max, "o estouro fere um pouco");
+            }
+            for (int k = 0; k < 10; k++) yield return null;
+            Assert.IsTrue(crystal == null, "o cristal some");
+            GameFlow.Layers = 8; GameFlow.Shrines = 3;
+            Time.captureFramerate = 0;
+        }
+
         [UnityTest, Timeout(600000)]
         public IEnumerator Elementals_And_The_Swarm()
         {

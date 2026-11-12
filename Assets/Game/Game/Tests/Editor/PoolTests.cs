@@ -14,5 +14,16 @@ namespace Quintessence.Game.Tests
             Assert.AreEqual(ElementType.Fire, CorruptionPool.ElementFor(Biome.Heart));
             Assert.IsNotEmpty(Tips.Text("terrain"));
         }
+
+        [Test] public void Crystal_UsesTheStretchElement_AndItsStatus()
+        {
+            Assert.AreEqual(ElementType.Fire, ResonanceCrystal.ElementFor(Biome.Ashes));
+            Assert.AreEqual(ElementType.Water, ResonanceCrystal.ElementFor(Biome.Crypt));
+            Assert.AreEqual(ElementType.Earth, ResonanceCrystal.ElementFor(Biome.Garden));
+            Assert.AreEqual(StatusType.Burn, ResonanceCrystal.StatusFor(ElementType.Fire));
+            Assert.AreEqual(StatusType.Soaked, ResonanceCrystal.StatusFor(ElementType.Water));
+            Assert.AreEqual(StatusType.Rooted, ResonanceCrystal.StatusFor(ElementType.Earth));
+            Assert.IsNotEmpty(Tips.Text("crystal"));
+        }
     }
 }

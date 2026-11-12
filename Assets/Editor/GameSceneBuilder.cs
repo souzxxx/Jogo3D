@@ -66,6 +66,7 @@ public static class GameSceneBuilder
         director.BindGuard(EnemyDevSceneBuilder.GuardPrefab());
         director.BindBanner(EnemyDevSceneBuilder.BannerPrefab());
         director.BindShade(EnemyDevSceneBuilder.ShadePrefab());
+        director.BindCrystal(CrystalPrefab());
         var drowned = EnemyDevSceneBuilder.DrownedPrefab();
         director.BindDrowned(drowned, PuddlePrefab());
         const string catalogPath = "Assets/Game/Run/Data/Boons.asset";
@@ -417,6 +418,36 @@ public static class GameSceneBuilder
     }
 
     /// Barril de polvora: barril do pack em tom avermelhado, com vida curta. Qualquer golpe acende.
+    /// Cristal de Ressonancia: tres lascas de cristal (a mesma malha dos cristais ambar do cenario) num material que o jogo
+    /// pinta com a cor do elemento do trecho. Um golpe estoura.
+    static GameObject CrystalPrefab()
+    {
+        const string path = "Assets/Game/Game/Prefabs/Obstacles/ResonanceCrystal.prefab";
+        var mat = LookDevBuilder.Mat("ResonanceCrystal", null, new Color(0.7f, 0.7f, 0.75f), new Color(0.25f, 0.25f, 0.28f), 0f);
+        var root = new GameObject("ResonanceCrystal");
+        var renderers = new List<Renderer>();
+        foreach (var (pos, euler, w, h) in new[] { (new Vector3(0f, 0f, 0f), new Vector3(0, 0, 0), 0.36f, 1.5f), (new Vector3(0.32f, 0f, 0.1f), new Vector3(0, 30, -22), 0.24f, 0.95f), (new Vector3(-0.28f, 0f, -0.12f), new Vector3(0, 70, 25), 0.22f, 0.8f) })
+        {
+            var c = new GameObject("Shard");
+            c.transform.SetParent(root.transform, false);
+            c.transform.localPosition = pos; c.transform.localRotation = Quaternion.Euler(euler); c.transform.localScale = new Vector3(w, h, w);
+            c.AddComponent<MeshFilter>().sharedMesh = LookDevBuilder.CrystalMesh();
+            var r = c.AddComponent<MeshRenderer>();
+            r.sharedMaterial = mat;
+            renderers.Add(r);
+        }
+        var col = root.AddComponent<CapsuleCollider>();
+        col.center = new Vector3(0, 0.75f, 0); col.radius = 0.45f; col.height = 1.5f;
+        var carve = root.AddComponent<UnityEngine.AI.NavMeshObstacle>();
+        carve.shape = UnityEngine.AI.NavMeshObstacleShape.Capsule; carve.center = new Vector3(0, 0.75f, 0); carve.radius = 0.5f; carve.height = 1.5f;
+        carve.carving = true;
+        root.AddComponent<Quintessence.Core.Health>().Configure(1, Quintessence.Core.Team.Enemy);
+        root.AddComponent<ResonanceCrystal>().Bind(renderers.ToArray());
+        var prefab = PrefabUtility.SaveAsPrefabAsset(root, path);
+        Object.DestroyImmediate(root);
+        return prefab;
+    }
+
     static GameObject ExplosivePrefab()
     {
         const string path = "Assets/Game/Game/Prefabs/Obstacles/ExplosiveBarrel.prefab";
