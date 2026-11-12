@@ -726,8 +726,24 @@ namespace Quintessence.UI
                 var tl = UiKit.Text(UiKit.Rect("Talents", box, new Vector2(0, 1), new Vector2(60, -722), new Vector2(1200, 50)),
                     $"TALENTOS (nível {progress?.Level ?? 1}):  " + string.Join("  ·  ", parts), 21, UiKit.Cream, TextAnchor.UpperLeft, false);
                 tl.horizontalOverflow = HorizontalWrapMode.Wrap;
+                // Sintonia: quantos talentos de cada elemento e o grau que eles ja deram
+                var syn = new List<string>();
+                foreach (var e in Elements.All)
+                {
+                    int pts = Synergy.Points(talents, e);
+                    if (pts == 0) continue;
+                    int tier = Synergy.TierFor(pts);
+                    syn.Add(tier > 0 ? $"{Synergy.ElementName(e)} {pts} ({Synergy.Describe(tier)})" : $"{Synergy.ElementName(e)} {pts}/{Synergy.Tier1}");
+                }
+                if (syn.Count > 0)
+                {
+                    var st = UiKit.Text(UiKit.Rect("Synergy", box, new Vector2(0, 1), new Vector2(60, -770), new Vector2(940, 34)),
+                        "SINTONIA:  " + string.Join("   ·   ", syn), 19, new Color(0.9f, 0.76f, 0.42f), TextAnchor.MiddleLeft, false);
+                    st.horizontalOverflow = HorizontalWrapMode.Wrap; st.verticalOverflow = VerticalWrapMode.Truncate;
+                    st.resizeTextForBestFit = true; st.resizeTextMinSize = 12; st.resizeTextMaxSize = 19;
+                }
             }
-            UiKit.Text(UiKit.Rect("Close", box, new Vector2(0.5f, 0), new Vector2(0, 22), new Vector2(900, 30)), "I ou Esc fecha", 20, UiKit.Dim, TextAnchor.MiddleCenter, false);
+            UiKit.Text(UiKit.Rect("Close", box, new Vector2(1, 0), new Vector2(-40, 22), new Vector2(260, 30)), "I ou Esc fecha", 20, UiKit.Dim, TextAnchor.MiddleRight, false);
         }
 
         RectTransform tutorialBox, tutorialFill;

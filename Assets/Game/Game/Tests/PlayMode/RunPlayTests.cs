@@ -671,6 +671,13 @@ namespace Quintessence.Game.PlayTests
             Shot(cam, "docs/img/nivel_quatro.png");
             director.PickTalent(3);
             Assert.IsFalse(director.LevelUpOpen);
+            // o inventario mostra a Sintonia de cada elemento com talento
+            for (int k = 0; k < 5; k++) yield return null;
+            hud.ShowInventory(true, director.Run);
+            yield return null; yield return null;
+            Assert.IsNotNull(GameObject.Find("Synergy"), "a linha da Sintonia aparece no inventario");
+            Shot(cam, "docs/img/inventario_sintonia.png");
+            hud.ShowInventory(false);
             GameFlow.AutoPickTalents = true;
             GameFlow.Layers = 8; GameFlow.Shrines = 3;
             Time.captureFramerate = 0;
