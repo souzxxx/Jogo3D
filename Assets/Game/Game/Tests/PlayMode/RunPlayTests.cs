@@ -778,7 +778,7 @@ namespace Quintessence.Game.PlayTests
             Object.FindFirstObjectByType<WaveSpawner>().enabled = false;
             for (int k = 0; k < 2000 && director.Busy; k++) yield return null;
             Assert.IsNotNull(RunSaveStore.Load(), "entrar na primeira sala ja grava a run");
-            Assert.AreEqual(Tips.Text("start"), Object.FindFirstObjectByType<Hud>().LastTip, "a primeira sala mostra a dica de controles");
+            StringAssert.Contains("tecla 4", Object.FindFirstObjectByType<Hud>().LastTip, "a primeira sala mostra a dica de controles com a tecla da skill do Vey");
             Assert.IsTrue(Tips.WasSeen("start"));
             var hero = Object.FindFirstObjectByType<PlayerController>();
             var hp = hero.GetComponent<Health>();

@@ -213,6 +213,14 @@ namespace Quintessence.Game
         void Tip(string id)
         {
             if (GameFlow.Tutorial || !Tips.Consume(id)) return;
+            if (id == "start")
+            {
+                // a skill inicial fica na tecla do elemento do heroi (Liora no 2, Brann no 3, Vey no 4)
+                string[] skill = { "", "Labareda", "Maré", "Pilar de Pedra", "Vendaval" };
+                int k = (int)GameFlow.StartElement;
+                hud.ShowTip($"Clique esquerdo ataca. Sua skill, {skill[k]}, está na tecla {k} (ou clique direito). Espaço desvia.", 9f);
+                return;
+            }
             hud.ShowTip(Tips.Text(id));
         }
 
