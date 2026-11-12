@@ -71,5 +71,16 @@ namespace Quintessence.Run.Tests
             int with = Enumerable.Range(1, 60).Count(s => RunMapGenerator.Generate(s).Nodes.Any(n => n.Type == RoomType.Shop));
             Assert.Greater(with, 15, "loja rara demais");
         }
+
+        [Test] public void TalentScroll_OnlyFromTheFourthRoom()
+        {
+            var catalog = Catalog();
+            for (int d = 0; d < 9; d++)
+            {
+                var stock = ShopPlanner.Stock(catalog, new HashSet<string>(), new[] { ElementType.Fire }, new System.Random(d), d);
+                Assert.AreEqual(d >= ShopPlanner.TalentDepth ? 1 : 0, stock.Count(i => i.Kind == ShopItemKind.Talent), "camada " + d);
+            }
+            Assert.Greater(ShopPlanner.TalentPrice(3), ShopPlanner.BoonPrice(3), "talento custa mais que bencao");
+        }
     }
 }

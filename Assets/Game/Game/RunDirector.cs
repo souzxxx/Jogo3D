@@ -886,7 +886,9 @@ namespace Quintessence.Game
                     var rs = table.GetComponentsInChildren<Renderer>();
                     if (rs.Length > 0) { var b = rs[0].bounds; foreach (var x in rs) b.Encapsulate(x.bounds); top = b.max.y; }
                 }
-                if (item.Kind == ShopItemKind.Boon)
+                if (item.Kind == ShopItemKind.Talent)
+                    Medal(root.transform, new Vector3(0, top + 0.75f, 0), "boon_skill", new Color(0.9f, 0.76f, 0.42f), 1.25f);
+                else if (item.Kind == ShopItemKind.Boon)
                     Medal(root.transform, new Vector3(0, top + 0.75f, 0), BoonEffects.Icon(item.Boon.stat), c, 1.25f);
                 else
                 {
@@ -917,6 +919,7 @@ namespace Quintessence.Game
                             case ShopItemKind.Heal: playerHealth.Heal(playerHealth.Max * ShopPlanner.HealFraction); break;
                             case ShopItemKind.MaxHealth: player.Modifiers.MaxHealthAdd += ShopPlanner.MaxHealthGain; ApplyMaxHealth(); break;
                             case ShopItemKind.Boon: GrantBoon(item.Boon); break;
+                            case ShopItemKind.Talent: Run.Progress.GrantPick(); break;
                         }
                         Feel.DamageNumber.Spawn(player.transform.position + Vector3.up * 3.6f, item.Name.ToUpperInvariant() + "!", c, 1.1f, 1.4f);
                         interactables.Remove(entry);

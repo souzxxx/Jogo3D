@@ -3,7 +3,7 @@ using Quintessence.Core;
 
 namespace Quintessence.Run
 {
-    public enum ShopItemKind { Heal, MaxHealth, Boon }
+    public enum ShopItemKind { Heal, MaxHealth, Boon, Talent }
 
     public class ShopItem
     {
@@ -23,8 +23,11 @@ namespace Quintessence.Run
         public static int HealPrice(int depth) => 18 + 2 * depth;
         public static int MaxHealthPrice(int depth) => 28 + 2 * depth;
         public static int BoonPrice(int depth) => 32 + 3 * depth;
+        public static int TalentPrice(int depth) => 44 + 3 * depth;
+        /// O pergaminho de talento so aparece da quarta sala em diante.
+        public const int TalentDepth = 3;
 
-        /// Sempre uma cura e um aumento de vida; mais ate duas bencaos que o heroi ainda nao tem.
+        /// Sempre uma cura e um aumento de vida; da quarta sala em diante um pergaminho de talento; mais ate duas bencaos que o heroi ainda nao tem.
         public static List<ShopItem> Stock(IReadOnlyList<Boon> catalog, ICollection<string> taken, IReadOnlyList<ElementType> awakened,
             System.Random rng, int depth)
         {
@@ -33,6 +36,8 @@ namespace Quintessence.Run
                 new() { Kind = ShopItemKind.Heal, Price = HealPrice(depth), Name = "Poção", Description = "Cura 40% da vida" },
                 new() { Kind = ShopItemKind.MaxHealth, Price = MaxHealthPrice(depth), Name = "Elixir", Description = "+15 de vida máxima" },
             };
+            if (depth >= TalentDepth)
+                items.Add(new ShopItem { Kind = ShopItemKind.Talent, Price = TalentPrice(depth), Name = "Pergaminho", Description = "Um talento agora" });
             foreach (var b in BoonPicker.Offer(catalog, taken, awakened, rng, 2))
                 items.Add(new ShopItem { Kind = ShopItemKind.Boon, Boon = b, Price = BoonPrice(depth), Name = b.name, Description = b.description });
             return items;
