@@ -808,6 +808,8 @@ namespace Quintessence.Game.PlayTests
             var h = guardBody.GetComponent<Health>();
             var guard = guardBody.GetComponent<FrontGuard>();
             Assert.IsNotNull(guard, "o Escudeiro traz o escudo");
+            yield return null; yield return null;
+            Assert.AreEqual(Tips.Text("guard"), hud.LastTip, "o primeiro Escudeiro traz a dica");
             Assert.IsTrue(guardBody.GetComponentsInChildren<Transform>(true).Any(t => t.name == "Skeleton_Shield_Large_B"), "segura o escudo do pack");
             Assert.IsTrue(guardBody.GetComponentsInChildren<Transform>(true).Any(t => t.name == "Skeleton_Blade"), "e a lamina");
             for (int k = 0; k < 40; k++) yield return null;
@@ -1453,6 +1455,7 @@ namespace Quintessence.Game.PlayTests
             hp.TakeDamage(new DamageInfo(12f, ElementType.None, Team.Enemy, foe.gameObject));
             Assert.GreaterOrEqual(hp.Current, life, "o dash atravessa o golpe (nenhum dano entra)");
             Assert.AreEqual(1, hero.PerfectDodges, "dois golpes no mesmo instante contam uma esquiva");
+            Assert.AreEqual(Tips.Text("perfect"), hud.LastTip, "a primeira esquiva perfeita explica o que aconteceu");
             Assert.AreEqual(meter + PlayerController.PerfectDodgeCharge, hero.Quintessence.Meter, 0.01f, "enche a Quintessencia");
             Assert.IsTrue(hero.PerfectCritReady);
             Assert.Greater(hp.Current, life, "Vey: a esquiva perfeita cura (Passo de Brisa)");

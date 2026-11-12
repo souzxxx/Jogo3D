@@ -320,6 +320,7 @@ namespace Quintessence.Game
             GameEvents.ReactionTriggered += OnReactionForFeats;
             GameEvents.BossShieldChanged += OnBossShield;
             GameEvents.AttackPerformed += OnAttackForTrial;
+            GameEvents.PerfectDodge += OnPerfectDodge;
         }
 
         // Pes no Chao: cada dash do heroi conta
@@ -505,8 +506,14 @@ namespace Quintessence.Game
 
         void OnEnemySpawned(Health enemy)
         {
-            if (enemy != null && enemy.TryGetComponent(out ElementalAffinity _)) Tip("affinity");
+            if (enemy == null) return;
+            if (enemy.TryGetComponent(out ElementalAffinity _) && enemy.GetComponent<BossBrain>() == null) Tip("affinity");
+            if (enemy.TryGetComponent(out FrontGuard _)) Tip("guard");
+            if (enemy.TryGetComponent(out AuraSource _)) Tip("banner");
+            if (enemy.TryGetComponent(out EnemyBrain brain) && brain.Definition != null && brain.Definition.attack == EnemyAttackKind.Ambush) Tip("shade");
         }
+
+        void OnPerfectDodge(Vector3 at) => Tip("perfect");
 
         void OnAwakened(ElementType e)
         {
@@ -562,6 +569,7 @@ namespace Quintessence.Game
             GameEvents.ReactionTriggered -= OnReactionForFeats;
             GameEvents.BossShieldChanged -= OnBossShield;
             GameEvents.AttackPerformed -= OnAttackForTrial;
+            GameEvents.PerfectDodge -= OnPerfectDodge;
         }
 
         void Start()
