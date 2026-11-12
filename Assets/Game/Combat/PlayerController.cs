@@ -452,7 +452,7 @@ namespace Quintessence.Combat
                     Knockback = knockback,
                     IsCrit = crit,
                 };
-                if (ElementCombat.Deliver(target, info, reactions, mods.ReactionPower, force) <= 0f) continue;
+                if (ElementCombat.Deliver(target, info, reactions, mods.ReactionPower, force, mods) <= 0f) continue;
                 hits++;
                 if (applyStatus && !target.IsDead)
                     StatusHolder.GetOrAdd(target).Apply(statusType, statusDuration * mods.StatusDurationMult, health.Team, gameObject);

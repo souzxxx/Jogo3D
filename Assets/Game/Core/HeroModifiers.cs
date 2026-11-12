@@ -6,6 +6,7 @@ namespace Quintessence.Core
         readonly float[] elementDamage = { 1f, 1f, 1f, 1f, 1f };
         readonly float[] skillRange = { 1f, 1f, 1f, 1f, 1f };
         readonly float[] skillCooldown = { 1f, 1f, 1f, 1f, 1f };
+        readonly float[] reactionBonus = new float[25];
         public float DamageAll = 1f;
         public float ReactionPower = 1f;
         public float CritChanceAdd;
@@ -46,6 +47,11 @@ namespace Quintessence.Core
         public float EssenceMult = 1f;
         public float XpMult = 1f;
 
+        static int Pair(ElementType a, ElementType b) => System.Math.Min((int)a, (int)b) * 5 + System.Math.Max((int)a, (int)b);
+        /// Multiplicador so da reacao daquele par (simetrico). 1 = sem bonus.
+        public float ReactionBonus(ElementType a, ElementType b) => 1f + reactionBonus[Pair(a, b)];
+        public void AddReactionBonus(ElementType a, ElementType b, float fraction) => reactionBonus[Pair(a, b)] += fraction;
+
         public float Damage(ElementType e) => DamageAll * elementDamage[(int)e];
         public void AddElementDamage(ElementType e, float fraction) => elementDamage[(int)e] += fraction;
         public float SkillRange(ElementType e) => skillRange[(int)e];
@@ -57,6 +63,7 @@ namespace Quintessence.Core
         public void Reset()
         {
             for (int i = 0; i < elementDamage.Length; i++) elementDamage[i] = skillRange[i] = skillCooldown[i] = 1f;
+            for (int i = 0; i < reactionBonus.Length; i++) reactionBonus[i] = 0f;
             DamageAll = ReactionPower = MoveSpeedMult = DashCooldownMult = SkillCooldownMult = QuintessenceGainMult = StatusDurationMult = 1f;
             CritChanceAdd = MaxHealthAdd = HealOnReaction = HealOnRoomClear = SwitchStrikeAdd = 0f;
             BasicDamageMult = FinisherMult = EssenceMult = XpMult = 1f;

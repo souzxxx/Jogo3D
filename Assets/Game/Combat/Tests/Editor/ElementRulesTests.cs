@@ -179,6 +179,15 @@ namespace Quintessence.Combat.Tests
             Assert.AreEqual(100 - 8, bystander.Current, 0.001f, "a reacao acerta quem esta no raio");
         }
 
+        [Test] public void ReactionTalent_BoostsOnlyThatReaction()
+        {
+            var mods = new HeroModifiers();
+            mods.AddReactionBonus(ElementType.Fire, ElementType.Water, 0.5f);
+            ElementCombat.Deliver(target, new DamageInfo(5, ElementType.Fire, Team.Player), table, 1f, ElementType.None, mods);
+            ElementCombat.Deliver(target, new DamageInfo(5, ElementType.Water, Team.Player), table, 1f, ElementType.None, mods);
+            Assert.AreEqual(100 - 5 - 5 - 12, target.Current, 0.001f, "Vapor com +50%: 12 em vez de 8");
+        }
+
         [Test] public void ReactionDamageDoesNotChainReactions()
         {
             int reactions = 0;

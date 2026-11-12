@@ -14,7 +14,7 @@ namespace Quintessence.Combat
         /// Devolve o dano aplicado ao alvo direto.
         /// forceReactionWith: na Quintessencia o golpe reage como se o alvo ja estivesse marcado com esse elemento.
         public static float Deliver(Health target, DamageInfo info, ReactionTable table, float reactionPower = 1f,
-            ElementType forceReactionWith = ElementType.None)
+            ElementType forceReactionWith = ElementType.None, HeroModifiers mods = null)
         {
             // Congelado: o proximo golpe direto estilhaca (+30%) e encerra o gelo
             if (!info.IsReaction && target.TryGetComponent(out StatusHolder st) && st.State.Has(StatusType.Frozen))
@@ -38,7 +38,7 @@ namespace Quintessence.Combat
                 if (mark.State.TryLock())
                 {
                     if (mark.State.HasMark) { mark.State.Clear(); GameEvents.RaiseMarkCleared(target); }
-                    React(target, forceReactionWith, info, table, reactionPower);
+                    React(target, forceReactionWith, info, table, reactionPower, mods);
                 }
                 return applied;
             }
@@ -53,24 +53,28 @@ namespace Quintessence.Combat
                     break;
                 case MarkOutcome.Reaction:
                     GameEvents.RaiseMarkCleared(target);
-                    React(target, consumed, info, table, reactionPower);
+                    React(target, consumed, info, table, reactionPower, mods);
                     break;
             }
             return applied;
         }
 
-        static void React(Health target, ElementType markElement, DamageInfo info, ReactionTable table, float power)
+        static void React(Health target, ElementType markElement, DamageInfo info, ReactionTable table, float power, HeroModifiers mods = null)
         {
             var r = table != null ? table.Find(markElement, info.Element) : null;
             if (r == null) return;
+            // talento de reacao: aquele par bate mais forte e pega uma area maior
+            float pair = mods != null ? mods.ReactionBonus(markElement, info.Element) : 1f;
+            power *= pair;
+            float radius = r.radius * (1f + (pair - 1f) * 0.5f);
             var center = target.transform.position;
             GameEvents.RaiseReaction(new ReactionEvent
             {
                 Mark = markElement, Trigger = info.Element, Point = center,
-                Target = target.gameObject, Source = info.Source, Name = r.name, Radius = r.radius,
+                Target = target.gameObject, Source = info.Source, Name = r.name, Radius = radius,
             });
 
-            int n = Physics.OverlapSphereNonAlloc(center + Vector3.up, r.radius, buffer, ~0, QueryTriggerInteraction.Collide);
+            int n = Physics.OverlapSphereNonAlloc(center + Vector3.up, radius, buffer, ~0, QueryTriggerInteraction.Collide);
             seen.Clear();
             for (int i = 0; i < n; i++)
             {
@@ -89,7 +93,7 @@ namespace Quintessence.Combat
             }
 
             if (r.zoneDuration <= 0f) return;
-            var zone = DamageZone.Spawn(center, r.radius, r.zoneDuration, r.zoneInterval, r.zoneDamage * power,
+            var zone = DamageZone.Spawn(center, radius, r.zoneDuration, r.zoneInterval, r.zoneDamage * power,
                 info.Element, info.SourceTeam, info.Source, table, fromReaction: true);
             if (r.zoneAppliesStatus) zone.WithStatus(r.zoneStatus, r.zoneStatusDuration);
         }
