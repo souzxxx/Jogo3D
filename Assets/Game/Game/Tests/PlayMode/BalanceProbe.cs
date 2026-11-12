@@ -34,11 +34,11 @@ namespace Quintessence.Game.PlayTests
         public IEnumerator Probe_Full_Runs()
         {
             var log = new System.Text.StringBuilder();
-            log.AppendLine($"# sonda: dano levado {ProbeTaken:0.##}, desvia de {ProbeDodge:P0} dos avisos, {ProbeSeeds} sementes por heroi");
+            log.AppendLine($"# sonda: dano levado {ProbeTaken:0.##}, desvia de {ProbeDodge:P0} dos avisos, {ProbeSeeds} sementes por heroi{(ProbeRelaxed ? ", dificuldade Tranquila" : "")}");
             // o roteiro desvia de todo aviso com reflexo perfeito, mas joga sem estrategia: dano cheio por padrao
             float taken = ProbeTaken;
             GameFlow.AutoPickTalents = true;
-            GamePrefs.Force = false; // a sonda mede a dificuldade Normal
+            GamePrefs.Force = ProbeRelaxed; // Normal por padrao; ProbeRelaxed mede a Tranquila
             MetaStore.UseKey("quintessence.meta.test");
             RunSaveStore.UseKey("quintessence.run.probe");
             Tips.UseKey("quintessence.tips.probe");
@@ -168,6 +168,8 @@ namespace Quintessence.Game.PlayTests
         public static float ProbeTaken = 1f;
         /// Chance de o roteiro desviar de cada aviso que o ameaca. 1 = reflexo perfeito; 0,65 = alguem que joga razoavelmente.
         public static float ProbeDodge = 0.65f;
+        /// Joga na dificuldade Tranquila (para medir se ela ajuda quem joga mal).
+        public static bool ProbeRelaxed = false;
         System.Random dodgeRng = new(1);
         public static int ProbeSeeds = 3;
         /// Para investigar uma run so (None = todas).
