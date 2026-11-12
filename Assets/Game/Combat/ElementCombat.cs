@@ -127,6 +127,9 @@ namespace Quintessence.Combat
             }
 
             if (r.zoneDuration <= 0f) return;
+            // varios alvos da mesma reacao lado a lado: uma area so (renovada), nao uma pilha que viraria varias Fusoes
+            var existing = DamageZone.FindPaired(center, radius, markElement, info.Element);
+            if (existing != null) { existing.Refresh(r.zoneDuration); return; }
             var zone = DamageZone.Spawn(center, radius, r.zoneDuration, r.zoneInterval, r.zoneDamage * power,
                 info.Element, info.SourceTeam, info.Source, table, fromReaction: true);
             if (r.zoneAppliesStatus) zone.WithStatus(r.zoneStatus, r.zoneStatusDuration);

@@ -39,8 +39,25 @@ namespace Quintessence.Combat
             var z = go.AddComponent<DamageZone>();
             z.radius = radius; z.life = duration; z.interval = interval; z.damage = damage; z.tick = 0.1f;
             z.element = element; z.team = team; z.source = source; z.table = table; z.fromReaction = fromReaction;
-            GameEvents.RaiseZoneSpawned(new ZoneEvent { Point = point, Radius = radius, Duration = duration, Element = element });
+            GameEvents.RaiseZoneSpawned(new ZoneEvent { Point = point, Radius = radius, Duration = duration, Element = element, Owner = go });
             return z;
+        }
+
+        /// A mesma reacao de novo em cima da area: renova a duracao em vez de empilhar outra (que viraria outra Fusao).
+        public void Refresh(float duration) => life = Mathf.Max(life, duration);
+
+        /// Area de reacao ja ativa com este par perto do ponto (para nao empilhar).
+        public static DamageZone FindPaired(Vector3 point, float within, ElementType a, ElementType b)
+        {
+            foreach (var z in Active)
+            {
+                if (z == null || !z.Fusable) continue;
+                bool same = (z.PairA == a && z.PairB == b) || (z.PairA == b && z.PairB == a);
+                if (!same) continue;
+                var d = z.transform.position - point; d.y = 0f;
+                if (d.magnitude <= within) return z;
+            }
+            return null;
         }
 
         /// Zona criada pelo heroi: as reacoes que ela detonar usam os bonus dele (forca de reacao e talentos de par).

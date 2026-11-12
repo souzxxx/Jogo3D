@@ -56,6 +56,8 @@ namespace Quintessence.Core
         public float Radius;
         public float Duration;
         public ElementType Element;
+        /// A area no chao (some numa Fusao ou na troca de sala): o efeito visual acaba junto.
+        public GameObject Owner;
     }
 
     /// Barramento de eventos entre as frentes (combate, inimigos, run, UI, visual).
