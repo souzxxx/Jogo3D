@@ -168,7 +168,7 @@ namespace Quintessence.UI
         /// Grimorio: herois, inimigos (e como lidar com cada um) e as seis reacoes.
         public void ShowGrimoire()
         {
-            var box = OpenSheet("GRIMÓRIO", 940, 1640);
+            var box = OpenSheet("GRIMÓRIO", 1000, 1640);
             var top = new Vector2(0, 1);
             void Column(float x, string heading, (string name, string text, Color color)[] rows, float step)
             {
@@ -228,12 +228,13 @@ namespace Quintessence.UI
                 "Uma skill marca o inimigo; a skill de outro elemento detona a reação. O golpe básico não tem elemento.", 20, UiKit.Dim, TextAnchor.MiddleCenter, false);
             // fusoes: abaixo das reacoes
             UiKit.Text(UiKit.Rect("FusH", box, new Vector2(0, 1), new Vector2(1130, -650), new Vector2(500, 30)), "FUSÕES · TERCEIRO ELEMENTO", 22, UiKit.Dim, TextAnchor.MiddleLeft);
-            var fusions = new[] { FusionKind.Obsidian, FusionKind.Wildfire, FusionKind.Cyclone, FusionKind.Geyser };
+            var fusions = new[] { FusionKind.Obsidian, FusionKind.Wildfire, FusionKind.Cyclone, FusionKind.Geyser, FusionKind.Kiln, FusionKind.DustStorm };
             for (int i = 0; i < fusions.Length; i++)
             {
-                var f = UiKit.Text(UiKit.Rect("Fus" + i, box, new Vector2(0, 1), new Vector2(1130, -684 - i * 30), new Vector2(500, 28)),
+                var f = UiKit.Text(UiKit.Rect("Fus" + i, box, new Vector2(0, 1), new Vector2(1130, -684 - i * 28), new Vector2(500, 26)),
                     $"{FusionRules.Name(fusions[i])}: {FusionRules.Describe(fusions[i])}", 16, UiKit.Paper, TextAnchor.MiddleLeft, false);
-                f.horizontalOverflow = HorizontalWrapMode.Wrap;
+                f.horizontalOverflow = HorizontalWrapMode.Wrap; f.verticalOverflow = VerticalWrapMode.Truncate;
+                f.resizeTextForBestFit = true; f.resizeTextMinSize = 11; f.resizeTextMaxSize = 16; // uma linha por fusao
             }
         }
 
