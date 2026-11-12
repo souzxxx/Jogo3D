@@ -1402,6 +1402,68 @@ namespace Quintessence.Game.PlayTests
             Time.captureFramerate = 0;
         }
 
+        [UnityTest, Timeout(300000)]
+        public IEnumerator Perfect_Dodge_Charges_Quintessence_And_Crits()
+        {
+            GameEvents.Clear();
+            Time.timeScale = 1f;
+            Time.captureFramerate = 30;
+            GameFlow.StartElement = ElementType.Air;
+            GameFlow.Seed = 3; GameFlow.Layers = 5; GameFlow.Shrines = 1;
+            yield return EditorSceneManager.LoadSceneAsyncInPlayMode("Assets/Scenes/Run.unity", new LoadSceneParameters(LoadSceneMode.Single));
+            yield return null;
+            yield return null;
+            var director = Object.FindFirstObjectByType<RunDirector>();
+            var hud = Object.FindFirstObjectByType<Hud>();
+            cam = Camera.main;
+            hud.UseCamera(cam);
+            Object.FindFirstObjectByType<WaveSpawner>().enabled = false;
+            for (int k = 0; k < 2000 && director.Busy; k++) yield return null;
+            director.ApplyLayout(-1);
+            var hero = Object.FindFirstObjectByType<PlayerController>();
+            var hp = hero.GetComponent<Health>();
+            hero.Teleport(new Vector3(0, 0.05f, -3f), Vector3.forward);
+            var scripted = hero.gameObject.AddComponent<ScriptedInput>();
+            hero.GetComponent<PlayerInputReader>().enabled = false;
+            hero.Input = scripted;
+            scripted.AimPoint = hero.transform.position + Vector3.forward * 3f;
+            var attacker = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Game/Enemies/Prefabs/Rastejante.prefab");
+            var foe = Object.Instantiate(attacker, new Vector3(0, 0, 2.5f), Quaternion.Euler(0, 180, 0)).GetComponent<Health>();
+            yield return null; yield return null;
+            foe.GetComponent<EnemyBrain>().enabled = false;
+            // fora do dash o golpe entra normal
+            float life = hp.Current;
+            hp.TakeDamage(new DamageInfo(5f, ElementType.None, Team.Enemy, foe.gameObject));
+            Assert.Less(hp.Current, life);
+            Assert.AreEqual(0, hero.PerfectDodges);
+            // no meio do dash: esquiva perfeita
+            float meter = hero.Quintessence.Meter;
+            scripted.PressDash();
+            for (int k = 0; k < 30 && !hero.IsDashing; k++) yield return null;
+            Assert.IsTrue(hero.IsDashing);
+            life = hp.Current;
+            hp.TakeDamage(new DamageInfo(12f, ElementType.None, Team.Enemy, foe.gameObject));
+            hp.TakeDamage(new DamageInfo(12f, ElementType.None, Team.Enemy, foe.gameObject));
+            Assert.AreEqual(life, hp.Current, 0.01f, "o dash atravessa o golpe");
+            Assert.AreEqual(1, hero.PerfectDodges, "dois golpes no mesmo instante contam uma esquiva");
+            Assert.AreEqual(meter + PlayerController.PerfectDodgeCharge, hero.Quintessence.Meter, 0.01f, "enche a Quintessencia");
+            Assert.IsTrue(hero.PerfectCritReady);
+            for (int k = 0; k < 30 && hero.IsDashing; k++) yield return null;
+            // o proximo golpe basico e critico
+            bool crit = false;
+            GameEvents.DamageDealt += (t, info, applied) => { if (t == foe && info.IsCrit) crit = true; };
+            hero.Teleport(new Vector3(0, 0.05f, 0.8f), Vector3.forward);
+            scripted.AimPoint = foe.transform.position;
+            scripted.AttackHeld = true;
+            for (int k = 0; k < 300 && !crit; k++) yield return null;
+            scripted.AttackHeld = false;
+            Assert.IsTrue(crit, "o golpe depois da esquiva perfeita e critico");
+            Assert.IsFalse(hero.PerfectCritReady, "e so um");
+            GameFlow.StartElement = ElementType.Fire;
+            GameFlow.Layers = 8; GameFlow.Shrines = 3;
+            Time.captureFramerate = 0;
+        }
+
         [UnityTest, Timeout(600000)]
         public IEnumerator Elementals_And_The_Swarm()
         {

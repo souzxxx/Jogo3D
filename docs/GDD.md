@@ -50,6 +50,8 @@ São os heróis do Quintessence 2D. No 3D usam os corpos e as animações do pac
 
 **Fusões** (três elementos): Magma, Vapor e Lama deixam área no chão; a skill de um terceiro elemento sobre ela vira Obsidiana (Magma + Água), Incêndio (Magma + Ar), Ciclone (Vapor + Ar), Gêiser (Vapor + Terra), Barro Cozido (Lama + Fogo: quebra a armadura) ou Tempestade de Poeira (Lama + Ar: cega numa área grande).
 
+**Esquiva perfeita:** atravessar um golpe com o dash (o herói fica invulnerável durante ele) enche 8% da Quintessência e deixa o próximo golpe básico crítico. Aparece "ESQUIVA PERFEITA" sobre o herói.
+
 O quinto estado: o que os elementos eram antes de se separarem. Quem carrega os quatro e os faz reagir o bastante entra nele por alguns segundos, e nesse tempo todo golpe dispara uma reação. É a única coisa que quebra o escudo do Guardião. Ao entrar nele, cada herói solta o seu **despertar**: Rax, a Erupção do Caçador (queima tudo em volta); Liora, a Maré da Fonte (encharca e cura 15% da vida); Brann, o Rugido da Montanha (atordoa); Vey, o Olho do Vendaval (empurra longe e cega).
 
 ### O Guardião das Cinzas
