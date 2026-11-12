@@ -944,6 +944,35 @@ namespace Quintessence.Game.PlayTests
                 Assert.AreEqual(e.Definition.moveSpeed * 1.25f, e.GetComponent<UnityEngine.AI.NavMeshAgent>().speed, 0.3f);
                 Assert.AreEqual(e.Definition.maxHealth * (1f + DifficultyCurve.HealthPerLayer * 4), e.GetComponent<Health>().Max, 0.05f);
             }
+            // Protegidos: o primeiro golpe em cada um e bloqueado
+            foreach (var e in Object.FindObjectsByType<EnemyBrain>(FindObjectsSortMode.None)) Object.Destroy(e.gameObject);
+            yield return null;
+            director.StartEncounter(RoomType.Elite, 4, EliteModifier.Warded);
+            for (int k = 0; k < 90 && Object.FindObjectsByType<EnemyBrain>(FindObjectsSortMode.None).Length == 0; k++) yield return null;
+            var warded = Object.FindObjectsByType<EnemyBrain>(FindObjectsSortMode.None);
+            Assert.Greater(warded.Length, 0);
+            var wh = warded[0].GetComponent<Health>();
+            Assert.AreEqual(1, wh.Pool.Blocks, "Protegidos nascem com um bloqueio");
+            float full = wh.Current;
+            wh.TakeDamage(new DamageInfo(5f, ElementType.None, Team.Player));
+            Assert.AreEqual(full, wh.Current, 0.01f, "o primeiro golpe e bloqueado");
+            wh.TakeDamage(new DamageInfo(5f, ElementType.None, Team.Player));
+            Assert.Less(wh.Current, full, "o segundo entra");
+
+            // Voláteis: quem morre deixa uma explosao avisada no chao
+            foreach (var e in Object.FindObjectsByType<EnemyBrain>(FindObjectsSortMode.None)) Object.Destroy(e.gameObject);
+            yield return null;
+            director.StartEncounter(RoomType.Elite, 4, EliteModifier.Volatile);
+            for (int k = 0; k < 90 && Object.FindObjectsByType<EnemyBrain>(FindObjectsSortMode.None).Length == 0; k++) yield return null;
+            for (int k = 0; k < 25; k++) yield return null;
+            var vol = Object.FindObjectsByType<EnemyBrain>(FindObjectsSortMode.None).First(e => e.Definition.attack != EnemyAttackKind.Explode);
+            int blasts = 0;
+            GameEvents.Exploded += (_, _) => blasts++;
+            vol.GetComponent<Health>().TakeDamage(new DamageInfo(9999f, ElementType.None, Team.Player));
+            yield return null;
+            Assert.IsNotNull(Object.FindFirstObjectByType<VolatileBurst>(), "o Volatil deixa o circulo");
+            for (int k = 0; k < 3000 && blasts == 0; k++) yield return null; // a camera lenta do abate dura muitos quadros no teste
+            Assert.Greater(blasts, 0, "e o circulo explode");
             GameFlow.Layers = 8; GameFlow.Shrines = 3;
             Time.captureFramerate = 0;
         }

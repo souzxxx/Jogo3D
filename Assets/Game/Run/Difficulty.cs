@@ -3,12 +3,16 @@ using System;
 namespace Quintessence.Run
 {
     /// O que deixa uma sala de Elite diferente: os inimigos ganham um traco, alem de virem em tres ondas.
-    public enum EliteModifier { None, Swift, Sturdy, Fierce }
+    public enum EliteModifier { None, Swift, Sturdy, Fierce, Volatile, Warded }
 
     /// Multiplicadores aplicados aos inimigos de uma sala. 1 = como esta na ficha do inimigo.
     public struct Difficulty
     {
         public float Health, Damage, Speed, Cooldown, Size;
+        /// Ao morrer, deixa uma explosao avisada no chao.
+        public bool Volatile;
+        /// Golpes que cada inimigo bloqueia ao nascer.
+        public int Wards;
         public static Difficulty Base => new() { Health = 1f, Damage = 1f, Speed = 1f, Cooldown = 1f, Size = 1f };
     }
 
@@ -32,6 +36,8 @@ namespace Quintessence.Run
                 case EliteModifier.Swift: d.Speed = 1.25f; d.Cooldown = 0.8f; break;
                 case EliteModifier.Sturdy: d.Health *= 1.5f; break;
                 case EliteModifier.Fierce: d.Damage *= 1.3f; break;
+                case EliteModifier.Volatile: d.Volatile = true; break;
+                case EliteModifier.Warded: d.Wards = 1; d.Health *= 1.15f; break;
             }
             return d;
         }
@@ -43,7 +49,7 @@ namespace Quintessence.Run
             {
                 uint h = (uint)seed * 2654435761u ^ (uint)(nodeId + 1) * 40503u;
                 h ^= h >> 13; h *= 2246822519u; h ^= h >> 16;
-                return (EliteModifier)(1 + h % 3);
+                return (EliteModifier)(1 + h % 5);
             }
         }
 
@@ -52,6 +58,8 @@ namespace Quintessence.Run
             EliteModifier.Swift => "Velozes",
             EliteModifier.Sturdy => "Resistentes",
             EliteModifier.Fierce => "Ferozes",
+            EliteModifier.Volatile => "Voláteis",
+            EliteModifier.Warded => "Protegidos",
             _ => "",
         };
 
@@ -60,6 +68,8 @@ namespace Quintessence.Run
             EliteModifier.Swift => "andam e atacam mais rápido",
             EliteModifier.Sturdy => "têm 50% mais vida",
             EliteModifier.Fierce => "causam 30% mais dano",
+            EliteModifier.Volatile => "explodem ao morrer: saia do círculo",
+            EliteModifier.Warded => "o primeiro golpe em cada um é bloqueado",
             _ => "",
         };
     }

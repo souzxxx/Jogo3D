@@ -68,7 +68,7 @@ namespace Quintessence.Run.Tests
         }
 
         [Test]
-        public void Elite_Trait_Is_Stable_And_All_Three_Show_Up()
+        public void Elite_Trait_Is_Stable_And_All_Five_Show_Up()
         {
             var seen = new System.Collections.Generic.HashSet<EliteModifier>();
             for (int seed = 1; seed < 40; seed++)
@@ -81,7 +81,19 @@ namespace Quintessence.Run.Tests
                 Assert.IsNotEmpty(DifficultyCurve.Name(m));
                 Assert.IsNotEmpty(DifficultyCurve.Describe(m));
             }
-            Assert.AreEqual(3, seen.Count);
+            Assert.AreEqual(5, seen.Count);
+        }
+
+        [Test]
+        public void Volatile_And_Warded_Change_The_Enemies()
+        {
+            var v = DifficultyCurve.For(RoomType.Elite, 4, EliteModifier.Volatile);
+            Assert.IsTrue(v.Volatile);
+            Assert.AreEqual(0, v.Wards);
+            var w = DifficultyCurve.For(RoomType.Elite, 4, EliteModifier.Warded);
+            Assert.AreEqual(1, w.Wards);
+            Assert.IsFalse(w.Volatile);
+            Assert.IsFalse(DifficultyCurve.For(RoomType.Combat, 4).Volatile, "sala comum nao tem traco");
         }
     }
 }

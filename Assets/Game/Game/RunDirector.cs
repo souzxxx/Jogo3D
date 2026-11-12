@@ -364,7 +364,7 @@ namespace Quintessence.Game
             var diff = DifficultyCurve.For(type, depth, trait);
             diff.Health *= Ascension.HealthMult(GameFlow.Ascension);
             diff.Damage *= Ascension.DamageMult(GameFlow.Ascension);
-            spawner.Scaling = new EnemyScaling { Health = diff.Health, Damage = diff.Damage, Speed = diff.Speed, Cooldown = diff.Cooldown, Size = diff.Size };
+            spawner.Scaling = new EnemyScaling { Health = diff.Health, Damage = diff.Damage, Speed = diff.Speed, Cooldown = diff.Cooldown, Size = diff.Size, Volatile = diff.Volatile, Wards = diff.Wards };
             CurrentTrait = trait;
             if (trait != EliteModifier.None)
             {
@@ -461,6 +461,7 @@ namespace Quintessence.Game
             if (source.GetComponent<ExplosiveBarrel>() != null) return "Barril de pólvora";
             if (source.GetComponent<SpikeTrap>() != null) return "Armadilha de espinhos";
             if (source.GetComponent<EmberVent>() != null) return "Respiradouro de brasa";
+            if (source.GetComponent<VolatileBurst>() != null) return "Explosão de um Volátil";
             return "";
         }
 
