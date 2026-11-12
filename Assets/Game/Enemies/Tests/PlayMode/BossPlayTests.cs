@@ -117,6 +117,8 @@ namespace Quintessence.Enemies.PlayTests
             var bossHp = boss.GetComponent<Health>();
             Assert.IsTrue(player.Loadout.HasAll, "a cena do chefe comeca com os quatro elementos");
 
+            // teste de fluxo, nao de balanceamento: o roteiro nao sabe ler o anel nem a investida, entao leva 40% do dano
+            hp.Pool.CurseMultiplier = 0.4f;
             float limit = 240f, sinceSwitch = 0f, immuneChecked = -1f;
             bool testedImmune = false;
             while (!cleared && !hp.IsDead && limit > 0f)

@@ -24,7 +24,10 @@ namespace Quintessence.Enemies
         NavMeshAgent agent;
         readonly List<Strike> strikes = new();
         readonly List<GameObject> adds = new();
-        float spawnLeft = 1.2f, cooldown = 1.5f, busy, addTimer;
+        float spawnLeft = 1.2f, cooldown = 1.5f, busy, addTimer, chargeWait, chargeLeft;
+        Vector3 chargeDir;
+        bool chargeHit;
+        public bool IsCharging => chargeLeft > 0f;
         int attackIndex;
         bool quintessence;
         string anim;
@@ -84,6 +87,7 @@ namespace Quintessence.Enemies
         void OnDied(DamageInfo info)
         {
             strikes.Clear();
+            chargeWait = chargeLeft = 0f;
             if (agent.enabled) agent.enabled = false;
             if (TryGetComponent(out Collider c)) c.enabled = false;
             // os reforcos caem junto com o chefe: a sala nunca fica presa esperando um inimigo esquecido
@@ -119,6 +123,25 @@ namespace Quintessence.Enemies
                 if (s.Time > 0f) { strikes[i] = s; continue; }
                 strikes.RemoveAt(i);
                 Resolve(s);
+            }
+
+            if (chargeWait > 0f && (chargeWait -= dt) <= 0f)
+            {
+                chargeLeft = ClearLength(chargeDir, definition.chargeLength) / Mathf.Max(1f, definition.chargeSpeed);
+                chargeHit = false;
+            }
+            if (chargeLeft > 0f)
+            {
+                chargeLeft -= dt;
+                if (agent.enabled && agent.isOnNavMesh) agent.Move(chargeDir * (definition.chargeSpeed * dt));
+                if (!chargeHit && hasTarget && distance < definition.chargeWidth + 1.2f)
+                {
+                    chargeHit = true;
+                    target.TakeDamage(new DamageInfo(definition.chargeDamage, ElementType.None, health.Team, gameObject)
+                    {
+                        Point = target.transform.position + Vector3.up * 1.2f, Direction = chargeDir, Knockback = 10f,
+                    });
+                }
             }
 
             if (busy > 0f)
@@ -214,6 +237,32 @@ namespace Quintessence.Enemies
                     Play("Cast", 0.08f);
                     break;
                 }
+                case BossAttack.Charge:
+                {
+                    chargeDir = dir;
+                    float len = ClearLength(dir, definition.chargeLength);
+                    GameEvents.RaiseTelegraph(new TelegraphEvent
+                    {
+                        Point = transform.position, Direction = dir, Radius = definition.chargeWidth, Length = len,
+                        Duration = definition.chargeWindup, IsLine = true, Source = gameObject,
+                    });
+                    chargeWait = definition.chargeWindup;
+                    busy = definition.chargeWindup + len / Mathf.Max(1f, definition.chargeSpeed) + 0.9f; // fica exposto depois de atravessar
+                    Play("Roar", 0.08f);
+                    break;
+                }
+                case BossAttack.Ring:
+                {
+                    // dois aneis: o de dentro primeiro, o de fora logo depois. Entre eles ha uma faixa segura
+                    float turn = Random.Range(0f, 45f);
+                    foreach (var p in BossRules.RingPoints(transform.position, definition.ringRadius, definition.ringCount, turn))
+                        Circle(p, definition.ringCircleRadius, definition.ringWindup, definition.ringDamage, Vector3.up);
+                    foreach (var p in BossRules.RingPoints(transform.position, definition.ringRadius * 2.05f, definition.ringCount + 4, turn + 20f))
+                        Circle(p, definition.ringCircleRadius, definition.ringWindup + 0.55f, definition.ringDamage, Vector3.up);
+                    busy = definition.ringWindup + 0.9f;
+                    Play("Summon", 0.08f);
+                    break;
+                }
                 case BossAttack.Eruption:
                 {
                     int count = definition.eruptionCount + Phase;
@@ -228,6 +277,21 @@ namespace Quintessence.Enemies
                     break;
                 }
             }
+        }
+
+        static readonly RaycastHit[] rayHits = new RaycastHit[16];
+
+        /// Ate onde a investida vai antes de bater na parede.
+        float ClearLength(Vector3 dir, float max)
+        {
+            int n = Physics.RaycastNonAlloc(transform.position + Vector3.up * 1.3f, dir, rayHits, max, ~0, QueryTriggerInteraction.Ignore);
+            float best = max;
+            for (int i = 0; i < n; i++)
+            {
+                if (rayHits[i].collider.GetComponentInParent<Health>() != null) continue;
+                if (rayHits[i].distance < best) best = rayHits[i].distance;
+            }
+            return Mathf.Max(2f, best - 1.5f);
         }
 
         void Circle(Vector3 point, float radius, float windup, float damage, Vector3 dir)

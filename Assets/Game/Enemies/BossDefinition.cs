@@ -36,6 +36,20 @@ namespace Quintessence.Enemies
         public float eruptionWindup = 1.1f;
         public float eruptionScatter = 4.5f;
 
+        [Header("Investida: linha larga, depois ele atravessa por ela")]
+        public float chargeDamage = 20f;
+        public float chargeWidth = 1.7f;
+        public float chargeLength = 13f;
+        public float chargeWindup = 1.05f;
+        public float chargeSpeed = 26f;
+
+        [Header("Anel de cinzas: circulos em volta dele")]
+        public float ringDamage = 14f;
+        public float ringCircleRadius = 2.1f;
+        public float ringRadius = 5.7f;
+        public int ringCount = 8;
+        public float ringWindup = 1.15f;
+
         [Header("Escudo da ultima fase")]
         [Tooltip("Sem os quatro elementos nao ha Quintessencia: o escudo cai sozinho depois deste tempo, para nao travar a luta.")]
         public float shieldTimeout = 12f;

@@ -81,5 +81,26 @@ namespace Quintessence.Enemies.Tests
             s.Raise(true); s.Hit(true);
             Assert.IsFalse(s.Hit(true));
         }
+
+        [Test] public void RingPoints_AreEvenlySpacedAtTheRadius()
+        {
+            var pts = BossRules.RingPoints(new UnityEngine.Vector3(2, 0, -1), 5f, 8);
+            Assert.AreEqual(8, pts.Length);
+            foreach (var p in pts) Assert.AreEqual(5f, UnityEngine.Vector3.Distance(p, new UnityEngine.Vector3(2, 0, -1)), 0.001f);
+            Assert.AreEqual(UnityEngine.Vector3.Distance(pts[0], pts[1]), UnityEngine.Vector3.Distance(pts[3], pts[4]), 0.001f);
+        }
+
+        [Test] public void ChargeAndRing_OnlyComeAfterTheFirstPhase()
+        {
+            for (int i = 0; i < 12; i++)
+            {
+                var a = BossRules.Next(0, i, true);
+                Assert.IsTrue(a != BossAttack.Charge && a != BossAttack.Ring, "a primeira fase ensina so o basico");
+            }
+            bool charge = false, ring = false;
+            for (int i = 0; i < 12; i++) { charge |= BossRules.Next(1, i, true) == BossAttack.Charge; ring |= BossRules.Next(2, i, true) == BossAttack.Ring; }
+            Assert.IsTrue(charge, "a investida entra na segunda fase");
+            Assert.IsTrue(ring, "o anel entra na ultima");
+        }
     }
 }

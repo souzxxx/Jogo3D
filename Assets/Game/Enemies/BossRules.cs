@@ -3,7 +3,8 @@ using UnityEngine;
 
 namespace Quintessence.Enemies
 {
-    public enum BossAttack { Slam, Fan, Eruption }
+    /// Charge: investida em linha larga. Ring: anel de erupcoes em volta dele (perto do chefe ou bem longe e seguro).
+    public enum BossAttack { Slam, Fan, Eruption, Charge, Ring }
 
     /// Regras do chefe sem Unity de cena: fases, rodizio de ataques e o escudo da ultima fase.
     public static class BossRules
@@ -17,8 +18,8 @@ namespace Quintessence.Enemies
         static readonly BossAttack[][] cycles =
         {
             new[] { BossAttack.Slam, BossAttack.Slam, BossAttack.Fan },
-            new[] { BossAttack.Slam, BossAttack.Fan, BossAttack.Eruption },
-            new[] { BossAttack.Fan, BossAttack.Eruption, BossAttack.Slam, BossAttack.Eruption },
+            new[] { BossAttack.Slam, BossAttack.Charge, BossAttack.Fan, BossAttack.Eruption },
+            new[] { BossAttack.Fan, BossAttack.Ring, BossAttack.Eruption, BossAttack.Charge, BossAttack.Slam, BossAttack.Eruption },
         };
 
         /// Ataque numero index da fase. Longe demais para a Pancada, troca pelo Leque.
@@ -27,6 +28,15 @@ namespace Quintessence.Enemies
             var cycle = cycles[Mathf.Clamp(phase, 0, cycles.Length - 1)];
             var a = cycle[((index % cycle.Length) + cycle.Length) % cycle.Length];
             return a == BossAttack.Slam && !inSlamRange ? BossAttack.Fan : a;
+        }
+
+        /// Pontos do anel: count circulos igualmente espacados a radius do centro.
+        public static Vector3[] RingPoints(Vector3 center, float radius, int count, float startDegrees = 0f)
+        {
+            var pts = new Vector3[Math.Max(1, count)];
+            for (int i = 0; i < pts.Length; i++)
+                pts[i] = center + Quaternion.Euler(0f, startDegrees + 360f * i / pts.Length, 0f) * Vector3.forward * radius;
+            return pts;
         }
 
         /// Direcoes do leque, simetricas em torno de forward.
