@@ -436,6 +436,64 @@ public static class EnemyDevSceneBuilder
         dress = default;
     }
 
+    /// Cinzento (enxame), Brasa Viva (elemental de Fogo) e Sentinela de Pedra (torre de Terra). Chamar depois de Prefabs.
+    /// Usa as pecas de Assets/Art/Enemies2 quando existirem; sem elas, so a tinta e a escala.
+    public static void ElementalPrefabs(out GameObject swarm, out GameObject ember, out GameObject sentinel)
+    {
+        const string minionFbx = KK + "Skeletons/Characters/Skeleton_Minion.fbx";
+        const string warriorFbx = KK + "Skeletons/Characters/Skeleton_Warrior.fbx";
+        const string mageFbx = KK + "Skeletons/Characters/Skeleton_Mage.fbx";
+        var swarmCtrl = CombatDevSceneBuilder.Controller(minionFbx, Dir + "Animation/Cinzento.controller",
+            ("Idle", "Idle_Combat|Idle", 0f), ("Run", "Running_A", 0f), ("Attack", "1H_Melee_Attack_Stab|1H_Melee_Attack_Chop", 0.6f),
+            ("Hit", "Hit_A|Hit_B", 0.25f), ("Death", "Death_A", 0f), ("Spawn", "Spawn_Ground|Skeletons_Awaken_Standing|Idle", 0.6f));
+        var emberCtrl = CombatDevSceneBuilder.Controller(warriorFbx, Dir + "Animation/BrasaViva.controller",
+            ("Idle", "Idle_Combat|Idle", 0f), ("Run", "Running_A|Walking_A", 0f), ("Attack", "1H_Melee_Attack_Chop|2H_Melee_Attack_Chop", 0.8f),
+            ("Hit", "Hit_A|Hit_B", 0.3f), ("Death", "Death_B|Death_A", 0f), ("Spawn", "Spawn_Ground|Skeletons_Awaken_Standing|Idle", 0.7f));
+        var sentinelCtrl = CombatDevSceneBuilder.Controller(mageFbx, Dir + "Animation/Sentinela.controller",
+            ("Idle", "Idle_Combat|Idle", 0f), ("Run", "Idle_Combat|Idle", 0f), ("Attack", "Spellcast_Shoot|Spellcast_Long", 0.75f),
+            ("Hit", "Hit_A|Hit_B", 0.3f), ("Death", "Death_A", 0f), ("Spawn", "Spawn_Ground|Skeletons_Awaken_Standing|Idle", 0.7f));
+
+        var swarmDef = Asset<EnemyDefinition>("Cinzento", d =>
+        {
+            d.displayName = "Cinzento"; d.maxHealth = 10; d.moveSpeed = 5.6f;
+            d.attack = EnemyAttackKind.Melee; d.damage = 4; d.knockback = 1.5f;
+            d.attackRange = 1.6f; d.telegraphTime = 0.45f; d.recoverTime = 0.4f; d.cooldown = 1.1f;
+            d.strikeOffset = 1f; d.strikeRadius = 1f;
+        });
+        var emberDef = Asset<EnemyDefinition>("BrasaViva", d =>
+        {
+            d.displayName = "Brasa Viva"; d.maxHealth = 44; d.moveSpeed = 3.8f;
+            d.attack = EnemyAttackKind.Melee; d.damage = 11; d.knockback = 5; d.element = ElementType.Fire;
+            d.attackRange = 2.4f; d.telegraphTime = 0.65f; d.recoverTime = 0.55f; d.cooldown = 1.6f;
+            d.strikeOffset = 1.6f; d.strikeRadius = 1.7f;
+            d.affinity = ElementType.Fire; d.burstOnDeath = true;
+        });
+        var sentinelDef = Asset<EnemyDefinition>("Sentinela", d =>
+        {
+            d.displayName = "Sentinela de Pedra"; d.maxHealth = 46; d.moveSpeed = 0f;
+            d.attack = EnemyAttackKind.Projectile; d.damage = 8; d.knockback = 2; d.element = ElementType.Earth;
+            d.attackRange = 13f; d.telegraphTime = 0.7f; d.recoverTime = 0.3f; d.cooldown = 1.7f;
+            d.projectileSpeed = 12f; d.projectileRange = 16f; d.keepDistance = 0f;
+            d.affinity = ElementType.Earth; d.immovable = true;
+        });
+        if (sentinelDef.projectilePrefab == null) { sentinelDef.projectilePrefab = ProjectilePrefab(); EditorUtility.SetDirty(sentinelDef); }
+
+        AssetDatabase.Refresh();
+        bool art = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Art/Enemies2/brasa_head.fbx") != null;
+        if (art) HeroBuilder.MatteParts("Assets/Art/Enemies2");
+        const string tex = KK + "Skeletons/Characters/skeleton_texture.png";
+        var ash = LookDevBuilder.Mat("SkeletonSwarm", tex, new Color(0.62f, 0.6f, 0.62f), Color.black, 0f);
+        var coal = LookDevBuilder.Mat("SkeletonEmber", tex, new Color(1.05f, 0.58f, 0.42f), Color.black, 0f);
+        var moss = LookDevBuilder.Mat("SkeletonSentinel", tex, new Color(0.66f, 0.76f, 0.62f), Color.black, 0f);
+        dress = art ? (new[] { ("cinzento_head", "head"), ("cinzento_back", "chest"), ("cinzento_weapon", "handslot.r") }, new string[0]) : default;
+        swarm = EnemyPrefab("Cinzento", "Skeletons/Characters/Skeleton_Minion.fbx", swarmDef, swarmCtrl, ash, 0.65f);
+        dress = art ? (new[] { ("brasa_head", "head"), ("brasa_body", "chest"), ("brasa_weapon", "handslot.r") }, new[] { "Skeleton_Warrior_Helmet" }) : default;
+        ember = EnemyPrefab("BrasaViva", "Skeletons/Characters/Skeleton_Warrior.fbx", emberDef, emberCtrl, coal, 1.1f);
+        dress = art ? (new[] { ("sentinela_head", "head"), ("sentinela_back", "chest"), ("sentinela_base", "root"), ("sentinela_weapon", "handslot.r") }, new[] { "Skeleton_Mage_Hat" }) : default;
+        sentinel = EnemyPrefab("Sentinela", "Skeletons/Characters/Skeleton_Mage.fbx", sentinelDef, sentinelCtrl, moss, 1.25f);
+        dress = default;
+    }
+
     static T Asset<T>(string name, System.Action<T> init) where T : ScriptableObject
     {
         string path = Dir + "Data/" + name + ".asset";
@@ -489,7 +547,12 @@ public static class EnemyDevSceneBuilder
             model.transform.localScale = Vector3.one;
             foreach (var r in model.GetComponentsInChildren<Renderer>(true))
                 if (System.Array.IndexOf(dress.hide, r.name) >= 0) r.gameObject.SetActive(false);
-            foreach (var (partFile, partBone) in dress.parts) HeroBuilder.Attach(model, "Assets/Art/Enemies/" + partFile + ".fbx", partBone);
+            foreach (var (partFile, partBone) in dress.parts)
+            {
+                string partPath = "Assets/Art/Enemies/" + partFile + ".fbx";
+                if (AssetDatabase.LoadAssetAtPath<GameObject>(partPath) == null) partPath = "Assets/Art/Enemies2/" + partFile + ".fbx";
+                if (AssetDatabase.LoadAssetAtPath<GameObject>(partPath) != null) HeroBuilder.Attach(model, partPath, partBone);
+            }
         }
         model.transform.SetParent(go.transform, false);
         model.transform.localScale = Vector3.one * scale;

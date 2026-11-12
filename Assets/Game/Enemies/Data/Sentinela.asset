@@ -1,0 +1,42 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a9cf8aada748e4833867add4efcb33fc, type: 3}
+  m_Name: Sentinela
+  m_EditorClassIdentifier: Quintessence.Enemies::Quintessence.Enemies.EnemyDefinition
+  displayName: Sentinela de Pedra
+  maxHealth: 46
+  moveSpeed: 0
+  armored: 0
+  armoredDamageTaken: 0.4
+  attack: 1
+  damage: 8
+  knockback: 2
+  attackRange: 13
+  telegraphTime: 0.7
+  recoverTime: 0.3
+  cooldown: 1.7
+  element: 3
+  strikeOffset: 1.5
+  strikeRadius: 1.5
+  explosionDamageToEnemies: 12
+  affinity: 3
+  immovable: 1
+  burstOnDeath: 0
+  chargeDistance: 8
+  chargeSpeed: 22
+  chargeWidth: 0.9
+  healAmount: 14
+  healRadius: 6
+  projectilePrefab: {fileID: 5285576411816299366, guid: 6590da6c767a740e79055b4304b1f88e, type: 3}
+  projectileSpeed: 12
+  projectileRange: 16
+  keepDistance: 0

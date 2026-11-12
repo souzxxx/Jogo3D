@@ -1,0 +1,42 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a9cf8aada748e4833867add4efcb33fc, type: 3}
+  m_Name: Cinzento
+  m_EditorClassIdentifier: Quintessence.Enemies::Quintessence.Enemies.EnemyDefinition
+  displayName: Cinzento
+  maxHealth: 10
+  moveSpeed: 5.6
+  armored: 0
+  armoredDamageTaken: 0.4
+  attack: 0
+  damage: 4
+  knockback: 1.5
+  attackRange: 1.6
+  telegraphTime: 0.45
+  recoverTime: 0.4
+  cooldown: 1.1
+  element: 0
+  strikeOffset: 1
+  strikeRadius: 1
+  explosionDamageToEnemies: 12
+  affinity: 0
+  immovable: 0
+  burstOnDeath: 0
+  chargeDistance: 8
+  chargeSpeed: 22
+  chargeWidth: 0.9
+  healAmount: 14
+  healRadius: 6
+  projectilePrefab: {fileID: 0}
+  projectileSpeed: 11
+  projectileRange: 16
+  keepDistance: 6

@@ -1,0 +1,42 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a9cf8aada748e4833867add4efcb33fc, type: 3}
+  m_Name: BrasaViva
+  m_EditorClassIdentifier: Quintessence.Enemies::Quintessence.Enemies.EnemyDefinition
+  displayName: Brasa Viva
+  maxHealth: 44
+  moveSpeed: 3.8
+  armored: 0
+  armoredDamageTaken: 0.4
+  attack: 0
+  damage: 11
+  knockback: 5
+  attackRange: 2.4
+  telegraphTime: 0.65
+  recoverTime: 0.55
+  cooldown: 1.6
+  element: 1
+  strikeOffset: 1.6
+  strikeRadius: 1.7
+  explosionDamageToEnemies: 12
+  affinity: 1
+  immovable: 0
+  burstOnDeath: 1
+  chargeDistance: 8
+  chargeSpeed: 22
+  chargeWidth: 0.9
+  healAmount: 14
+  healRadius: 6
+  projectilePrefab: {fileID: 0}
+  projectileSpeed: 11
+  projectileRange: 16
+  keepDistance: 6

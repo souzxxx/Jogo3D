@@ -37,6 +37,7 @@ namespace Quintessence.Enemies
             if (Scaling.Health != 1f) health.Pool.SetMax(health.Max * Scaling.Health);
             if (Scaling.Size != 1f) transform.localScale *= Scaling.Size;
             if (Scaling.Wards > 0) health.Pool.Blocks = Scaling.Wards;
+            if (definition.affinity != ElementType.None) (GetComponent<ElementalAffinity>() ?? gameObject.AddComponent<ElementalAffinity>()).Set(definition.affinity);
             fsm = new EnemyFsm(definition.telegraphTime, definition.recoverTime, definition.cooldown * Scaling.Cooldown, definition.attackRange);
             agent.speed = definition.moveSpeed * Scaling.Speed;
             agent.updateRotation = false;
@@ -101,7 +102,7 @@ namespace Quintessence.Enemies
 
         void OnDamaged(DamageInfo info, float applied)
         {
-            knock += info.Direction * info.Knockback;
+            if (!definition.immovable) knock += info.Direction * info.Knockback;
             // recua ao apanhar, mas so enquanto persegue: golpe ja avisado nao e cortado pela animacao
             if (health.IsDead || fsm.Phase != EnemyPhase.Chase || applied <= 0f) return;
             anim = null;
@@ -117,7 +118,7 @@ namespace Quintessence.Enemies
             if (agent.enabled) agent.enabled = false;
             if (body != null) body.enabled = false;
             Play("Death", 0.05f);
-            if (Scaling.Volatile && definition.attack != EnemyAttackKind.Explode) VolatileBurst.Spawn(transform.position, 2f, 0.85f, Damage * 0.7f);
+            if ((Scaling.Volatile || definition.burstOnDeath) && definition.attack != EnemyAttackKind.Explode) VolatileBurst.Spawn(transform.position, 2f, 0.85f, Damage * 0.7f);
             Destroy(gameObject, 1.5f);
         }
 

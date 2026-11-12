@@ -40,6 +40,14 @@ namespace Quintessence.Enemies
         [Tooltip("So para Explode: dano nos outros inimigos pegos na explosao.")]
         public float explosionDamageToEnemies = 12f;
 
+        [Header("Elemental")]
+        [Tooltip("Resiste a este elemento e e fraco ao que o vence. None = comum.")]
+        public ElementType affinity = ElementType.None;
+        [Tooltip("Nao e empurrado (Sentinela).")]
+        public bool immovable;
+        [Tooltip("Ao morrer, estoura em brasas num circulo avisado (Brasa Viva).")]
+        public bool burstOnDeath;
+
         [Header("Investida")]
         public float chargeDistance = 8f;
         public float chargeSpeed = 22f;
