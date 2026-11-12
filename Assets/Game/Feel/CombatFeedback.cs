@@ -88,6 +88,7 @@ namespace Quintessence.Feel
             GameEvents.BossPhaseChanged += OnBossPhase;
             GameEvents.BossShieldChanged += OnBossShield;
             GameEvents.Exploded += OnExploded;
+            GameEvents.PuddleLanded += OnPuddle;
             GameEvents.EnemyHealed += OnEnemyHealed;
             GameEvents.ChampionSpawned += OnChampion;
             GameEvents.Evaded += OnEvaded;
@@ -119,6 +120,7 @@ namespace Quintessence.Feel
             GameEvents.BossPhaseChanged -= OnBossPhase;
             GameEvents.BossShieldChanged -= OnBossShield;
             GameEvents.Exploded -= OnExploded;
+            GameEvents.PuddleLanded -= OnPuddle;
             GameEvents.EnemyHealed -= OnEnemyHealed;
             GameEvents.ChampionSpawned -= OnChampion;
             GameEvents.Evaded -= OnEvaded;
@@ -259,7 +261,8 @@ namespace Quintessence.Feel
             if (e.Source != null) telegraphs[e.Source] = v;
             // a bomba some junto com o aviso se o arremessador for interrompido
             if (e.Lobbed && e.Source != null)
-                LobbedBomb.Spawn(e.Source.transform.position + Vector3.up * 1.6f, e.Point + Vector3.up * 0.2f, e.Duration, flatMaterial).transform.SetParent(v.transform, true);
+                LobbedBomb.Spawn(e.Source.transform.position + Vector3.up * 1.6f, e.Point + Vector3.up * 0.2f, e.Duration, flatMaterial,
+                    e.Element == ElementType.Water ? new Color(0.2f, 0.42f, 0.5f) : new Color(0.16f, 0.14f, 0.15f)).transform.SetParent(v.transform, true);
         }
 
         void OnTelegraphCancelled(GameObject source)
@@ -418,6 +421,18 @@ namespace Quintessence.Feel
             var p = target.transform.position + Vector3.up * 1.4f;
             DamageNumber.Spawn(p + Vector3.up * 1.2f, "+" + Mathf.RoundToInt(amount), green, 0.8f, 0.9f);
             accents?.Emit(ElementType.Air, p, Vector3.up, 60f, 10, 2.5f, green);
+        }
+
+        /// Orbe d'agua caindo: respingo e anel da cor do elemento, sem clarao de fogo.
+        void OnPuddle(Vector3 point, float radius, ElementType element, float seconds)
+        {
+            var c = ElementColors.Of(element);
+            var p = point + Vector3.up * 0.5f;
+            Ring(p, 60, radius / 0.3f, 0.5f, 0.9f, 0.4f, c);
+            accents?.Emit(element, p, Vector3.up, 120f, 24, radius * 1.4f);
+            Burst(p, Vector3.up, 70f, 40, 2f, 7f, 0.25f, 0.6f, 0.5f, c);
+            Sfx.Play("cast_water");
+            CameraShake.Add(0.25f);
         }
 
         void OnExploded(Vector3 point, float radius)

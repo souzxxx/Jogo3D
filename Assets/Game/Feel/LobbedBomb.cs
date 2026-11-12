@@ -9,13 +9,15 @@ namespace Quintessence.Feel
         float duration, t, height;
         Material material;
 
-        public static LobbedBomb Spawn(Vector3 from, Vector3 to, float duration, Material flat)
+        public static LobbedBomb Spawn(Vector3 from, Vector3 to, float duration, Material flat) => Spawn(from, to, duration, flat, new Color(0.16f, 0.14f, 0.15f));
+
+        public static LobbedBomb Spawn(Vector3 from, Vector3 to, float duration, Material flat, Color color)
         {
             var go = GameObject.CreatePrimitive(PrimitiveType.Sphere);
             Destroy(go.GetComponent<Collider>());
             go.name = "LobbedBomb";
             go.transform.localScale = Vector3.one * 0.55f;
-            var m = new Material(flat) { color = new Color(0.16f, 0.14f, 0.15f) };
+            var m = new Material(flat) { color = color };
             go.GetComponent<Renderer>().material = m;
             var b = go.AddComponent<LobbedBomb>();
             b.material = m;
