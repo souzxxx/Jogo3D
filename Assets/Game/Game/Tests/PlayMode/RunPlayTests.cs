@@ -1444,10 +1444,11 @@ namespace Quintessence.Game.PlayTests
             life = hp.Current;
             hp.TakeDamage(new DamageInfo(12f, ElementType.None, Team.Enemy, foe.gameObject));
             hp.TakeDamage(new DamageInfo(12f, ElementType.None, Team.Enemy, foe.gameObject));
-            Assert.AreEqual(life, hp.Current, 0.01f, "o dash atravessa o golpe");
+            Assert.GreaterOrEqual(hp.Current, life, "o dash atravessa o golpe (nenhum dano entra)");
             Assert.AreEqual(1, hero.PerfectDodges, "dois golpes no mesmo instante contam uma esquiva");
             Assert.AreEqual(meter + PlayerController.PerfectDodgeCharge, hero.Quintessence.Meter, 0.01f, "enche a Quintessencia");
             Assert.IsTrue(hero.PerfectCritReady);
+            Assert.Greater(hp.Current, life, "Vey: a esquiva perfeita cura (Passo de Brisa)");
             for (int k = 0; k < 30 && hero.IsDashing; k++) yield return null;
             // o proximo golpe basico e critico
             bool crit = false;
