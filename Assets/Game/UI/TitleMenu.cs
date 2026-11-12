@@ -199,7 +199,7 @@ namespace Quintessence.UI
             UiKit.Text(UiKit.Rect("Pick", root, new Vector2(0.5f, 0.5f), new Vector2(0, -138), new Vector2(1000, 40)), "ESCOLHA SEU HERÓI", 26, UiKit.Dim);
 
             string[] names = { "Rax", "Liora", "Brann", "Vey" };
-            string[] notes = { "Fogo · Labareda\no ataque", "Água · Maré\ncura e controle", "Terra · Pilar de Pedra\nproteção", "Ar · Vendaval\na fuga" };
+            string[] notes = { "Fogo · Labareda\n+15% no combo básico", "Água · Maré\ncura ao limpar a sala", "Terra · Pilar de Pedra\n+20 de vida máxima", "Ar · Vendaval\nmais veloz, dash rápido" };
             string[] iconNames = { "fire", "water", "earth", "air" };
             var mid = new Vector2(0.5f, 0.5f);
             for (int i = 0; i < 4; i++)

@@ -540,6 +540,13 @@ namespace Quintessence.UI
             var title = UiKit.Text(UiKit.Rect("Title", box, new Vector2(0.5f, 1), new Vector2(0, -34), new Vector2(900, 70)), "INVENTÁRIO", 56, UiKit.Paper);
             title.font = GameFonts.Title;
 
+            if (hero != null && hero.AwakenedElements.Count > 0)
+            {
+                var first = hero.AwakenedElements[0];
+                UiKit.Text(UiKit.Rect("Hero", box, new Vector2(0.5f, 1), new Vector2(0, -92), new Vector2(1200, 30)),
+                    $"{HeroPassives.HeroName(first)}  ·  {HeroPassives.Title(first)}: {HeroPassives.Describe(first)}", 22, Color.Lerp(ElementColors.Of(first), UiKit.Cream, 0.5f), TextAnchor.MiddleCenter, false);
+            }
+
             // coluna da esquerda: as quatro skills
             UiKit.Text(UiKit.Rect("H1", box, new Vector2(0, 1), new Vector2(60, -130), new Vector2(560, 34)), "SKILLS ELEMENTAIS", 24, UiKit.Dim, TextAnchor.MiddleLeft);
             string[] role =

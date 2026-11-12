@@ -179,6 +179,7 @@ namespace Quintessence.Game
             talentRng = new System.Random(GameFlow.Seed ^ 0x5f3759df);
             startTime = Time.time;
             // melhorias permanentes do Refugio entram antes da primeira sala
+            HeroPassives.Apply(GameFlow.StartElement, player.Modifiers);
             MetaStore.Current.ApplyTo(player.Modifiers);
             ApplyMaxHealth();
             Run.AddEssence(MetaStore.Current.StartEssence);
@@ -305,6 +306,7 @@ namespace Quintessence.Game
                 Feel.DamageNumber.Spawn(player.transform.position + Vector3.up * 3.6f,
                     $"ELITE {DifficultyCurve.Name(trait).ToUpperInvariant()}: {DifficultyCurve.Describe(trait)}", new Color(0.86f, 0.62f, 0.34f), 1f, 2.6f);
             }
+            spawner.Champion = type == RoomType.Elite;
             spawner.Run(BuildWaves(EncounterPlanner.Plan(type, depth)));
         }
 
@@ -534,7 +536,9 @@ namespace Quintessence.Game
             bool boss = enemy.GetComponent<BossBrain>() != null;
             float baseHealth = brain != null && brain.Definition != null ? brain.Definition.maxHealth : enemy.Max;
             Run.Kills++;
-            int levels = Run.Progress.AddXp(Mathf.RoundToInt(Progression.XpForEnemy(baseHealth, boss) * player.Modifiers.XpMult));
+            bool champion = enemy.GetComponent<Champion>() != null;
+            if (champion) { Run.AddEssence(Mathf.RoundToInt(15 * player.Modifiers.EssenceMult)); hud.SetEssence(Run.Essence); }
+            int levels = Run.Progress.AddXp(Mathf.RoundToInt(Progression.XpForEnemy(baseHealth, boss) * (champion ? 3 : 1) * player.Modifiers.XpMult));
             if (levels <= 0) return;
             Sfx.Play("pickup");
             Feel.DamageNumber.Spawn(player.transform.position + Vector3.up * 3.9f, "NÍVEL " + Run.Progress.Level + "!", new Color(0.9f, 0.76f, 0.42f), 1.3f, 1.8f);
