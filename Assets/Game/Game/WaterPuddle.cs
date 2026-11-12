@@ -53,6 +53,8 @@ namespace Quintessence.Game
                 if (h.Team == Team.Player) { StatusHolder.GetOrAdd(h).Apply(StatusType.Soaked, 1f, Team.Enemy, gameObject); continue; }
                 // so criatura: barril e boneco nao ficam marcados
                 if (h.GetComponent<UnityEngine.AI.NavMeshAgent>() == null) continue;
+                // quem e do mesmo elemento (Afogado, Rainha) nao fica marcado pela propria agua
+                if (h.TryGetComponent(out ElementalAffinity own) && own.Element == element) continue;
                 var mark = h.GetComponent<ElementMark>();
                 if (mark == null) mark = h.gameObject.AddComponent<ElementMark>();
                 if (mark.State.HasMark && mark.State.Element != element) continue;
