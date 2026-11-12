@@ -87,6 +87,7 @@ namespace Quintessence.Feel
             GameEvents.BossShieldChanged += OnBossShield;
             GameEvents.Exploded += OnExploded;
             GameEvents.EnemyHealed += OnEnemyHealed;
+            GameEvents.ChampionSpawned += OnChampion;
             GameEvents.RoomCleared += OnRoomCleared;
             GameEvents.Shattered += OnShattered;
             GameEvents.QuintessenceActiveChanged += OnQuintessence;
@@ -116,6 +117,7 @@ namespace Quintessence.Feel
             GameEvents.BossShieldChanged -= OnBossShield;
             GameEvents.Exploded -= OnExploded;
             GameEvents.EnemyHealed -= OnEnemyHealed;
+            GameEvents.ChampionSpawned -= OnChampion;
             GameEvents.RoomCleared -= OnRoomCleared;
             GameEvents.Shattered -= OnShattered;
             GameEvents.QuintessenceActiveChanged -= OnQuintessence;
@@ -340,6 +342,19 @@ namespace Quintessence.Feel
             Burst(p, Vector3.up, 180f, 50, 4f, 11f, 0.25f, 0.6f, 0.5f, Steel);
             LightFlash(p, Steel, 8f, 6f, 0.3f);
             CameraShake.Add(0.4f);
+        }
+
+        /// Campeao de Elite: anuncio e uma luz ambar que o acompanha.
+        void OnChampion(Health champion)
+        {
+            if (champion == null) return;
+            var amber = new Color(0.9f, 0.62f, 0.28f);
+            DamageNumber.Spawn(champion.transform.position + Vector3.up * 3.6f, "CAMPEÃO", amber, 1.3f, 2f);
+            var l = new GameObject("ChampionLight").AddComponent<Light>();
+            l.transform.SetParent(champion.transform, false);
+            l.transform.localPosition = new Vector3(0, 2.2f, 0);
+            l.type = LightType.Point; l.color = amber; l.intensity = 2.4f; l.range = 5f;
+            CameraShake.Add(0.35f);
         }
 
         /// Cura do Xama: numero verde e um sopro de folhas no aliado curado.

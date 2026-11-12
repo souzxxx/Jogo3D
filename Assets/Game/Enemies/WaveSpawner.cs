@@ -36,6 +36,9 @@ namespace Quintessence.Enemies
         /// Vale para quem nascer daqui em diante. A run define antes de cada sala.
         public EnemyScaling Scaling { get; set; } = EnemyScaling.None;
         bool announcedClear;
+        /// A ultima onda traz um Campeao: um inimigo maior, com mais que o dobro de vida, que paga mais.
+        public bool Champion { get; set; }
+        public Health LastChampion { get; private set; }
         [Tooltip("Segundos de luta sem ninguem levar dano ate os inimigos serem trazidos para perto do heroi.")]
         [SerializeField] float stallSeconds = 25f;
         StallTimer stall;
@@ -108,7 +111,17 @@ namespace Quintessence.Enemies
                 for (int i = 0; i < entry.count; i++)
                 {
                     var pos = PickPoint(offset + 360f * k++ / Mathf.Max(1, total));
+                    bool champion = Champion && index == waves.Count - 1 && k == 1;
+                    var keep = Scaling;
+                    if (champion) Scaling = new EnemyScaling { Health = keep.Health * 2.4f, Damage = keep.Damage * 1.15f, Speed = keep.Speed, Cooldown = keep.Cooldown, Size = keep.Size * 1.3f };
                     var go = Instantiate(entry.prefab, pos, Quaternion.identity, transform);
+                    Scaling = keep;
+                    if (champion)
+                    {
+                        go.AddComponent<Champion>();
+                        LastChampion = go.GetComponent<Health>();
+                        GameEvents.RaiseChampionSpawned(LastChampion);
+                    }
                     if (player != null)
                     {
                         var look = player.position - pos; look.y = 0f;
