@@ -49,6 +49,10 @@ namespace Quintessence.UI
             xpRoot.gameObject.SetActive(p != null);
         }
 
+        int[] ranks;
+        /// Graus das skills (do Santuario), para a barra mostrar II e III.
+        public void SetRanks(int[] skillRanks) => ranks = skillRanks;
+
         public bool LevelUpVisible => levelPanel != null && levelPanel.gameObject.activeSelf;
 
         static string TalentIcon(Talent t) => t.Second != ElementType.None ? "boon_reaction" : t.Element != ElementType.None ? SkillIcon[(int)t.Element] : t.Effect switch
@@ -331,6 +335,8 @@ namespace Quintessence.UI
                 t.Cooldown.fillAmount = cd;
                 t.Ring.color = usable ? Color.Lerp(c, UiKit.Cream, 0.35f) : new Color(1, 1, 1, 0.15f);
                 t.Key.color = has ? UiKit.Cream : UiKit.Dim;
+                int rank = ranks != null && i + 1 < ranks.Length ? ranks[i + 1] : 1;
+                t.Key.text = rank > 1 ? $"{i + 1} · {RunState.Roman(rank)}" : (i + 1).ToString();
                 // acabou de usar: mostra o nome da skill por um instante
                 if (has && cd > lastCd[i] + 0.5f) { skillLabel.text = SkillName[i + 1]; skillLabel.color = Color.Lerp(c, UiKit.Cream, 0.4f); skillLabelLeft = 1.4f; }
                 lastCd[i] = cd;

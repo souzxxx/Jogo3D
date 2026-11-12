@@ -235,6 +235,7 @@ namespace Quintessence.Game
             rng = new System.Random(GameFlow.Seed);
             hud.SetBoons(Run.Boons);
             hud.SetProgress(Run.Progress, Run.Talents);
+            hud.SetRanks(Run.SkillRank);
             talentRng = new System.Random(GameFlow.Seed ^ 0x5f3759df);
             startTime = Time.time;
             // melhorias permanentes do Refugio entram antes da primeira sala
@@ -765,7 +766,7 @@ namespace Quintessence.Game
                 if (shrinePrefab != null) Instantiate(shrinePrefab, root.transform).transform.localPosition = Vector3.zero;
                 Medal(root.transform, new Vector3(0, top + 0.75f, 0), "skill_" + e.ToString().ToLowerInvariant(), c, 1.05f);
                 Label(root.transform, new Vector3(0, top + 2.35f, 0), skills[(int)e] + " " + RunState.Roman(next), Cream, 0.72f);
-                Label(root.transform, new Vector3(0, top + 1.75f, 0), "+30% de dano\nrecarga 10% menor", new Color(0.8f, 0.76f, 0.7f), 0.5f);
+                Label(root.transform, new Vector3(0, top + 1.75f, 0), next == RunState.MaxSkillRank ? "+30% de dano e " + RunState.Signature(e) : "+30% de dano\nrecarga 10% menor", new Color(0.8f, 0.76f, 0.7f), 0.5f);
                 Glow(root.transform, new Vector3(0, top + 0.7f, -0.7f), c, 1.4f);
                 later.Add(new Interactable
                 {

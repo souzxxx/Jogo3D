@@ -137,6 +137,13 @@ namespace Quintessence.Run.Tests
             Assert.AreEqual(0.81f, m.SkillCooldown(ElementType.Fire), 0.001f);
             Assert.AreEqual(1f, m.Damage(ElementType.Water), 0.001f, "so a skill aprofundada muda");
             Assert.AreEqual("III", RunState.Roman(3));
+            Assert.Greater(m.FireTrailSeconds, 0f, "Labareda III deixa o chao em chamas");
+            var air = new HeroModifiers();
+            run.Deepen(ElementType.Air, air);
+            Assert.AreEqual(0, air.DashChargesAdd, "grau II e so numero");
+            run.Deepen(ElementType.Air, air);
+            Assert.AreEqual(1, air.DashChargesAdd, "Vendaval III da mais uma carga de dash");
+            foreach (var e in Elements.All) Assert.IsNotEmpty(RunState.Signature(e));
         }
 
         [Test] public void ReactionTalents_NeedBothElements_AndBoostOnlyTheirPair()

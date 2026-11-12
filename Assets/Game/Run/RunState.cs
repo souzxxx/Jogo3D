@@ -28,8 +28,27 @@ namespace Quintessence.Run
             SkillRank[i]++;
             mods.AddElementDamage(e, RankDamage);
             mods.ScaleSkillCooldown(e, RankCooldown);
+            // grau III: a skill ganha um efeito de assinatura, nao so numero
+            if (SkillRank[i] == MaxSkillRank)
+                switch (e)
+                {
+                    case Quintessence.Core.ElementType.Fire: mods.FireTrailSeconds += 2.5f; break;
+                    case Quintessence.Core.ElementType.Water: mods.WaterFreezeSeconds += 1f; break;
+                    case Quintessence.Core.ElementType.Earth: mods.EarthBlocksAdd += 1; mods.EarthThorns += 10f; break;
+                    case Quintessence.Core.ElementType.Air: mods.DashChargesAdd += 1; break;
+                }
             return true;
         }
+
+        /// O que o grau III acrescenta a skill de cada elemento.
+        public static string Signature(Quintessence.Core.ElementType e) => e switch
+        {
+            Quintessence.Core.ElementType.Fire => "deixa o chão em chamas",
+            Quintessence.Core.ElementType.Water => "congela quem acerta",
+            Quintessence.Core.ElementType.Earth => "bloqueia 2 golpes e devolve dano",
+            Quintessence.Core.ElementType.Air => "+1 carga de dash",
+            _ => "",
+        };
 
         public static string Roman(int rank) => rank switch { 1 => "I", 2 => "II", 3 => "III", _ => rank.ToString() };
         /// Trocas de oferta de talento que ainda restam nesta run.
