@@ -4,7 +4,9 @@ using UnityEngine;
 namespace Quintessence.Enemies
 {
     /// Explode: avisa um circulo em volta de si, explode (fere heroi e outros inimigos) e morre.
-    public enum EnemyAttackKind { Melee, Projectile, Explode }
+    /// Charge: avisa uma linha e corre por ela. Lob: avisa um circulo onde o heroi esta e a bomba cai ali.
+    /// Heal: cura os aliados feridos em volta; sem ninguem para curar, atira.
+    public enum EnemyAttackKind { Melee, Projectile, Explode, Charge, Lob, Heal }
 
     /// Numeros de um tipo de inimigo.
     [CreateAssetMenu(menuName = "Quintessence/Enemy Definition")]
@@ -37,6 +39,16 @@ namespace Quintessence.Enemies
         public float strikeRadius = 1.5f;
         [Tooltip("So para Explode: dano nos outros inimigos pegos na explosao.")]
         public float explosionDamageToEnemies = 12f;
+
+        [Header("Investida")]
+        public float chargeDistance = 8f;
+        public float chargeSpeed = 22f;
+        [Tooltip("Meia largura do corredor da investida.")]
+        public float chargeWidth = 0.9f;
+
+        [Header("Cura")]
+        public float healAmount = 14f;
+        public float healRadius = 6f;
 
         [Header("Projetil")]
         public GameObject projectilePrefab;

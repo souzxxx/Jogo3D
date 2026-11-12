@@ -40,6 +40,8 @@ namespace Quintessence.Core
         public float Length;
         public float Duration;
         public bool IsLine;
+        /// Nao e ataque no heroi (cura do Xama): desenha em verde.
+        public bool Friendly;
         public GameObject Source;
     }
 
@@ -88,6 +90,8 @@ namespace Quintessence.Core
         public static event Action<Vector3, float> Exploded;
         /// (indice da onda comecando em 0, total de ondas)
         public static event Action<int, int> WaveStarted;
+        /// Um inimigo curou outro: (quem recebeu, quanto).
+        public static event Action<Health, float> EnemyHealed;
         /// (anterior, novo)
         public static event Action<ElementType, ElementType> ElementSwitched;
         public static event Action<ElementType> ElementAwakened;
@@ -120,6 +124,7 @@ namespace Quintessence.Core
         public static void RaiseBossShield(bool up, bool needsQuintessence) => BossShieldChanged?.Invoke(up, needsQuintessence);
         public static void RaiseArmorChanged(Health enemy, bool armored) => ArmorChanged?.Invoke(enemy, armored);
         public static void RaiseExploded(Vector3 point, float radius) => Exploded?.Invoke(point, radius);
+        public static void RaiseEnemyHealed(Health target, float amount) => EnemyHealed?.Invoke(target, amount);
         public static void RaiseWaveStarted(int index, int total) => WaveStarted?.Invoke(index, total);
         public static void RaiseElementSwitched(ElementType from, ElementType to) => ElementSwitched?.Invoke(from, to);
         public static void RaiseElementAwakened(ElementType element) => ElementAwakened?.Invoke(element);
@@ -137,6 +142,7 @@ namespace Quintessence.Core
             DamageDealt = null; Died = null; HitBlocked = null; Shattered = null; MarkApplied = null; ReactionTriggered = null;
             MarkCleared = null; StatusApplied = null; StatusEnded = null; AttackPerformed = null; ZoneSpawned = null;
             TelegraphStarted = null; TelegraphCancelled = null; AttackMissed = null; EnemySpawned = null; WaveStarted = null; ArmorChanged = null; Exploded = null;
+            EnemyHealed = null;
             BossSpawned = null; BossPhaseChanged = null; BossShieldChanged = null;
             ElementSwitched = null; ElementAwakened = null;
             QuintessenceMeterChanged = null; QuintessenceActiveChanged = null;

@@ -21,7 +21,8 @@ namespace Quintessence.Enemies
         EnemyFsm fsm;
         Vector3 knock, strikePoint, strikeDir;
         string anim;
-        float repath;
+        float repath, chargeLeft;
+        bool chargeHit, healing;
 
         public void Bind(EnemyDefinition def, Animator anim) { definition = def; animator = anim; }
 
@@ -146,12 +147,24 @@ namespace Quintessence.Enemies
                 case EnemyAction.StartWindup:
                     strikeDir = toDir;
                     strikePoint = transform.position + strikeDir * (definition.attack == EnemyAttackKind.Explode ? 0f : definition.strikeOffset);
-                    bool line = definition.attack == EnemyAttackKind.Projectile;
+                    var kind = definition.attack;
+                    healing = false;
+                    if (kind == EnemyAttackKind.Heal)
+                    {
+                        // so cura se houver alguem ferido por perto; sozinho, o Xama atira
+                        healing = AnyWoundedAlly();
+                        kind = healing ? EnemyAttackKind.Heal : EnemyAttackKind.Projectile;
+                    }
+                    if (kind == EnemyAttackKind.Lob && hasTarget) strikePoint = target.transform.position;
+                    if (kind == EnemyAttackKind.Heal) strikePoint = transform.position;
+                    bool line = kind == EnemyAttackKind.Projectile || kind == EnemyAttackKind.Charge;
+                    bool charge = kind == EnemyAttackKind.Charge;
                     GameEvents.RaiseTelegraph(new TelegraphEvent
                     {
                         Point = line ? transform.position : strikePoint, Direction = strikeDir,
-                        Radius = line ? 0.35f : definition.strikeRadius, Length = line ? ClearDistance(strikeDir, definition.projectileRange) : 0f,
-                        Duration = definition.telegraphTime, IsLine = line, Source = gameObject,
+                        Radius = charge ? definition.chargeWidth : line ? 0.35f : kind == EnemyAttackKind.Heal ? definition.healRadius : definition.strikeRadius,
+                        Length = charge ? ClearDistance(strikeDir, definition.chargeDistance) : line ? ClearDistance(strikeDir, definition.projectileRange) : 0f,
+                        Duration = definition.telegraphTime, IsLine = line, Friendly = kind == EnemyAttackKind.Heal, Source = gameObject,
                     });
                     Play("Attack", 0.08f);
                     break;
@@ -164,6 +177,7 @@ namespace Quintessence.Enemies
             }
 
             Move(dt, hasTarget, distance, toDir, canAct, moveMul);
+            if (chargeLeft > 0f) Charge(dt, hasTarget, canAct);
 
             if (knock.sqrMagnitude > 0.01f)
             {
@@ -189,12 +203,12 @@ namespace Quintessence.Enemies
 
             Vector3 goal = target.transform.position;
             bool stop = false;
-            if (definition.attack == EnemyAttackKind.Projectile)
+            if (definition.attack == EnemyAttackKind.Projectile || definition.attack == EnemyAttackKind.Lob || definition.attack == EnemyAttackKind.Heal)
             {
                 if (distance < definition.keepDistance) goal = transform.position - toDir * 4f;   // recua
                 else if (distance <= definition.attackRange * 0.9f) stop = true;                 // ja esta em posicao
             }
-            else if (distance <= definition.attackRange * 0.8f) stop = true;
+            else if (distance <= Mathf.Min(definition.attackRange * 0.8f, definition.attack == EnemyAttackKind.Charge ? 3.5f : 999f)) stop = true;
 
             agent.isStopped = stop;
             if (stop) { agent.velocity = Vector3.zero; return; }
@@ -207,7 +221,27 @@ namespace Quintessence.Enemies
         {
             if (missChance > 0f && Random.value < missChance) { GameEvents.RaiseAttackMissed(health); return; }
             if (definition.attack == EnemyAttackKind.Explode) { Explode(); return; }
-            if (definition.attack == EnemyAttackKind.Projectile)
+            if (definition.attack == EnemyAttackKind.Charge)
+            {
+                chargeLeft = ClearDistance(strikeDir, definition.chargeDistance) / Mathf.Max(1f, definition.chargeSpeed);
+                chargeHit = false;
+                return;
+            }
+            if (definition.attack == EnemyAttackKind.Heal && healing) { HealAllies(); return; }
+            if (definition.attack == EnemyAttackKind.Lob)
+            {
+                GameEvents.RaiseExploded(strikePoint, definition.strikeRadius);
+                if (target == null || target.IsDead) return;
+                var off = target.transform.position - strikePoint; off.y = 0f;
+                if (off.magnitude > definition.strikeRadius + 0.3f) return;
+                target.TakeDamage(new DamageInfo(Damage, definition.element, health.Team, gameObject)
+                {
+                    Point = target.transform.position + Vector3.up * 1.2f,
+                    Direction = off.sqrMagnitude > 0.01f ? off.normalized : strikeDir, Knockback = definition.knockback,
+                });
+                return;
+            }
+            if (definition.attack == EnemyAttackKind.Projectile || definition.attack == EnemyAttackKind.Heal)
             {
                 Projectile.Spawn(definition.projectilePrefab, transform.position + Vector3.up * 1.3f + strikeDir * 0.8f, strikeDir,
                     definition.projectileSpeed, definition.projectileRange, Damage, definition.knockback,
@@ -222,6 +256,49 @@ namespace Quintessence.Enemies
             {
                 Point = target.transform.position + Vector3.up * 1.2f, Direction = strikeDir, Knockback = definition.knockback,
             });
+        }
+
+        /// Corre pela linha avisada. Fere o heroi uma vez se ele estiver no corredor.
+        void Charge(float dt, bool hasTarget, bool canAct)
+        {
+            if (!canAct) { chargeLeft = 0f; return; } // atordoar ou congelar para a investida
+            chargeLeft -= dt;
+            if (agent.enabled && agent.isOnNavMesh) agent.Move(strikeDir * (definition.chargeSpeed * dt));
+            if (chargeHit || !hasTarget) return;
+            var d = target.transform.position - transform.position; d.y = 0f;
+            if (d.magnitude > definition.chargeWidth + 0.7f) return;
+            chargeHit = true;
+            target.TakeDamage(new DamageInfo(Damage, definition.element, health.Team, gameObject)
+            {
+                Point = target.transform.position + Vector3.up * 1.2f, Direction = strikeDir, Knockback = definition.knockback,
+            });
+        }
+
+        public bool IsCharging => chargeLeft > 0f;
+        static readonly Collider[] allies = new Collider[32];
+
+        bool AnyWoundedAlly()
+        {
+            int n = Physics.OverlapSphereNonAlloc(transform.position + Vector3.up, definition.healRadius, allies, ~0, QueryTriggerInteraction.Ignore);
+            for (int i = 0; i < n; i++)
+            {
+                var h = allies[i].GetComponentInParent<Health>();
+                if (h != null && h != health && h.Team == health.Team && !h.IsDead && h.Current < h.Max - 0.5f) return true;
+            }
+            return false;
+        }
+
+        void HealAllies()
+        {
+            int n = Physics.OverlapSphereNonAlloc(transform.position + Vector3.up, definition.healRadius, allies, ~0, QueryTriggerInteraction.Ignore);
+            var seen = new System.Collections.Generic.HashSet<Health>();
+            for (int i = 0; i < n; i++)
+            {
+                var h = allies[i].GetComponentInParent<Health>();
+                if (h == null || h == health || h.Team != health.Team || h.IsDead || !seen.Add(h)) continue;
+                float got = h.Heal(definition.healAmount * Scaling.Health);
+                if (got > 0f) GameEvents.RaiseEnemyHealed(h, got);
+            }
         }
 
         static readonly Collider[] blast = new Collider[32];

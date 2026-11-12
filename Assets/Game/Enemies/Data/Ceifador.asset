@@ -1,0 +1,39 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a9cf8aada748e4833867add4efcb33fc, type: 3}
+  m_Name: Ceifador
+  m_EditorClassIdentifier: Quintessence.Enemies::Quintessence.Enemies.EnemyDefinition
+  displayName: Ceifador
+  maxHealth: 38
+  moveSpeed: 4.6
+  armored: 0
+  armoredDamageTaken: 0.4
+  attack: 3
+  damage: 13
+  knockback: 9
+  attackRange: 7
+  telegraphTime: 0.8
+  recoverTime: 1.15
+  cooldown: 3
+  element: 0
+  strikeOffset: 1.5
+  strikeRadius: 1.5
+  explosionDamageToEnemies: 12
+  chargeDistance: 8.5
+  chargeSpeed: 22
+  chargeWidth: 0.9
+  healAmount: 14
+  healRadius: 6
+  projectilePrefab: {fileID: 0}
+  projectileSpeed: 11
+  projectileRange: 16
+  keepDistance: 6

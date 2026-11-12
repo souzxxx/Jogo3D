@@ -19,6 +19,7 @@ public static class EnemyDevSceneBuilder
     {
         Bake(root, NavPath);
         Prefabs(out var melee, out var ranged, out var brute, out var bomber);
+        ExtraPrefabs(out _, out _, out _);
         var go = new GameObject("WaveSpawner");
         go.transform.SetParent(root, false);
         go.transform.position = new Vector3(1, 0, 0);
@@ -223,6 +224,56 @@ public static class EnemyDevSceneBuilder
         bomber = EnemyPrefab("Explosivo", "Skeletons/Characters/Skeleton_Rogue.fbx", bomberDef, bomberCtrl, hot, 0.9f);
     }
 
+    /// Ceifador (investida), Arremessador (bomba em area) e Xama (cura). Chamar depois de Prefabs.
+    public static void ExtraPrefabs(out GameObject charger, out GameObject lobber, out GameObject shaman)
+    {
+        const string rogueFbx = KK + "Skeletons/Characters/Skeleton_Rogue.fbx";
+        const string mageFbx = KK + "Skeletons/Characters/Skeleton_Mage.fbx";
+        const string minionFbx = KK + "Skeletons/Characters/Skeleton_Minion.fbx";
+        var chargerCtrl = CombatDevSceneBuilder.Controller(rogueFbx, Dir + "Animation/Ceifador.controller",
+            ("Idle", "Idle_Combat|Idle", 0f), ("Run", "Running_A|Running_B", 0f), ("Attack", "1H_Melee_Attack_Stab|Dodge_Forward|1H_Melee_Attack_Chop", 0.9f),
+            ("Hit", "Hit_A|Hit_B", 0.3f), ("Death", "Death_B|Death_A", 0f), ("Spawn", "Spawn_Ground|Skeletons_Awaken_Standing|Idle", 0.7f));
+        var lobberCtrl = CombatDevSceneBuilder.Controller(minionFbx, Dir + "Animation/Arremessador.controller",
+            ("Idle", "Idle_Combat|Idle", 0f), ("Run", "Running_A", 0f), ("Attack", "Throw|Spellcast_Long|1H_Melee_Attack_Chop", 1f),
+            ("Hit", "Hit_A|Hit_B", 0.3f), ("Death", "Death_A", 0f), ("Spawn", "Spawn_Ground|Skeletons_Awaken_Standing|Idle", 0.7f));
+        var shamanCtrl = CombatDevSceneBuilder.Controller(mageFbx, Dir + "Animation/Xama.controller",
+            ("Idle", "Idle_Combat|Idle", 0f), ("Run", "Running_A", 0f), ("Attack", "Spellcast_Raise|Spellcast_Summon|Spellcast_Long", 1.1f),
+            ("Hit", "Hit_A|Hit_B", 0.3f), ("Death", "Death_A", 0f), ("Spawn", "Spawn_Ground|Skeletons_Awaken_Standing|Idle", 0.7f));
+
+        var chargerDef = Asset<EnemyDefinition>("Ceifador", d =>
+        {
+            d.displayName = "Ceifador"; d.maxHealth = 38; d.moveSpeed = 4.6f;
+            d.attack = EnemyAttackKind.Charge; d.damage = 13; d.knockback = 9;
+            d.attackRange = 7f; d.telegraphTime = 0.8f; d.recoverTime = 1.15f; d.cooldown = 3f;
+            d.chargeDistance = 8.5f; d.chargeSpeed = 22f; d.chargeWidth = 0.9f;
+        });
+        var lobberDef = Asset<EnemyDefinition>("Arremessador", d =>
+        {
+            d.displayName = "Arremessador"; d.maxHealth = 26; d.moveSpeed = 3.2f;
+            d.attack = EnemyAttackKind.Lob; d.damage = 12; d.knockback = 5;
+            d.attackRange = 10f; d.telegraphTime = 1.05f; d.recoverTime = 0.5f; d.cooldown = 2.8f;
+            d.strikeRadius = 2.3f; d.keepDistance = 5f;
+        });
+        var shamanDef = Asset<EnemyDefinition>("Xama", d =>
+        {
+            d.displayName = "Xamã"; d.maxHealth = 34; d.moveSpeed = 3.2f;
+            d.attack = EnemyAttackKind.Heal; d.damage = 6; d.knockback = 2;
+            d.attackRange = 10f; d.telegraphTime = 1.1f; d.recoverTime = 0.5f; d.cooldown = 3.6f;
+            d.healAmount = 14f; d.healRadius = 6f; d.keepDistance = 6.5f;
+            d.projectileSpeed = 10f; d.projectileRange = 14f;
+        });
+        if (shamanDef.projectilePrefab == null) { shamanDef.projectilePrefab = ProjectilePrefab(); EditorUtility.SetDirty(shamanDef); }
+
+        // cada tipo tem um tom proprio do osso e uma peca do pack na mao: da para reconhecer de cima
+        const string tex = KK + "Skeletons/Characters/skeleton_texture.png";
+        var steel = LookDevBuilder.Mat("SkeletonCharger", tex, new Color(0.62f, 0.68f, 0.82f), Color.black, 0f);
+        var moss = LookDevBuilder.Mat("SkeletonLobber", tex, new Color(0.78f, 0.8f, 0.56f), Color.black, 0f);
+        var jade = LookDevBuilder.Mat("SkeletonShaman", tex, new Color(0.56f, 0.82f, 0.7f), Color.black, 0f);
+        charger = EnemyPrefab("Ceifador", "Skeletons/Characters/Skeleton_Rogue.fbx", chargerDef, chargerCtrl, steel, 1.12f, "Skeleton_Blade", "handslot.r");
+        lobber = EnemyPrefab("Arremessador", "Skeletons/Characters/Skeleton_Minion.fbx", lobberDef, lobberCtrl, moss, 1.05f);
+        shaman = EnemyPrefab("Xama", "Skeletons/Characters/Skeleton_Mage.fbx", shamanDef, shamanCtrl, jade, 1.05f, "Skeleton_Staff", "handslot.r");
+    }
+
     static T Asset<T>(string name, System.Action<T> init) where T : ScriptableObject
     {
         string path = Dir + "Data/" + name + ".asset";
@@ -253,7 +304,8 @@ public static class EnemyDevSceneBuilder
         return prefab;
     }
 
-    static GameObject EnemyPrefab(string name, string fbx, EnemyDefinition def, RuntimeAnimatorController ctrl, Material mat, float scale = 1f)
+    static GameObject EnemyPrefab(string name, string fbx, EnemyDefinition def, RuntimeAnimatorController ctrl, Material mat, float scale = 1f,
+        string prop = null, string bone = null)
     {
         string path = Dir + "Prefabs/" + name + ".prefab";
         var go = new GameObject(name);
@@ -267,6 +319,23 @@ public static class EnemyDevSceneBuilder
         model.transform.SetParent(go.transform, false);
         model.transform.localScale = Vector3.one * scale;
         col.height *= scale; col.radius *= scale; col.center *= scale;
+        if (prop != null)
+        {
+            Transform hand = null;
+            foreach (var t in model.GetComponentsInChildren<Transform>(true)) if (t.name == bone) hand = t;
+            if (hand != null)
+            {
+                var gear = LookDevBuilder.Mat("SkeletonGear", KK + "Skeletons/Props/skeleton_texture.png", new Color(0.7f, 0.66f, 0.68f), Color.black, 0f);
+                var held = LookDevBuilder.Spawn("Skeletons/Props/" + prop + ".fbx", Vector3.zero, 0, gear);
+                held.name = prop;
+                held.transform.SetParent(hand, false);
+                held.transform.localPosition = Vector3.zero;
+                held.transform.localRotation = Quaternion.identity;
+                var source = AssetDatabase.LoadAssetAtPath<GameObject>(KK + "Skeletons/Props/" + prop + ".fbx");
+                float native = source != null ? source.transform.localScale.x : 1f;
+                held.transform.localScale = Vector3.one * (native * model.transform.lossyScale.x / Mathf.Max(0.0001f, hand.lossyScale.x));
+            }
+        }
         var anim = CombatDevSceneBuilder.Animator(model, ctrl);
         go.AddComponent<EnemyBrain>().Bind(def, anim);
         var prefab = PrefabUtility.SaveAsPrefabAsset(go, path);

@@ -151,6 +151,109 @@ namespace Quintessence.Enemies.PlayTests
             Time.timeScale = 1f;
         }
 
+        [UnityTest, Timeout(300000)]
+        public IEnumerator New_Enemies_Charge_Lob_And_Heal()
+        {
+            Time.timeScale = 1f;
+            Time.captureFramerate = 30;
+            GameEvents.Clear();
+            yield return EditorSceneManager.LoadSceneAsyncInPlayMode(Scene, new LoadSceneParameters(LoadSceneMode.Single));
+            yield return null;
+            player = Object.FindFirstObjectByType<PlayerController>();
+            hp = player.GetComponent<Health>();
+            player.GetComponent<PlayerInputReader>().enabled = false;
+            input = player.gameObject.AddComponent<ScriptedInput>();
+            player.Input = input;
+            Object.FindFirstObjectByType<WaveSpawner>().enabled = false;
+            foreach (var e in Object.FindObjectsByType<EnemyBrain>(FindObjectsSortMode.None)) Object.Destroy(e.gameObject);
+            player.Teleport(new Vector3(0, 0.05f, -1f), Vector3.forward);
+            input.AimPoint = player.transform.position + Vector3.forward;
+            hp.Pool.ExtraDamageTakenMultiplier = 0.02f;
+            cam = Camera.main;
+            rt = new RenderTexture(960, 540, 24, RenderTextureFormat.ARGB32, RenderTextureReadWrite.sRGB);
+            tex = new Texture2D(960, 540, TextureFormat.RGB24, false);
+            void Shot(string path)
+            {
+                cam.targetTexture = rt; cam.Render(); cam.targetTexture = null;
+                RenderTexture.active = rt; tex.ReadPixels(new Rect(0, 0, rt.width, rt.height), 0, 0); RenderTexture.active = null;
+                File.WriteAllBytes(path, tex.EncodeToPNG());
+            }
+            GameObject Load(string name) => UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Game/Enemies/Prefabs/" + name + ".prefab");
+
+            TelegraphEvent last = default;
+            int telegraphs = 0, hits = 0, blasts = 0, heals = 0;
+            GameEvents.TelegraphStarted += e => { last = e; telegraphs++; };
+            GameEvents.DamageDealt += (target, _, _) => { if (target == hp) hits++; };
+            GameEvents.Exploded += (_, _) => blasts++;
+            GameEvents.EnemyHealed += (_, _) => heals++;
+
+            // Ceifador: linha larga no chao, depois atravessa a sala por ela
+            var charger = Object.Instantiate(Load("Ceifador"), player.transform.position + new Vector3(0, 0, 6f), Quaternion.identity).GetComponent<EnemyBrain>();
+            for (float t = 8f; t > 0f && telegraphs == 0; t -= Time.deltaTime) yield return null;
+            Assert.AreEqual(1, telegraphs, "o Ceifador avisa a investida");
+            Assert.IsTrue(last.IsLine, "a investida e avisada em linha");
+            Assert.Greater(last.Radius, 0.6f, "corredor mais largo que o de um tiro");
+            Assert.GreaterOrEqual(charger.Definition.telegraphTime, 0.4f);
+            var from = charger.transform.position;
+            for (int k = 0; k < 12; k++) yield return null;
+            Shot("docs/img/inimigo_ceifador.png");
+            for (float t = 4f; t > 0f && hits == 0; t -= Time.deltaTime) yield return null;
+            Assert.AreEqual(1, hits, "heroi parado na linha leva a investida, uma vez so");
+            for (float t = 0.6f; t > 0f; t -= Time.deltaTime) yield return null;
+            Assert.Greater(Vector3.Distance(from, charger.transform.position), 4f, "ele atravessa a sala na investida");
+            Assert.AreEqual(1, hits);
+            Object.Destroy(charger.gameObject);
+            yield return null;
+
+            // Arremessador: circulo onde o heroi esta; quem sai de dentro nao leva
+            telegraphs = 0; hits = 0;
+            var lobber = Object.Instantiate(Load("Arremessador"), player.transform.position + new Vector3(7f, 0, 2f), Quaternion.identity);
+            for (float t = 8f; t > 0f && telegraphs == 0; t -= Time.deltaTime) yield return null;
+            Assert.AreEqual(1, telegraphs, "o Arremessador avisa onde a bomba cai");
+            Assert.IsFalse(last.IsLine);
+            Assert.Less(Vector3.Distance(last.Point, player.transform.position), 0.5f, "a bomba mira onde o heroi esta");
+            for (int k = 0; k < 14; k++) yield return null;
+            Shot("docs/img/inimigo_arremessador.png");
+            for (float t = 4f; t > 0f && blasts == 0; t -= Time.deltaTime) yield return null;
+            Assert.AreEqual(1, blasts, "a bomba estoura no fim do aviso");
+            Assert.AreEqual(1, hits, "heroi que fica no circulo leva a bomba");
+            // segunda bomba: desta vez o heroi sai do circulo
+            telegraphs = 0;
+            for (float t = 8f; t > 0f && telegraphs == 0; t -= Time.deltaTime) yield return null;
+            player.Teleport(player.transform.position + new Vector3(-5f, 0, 0), Vector3.forward);
+            input.AimPoint = player.transform.position + Vector3.forward;
+            for (float t = 4f; t > 0f && blasts < 2; t -= Time.deltaTime) yield return null;
+            Assert.AreEqual(2, blasts);
+            Assert.AreEqual(1, hits, "fora do circulo a bomba nao acerta");
+            Object.Destroy(lobber);
+            yield return null;
+
+            // Xama: com um aliado ferido por perto, cura em vez de atirar
+            telegraphs = 0;
+            var minion = Object.Instantiate(Load("Rastejante"), player.transform.position + new Vector3(9f, 0, 3f), Quaternion.identity);
+            var shaman = Object.Instantiate(Load("Xama"), player.transform.position + new Vector3(9f, 0, 5f), Quaternion.identity);
+            yield return null;
+            var minionHp = minion.GetComponent<Health>();
+            StatusHolder.GetOrAdd(minionHp).Apply(StatusType.Rooted, 30f, Team.Player, player.gameObject);
+            minionHp.TakeDamage(new DamageInfo(18f, ElementType.None, Team.Player, player.gameObject));
+            float wounded = minionHp.Current;
+            for (float t = 10f; t > 0f && heals == 0; t -= Time.deltaTime)
+            {
+                if (telegraphs > 0 && last.Friendly && File.Exists("docs/img/inimigo_xama.png") == false) Shot("docs/img/inimigo_xama.png");
+                yield return null;
+            }
+            Assert.Greater(heals, 0, "o Xama cura o aliado ferido");
+            Assert.IsTrue(last.Friendly, "a cura e avisada como area amiga, nao como golpe");
+            Assert.Greater(minionHp.Current, wounded);
+            Shot("docs/img/inimigo_xama_cura.png");
+            Object.Destroy(minion);
+            // sozinho, ele atira
+            telegraphs = 0;
+            for (float t = 10f; t > 0f && telegraphs == 0; t -= Time.deltaTime) yield return null;
+            Assert.IsTrue(last.IsLine && !last.Friendly, "sem ninguem para curar, o Xama atira");
+            Time.captureFramerate = 0;
+        }
+
         void ConsiderDodge(TelegraphEvent e)
         {
             var p = player.transform.position;

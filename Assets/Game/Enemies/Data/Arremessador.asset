@@ -1,0 +1,39 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a9cf8aada748e4833867add4efcb33fc, type: 3}
+  m_Name: Arremessador
+  m_EditorClassIdentifier: Quintessence.Enemies::Quintessence.Enemies.EnemyDefinition
+  displayName: Arremessador
+  maxHealth: 26
+  moveSpeed: 3.2
+  armored: 0
+  armoredDamageTaken: 0.4
+  attack: 4
+  damage: 12
+  knockback: 5
+  attackRange: 10
+  telegraphTime: 1.05
+  recoverTime: 0.5
+  cooldown: 2.8
+  element: 0
+  strikeOffset: 1.5
+  strikeRadius: 2.3
+  explosionDamageToEnemies: 12
+  chargeDistance: 8
+  chargeSpeed: 22
+  chargeWidth: 0.9
+  healAmount: 14
+  healRadius: 6
+  projectilePrefab: {fileID: 0}
+  projectileSpeed: 11
+  projectileRange: 16
+  keepDistance: 5

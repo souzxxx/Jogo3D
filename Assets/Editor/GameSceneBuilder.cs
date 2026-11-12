@@ -45,6 +45,8 @@ public static class GameSceneBuilder
         dir.transform.SetParent(root, false);
         var director = dir.AddComponent<RunDirector>();
         director.Bind(melee, ranged, brute, bomber, flat);
+        EnemyDevSceneBuilder.ExtraPrefabs(out var charger, out var lobber, out var shaman);
+        director.BindExtraEnemies(charger, lobber, shaman);
         const string catalogPath = "Assets/Game/Run/Data/Boons.asset";
         var catalog = AssetDatabase.LoadAssetAtPath<Quintessence.Run.BoonCatalog>(catalogPath);
         if (catalog == null)

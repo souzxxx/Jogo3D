@@ -19,6 +19,9 @@ namespace Quintessence.Game
         [SerializeField] GameObject brutePrefab;
         [SerializeField] GameObject bomberPrefab;
         [SerializeField] GameObject bossPrefab;
+        [SerializeField] GameObject chargerPrefab;
+        [SerializeField] GameObject lobberPrefab;
+        [SerializeField] GameObject shamanPrefab;
         [SerializeField] Material flatMaterial;
         [SerializeField] BoonCatalog boonCatalog;
         [Header("Pecas do cenario (modelos do pack)")]
@@ -65,6 +68,11 @@ namespace Quintessence.Game
         public void Bind(GameObject melee, GameObject ranged, GameObject brute, GameObject bomber, Material flat)
         {
             meleePrefab = melee; rangedPrefab = ranged; brutePrefab = brute; bomberPrefab = bomber; flatMaterial = flat;
+        }
+
+        public void BindExtraEnemies(GameObject charger, GameObject lobber, GameObject shaman)
+        {
+            chargerPrefab = charger; lobberPrefab = lobber; shamanPrefab = shaman;
         }
 
         public void BindBoons(BoonCatalog catalog) => boonCatalog = catalog;
@@ -305,6 +313,9 @@ namespace Quintessence.Game
                 if (p.Ranged > 0) w.entries.Add(new WaveEntry { prefab = rangedPrefab, count = p.Ranged });
                 if (p.Brute > 0 && brutePrefab != null) w.entries.Add(new WaveEntry { prefab = brutePrefab, count = p.Brute });
                 if (p.Bomber > 0 && bomberPrefab != null) w.entries.Add(new WaveEntry { prefab = bomberPrefab, count = p.Bomber });
+                if (p.Charger > 0 && chargerPrefab != null) w.entries.Add(new WaveEntry { prefab = chargerPrefab, count = p.Charger });
+                if (p.Lobber > 0 && lobberPrefab != null) w.entries.Add(new WaveEntry { prefab = lobberPrefab, count = p.Lobber });
+                if (p.Shaman > 0 && shamanPrefab != null) w.entries.Add(new WaveEntry { prefab = shamanPrefab, count = p.Shaman });
                 if (p.Boss > 0) w.entries.Add(new WaveEntry { prefab = bossPrefab != null ? bossPrefab : brutePrefab, count = p.Boss });
                 waves.Add(w);
             }
