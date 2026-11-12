@@ -142,6 +142,7 @@ namespace Quintessence.Enemies
         {
             if (SplitPrefab == null || State == null || State.Cleared) return;
             State.AddAlive(count);
+            Sfx.Play("split");
             var keep = Scaling;
             var child = keep; child.Splits = false; child.Volatile = false;
             Scaling = child;
