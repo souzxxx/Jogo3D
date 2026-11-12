@@ -37,6 +37,9 @@ namespace Quintessence.Run
             return gained;
         }
 
+        /// Talento extra sem subir de nivel (pacto).
+        public void GrantPick() => PendingPicks++;
+
         public bool ConsumePick()
         {
             if (PendingPicks <= 0) return false;

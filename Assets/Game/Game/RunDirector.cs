@@ -52,6 +52,9 @@ namespace Quintessence.Game
         Health playerHealth;
         WaveSpawner spawner;
         Hud hud;
+        BiomeDresser dresser;
+        Biome lastBiome = (Biome)(-1);
+        public Biome CurrentBiome => lastBiome;
         readonly List<Interactable> interactables = new();
         float startTime, baseMaxHealth;
         bool mapByTab;
@@ -137,6 +140,7 @@ namespace Quintessence.Game
             GameClock.SetPaused(false);
             hud = FindFirstObjectByType<Hud>();
             if (hud == null) hud = new GameObject("Hud").AddComponent<Hud>();
+            dresser = gameObject.AddComponent<BiomeDresser>();
         }
 
         void OnEnable()
@@ -246,6 +250,7 @@ namespace Quintessence.Game
             }
             Cleanup();
             ApplyLayout(LayoutPicker.UsesLayout(node.Type) ? LayoutPicker.Pick(GameFlow.Seed, node.Id, layouts.Length) : -1);
+            DressBiome(Biomes.For(Run.Depth, Run.Map.LayerCount), true);
             player.Teleport(entryPoint, Vector3.forward);
             hud.SetRoom($"Sala {Run.Depth + 1}/{Run.Map.LayerCount} · {RoomInfo.Name(node.Type)}", node.Type);
             yield return null;
@@ -262,6 +267,16 @@ namespace Quintessence.Game
                     break;
                 case RoomType.Master:
                     if (!SetupBoons()) { Run.RoomCleared(); OpenDoors(); }
+                    break;
+                case RoomType.Treasure:
+                    SetupTreasure();
+                    Run.RoomCleared();
+                    OpenDoors();
+                    break;
+                case RoomType.Pact:
+                    SetupPact();
+                    Run.RoomCleared();
+                    OpenDoors();
                     break;
                 case RoomType.Rest:
                     playerHealth.Heal(playerHealth.Max * 0.3f);
@@ -356,7 +371,8 @@ namespace Quintessence.Game
 
         void OnDied(Health target, DamageInfo info)
         {
-            if (target != playerHealth && target.Team == Team.Enemy && Run != null && !Finished) GrantKillXp(target);
+            if (target != playerHealth && target.Team == Team.Enemy && Run != null && !Finished
+                && (target.GetComponent<EnemyBrain>() != null || target.GetComponent<BossBrain>() != null)) GrantKillXp(target);
             if (target == playerHealth && !Finished) StartCoroutine(Finish(false));
         }
 
@@ -375,6 +391,130 @@ namespace Quintessence.Game
                 + $"\n+{shards} Fragmentos para o Refúgio (total: {MetaStore.Current.Shards})";
             Sfx.Play(victory ? "victory" : "defeat");
             hud.ShowResult(victory, stats, GameFlow.RestartRun, GameFlow.ToTitle);
+        }
+
+        // ---------- trechos da run ----------
+
+        /// Troca o clima da sala para o trecho. announce: mostra o letreiro se o trecho mudou.
+        public void DressBiome(Biome biome, bool announce = false)
+        {
+            if (dresser != null) dresser.Apply(biome);
+            if (biome == lastBiome) return;
+            lastBiome = biome;
+            if (!announce) return;
+            string sub = biome == Biome.Heart ? "O fim da descida" : "Ato " + Biomes.Roman(Biomes.Act(biome));
+            hud.ShowBanner(Biomes.Name(biome).ToUpperInvariant(), sub, Color.Lerp(dresser != null ? dresser.CrackColor : Cream, Cream, 0.55f));
+        }
+
+        // ---------- tesouro e pacto ----------
+
+        /// Monta a sala de Tesouro sem passar pelo mapa. Para os testes e as capturas.
+        public void ShowTreasure() { Cleanup(); ApplyLayout(-1); SetupTreasure(); }
+        /// Monta a sala de Pacto sem passar pelo mapa. Para os testes e as capturas.
+        public void ShowPact() { Cleanup(); ApplyLayout(-1); SetupPact(); }
+
+        void SetupTreasure()
+        {
+            int amount = Mathf.RoundToInt((30 + 6 * Run.Depth) * player.Modifiers.EssenceMult);
+            var gold = new Color(0.88f, 0.74f, 0.42f);
+            var root = new GameObject("Treasure");
+            root.transform.position = new Vector3(0, 0, 0.6f);
+            if (chestPrefab != null)
+            {
+                var chest = Instantiate(chestPrefab, root.transform).transform;
+                chest.localPosition = Vector3.zero;
+                chest.localRotation = Quaternion.Euler(0, 180, 0);
+                chest.localScale *= 1.25f;
+            }
+            Medal(root.transform, new Vector3(0, 2.1f, 0), "essence", gold, 1.2f);
+            Label(root.transform, new Vector3(0, 3.6f, 0), "Tesouro", Cream, 0.9f);
+            Label(root.transform, new Vector3(0, 2.95f, 0), $"{amount} de Essência e um gole de vida", new Color(0.8f, 0.76f, 0.7f), 0.55f);
+            Glow(root.transform, new Vector3(0, 1.8f, -0.8f), gold, 2.2f);
+            Interactable entry = null;
+            entry = new Interactable
+            {
+                Object = root, Prompt = "abrir o baú",
+                Use = () =>
+                {
+                    Sfx.Play("pickup");
+                    Run.AddEssence(amount);
+                    hud.SetEssence(Run.Essence);
+                    playerHealth.Heal(playerHealth.Max * 0.15f);
+                    Feel.DamageNumber.Spawn(player.transform.position + Vector3.up * 3.6f, $"+{amount} DE ESSÊNCIA", gold, 1.2f, 1.6f);
+                    interactables.Remove(entry);
+                    Destroy(root);
+                },
+            };
+            interactables.Add(entry);
+        }
+
+        public int PactsTaken { get; private set; }
+
+        /// Pacto: um ganho forte em troca de um custo permanente. Da para recusar: as portas ja estao abertas.
+        void SetupPact()
+        {
+            var wine = new Color(0.72f, 0.3f, 0.42f);
+            var offers = new (string name, string gain, string cost, string icon, System.Func<bool> take)[]
+            {
+                ("Pacto de Sangue", "+25% de dano em tudo", "−20% de vida máxima", "boon_damage", () =>
+                {
+                    baseMaxHealth *= 0.8f;
+                    player.Modifiers.DamageAll += 0.25f;
+                    ApplyMaxHealth();
+                    return true;
+                }),
+                ("Pacto de Vidro", "Skills recarregam 25% mais rápido", "Você recebe +25% de dano", "boon_skill", () =>
+                {
+                    player.Modifiers.SkillCooldownMult *= 0.75f;
+                    playerHealth.Pool.CurseMultiplier *= 1.25f;
+                    return true;
+                }),
+                ("Pacto da Ganância", "Um talento agora", "Entrega toda a Essência (mínimo 30)", "essence", () =>
+                {
+                    if (Run.Essence < 30) return false;
+                    Run.TrySpend(Run.Essence);
+                    hud.SetEssence(Run.Essence);
+                    Run.Progress.GrantPick();
+                    return true;
+                }),
+            };
+            for (int i = 0; i < offers.Length; i++)
+            {
+                var o = offers[i];
+                var root = new GameObject("Pact_" + i);
+                root.transform.position = new Vector3((i - (offers.Length - 1) / 2f) * 5.4f, 0, 0.2f);
+                if (shrinePrefab != null) Instantiate(shrinePrefab, root.transform).transform.localPosition = Vector3.zero;
+                Medal(root.transform, new Vector3(0, 2.25f, 0), o.icon, wine, 1.1f);
+                Label(root.transform, new Vector3(0, 4.35f, 0), o.name, Cream, 0.8f);
+                Label(root.transform, new Vector3(0, 3.7f, 0), Wrap(o.gain, 22), new Color(0.62f, 0.82f, 0.6f), 0.55f);
+                Label(root.transform, new Vector3(0, 3.15f, 0), Wrap(o.cost, 24), new Color(0.85f, 0.45f, 0.4f), 0.55f);
+                Glow(root.transform, new Vector3(0, 2f, -0.8f), wine, 1.8f);
+                interactables.Add(new Interactable
+                {
+                    Object = root, Prompt = "selar o " + o.name,
+                    Use = () =>
+                    {
+                        if (!o.take())
+                        {
+                            Sfx.Play("block");
+                            Feel.DamageNumber.Spawn(root.transform.position + Vector3.up * 4.8f, "ESSÊNCIA INSUFICIENTE", new Color(0.8f, 0.4f, 0.35f), 0.8f, 1f);
+                            return;
+                        }
+                        PactsTaken++;
+                        Sfx.Play("pickup");
+                        Run.AddBoon(new Boon { id = "pact_" + PactsTaken + "_" + o.icon, name = o.name, description = o.gain + " · " + o.cost, patron = ElementType.None, stat = BoonStat.SwitchStrike });
+                        hud.SetBoons(Run.Boons);
+                        Feel.DamageNumber.Spawn(player.transform.position + Vector3.up * 3.6f, o.name.ToUpperInvariant() + " SELADO", wine, 1.2f, 1.8f);
+                        // um pacto por sala: os outros altares somem, as portas ficam
+                        for (int k = interactables.Count - 1; k >= 0; k--)
+                        {
+                            if (interactables[k].Object == null || !interactables[k].Object.name.StartsWith("Pact_")) continue;
+                            Destroy(interactables[k].Object);
+                            interactables.RemoveAt(k);
+                        }
+                    },
+                });
+            }
         }
 
         // ---------- nivel e talentos ----------
@@ -627,7 +767,8 @@ namespace Quintessence.Game
 
         void ApplyMaxHealth()
         {
-            float max = baseMaxHealth + player.Modifiers.MaxHealthAdd;
+            float max = Mathf.Max(20f, baseMaxHealth + player.Modifiers.MaxHealthAdd);
+            if (max < playerHealth.Max - 0.01f) { playerHealth.Pool.SetMax(max); return; }
             if (max <= playerHealth.Max) return;
             float gain = max - playerHealth.Max;
             playerHealth.Pool.SetMax(max);

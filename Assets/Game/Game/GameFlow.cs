@@ -13,7 +13,7 @@ namespace Quintessence.Game
 
         public static ElementType StartElement = ElementType.Fire;
         public static int Seed = 1;
-        public static int Layers = 8;
+        public static int Layers = 10;
         public static int Shrines = 3;
         /// A proxima cena de run abre a sala de treino em vez do mapa.
         public static bool Tutorial;

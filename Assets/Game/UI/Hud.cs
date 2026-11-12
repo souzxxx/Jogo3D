@@ -281,6 +281,7 @@ namespace Quintessence.UI
 
         void LateUpdate()
         {
+            TickBanner();
             if (hero == null || (hero as UnityEngine.Object) == null)
             {
                 var go = GameObject.FindGameObjectWithTag("Player");
@@ -359,6 +360,43 @@ namespace Quintessence.UI
         }
 
         // ---------- API usada pela run ----------
+
+        RectTransform bannerRoot;
+        Text bannerTitle, bannerSub;
+        Image bannerBack;
+        float bannerLeft;
+        public string LastBanner { get; private set; } = "";
+
+        /// Letreiro grande no alto da tela que some sozinho (novo trecho da run).
+        public void ShowBanner(string title, string sub, Color color, float seconds = 3.2f)
+        {
+            if (bannerRoot == null)
+            {
+                bannerRoot = UiKit.Rect("Banner", canvas.transform, new Vector2(0.5f, 1), new Vector2(0, -210), new Vector2(1400, 160));
+                bannerBack = UiKit.Image(UiKit.Rect("Back", bannerRoot, new Vector2(0.5f, 1), new Vector2(0, 14), new Vector2(1900, 170)), UiKit.VerticalVignette, new Color(0.02f, 0.02f, 0.04f, 0.7f));
+                bannerSub = UiKit.Text(UiKit.Rect("Sub", bannerRoot, new Vector2(0.5f, 1), new Vector2(0, 0), new Vector2(1400, 36)), "", 26, UiKit.Dim);
+                bannerTitle = UiKit.Text(UiKit.Rect("Title", bannerRoot, new Vector2(0.5f, 1), new Vector2(0, -38), new Vector2(1400, 90)), "", 72, UiKit.Cream);
+                bannerTitle.font = GameFonts.Title;
+                bannerRoot.SetSiblingIndex(0);
+            }
+            LastBanner = title;
+            bannerTitle.text = title; bannerSub.text = sub;
+            bannerTitle.color = color;
+            bannerLeft = seconds;
+            bannerRoot.gameObject.SetActive(true);
+        }
+
+        void TickBanner()
+        {
+            if (bannerRoot == null || !bannerRoot.gameObject.activeSelf) return;
+            bannerLeft -= Time.unscaledDeltaTime;
+            float a = Mathf.Clamp01(bannerLeft / 0.8f);
+            var c = bannerTitle.color; c.a = a; bannerTitle.color = c;
+            var d = bannerSub.color; d.a = a; bannerSub.color = d;
+            if (bannerBack != null) bannerBack.color = new Color(0.02f, 0.02f, 0.04f, 0.7f * a);
+            if (bannerLeft <= 0f) bannerRoot.gameObject.SetActive(false);
+        }
+
 
         public void SetRoom(string text) => roomText.text = text;
 

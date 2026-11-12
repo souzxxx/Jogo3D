@@ -63,8 +63,8 @@ public static class GameSceneBuilder
         director.BindBoons(catalog);
         director.BindBoss(EnemyDevSceneBuilder.BossPrefab(melee, bomber));
         director.BindShop(Prop("table_small", 1f), Prop("bottle_A_labeled_green", 1.8f), Prop("bottle_B_brown", 1.8f), ShopDecor());
-        // ordem do enum RoomType: Combat, Elite, Shrine, Rest, Boss, Master, Shop
-        string[] banners = { "banner_red", "banner_patternB_brown", "banner_blue", "banner_green", "banner_shield_red", "banner_patternA_yellow", "banner_patternA_green" };
+        // ordem do enum RoomType: Combat, Elite, Shrine, Rest, Boss, Master, Shop, Treasure, Pact
+        string[] banners = { "banner_red", "banner_patternB_brown", "banner_blue", "banner_green", "banner_shield_red", "banner_patternA_yellow", "banner_patternA_green", "banner_yellow", "banner_patternC_red" };
         var bannerPrefabs = new GameObject[banners.Length];
         for (int i = 0; i < banners.Length; i++) bannerPrefabs[i] = Prop(banners[i], 1f);
         var stone = LookDevBuilder.Mat("Stone", null, new Color(0.33f, 0.34f, 0.42f), Color.black, 0f);
@@ -242,6 +242,66 @@ public static class GameSceneBuilder
         return prefab;
     }
 
+    /// Barril de polvora: barril do pack em tom avermelhado, com vida curta. Qualquer golpe acende.
+    static GameObject ExplosivePrefab()
+    {
+        const string path = "Assets/Game/Game/Prefabs/Obstacles/ExplosiveBarrel.prefab";
+        var mat = LookDevBuilder.Mat("PowderBarrel", CombatDevSceneBuilder.KK + "Dungeon/dungeon_texture.png", new Color(1.1f, 0.66f, 0.56f), Color.black, 0f);
+        var root = new GameObject("ExplosiveBarrel");
+        var visual = LookDevBuilder.Spawn("Dungeon/barrel_small.fbx", Vector3.zero, 0, mat, 1.25f);
+        visual.name = "Model";
+        visual.transform.SetParent(root.transform, false);
+        var rs = visual.GetComponentsInChildren<Renderer>();
+        var b = rs[0].bounds; foreach (var x in rs) b.Encapsulate(x.bounds);
+        var col = root.AddComponent<CapsuleCollider>();
+        col.center = b.center; col.radius = Mathf.Max(b.extents.x, b.extents.z); col.height = b.size.y;
+        var carve = root.AddComponent<UnityEngine.AI.NavMeshObstacle>();
+        carve.shape = UnityEngine.AI.NavMeshObstacleShape.Box;
+        carve.center = b.center; carve.size = b.size + new Vector3(0.3f, 0, 0.3f);
+        carve.carving = true;
+        root.AddComponent<Quintessence.Core.Health>().Configure(8, Quintessence.Core.Team.Enemy);
+        root.AddComponent<ExplosiveBarrel>();
+        // faixa escura no chao: marca ate onde a explosao chega
+        var ring = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+        Object.DestroyImmediate(ring.GetComponent<Collider>());
+        ring.name = "Scorch";
+        ring.transform.SetParent(root.transform, false);
+        ring.transform.localPosition = new Vector3(0, 0.012f, 0);
+        ring.transform.localScale = new Vector3(2.2f, 0.01f, 2.2f);
+        ring.GetComponent<Renderer>().sharedMaterial = LookDevBuilder.Mat("Scorch2", null, new Color(0.2f, 0.15f, 0.15f), Color.black, 0f);
+        Debug.Log($"barril explosivo: tamanho {b.size}");
+        var prefab = PrefabUtility.SaveAsPrefabAsset(root, path);
+        Object.DestroyImmediate(root);
+        return prefab;
+    }
+
+    /// Armadilha de espinhos: a placa do pack; os espinhos ficam recolhidos e sobem no golpe.
+    static GameObject SpikesPrefab()
+    {
+        const string path = "Assets/Game/Game/Prefabs/Obstacles/SpikeTrap.prefab";
+        var mat = LookDevBuilder.Mat("DungeonProp", CombatDevSceneBuilder.KK + "Dungeon/dungeon_texture.png", Color.white, Color.black, 0f);
+        var root = new GameObject("SpikeTrap");
+        var visual = LookDevBuilder.Spawn("Dungeon/floor_tile_big_spikes.fbx", Vector3.zero, 0, mat, 0.7f);
+        visual.name = "Model";
+        visual.transform.SetParent(root.transform, false);
+        var rs = visual.GetComponentsInChildren<Renderer>();
+        var b = rs[0].bounds; foreach (var x in rs) b.Encapsulate(x.bounds);
+        var names = new System.Text.StringBuilder();
+        Transform moving = null;
+        foreach (var t in visual.GetComponentsInChildren<Transform>(true))
+        {
+            names.Append(t.name).Append(' ');
+            if (t != visual.transform && t.name.ToLowerInvariant().Contains("spike") && t.GetComponent<Renderer>() != null && moving == null) moving = t;
+        }
+        Debug.Log($"espinhos: tamanho {b.size} min {b.min} filhos: {names} movel: {(moving != null ? moving.name : "modelo inteiro")}");
+        // sem peca separada, o modelo inteiro sobe: fica quase todo abaixo do piso ate o golpe
+        if (moving == null) moving = visual.transform;
+        root.AddComponent<SpikeTrap>().Bind(moving, moving == visual.transform ? -(b.size.y - 0.06f) : -b.size.y * 0.8f / Mathf.Max(0.01f, moving.parent.lossyScale.y));
+        var prefab = PrefabUtility.SaveAsPrefabAsset(root, path);
+        Object.DestroyImmediate(root);
+        return prefab;
+    }
+
     /// Os seis arranjos iniciais. Depois de criados sao assets: da pra mover peca no Inspector sem tocar no codigo.
     static RoomLayout[] Layouts()
     {
@@ -277,6 +337,14 @@ public static class GameSceneBuilder
         Make("3_Praca", "Praça", (crates, 0f, 0.6f, 15), (barrel, 1.7f, 1.3f, 0), (box, -1.6f, -0.2f, 30), (barrel, -0.9f, 2.1f, 0), (box, 5.5f, -2.5f, 10), (barrel, -5.5f, 3f, 0));
         Make("4_Ruinas", "Ruínas", (rubble, -5f, 1f, 20), (rubble, 4f, -1.5f, 110), (rubble, 1f, 3.4f, 200), (pillar, -2.5f, -1f, 0), (column, 5.5f, 3f, 0));
         Make("5_Fornalha", "Fornalha", (vent, -4.5f, 0.5f, 0), (vent, 4.5f, 0.5f, 0), (vent, 0f, 3.2f, 0), (column, -2f, -1.6f, 0), (column, 2f, -1.6f, 0));
+        var powder = ExplosivePrefab();
+        var spikes = SpikesPrefab();
+        Make("7_Paiol", "Paiol", (powder, -3.4f, 1.2f, 0), (powder, 3.4f, 1.2f, 20), (powder, 0f, 3.4f, 40), (crates, -6.5f, -1.2f, 10), (crates, 6.5f, -1.2f, -10), (pillar, 0f, -1.4f, 0));
+        Make("8_Espinhos", "Espinhos", (spikes, -3.4f, 0.6f, 0), (spikes, 0f, 0.6f, 0), (spikes, 3.4f, 0.6f, 0), (barrier, -6.4f, 2.6f, 0), (barrier, 6.4f, 2.6f, 0), (column, -6.5f, -3.2f, 0), (column, 6.5f, -3.2f, 0));
+        Make("9_Arena", "Arena", (column, -5f, 3f, 0), (column, 5f, 3f, 0), (column, -5f, -2.2f, 0), (column, 5f, -2.2f, 0), (powder, 0f, 0.8f, 0), (rubble, 0f, 3.6f, 90));
+        Make("10_Trincheira", "Trincheira", (barrier, -3f, 0.4f, 0), (barrier, 3f, 0.4f, 0), (barrier, -6.6f, -2f, 90), (barrier, 6.6f, -2f, 90), (spikes, 0f, 3f, 0), (powder, -7.2f, 3.4f, 0), (powder, 7.2f, 3.4f, 0));
+        Make("11_Escombros", "Escombros", (rubble, -5.6f, 2.6f, 40), (rubble, 5.2f, 2.2f, 150), (rubble, -1.5f, 0.2f, 80), (pillar, 3f, -1.8f, 0), (pillar, -5f, -2.4f, 0), (vent, 1.8f, 2.8f, 0), (box, 7.2f, -3.4f, 20));
+        Make("12_Camara", "Câmara", (vent, 0f, 0.4f, 0), (spikes, -4.6f, 2.6f, 0), (spikes, 4.6f, 2.6f, 0), (pillar, -5f, -2.2f, 0), (pillar, 5f, -2.2f, 0), (powder, 0f, 3.6f, 0));
         Make("6_Cruz", "Cruz", (barrier, 0f, 2.6f, 0), (barrier, -4.2f, -0.8f, 90), (barrier, 4.2f, -0.8f, 90), (vent, -4.2f, 3.6f, 0), (vent, 4.2f, 3.6f, 0));
         return list.ToArray();
     }

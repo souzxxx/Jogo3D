@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e2ca81051d317428ea372b142d2aa5d1, type: 3}
+  m_Name: 12_Camara
+  m_EditorClassIdentifier: Quintessence.Game::Quintessence.Game.RoomLayout
+  displayName: "C\xE2mara"
+  pieces:
+  - prefab: {fileID: 5389007979970110108, guid: 85e630076b2174095ba42b678310210e, type: 3}
+    position: {x: 0, y: 0, z: 0.4}
+    rotation: 0
+  - prefab: {fileID: 5269949122691443133, guid: dce9e943c6c1848f6a8ac3b1562af8ae, type: 3}
+    position: {x: -4.6, y: 0, z: 2.6}
+    rotation: 0
+  - prefab: {fileID: 5269949122691443133, guid: dce9e943c6c1848f6a8ac3b1562af8ae, type: 3}
+    position: {x: 4.6, y: 0, z: 2.6}
+    rotation: 0
+  - prefab: {fileID: 4187731875860395566, guid: 56ae20eb1792b41b7b66b9d726e1599e, type: 3}
+    position: {x: -5, y: 0, z: -2.2}
+    rotation: 0
+  - prefab: {fileID: 4187731875860395566, guid: 56ae20eb1792b41b7b66b9d726e1599e, type: 3}
+    position: {x: 5, y: 0, z: -2.2}
+    rotation: 0
+  - prefab: {fileID: 7753132880343053795, guid: 902c7b918f9344889b880b340233f69e, type: 3}
+    position: {x: 0, y: 0, z: 3.6}
+    rotation: 0

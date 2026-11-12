@@ -614,6 +614,115 @@ namespace Quintessence.Game.PlayTests
         }
 
         [UnityTest, Timeout(600000)]
+        public IEnumerator Hazards_Treasure_Pact_And_Biomes()
+        {
+            GameEvents.Clear();
+            Time.timeScale = 1f;
+            Time.captureFramerate = 30;
+            GameFlow.StartElement = ElementType.Fire;
+            GameFlow.Seed = 3; GameFlow.Layers = 5; GameFlow.Shrines = 1;
+            yield return EditorSceneManager.LoadSceneAsyncInPlayMode("Assets/Scenes/Run.unity", new LoadSceneParameters(LoadSceneMode.Single));
+            yield return null;
+            yield return null;
+            var director = Object.FindFirstObjectByType<RunDirector>();
+            var hud = Object.FindFirstObjectByType<Hud>();
+            cam = Camera.main;
+            hud.UseCamera(cam);
+            Object.FindFirstObjectByType<WaveSpawner>().enabled = false;
+            for (int k = 0; k < 2000 && director.Busy; k++) yield return null;
+            var hero = Object.FindFirstObjectByType<PlayerController>();
+            var heroHp = hero.GetComponent<Health>();
+            Assert.AreEqual(Biome.Ashes, director.CurrentBiome, "a run comeca nos Saloes de Cinza");
+            Assert.IsNotEmpty(hud.LastBanner, "o primeiro trecho e anunciado");
+
+            // barril de polvora: um golpe acende, a explosao fere o inimigo ao lado e acende o outro barril
+            var barrelPrefab = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Game/Game/Prefabs/Obstacles/ExplosiveBarrel.prefab");
+            var minionPrefab = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Game/Enemies/Prefabs/Rastejante.prefab");
+            director.ApplyLayout(-1); // sem os perigos do layout da sala na conta
+            yield return null;
+            hero.Teleport(new Vector3(-7f, 0.05f, -5f), Vector3.forward);
+            var b1 = Object.Instantiate(barrelPrefab, new Vector3(3f, 0, 1f), Quaternion.identity);
+            var b2 = Object.Instantiate(barrelPrefab, new Vector3(5.2f, 0, 1f), Quaternion.identity);
+            var minion = Object.Instantiate(minionPrefab, new Vector3(3f, 0, 2.6f), Quaternion.identity).GetComponent<Health>();
+            StatusHolder.GetOrAdd(minion).Apply(StatusType.Rooted, 30f, Team.Player, hero.gameObject);
+            int blasts = 0;
+            GameEvents.Exploded += (_, _) => blasts++;
+            yield return null;
+            float before = minion.Current, heroBefore = heroHp.Current;
+            b1.GetComponent<Health>().TakeDamage(new DamageInfo(50, ElementType.None, Team.Player, hero.gameObject));
+            Assert.IsTrue(b1.GetComponent<ExplosiveBarrel>().Lit);
+            for (int k = 0; k < 6; k++) yield return null;
+            Shot(cam, "docs/img/perigo_barril.png");
+            for (float t = 3f; t > 0f && blasts < 2; t -= Time.deltaTime) yield return null;
+            Assert.AreEqual(2, blasts, "um barril acende o outro");
+            Assert.IsTrue(minion.IsDead || minion.Current < before - 10f, "a explosao fere os inimigos em volta");
+            Assert.AreEqual(heroBefore, heroHp.Current, "heroi longe nao leva nada");
+            for (int k = 0; k < 5; k++) yield return null;
+            Assert.IsTrue(b1 == null && b2 == null, "barris estourados somem");
+            foreach (var e in Object.FindObjectsByType<EnemyBrain>(FindObjectsSortMode.None)) Object.Destroy(e.gameObject);
+
+            // armadilha de espinhos: avisa e fura quem esta em cima
+            var trapPrefab = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Game/Game/Prefabs/Obstacles/SpikeTrap.prefab");
+            var trap = Object.Instantiate(trapPrefab, new Vector3(0, 0, 0), Quaternion.identity).GetComponent<SpikeTrap>();
+            hero.Teleport(new Vector3(0.3f, 0.05f, 0.2f), Vector3.forward);
+            int warnings = 0;
+            GameEvents.TelegraphStarted += e => { if (e.Source == trap.gameObject) warnings++; };
+            heroBefore = heroHp.Current;
+            for (float t = 8f; t > 0f && trap.Strikes == 0; t -= Time.deltaTime) yield return null;
+            Assert.AreEqual(1, warnings, "a armadilha avisa antes de subir");
+            Assert.Less(heroHp.Current, heroBefore, "quem fica em cima e furado");
+            yield return null;
+            Shot(cam, "docs/img/perigo_espinhos.png");
+            Object.Destroy(trap.gameObject);
+            heroHp.Heal(999);
+
+            // tesouro: abrir paga Essencia
+            director.ShowTreasure();
+            hero.Teleport(new Vector3(0, 0.05f, -2.4f), Vector3.forward);
+            for (int k = 0; k < 20; k++) yield return null;
+            Shot(cam, "docs/img/sala_tesouro.png");
+            int essence = director.Run.Essence;
+            director.Interactables.First(i => i.Prompt.StartsWith("abrir")).Use();
+            Assert.Greater(director.Run.Essence, essence + 20);
+            Assert.IsFalse(director.Interactables.Any(i => i.Prompt.StartsWith("abrir")), "o bau so abre uma vez");
+
+            // pacto: ganho e custo de verdade, e so um por sala
+            director.ShowPact();
+            hero.Teleport(new Vector3(0, 0.05f, -3.2f), Vector3.forward);
+            for (int k = 0; k < 20; k++) yield return null;
+            Shot(cam, "docs/img/sala_pacto.png");
+            var pacts = director.Interactables.Where(i => i.Prompt.StartsWith("selar")).ToList();
+            Assert.AreEqual(3, pacts.Count);
+            // Ganancia sem Essencia: recusa e nada muda
+            director.Run.TrySpend(director.Run.Essence);
+            pacts[2].Use();
+            Assert.AreEqual(0, director.PactsTaken);
+            float maxBefore = heroHp.Max, dmgBefore = hero.Modifiers.DamageAll;
+            pacts[0].Use();
+            Assert.AreEqual(1, director.PactsTaken);
+            Assert.Less(heroHp.Max, maxBefore - 5f, "Pacto de Sangue cobra vida maxima");
+            Assert.Greater(hero.Modifiers.DamageAll, dmgBefore + 0.2f, "e paga em dano");
+            Assert.LessOrEqual(heroHp.Current, heroHp.Max);
+            yield return null;
+            Assert.IsFalse(director.Interactables.Any(i => i.Prompt.StartsWith("selar")), "um pacto por sala");
+            Assert.IsTrue(director.Run.Boons.Any(b => b.name == "Pacto de Sangue"), "o pacto aparece no inventario");
+
+            // trechos: cada um troca o clima da sala
+            director.ShowShrine();
+            hero.Teleport(new Vector3(0, 0.05f, -4.5f), Vector3.forward);
+            foreach (Biome b in System.Enum.GetValues(typeof(Biome)))
+            {
+                director.DressBiome(b, true);
+                Assert.AreEqual(b, director.CurrentBiome);
+                if (b != Biome.Ashes) Assert.AreEqual(Biomes.Name(b).ToUpperInvariant(), hud.LastBanner);
+                for (int k = 0; k < 15; k++) yield return null;
+                Shot(cam, $"docs/img/bioma_{(int)b + 1}.png");
+            }
+            GameFlow.Layers = 8; GameFlow.Shrines = 3;
+            Time.captureFramerate = 0;
+        }
+
+        [UnityTest, Timeout(600000)]
         public IEnumerator Elite_Room_Applies_Its_Trait_And_Depth_Scales_Enemies()
         {
             GameEvents.Clear();

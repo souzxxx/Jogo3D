@@ -1,0 +1,37 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e2ca81051d317428ea372b142d2aa5d1, type: 3}
+  m_Name: 8_Espinhos
+  m_EditorClassIdentifier: Quintessence.Game::Quintessence.Game.RoomLayout
+  displayName: Espinhos
+  pieces:
+  - prefab: {fileID: 5269949122691443133, guid: dce9e943c6c1848f6a8ac3b1562af8ae, type: 3}
+    position: {x: -3.4, y: 0, z: 0.6}
+    rotation: 0
+  - prefab: {fileID: 5269949122691443133, guid: dce9e943c6c1848f6a8ac3b1562af8ae, type: 3}
+    position: {x: 0, y: 0, z: 0.6}
+    rotation: 0
+  - prefab: {fileID: 5269949122691443133, guid: dce9e943c6c1848f6a8ac3b1562af8ae, type: 3}
+    position: {x: 3.4, y: 0, z: 0.6}
+    rotation: 0
+  - prefab: {fileID: 8021899928430201360, guid: 374c92d7586c34929b21e99ac34d5021, type: 3}
+    position: {x: -6.4, y: 0, z: 2.6}
+    rotation: 0
+  - prefab: {fileID: 8021899928430201360, guid: 374c92d7586c34929b21e99ac34d5021, type: 3}
+    position: {x: 6.4, y: 0, z: 2.6}
+    rotation: 0
+  - prefab: {fileID: 4998541908864834248, guid: e5ebb326baff848818468fb4f3e04331, type: 3}
+    position: {x: -6.5, y: 0, z: -3.2}
+    rotation: 0
+  - prefab: {fileID: 4998541908864834248, guid: e5ebb326baff848818468fb4f3e04331, type: 3}
+    position: {x: 6.5, y: 0, z: -3.2}
+    rotation: 0
