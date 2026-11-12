@@ -799,8 +799,9 @@ namespace Quintessence.Feel
                 var z = zones[i];
                 z.left -= dt;
                 // a area acabou antes (Fusao, troca de sala): para de soltar particula ali
-                bool gone = z.zone.Owner == null && !ReferenceEquals(z.zone.Owner, null);
-                if (z.left <= 0f || gone) { zones.RemoveAt(i); continue; }
+                // com dona, vive o quanto a area viver (ela pode ser renovada); sem dona, pelo tempo do evento
+                bool done = ReferenceEquals(z.zone.Owner, null) ? z.left <= 0f : z.zone.Owner == null;
+                if (done) { zones.RemoveAt(i); continue; }
                 zones[i] = z;
                 if (!emit) continue;
                 var off = Random.insideUnitCircle * z.zone.Radius;
