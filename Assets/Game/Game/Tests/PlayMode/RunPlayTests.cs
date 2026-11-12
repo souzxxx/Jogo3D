@@ -659,6 +659,16 @@ namespace Quintessence.Game.PlayTests
             for (int k = 0; k < 5; k++) yield return null;
             Assert.Greater(hero.Health.Max, before, "Vigor aumenta a vida maxima");
             Assert.AreEqual(2, hero.DashMaxCharges, "Asas da a segunda carga de dash");
+            // Clarividencia (Refugio): a escolha passa a mostrar quatro talentos, e a tecla 4 escolhe o quarto
+            MetaStore.Current.AddShards(100);
+            Assert.IsTrue(MetaStore.Current.TryBuy(MetaUpgrade.Clarity));
+            director.Run.Progress.AddXp(director.Run.Progress.XpToNext);
+            for (int k = 0; k < 10 && !director.LevelUpOpen; k++) yield return null;
+            Assert.AreEqual(4, director.TalentOffer.Count, "quatro opcoes com a Clarividencia");
+            for (int k = 0; k < 4; k++) yield return null;
+            Shot(cam, "docs/img/nivel_quatro.png");
+            director.PickTalent(3);
+            Assert.IsFalse(director.LevelUpOpen);
             GameFlow.AutoPickTalents = true;
             GameFlow.Layers = 8; GameFlow.Shrines = 3;
             Time.captureFramerate = 0;

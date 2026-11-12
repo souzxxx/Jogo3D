@@ -1192,7 +1192,7 @@ namespace Quintessence.Game
         void OpenLevelUp()
         {
             talentRng = TalentRng();
-            talentOffer = TalentCatalog.Offer(Run.Talents, player.Loadout.Awakened, talentRng);
+            talentOffer = TalentCatalog.Offer(Run.Talents, player.Loadout.Awakened, talentRng, MetaStore.Current.TalentChoices);
             if (talentOffer.Count == 0) { while (Run.Progress.ConsumePick()) { } masteryPicks = 0; return; }
             if (GameFlow.AutoPickTalents) { PickTalent(0); return; }
             levelUpOpen = true;
@@ -1207,7 +1207,7 @@ namespace Quintessence.Game
         {
             if (!levelUpOpen || Run.Rerolls <= 0) return;
             Run.Rerolls--;
-            var fresh = TalentCatalog.Offer(Run.Talents, player.Loadout.Awakened, TalentRng());
+            var fresh = TalentCatalog.Offer(Run.Talents, player.Loadout.Awakened, TalentRng(), MetaStore.Current.TalentChoices);
             if (fresh.Count == 0) { Run.Rerolls++; return; }
             talentOffer = fresh;
             Sfx.Play("ui_click");
@@ -1231,6 +1231,7 @@ namespace Quintessence.Game
             if (kb.digit1Key.wasPressedThisFrame || kb.numpad1Key.wasPressedThisFrame) PickTalent(0);
             else if (kb.digit2Key.wasPressedThisFrame || kb.numpad2Key.wasPressedThisFrame) PickTalent(1);
             else if (kb.digit3Key.wasPressedThisFrame || kb.numpad3Key.wasPressedThisFrame) PickTalent(2);
+            else if (kb.digit4Key.wasPressedThisFrame || kb.numpad4Key.wasPressedThisFrame) PickTalent(3);
             else if (kb.tKey.wasPressedThisFrame) RerollTalents();
         }
 
@@ -1258,6 +1259,8 @@ namespace Quintessence.Game
                 // a tecla que escolheu o talento nao pode virar skill no quadro seguinte
                 // a tecla que escolheu nao vira skill: o heroi ignora comandos no quadro em que a pausa sai (GameClock.ResumedFrame)
             }
+            // com outra escolha na fila o painel reabre ja: o nome flutuando passaria por cima do titulo dele
+            if (Run.Progress.PendingPicks > 0) return;
             var c = t.Element == ElementType.None ? new Color(0.9f, 0.76f, 0.42f) : ElementColors.Of(t.Element);
             Feel.DamageNumber.Spawn(player.transform.position + Vector3.up * 3.6f, t.Name.ToUpperInvariant() + "!", c, 1.1f, 1.5f);
         }

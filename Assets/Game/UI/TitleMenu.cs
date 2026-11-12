@@ -285,7 +285,7 @@ namespace Quintessence.UI
             if (meta == null) return;
             var center = new Vector2(0.5f, 0.5f);
             UiKit.Image(UiKit.Stretch("Shade", refuge), null, new Color(0.02f, 0.02f, 0.04f, 0.95f), true);
-            var box = UiKit.Box("Box", refuge, center, Vector2.zero, new Vector2(1180, 980), 1f);
+            var box = UiKit.Box("Box", refuge, center, Vector2.zero, new Vector2(1180, 1030), 1f);
             var title = UiKit.Text(UiKit.Rect("Title", box, new Vector2(0.5f, 1), new Vector2(0, -58), new Vector2(900, 70)), "REFÚGIO", 60, UiKit.Paper);
             title.font = GameFonts.Title;
             UiKit.Text(UiKit.Rect("Sub", box, new Vector2(0.5f, 1), new Vector2(0, -112), new Vector2(1000, 36)),
@@ -304,7 +304,7 @@ namespace Quintessence.UI
             {
                 var u = (MetaUpgrade)i;
                 int level = meta.Level(u), max = MetaInfo.MaxLevel(u);
-                var row = UiKit.Box("Row" + i, box, new Vector2(0.5f, 1), new Vector2(0, -240 - i * 86), new Vector2(1080, 78), 0.5f);
+                var row = UiKit.Box("Row" + i, box, new Vector2(0.5f, 1), new Vector2(0, -232 - i * 80), new Vector2(1080, 74), 0.5f);
                 var disc = UiKit.Rect("Disc", row, new Vector2(0, 0.5f), new Vector2(16, 0), new Vector2(60, 60));
                 UiKit.Image(disc, UiKit.Circle, new Color(0.16f, 0.14f, 0.2f));
                 UiKit.Image(UiKit.Rect("Icon", disc, center, Vector2.zero, new Vector2(40, 40)), UiKit.Icon(MetaInfo.Icon(u)), UiKit.Cream);

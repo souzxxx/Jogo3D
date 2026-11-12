@@ -251,5 +251,18 @@ namespace Quintessence.Run.Tests
             p.AddHeroXp(ElementType.Air, 500);
             Assert.Contains(Feat.MasteryFive, p.GrantFeats(new RunRecord { Final = true }));
         }
+
+        [Test] public void Clarity_ShowsAFourthTalentChoice_AndOldSavesStartWithout()
+        {
+            var p = new MetaProgress();
+            Assert.AreEqual(3, p.TalentChoices);
+            p.AddShards(100);
+            Assert.IsTrue(p.TryBuy(MetaUpgrade.Clarity));
+            Assert.AreEqual(4, p.TalentChoices);
+            Assert.IsFalse(p.CanBuy(MetaUpgrade.Clarity), "um nivel so");
+            Assert.AreEqual(1, MetaProgress.Parse(p.Serialize()).Level(MetaUpgrade.Clarity));
+            Assert.AreEqual(0, MetaProgress.Parse("v1;40;3;1;7;2,1,0,3,1,0,1").Level(MetaUpgrade.Clarity), "save com sete melhorias");
+            Assert.IsNotEmpty(MetaInfo.Describe(MetaUpgrade.Clarity, 1));
+        }
     }
 }
