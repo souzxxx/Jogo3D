@@ -25,6 +25,8 @@ namespace Quintessence.Game.PlayTests
         Vector3 dodgeDir, lastPos;
         float dodgeLeft, stuck, sidestep;
         int stuckStreak;
+        float bestGoal = float.MaxValue, noProgress, escapeLeft;
+        Vector2 escapeDir;
         Vector3 stuckAnchor;
         Vector2 sideDir;
 
@@ -127,6 +129,15 @@ namespace Quintessence.Game.PlayTests
                             float d = to.magnitude;
                             input.AimPoint = goal;
                             input.Move = d > 1.4f ? SteerTo(goal) : Vector2.zero;
+                            // vigia: 3 s sem chegar mais perto do alvo (preso entre pecas) = foge para um lado por 1 s, com dash
+                            if (d > bestGoal + 5f || d < bestGoal - 0.5f) { bestGoal = d; noProgress = 0f; }
+                            else if ((noProgress += dt) > 3f)
+                            {
+                                noProgress = 0f; bestGoal = d; escapeLeft = 1f;
+                                escapeDir = Random.insideUnitCircle.normalized;
+                                input.PressDash();
+                            }
+                            if (escapeLeft > 0f) { escapeLeft -= dt; input.Move = escapeDir; }
                             if (d < 2.2f && sinceInteract > 0.5f) { sinceInteract = 0f; if (!pick.Prompt.StartsWith("entrar")) tried++; pick.Use(); }
                         }
                         else input.Move = Vector2.zero;
