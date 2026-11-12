@@ -61,6 +61,13 @@ S["ui_click"] = ([tone(f"0.3*sin({P}*900*t)*exp(-60*t)", 0.06)], "")
 S["boss_spawn"] = ([tone(f"0.5*sin({P}*55*t)*(1+0.5*sin({P}*6*t))*min(t/0.3,1)*exp(-1.2*max(t-1,0))", 2.2), noise(2.2, "brown", "lowpass=f=200," + env("min(t/0.3,1)*exp(-1.5*max(t-0.8,0))*2")), tone(f"0.22*(sin({P}*110*t)+0.5*sin({P}*220*t)+0.33*sin({P}*330*t))*min(t/0.4,1)*exp(-1.5*max(t-1.2,0))", 2.2)], ECHO)
 S["boss_phase"] = ([tone(thump(180, 32, 6, 3, 1.0), 1.3), tone(f"0.2*(sin({P}*98*t)+0.5*sin({P}*196*t)+0.33*sin({P}*294*t))*exp(-2.5*t)", 1.3)], ECHO)
 S["level_up"] = ([tone("+".join(bell(f, i * 0.07, 4.0, 0.22) for i, f in enumerate([523.3, 659.3, 784, 1046.5, 1318.5])), 1.2)], ECHO)
+# despertar da Quintessencia: estouro grave que abre num brilho subindo
+S["quint_burst"] = ([tone(thump(150, 38, 5, 2.6, 1.0), 1.4), noise(1.4, "pink", "bandpass=f=1600:w=2400," + env("min(t/0.05,1)*exp(-3.5*t)*1.4")),
+    tone("+".join(bell(f, 0.12 + i * 0.05, 3.5, 0.16) for i, f in enumerate([659.3, 987.8, 1318.5])), 1.4)], ECHO)
+# feito cumprido: dois sinos claros
+S["feat"] = ([tone(bell(880, 0.0, 3.2, 0.3) + "+" + bell(1318.5, 0.14, 3.0, 0.28), 1.1)], ECHO)
+# Divisor se partindo: estalo seco e curto
+S["split"] = ([tone(thump(320, 110, 30, 16, 0.55), 0.3), noise(0.3, "brown", "lowpass=f=1800," + env("exp(-22*t)*1.6"))], "")
 S["champion"] = ([tone(f"0.45*(sin({P}*82*t)+0.6*sin({P}*123*t)+0.3*sin({P}*164*t))*min(t/0.15,1)*exp(-2.2*max(t-0.35,0))", 1.4), noise(1.4, "brown", "lowpass=f=300," + env("min(t/0.1,1)*exp(-3*t)*1.6"))], ECHO)
 S["victory"] = ([tone("+".join(bell(f, i * 0.15, 2.2, 0.26) for i, f in enumerate([392, 523.3, 659.3, 784, 1046.5])), 2.8)], ECHO)
 S["defeat"] = ([tone("+".join(bell(f, i * 0.32, 2.4, 0.28) for i, f in enumerate([392, 370, 311.1, 261.6])), 2.6)], ECHO)

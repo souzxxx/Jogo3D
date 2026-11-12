@@ -15,7 +15,7 @@ namespace Quintessence.Feel
             "cast_fire", "cast_water", "cast_earth", "cast_air", "skill_fire", "skill_water", "skill_earth", "skill_air",
             "hit", "hit_heavy", "hurt", "enemy_die", "dash", "switch", "reaction", "telegraph", "explode", "block", "shield",
             "shatter", "quint_on", "quint_off", "room_clear", "wave", "door", "pickup", "heal", "ui_click",
-            "boss_spawn", "boss_phase", "victory", "defeat", "level_up", "champion",
+            "boss_spawn", "boss_phase", "victory", "defeat", "level_up", "champion", "quint_burst", "feat", "split",
         };
         public const string AmbientMusic = "music_ambient", BossMusic = "music_boss";
         /// Ambiente de cada trecho, pelo indice do GameEvents.AmbientChanged.

@@ -436,6 +436,7 @@ namespace Quintessence.Feel
             Burst(p, Vector3.up, 180f, 80, 3f, 10f, 0.35f, 1f, 0.7f, c);
             LightFlash(p + Vector3.up, c, 14f, radius * 3f, 0.45f);
             CameraShake.Add(0.7f);
+            Sfx.Play("quint_burst");
             DamageNumber.Spawn(point + Vector3.up * 4.2f, name.ToUpperInvariant(), Color.Lerp(c, Color.white, 0.35f), 1.15f, 2f);
         }
 
