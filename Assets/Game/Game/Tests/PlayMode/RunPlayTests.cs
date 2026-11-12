@@ -97,6 +97,11 @@ namespace Quintessence.Game.PlayTests
             yield return null; yield return null;
             Assert.IsTrue(menu.SheetOpen);
             Shot(Camera.main, "docs/img/opcoes.png");
+            menu.ShowFeats();
+            yield return null; yield return null;
+            Assert.IsTrue(menu.SheetOpen);
+            Assert.IsNotNull(GameObject.Find("Feat9"), "os dez feitos aparecem");
+            Shot(Camera.main, "docs/img/feitos.png");
             menu.ShowCredits();
             yield return null; yield return null;
             Shot(Camera.main, "docs/img/creditos.png");
@@ -389,6 +394,8 @@ namespace Quintessence.Game.PlayTests
 
             Assert.IsTrue(director.Finished, "a run nao terminou no tempo limite");
             Assert.IsTrue(director.Victory, $"o heroi caiu na sala {director.Run.Depth + 1} ({director.Run.Current.Type})");
+            Assert.Contains(Feat.FirstWin, director.NewFeats, "a primeira vitoria cumpre o feito");
+            Assert.IsTrue(MetaStore.Current.Has(Feat.FirstWin));
             Assert.IsTrue(sawDoors, "as portas deveriam abrir depois de limpar a sala");
             Assert.IsTrue(sawShrine, "o caminho passa por um santuario");
             Assert.AreEqual(4, maxDepth, "chegou a ultima camada");

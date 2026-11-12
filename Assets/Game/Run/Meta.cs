@@ -86,6 +86,64 @@ namespace Quintessence.Run
         public static int StartEssence(int level) => level >= 5 ? 30 : 0;
     }
 
+    public enum Feat { FirstWin, AllHeroes, MasteryFive, Ascended, Quintessence, Trial, Fusion, Horde, ShieldBreak, Collector }
+
+    /// O que uma run fez, para conferir os Feitos no fim dela.
+    public struct RunRecord
+    {
+        public bool Victory;
+        public int Ascension, Kills, Talents, Quintessences, Fusions, TrialsPassed, ShieldBreaks;
+    }
+
+    /// Feitos: metas permanentes, cada uma paga Fragmentos uma vez so.
+    public static class Feats
+    {
+        public const int Count = 10;
+        public const int Reward = 10;
+
+        public static string Name(Feat f) => f switch
+        {
+            Feat.FirstWin => "Primeira Chama", Feat.AllHeroes => "Quatro Caminhos", Feat.MasteryFive => "Mestre",
+            Feat.Ascended => "Ascendido", Feat.Quintessence => "O Quinto Estado", Feat.Trial => "Provado",
+            Feat.Fusion => "Alquimista", Feat.Horde => "Ceifa", Feat.ShieldBreak => "Escudo Partido", Feat.Collector => "Colecionador",
+            _ => "",
+        };
+
+        public static string Describe(Feat f) => f switch
+        {
+            Feat.FirstWin => "Vença uma run",
+            Feat.AllHeroes => "Vença com os quatro heróis",
+            Feat.MasteryFive => "Leve um herói à maestria 5",
+            Feat.Ascended => "Vença na Ascensão 3 ou acima",
+            Feat.Quintessence => "Desperte a Quintessência",
+            Feat.Trial => "Cumpra uma Provação",
+            Feat.Fusion => "Faça uma Fusão com o terceiro elemento",
+            Feat.Horde => "Derrote 100 inimigos numa run",
+            Feat.ShieldBreak => "Quebre o escudo de um chefe final",
+            Feat.Collector => "Termine uma run com 6 talentos",
+            _ => "",
+        };
+
+        /// Quais feitos a run cumpriu (com o progresso ja somado da run).
+        public static System.Collections.Generic.List<Feat> Earned(RunRecord r, MetaProgress p)
+        {
+            var list = new System.Collections.Generic.List<Feat>();
+            void Check(Feat f, bool ok) { if (ok && !p.Has(f)) list.Add(f); }
+            Check(Feat.FirstWin, r.Victory);
+            Check(Feat.AllHeroes, p.HeroWins(ElementType.Fire) > 0 && p.HeroWins(ElementType.Water) > 0 && p.HeroWins(ElementType.Earth) > 0 && p.HeroWins(ElementType.Air) > 0);
+            Check(Feat.MasteryFive, p.MasteryLevel(ElementType.Fire) >= Mastery.MaxLevel || p.MasteryLevel(ElementType.Water) >= Mastery.MaxLevel
+                || p.MasteryLevel(ElementType.Earth) >= Mastery.MaxLevel || p.MasteryLevel(ElementType.Air) >= Mastery.MaxLevel);
+            Check(Feat.Ascended, r.Victory && r.Ascension >= 3);
+            Check(Feat.Quintessence, r.Quintessences > 0);
+            Check(Feat.Trial, r.TrialsPassed > 0);
+            Check(Feat.Fusion, r.Fusions > 0);
+            Check(Feat.Horde, r.Kills >= 100);
+            Check(Feat.ShieldBreak, r.ShieldBreaks > 0);
+            Check(Feat.Collector, r.Talents >= 6);
+            return list;
+        }
+    }
+
     /// O que sobrevive entre as runs. So regra: quem grava em disco e outro.
     public class MetaProgress
     {
@@ -159,7 +217,19 @@ namespace Quintessence.Run
         }
 
         /// "v1;fragmentos;runs;vitorias;recorde;niveis;vitorias por heroi;maestria por heroi" (os dois ultimos sao opcionais: saves antigos nao tem)
-        public string Serialize() => $"v1;{Shards};{Runs};{Wins};{BestRooms};{string.Join(",", levels)};{heroWins[1]},{heroWins[2]},{heroWins[3]},{heroWins[4]};{heroXp[1]},{heroXp[2]},{heroXp[3]},{heroXp[4]}";
+        public string Serialize() => $"v1;{Shards};{Runs};{Wins};{BestRooms};{string.Join(",", levels)};{heroWins[1]},{heroWins[2]},{heroWins[3]},{heroWins[4]};{heroXp[1]},{heroXp[2]},{heroXp[3]},{heroXp[4]};{feats}";
+
+        int feats;
+        public bool Has(Feat f) => (feats & (1 << (int)f)) != 0;
+        public int FeatCount { get { int n = 0; for (int i = 0; i < Feats.Count; i++) if ((feats & (1 << i)) != 0) n++; return n; } }
+
+        /// Marca os feitos novos da run e paga os Fragmentos de cada um. Devolve os novos.
+        public System.Collections.Generic.List<Feat> GrantFeats(RunRecord r)
+        {
+            var earned = Feats.Earned(r, this);
+            foreach (var f in earned) { feats |= 1 << (int)f; Shards += Feats.Reward; }
+            return earned;
+        }
 
         /// Le um save. Texto vazio, cortado ou adulterado vira progresso zerado ou valores dentro dos limites, nunca erro.
         public static MetaProgress Parse(string text)
@@ -185,6 +255,7 @@ namespace Quintessence.Run
                 var hx = parts[7].Split(',');
                 for (int i = 0; i < 4 && i < hx.Length; i++) p.heroXp[i + 1] = Read(hx[i], 0, 99999);
             }
+            if (parts.Length >= 9) p.feats = Read(parts[8], 0, (1 << Feats.Count) - 1);
             return p;
         }
 

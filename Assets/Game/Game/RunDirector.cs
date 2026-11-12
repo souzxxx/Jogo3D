@@ -249,6 +249,24 @@ namespace Quintessence.Game
             GameEvents.DamageDealt += OnDamageDealt;
             CorruptionPool.Marked += OnPoolMarked;
             GameEvents.PuddleLanded += OnPuddleLanded;
+            GameEvents.QuintessenceActiveChanged += OnQuintessence;
+            GameEvents.ReactionTriggered += OnReactionForFeats;
+            GameEvents.BossShieldChanged += OnBossShield;
+        }
+
+        // ---------- contagem para os Feitos ----------
+        int quintessences, fusions, trialsPassed, shieldBreaks;
+        bool shieldUp;
+        /// Feitos que esta run cumpriu (para a tela de resultado e os testes).
+        public List<Feat> NewFeats { get; private set; } = new();
+        void OnQuintessence(bool on) { if (on && !Finished) quintessences++; }
+        // a Fusao chega sem alvo (e uma area, nao um inimigo)
+        void OnReactionForFeats(ReactionEvent e) { if (!Finished && e.Target == null && !string.IsNullOrEmpty(e.Name)) fusions++; }
+        void OnBossShield(bool up, bool needsQuintessence)
+        {
+            if (up) { shieldUp = true; return; }
+            if (shieldUp && !Finished) shieldBreaks++;
+            shieldUp = false;
         }
 
         void OnPuddleLanded(Vector3 point, float radius, ElementType element, float seconds) => WaterPuddle.Spawn(puddlePrefab, point, radius, element, seconds);
@@ -339,6 +357,7 @@ namespace Quintessence.Game
             LastTrialPassed = passed;
             if (passed)
             {
+                trialsPassed++;
                 Run.Progress.GrantPick();
                 Run.AddEssence(Trials.BonusEssence);
                 Feel.DamageNumber.Spawn(player.transform.position + Vector3.up * 3.9f, "PROVAÇÃO CUMPRIDA: TALENTO EXTRA", new Color(0.9f, 0.76f, 0.42f), 1.1f, 2.2f);
@@ -400,6 +419,9 @@ namespace Quintessence.Game
             GameEvents.DamageDealt -= OnDamageDealt;
             CorruptionPool.Marked -= OnPoolMarked;
             GameEvents.PuddleLanded -= OnPuddleLanded;
+            GameEvents.QuintessenceActiveChanged -= OnQuintessence;
+            GameEvents.ReactionTriggered -= OnReactionForFeats;
+            GameEvents.BossShieldChanged -= OnBossShield;
         }
 
         void Start()
@@ -791,6 +813,11 @@ namespace Quintessence.Game
             int unlockedNow = Ascension.Unlocked(MetaStore.Current.Wins);
             MasteryGained = Mastery.RunXp(Run.RoomsCleared, Run.Kills, victory);
             MasteryLevelsUp = MetaStore.Current.AddHeroXp(GameFlow.StartElement, MasteryGained);
+            NewFeats = MetaStore.Current.GrantFeats(new RunRecord
+            {
+                Victory = victory, Ascension = GameFlow.Ascension, Kills = Run.Kills, Talents = Run.Talents.Count,
+                Quintessences = quintessences, Fusions = fusions, TrialsPassed = trialsPassed, ShieldBreaks = shieldBreaks,
+            });
             NewAscension = unlockedNow > unlockedBefore ? unlockedNow : 0;
             MetaStore.Save();
             ShardsEarned = shards;
@@ -801,6 +828,7 @@ namespace Quintessence.Game
                 + $"\nSalas vencidas: {Run.RoomsCleared}   ·   Essência: {Run.Essence}   ·   Elementos: {player.Loadout.Awakened.Count}/4   ·   Tempo: {seconds / 60}:{seconds % 60:00}"
                 + $"\n+{shards} Fragmentos para o Refúgio (total: {MetaStore.Current.Shards})   ·   {HeroPassives.HeroName(GameFlow.StartElement)} +{MasteryGained} de maestria"
                 + (MasteryLevelsUp > 0 ? $"\nMaestria {MetaStore.Current.MasteryLevel(GameFlow.StartElement)} de {HeroPassives.HeroName(GameFlow.StartElement)}: {Mastery.Perk(MetaStore.Current.MasteryLevel(GameFlow.StartElement))}" : "")
+                + (NewFeats.Count > 0 ? $"\nFeito{(NewFeats.Count > 1 ? "s" : "")}: {string.Join(", ", NewFeats.ConvertAll(Feats.Name))} (+{NewFeats.Count * Feats.Reward} Fragmentos)" : "")
                 + (NewAscension > 0 ? $"\nAscensão {NewAscension} liberada: escolha no título para enfrentar inimigos mais fortes" : "");
             Sfx.Play(victory ? "victory" : "defeat");
             hud.ShowResult(victory, stats, GameFlow.RestartRun, GameFlow.ToTitle);

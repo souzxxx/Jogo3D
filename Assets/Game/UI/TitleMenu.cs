@@ -223,6 +223,27 @@ namespace Quintessence.UI
             }
         }
 
+        /// Feitos: as dez metas permanentes, cumpridas ou nao, e o que cada uma paga.
+        public void ShowFeats()
+        {
+            var box = OpenSheet("FEITOS", 900, 1200);
+            int done = meta != null ? meta.FeatCount : 0;
+            UiKit.Text(UiKit.Rect("Count", box, new Vector2(0.5f, 1), new Vector2(0, -112), new Vector2(1000, 32)),
+                $"{done} de {Feats.Count} cumpridos  ·  cada feito paga {Feats.Reward} Fragmentos uma vez", 22, UiKit.Dim, TextAnchor.MiddleCenter, false);
+            var gold = new Color(0.88f, 0.74f, 0.42f);
+            for (int i = 0; i < Feats.Count; i++)
+            {
+                var f = (Feat)i;
+                bool has = meta != null && meta.Has(f);
+                float x = i < 5 ? -280f : 280f, y = -190 - (i % 5) * 112;
+                var row = UiKit.Box("Feat" + i, box, new Vector2(0.5f, 1), new Vector2(x, y), new Vector2(520, 96), has ? 0.9f : 0.5f);
+                var disc = UiKit.Rect("Disc", row, new Vector2(0, 0.5f), new Vector2(14, 0), new Vector2(56, 56));
+                UiKit.Image(disc, has ? UiKit.Circle : UiKit.Ring, has ? gold : UiKit.Dim);
+                UiKit.Text(UiKit.Rect("Name", row, new Vector2(0, 0.5f), new Vector2(86, 16), new Vector2(420, 34)), Feats.Name(f), 26, has ? UiKit.Paper : UiKit.Dim, TextAnchor.MiddleLeft);
+                UiKit.Text(UiKit.Rect("Desc", row, new Vector2(0, 0.5f), new Vector2(86, -18), new Vector2(420, 30)), Feats.Describe(f), 20, has ? UiKit.Cream : UiKit.Dim, TextAnchor.MiddleLeft, false);
+            }
+        }
+
         public void ShowCredits()
         {
             var box = OpenSheet("CRÉDITOS", 800);
@@ -360,14 +381,15 @@ namespace Quintessence.UI
                 heroMasteryLabels[i] = UiKit.Text(UiKit.Rect("Mastery", card, new Vector2(0, 1), new Vector2(12, -18), new Vector2(80, 22)), "", 17, UiKit.Cream, TextAnchor.MiddleLeft, false);
                 heroMasteryLabels[i].resizeTextForBestFit = true; heroMasteryLabels[i].resizeTextMinSize = 12; heroMasteryLabels[i].resizeTextMaxSize = 17;
             }
-            var open = UiKit.Button(root, "REFÚGIO", new Vector2(0.5f, 0), new Vector2(-440, 74), new Vector2(360, 58), UiKit.Primary, () => ShowRefuge(true));
+            var open = UiKit.Button(root, "REFÚGIO", new Vector2(0.5f, 0), new Vector2(-560, 74), new Vector2(340, 58), UiKit.Primary, () => ShowRefuge(true));
             void Small(string label, float x, Action act) =>
                 UiKit.Button(root, label, new Vector2(0.5f, 0), new Vector2(x, 74), new Vector2(200, 58), UiKit.Secondary, act)
                     .transform.Find("Label").GetComponent<UnityEngine.UI.Text>().fontSize = 26;
-            Small("GRIMÓRIO", -140, ShowGrimoire);
-            Small("TREINO", 80, () => OnTutorial?.Invoke());
-            Small("OPÇÕES", 300, ShowOptions);
-            Small("CRÉDITOS", 520, ShowCredits);
+            Small("GRIMÓRIO", -270, ShowGrimoire);
+            Small("FEITOS", -50, ShowFeats);
+            Small("TREINO", 170, () => OnTutorial?.Invoke());
+            Small("OPÇÕES", 390, ShowOptions);
+            Small("CRÉDITOS", 610, ShowCredits);
             refugeLabel = open.transform.Find("Label").GetComponent<UnityEngine.UI.Text>();
             refugeLabel.fontSize = 26;
             refuge = UiKit.Stretch("Refuge", root);

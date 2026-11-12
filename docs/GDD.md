@@ -147,6 +147,7 @@ Os tipos entram aos poucos: Ceifador na segunda sala, Cinzentos na terceira, Arr
 - **Entre runs:** Fragmentos, 3 por sala vencida e 15 por vencer o Guardião. No **Refúgio** compram sete melhorias permanentes: Vigor (vida), Força (dano), Bolsa (Essência inicial), Foco (Quintessência), Fôlego (cura por sala), Sabedoria (experiência) e Intuição (trocar as opções de talento). O progresso é salvo no navegador.
 - **Continuar:** a run é gravada ao entrar em cada sala. Fechar o jogo e voltar retoma do começo daquela sala. Começar uma run nova ou terminá-la apaga o save.
 - **Ascensão:** cada vitória libera um nível de desafio (até cinco). Cada nível dá +12% de vida e +10% de dano aos inimigos e +25% de Fragmentos.
+- **Feitos:** dez metas permanentes, cada uma paga 10 Fragmentos uma vez: vencer uma run, vencer com os quatro heróis, maestria 5, vencer na Ascensão 3, despertar a Quintessência, cumprir uma Provação, fazer uma Fusão, 100 abates numa run, quebrar o escudo de um chefe e terminar com 6 talentos. Painel no título (FEITOS) e aviso no fim da run.
 - **Maestria por herói:** cada run dá experiência ao herói usado (uma por sala vencida, uma a cada 10 abates, 10 pela vitória). São cinco níveis, e cada um vale só para aquele herói: 1) +10 de vida, 2) um talento à escolha no começo da run, 3) +8% de dano, 4) +1 troca de talentos, 5) começa com 30 de Essência. Aparece na carta do herói, no Refúgio, no Grimório e no fim da run.
 
 ### Estados e erros
@@ -184,7 +185,7 @@ Os tipos entram aos poucos: Ceifador na segunda sala, Cinzentos na terceira, Arr
 
 ### Menus
 
-Título com os quatro heróis no altar (o herói da carta em foco comemora), Continuar run quando há uma salva, seletor de Ascensão depois da primeira vitória, Refúgio (com vitórias por herói), Grimório (heróis, inimigos e reações), Treino (com o herói da última carta em foco), Opções (volumes, tela cheia, tremor de tela e dificuldade: Normal ou Tranquila, em que o herói recebe 35% menos dano de tudo; vale na hora, até pela pausa, e aparece no resultado) e Créditos. Na run: pausa com as opções, inventário (skills, reações, atributos, bênçãos e talentos), mapa com os trechos, escolha de talento a cada nível e dicas de primeira vez no rodapé. Resultado com herói, nível, abates, quem derrubou o herói e os Fragmentos ganhos.
+Título com os quatro heróis no altar (o herói da carta em foco comemora), Continuar run quando há uma salva, seletor de Ascensão depois da primeira vitória, Refúgio (com vitórias por herói), Grimório (heróis, inimigos e reações), Feitos, Treino (com o herói da última carta em foco), Opções (volumes, tela cheia, tremor de tela e dificuldade: Normal ou Tranquila, em que o herói recebe 35% menos dano de tudo; vale na hora, até pela pausa, e aparece no resultado) e Créditos. Na run: pausa com as opções, inventário (skills, reações, atributos, bênçãos e talentos), mapa com os trechos, escolha de talento a cada nível e dicas de primeira vez no rodapé. Resultado com herói, nível, abates, quem derrubou o herói e os Fragmentos ganhos.
 
 A build WebGL tem página de carregamento própria (arte do título, barra dourada e os controles) e abre direto no título.
 

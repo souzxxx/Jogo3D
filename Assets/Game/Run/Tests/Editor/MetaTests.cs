@@ -220,5 +220,35 @@ namespace Quintessence.Run.Tests
             Assert.AreEqual(0, old.HeroXp(ElementType.Water));
             Assert.AreEqual(0, MetaProgress.Parse("v1;0;0;0;0;0,0,0,0,0;0,0,0,0;9,x").HeroXp(ElementType.Water), "campo estragado vira zero");
         }
+
+        [Test] public void Feats_PayOnce_AndSurviveSaving()
+        {
+            var p = new MetaProgress();
+            for (int i = 0; i < Feats.Count; i++) { Assert.IsNotEmpty(Feats.Name((Feat)i)); Assert.IsNotEmpty(Feats.Describe((Feat)i)); }
+            var loss = new RunRecord { Victory = false, Kills = 120, Talents = 6, Fusions = 1 };
+            var got = p.GrantFeats(loss);
+            CollectionAssert.AreEquivalent(new[] { Feat.Horde, Feat.Collector, Feat.Fusion }, got, "derrota tambem cumpre feitos que nao pedem vitoria");
+            Assert.AreEqual(3 * Feats.Reward, p.Shards);
+            Assert.AreEqual(0, p.GrantFeats(loss).Count, "cada feito paga uma vez so");
+            Assert.AreEqual(3 * Feats.Reward, p.Shards);
+            p.EndRun(10, true, 1f, ElementType.Fire);
+            var won = p.GrantFeats(new RunRecord { Victory = true, Ascension = 3, Quintessences = 1, ShieldBreaks = 1, TrialsPassed = 1 });
+            CollectionAssert.IsSubsetOf(new[] { Feat.FirstWin, Feat.Ascended, Feat.Quintessence, Feat.ShieldBreak, Feat.Trial }, won);
+            Assert.IsFalse(p.Has(Feat.AllHeroes), "falta vencer com os outros tres");
+            var back = MetaProgress.Parse(p.Serialize());
+            Assert.AreEqual(p.FeatCount, back.FeatCount);
+            Assert.IsTrue(back.Has(Feat.FirstWin));
+            Assert.AreEqual(0, MetaProgress.Parse("v1;40;3;1;7;2,1,0,3,1;0,1,0,0;5,0,0,0").FeatCount, "save antigo sem feitos");
+            Assert.AreEqual(0, MetaProgress.Parse("v1;40;3;1;7;2,1,0,3,1;0,1,0,0;5,0,0,0;abc").FeatCount, "campo estragado vira zero");
+        }
+
+        [Test] public void Feat_AllHeroes_And_Mastery_ComeFromTheSave()
+        {
+            var p = new MetaProgress();
+            foreach (var e in Elements.All) p.EndRun(10, true, 1f, e);
+            Assert.Contains(Feat.AllHeroes, p.GrantFeats(new RunRecord { Victory = true }));
+            p.AddHeroXp(ElementType.Air, 500);
+            Assert.Contains(Feat.MasteryFive, p.GrantFeats(new RunRecord()));
+        }
     }
 }
