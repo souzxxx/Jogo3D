@@ -35,6 +35,78 @@
   <h1>Quintessence 3D — Progresso</h1>
   <p class="sub">Entrega mais recente no topo. Escopo em <a href="ESCOPO.md">ESCOPO.md</a> · kanban em <a href="https://github.com/users/souzxxx/projects/4">GitHub Projects</a>.</p>
 
+  <section id="madrugada">
+    <h2>Madrugada de 11 para 12/11: heróis do 2D, nível e talentos, inimigos, perigos, salas e biomas</h2>
+    <div class="meta"><span class="tag who">Leonardo</span><span class="tag who">Nicolas</span><span class="tag who">Enzo</span><span class="tag who">Miguel</span><span class="tag ok">481 testes de regra + 20 testes jogando, todos passando</span></div>
+    <img src="img/titulo.png" alt="Título com os quatro heróis">
+    <div class="cols">
+      <div>
+        <h3>Os quatro heróis do Quintessence 2D</h3>
+        <ul>
+          <li><b>Rax</b> (Fogo, felino caçador com garras), <b>Liora</b> (Água, espírito cervo-raposa com orbe), <b>Brann</b> (Terra, texugo com martelo de pedra) e <b>Vey</b> (Ar, espírito encapuzado sem pernas, duas adagas)</li>
+          <li>Cabeças, caudas e armas foram modeladas no Blender do PC do Leonardo (por SSH) e presas aos ossos dos corpos do pack; as animações são as do pack</li>
+          <li>Escolher o herói define a primeira skill, a passiva e o conjunto de golpes (garras, orbe, martelo, adagas)</li>
+          <li>A parte mágica de cada um (crina do Rax, orbe da Liora, rachaduras do martelo, olhos e debrum do Vey) assume a cor da última skill usada</li>
+          <li>Passivas: Rax +15% no combo; Liora cura ao limpar a sala; Brann +20 de vida; Vey mais veloz e dash mais rápido</li>
+        </ul>
+      </div>
+      <div>
+        <h3>Limites</h3>
+        <ul>
+          <li class="warn">Liora e Brann ficaram no nível do pack. A crina do Rax ainda é a peça mais dura, e o redemoinho do Vey quase some visto de cima</li>
+          <li class="warn">As pernas de felino do Rax e a saia de folhas da Liora do 2D não foram feitas</li>
+          <li class="warn">As skills usam as mesmas animações nos quatro heróis</li>
+        </ul>
+      </div>
+    </div>
+    <img src="img/herois.png" alt="Os quatro heróis dentro do jogo" style="margin-top:14px">
+    <img src="img/herois_blender.png" alt="Os quatro heróis no Blender" style="margin-top:14px">
+
+    <h3 style="margin-top:18px">Nível e talentos</h3>
+    <img src="img/nivel_talentos.png" alt="Escolha de talento ao subir de nível">
+    <ul style="margin-top:10px">
+      <li>Inimigo derrotado dá experiência; cada nível oferece três talentos para escolher um (clique, teclas 1-2-3 ou controle)</li>
+      <li>17 talentos: cinco de corpo e três por skill. Exemplos: Labareda deixa o chão em chamas, Maré congela, Pilar bloqueia mais um golpe e devolve dano, Vendaval dá pressa, +1 carga de dash</li>
+      <li>A escolha só abre com a sala limpa: nunca interrompe a luta</li>
+    </ul>
+
+    <h3 style="margin-top:18px">Três inimigos novos e o Campeão</h3>
+    <div class="cols">
+      <img src="img/inimigo_ceifador.png" alt="Ceifador avisando a investida">
+      <img src="img/inimigo_xama_cura.png" alt="Xamã curando um aliado">
+    </div>
+    <ul style="margin-top:10px">
+      <li><b>Ceifador:</b> avisa uma linha larga e atravessa a sala por ela. Fica exposto depois</li>
+      <li><b>Arremessador:</b> joga uma bomba onde você está; o círculo avisa e basta sair</li>
+      <li><b>Xamã:</b> cura os aliados feridos em volta (aviso verde). Sozinho, atira. É o alvo a derrubar primeiro</li>
+      <li><b>Campeão:</b> a última onda das salas de Elite traz um inimigo maior, com 2,4 vezes a vida, que paga Essência e experiência extra</li>
+      <li>Eles entram aos poucos: Ceifador na segunda sala, Arremessador na quarta, Xamã na quinta</li>
+    </ul>
+
+    <h3 style="margin-top:18px">Perigos, salas e biomas</h3>
+    <div class="cols">
+      <img src="img/perigo_barril.png" alt="Barril de pólvora">
+      <img src="img/sala_pacto.png" alt="Sala de Pacto">
+    </div>
+    <div class="cols">
+      <img src="img/bioma_2.png" alt="Cripta Afogada">
+      <img src="img/bioma_3.png" alt="Jardim de Pedra">
+    </div>
+    <ul style="margin-top:10px">
+      <li><b>Barril de pólvora:</b> qualquer golpe acende; a explosão fere muito mais os inimigos que o herói e acende os barris vizinhos</li>
+      <li><b>Armadilha de espinhos:</b> avisa e sobe; fura herói e inimigo</li>
+      <li>Seis layouts novos (Paiol, Espinhos, Arena, Trincheira, Escombros, Câmara): agora são doze</li>
+      <li><b>Tesouro:</b> um baú com Essência e um gole de vida. <b>Pacto:</b> um ganho forte por um custo permanente (Sangue, Vidro ou Ganância), e dá para recusar</li>
+      <li>A run passou de 8 para 10 salas e atravessa três trechos com clima próprio: Salões de Cinza, Cripta Afogada e Jardim de Pedra, até o Coração das Cinzas, a sala do chefe</li>
+    </ul>
+    <h3 style="margin-top:14px">Limites desta leva</h3>
+    <ul>
+      <li class="warn">Nada disso foi jogado por uma pessoa: os testes são roteiros. A dificuldade com mais inimigos, mais salas e talentos precisa de uma run sua para calibrar</li>
+      <li class="warn">Os biomas mudam luz e cor da corrupção; as paredes e o piso são os mesmos</li>
+      <li class="warn">A bomba do Arremessador não tem projétil visível, só o aviso e a explosão</li>
+    </ul>
+  </section>
+
   <section>
     <h2>Combate novo: golpe básico neutro, skills no 1-2-3-4, controle e inventário</h2>
     <div class="meta"><span class="tag who">Leonardo</span><span class="tag who">Nicolas</span><span class="tag ok">429 testes de regra + 16 testes jogando, todos passando</span></div>
