@@ -22,7 +22,7 @@ No Unity: x_unity = −x, y_unity = z, z_unity = −y.
 
 | Peça | Arquivo | Osso | Tris | bbox min | bbox max | Materiais |
 |---|---|---|---|---|---|---|
-| Cabeça + juba | `rax_head.fbx` | `head` | 1268 | -0.685, -0.577, 1.061 | 0.685, 0.654, 2.404 | Fur, FurLight, FurDark, Nose, Eye (oval preto), EarInner, **Magic** (crina em mechas) |
+| Cabeça + juba | `rax_head.fbx` | `head` | 1420 | -0.685, -0.577, 1.12 | 0.685, 0.902, 2.404 | Fur, FurLight, FurDark, Nose, Eye (oval preto), EarInner, **Magic** (7 mechas de chama em duas camadas) |
 | Cauda | `rax_tail.fbx` | `hips` | 142 | -0.074, 0.207, 0.413 | 0.405, 1.336, 1.624 | Fur, **Magic** (ponta) |
 | Garra esq. | `rax_weapon_l.fbx` | `handslot.l` | 172 | 0.8, -0.19, 0.945 | 1.403, 0.19, 1.265 | Leather, Metal, Claw |
 | Garra dir. | `rax_weapon_r.fbx` | `handslot.r` | 172 | -1.403, -0.19, 0.945 | -0.8, 0.19, 1.265 | Leather, Metal, Claw |
@@ -57,7 +57,7 @@ O martelo segue a mesma orientação do `2H_Axe` do pack (cabo ao longo do slot)
 | Peça | Arquivo | Osso | Tris | bbox min | bbox max | Materiais |
 |---|---|---|---|---|---|---|
 | Rosto (vazio preto) + olhos + debrum | `vey_head.fbx` | `head` | 456 | -0.486, -0.63, 1.15 | 0.486, 0.44, 1.89 | Void (preto fosco), **Magic** (olhos e debrum do capuz) |
-| Redemoinho (3 fitas espirais) | `vey_tail.fbx` | `hips` | 368 | -0.528, -0.409, -0.011 | 0.594, 0.316, 0.692 | **Magic** |
+| Redemoinho (funil aberto r≈0,75 + anel na cintura) | `vey_tail.fbx` | `hips` | 644 | -0.785, -0.809, 0.005 | 0.799, 0.785, 0.726 | **Magic** |
 | Adaga dir. | `vey_weapon_r.fbx` | `handslot.r` | 172 | -1.062, -0.981, 0.973 | -0.763, 0.225, 1.125 | Metal, Grip, Guard |
 | Adaga esq. | `vey_weapon_l.fbx` | `handslot.l` | 172 | 0.763, -0.981, 0.973 | 1.062, 0.225, 1.125 | Metal, Grip, Guard |
 
@@ -78,3 +78,7 @@ Scripts em `_blender/` (`lib.py`, `heroes.py`, `preview.py`); caminhos apontam p
 - Rax: cabeça esférica com bochechas e focinho curto, olhos ovais pretos (material `Pupil` removido), orelhas de lince com tufo, juba trocada por mechas chapadas em camadas da coroa até a nuca.
 - Vey: orelhas removidas (materiais `Ear`/`EarDark` não existem mais); domo preto `Void` dentro do capuz cobre nariz e boca; debrum `Magic` segue a borda real da abertura do capuz do pack; redemoinho virou funil de três fitas espirais.
 - Brann: veios do martelo viraram rachaduras em zigue-zague quase rentes à pedra.
+
+## Rodada 6
+- Rax: crina refeita como 7 mechas de chama em duas camadas (5 atrás, 2 na crista da testa à coroa), afinando na ponta, curvadas para trás e para cima. Resto da cabeça igual.
+- Vey: redemoinho abre para fora na altura do quadril (anel de cima com raio ~0,75 m, z ~0,62), 3 fitas largas e chatas em espiral até a ponta no chão, mais um anel fino aberto em volta da cintura (r ~0,56, z ~0,66).

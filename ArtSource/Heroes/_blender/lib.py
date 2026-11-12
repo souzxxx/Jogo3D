@@ -157,7 +157,7 @@ def recolor(src,dst,cells,default=None):
     bpy.data.images.remove(im); bpy.data.images.remove(out)
 
 # ---------------- preview ----------------
-def load_body(fbx,texpath,hide,offset=(0,0,0),suffix=""):
+def load_body(fbx,texpath,hide,offset=(0,0,0),suffix="",props=False,tint=None):
     before=set(bpy.data.objects)
     bpy.ops.import_scene.fbx(filepath=fbx)
     new=[o for o in bpy.data.objects if o not in before]
@@ -167,13 +167,18 @@ def load_body(fbx,texpath,hide,offset=(0,0,0),suffix=""):
     arm.parent=root; root.location=offset; bpy.context.view_layer.update()
     for o in new:
         if o.type=='MESH':
-            if o.name.split('.')[0] in hide or (o.parent_type=='BONE' and 'Cape' not in o.name): o.hide_render=True; o.hide_viewport=True
+            if o.name.split('.')[0] in hide or (o.parent_type=='BONE' and 'Cape' not in o.name and not props): o.hide_render=True; o.hide_viewport=True
             for m in o.data.materials:
                 if m and m.use_nodes:
                     for n in m.node_tree.nodes:
                         if n.type=='TEX_IMAGE' and texpath:
                             n.image=bpy.data.images.load(texpath,check_existing=True); n.interpolation='Closest'
                         if n.type=='BSDF_PRINCIPLED':
+                            if tint and n.inputs["Base Color"].links and not m.get("tinted"):
+                                lk=n.inputs["Base Color"].links[0]; src=lk.from_socket
+                                mx=m.node_tree.nodes.new("ShaderNodeMix"); mx.data_type='RGBA'; mx.blend_type='MULTIPLY'; mx.inputs[0].default_value=1.0
+                                m.node_tree.links.new(src,mx.inputs[6]); mx.inputs[7].default_value=(*[c**2.2 for c in tint],1)
+                                m.node_tree.links.new(mx.outputs[2],n.inputs["Base Color"]); m["tinted"]=1
                             n.inputs["Roughness"].default_value=0.8
                             try: n.inputs["Specular IOR Level"].default_value=0.2
                             except Exception: pass

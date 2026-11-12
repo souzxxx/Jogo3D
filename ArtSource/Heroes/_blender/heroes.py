@@ -42,18 +42,25 @@ def rax():
         o.append(lock("ruff",FurL,(s*0.42,-0.22,1.5),(s*1.0,0.1,-0.6),(0,-1,0),0.3,0.3,thick=0.5,r2=0.15))
         return o
     P+=sym(side)
-    # ember mane: flat layered locks from the crown down the nape (crest), wider at the back
-    rows=[(-6,0.0,0.36,0.3),(26,0.2,0.4,0.34),(58,0.3,0.44,0.38),(90,0.33,0.46,0.4),(120,0.26,0.44,0.42)]
-    for th,xo,wd,ln in rows:
-        t=math.radians(th)
-        for sx in ((0,) if xo==0 else (-1,0,1)):
-            x=sx*xo
-            k=math.sqrt(max(0.05,1-(x/SX)**2))
-            nrm=Vector((x/SX*0.9,math.sin(t)*k,math.cos(t)*k)).normalized()
-            pos=C0+Vector((x,SY*math.sin(t)*k,SZ*math.cos(t)*k))-nrm*0.03
-            tan=Vector((sx*0.35,math.cos(t),-math.sin(t))).normalized()
-            d=(tan+nrm*0.3).normalized()
-            P.append(lock("mane",Magic,pos,d,nrm,wd*(1.0 if sx==0 else 0.92),ln,thick=0.36,r2=0.42))
+    # ember mane: 7 flame/leaf locks in two overlapping layers, forehead to nape, swept back and a bit up
+    UP=Vector((0,0,1))
+    def flame(theta,x,L,W,lift,spread=0.0,thick=0.07):
+        t=math.radians(theta)
+        k=math.sqrt(max(0.05,1-(x/SX)**2))
+        nrm=Vector((x/SX*0.9,math.sin(t)*k,math.cos(t)*k)).normalized()
+        base=C0+Vector((x,SY*math.sin(t)*k,SZ*math.cos(t)*k))-nrm*0.05
+        back=Vector((spread,1,0)).normalized()
+        p0=base; p1=base+nrm*0.05+back*L*0.32
+        p2=base+nrm*0.06+back*L*0.72+UP*lift*0.4; p3=base+nrm*0.02+back*L+UP*lift
+        pts=bez(p0,p1,p2,p3,5)
+        rad=[(W*0.7,thick),(W,thick),(W*1.02,thick),(W*0.78,thick*0.85),(W*0.4,thick*0.6),(0.012,0.012)]
+        return tube("mane",Magic,pts,rad,sides=4,up=tuple(nrm))
+    # lower/back layer: wider locks from the back of the skull, fanning out
+    for th,x,L,W,lift,sp in ((70,0.0,0.5,0.3,0.26,0.0),(64,0.28,0.44,0.26,0.2,0.4),(64,-0.28,0.44,0.26,0.2,-0.4),(108,0.17,0.42,0.26,0.1,0.25),(108,-0.17,0.42,0.26,0.1,-0.25)):
+        P.append(flame(th,x,L,W,lift,sp))
+    # top layer: two crest locks from the forehead/crown riding over the back layer
+    for th,x,L,W,lift,sp in ((-20,0.0,0.6,0.24,0.3,0.0),(20,0.0,0.52,0.24,0.28,0.0)):
+        P.append(flame(th,x,L,W,lift,sp,thick=0.08))
     fin("Rax","head",P,sharp=52)
     # tail
     pts=bez((0,0.24,0.62),(0,0.85,0.30),(0.05,1.30,0.62),(0.22,1.22,1.22),9)
@@ -228,18 +235,31 @@ def vey():
         A,B=loop[i],loop[(i+1)%n]; dd=(B-A).normalized()
         P.append(tube("trim",Magic,[A-dd*0.012,B+dd*0.012],[(0.022,0.016)]*2,sides=4,up=(0,-1,0)))
     fin("Vey","head",P,sharp=40)
-    # wind funnel replacing the legs: three spiral ribbons narrowing to a point, gaps in between
+    # wind funnel replacing the legs: opens wide at the hips (r~0.75) and narrows to a point on the floor
     T=[]
-    for j in range(3):
-        pts=[];rad=[]
-        N=14
+    def ribbon(a0,turns,R0,z0,w0,th=0.035,N=18):
+        bm=bmesh.new(); rings=[]
+        P3=lambda t:Vector(((R0*(1-t)**0.95+0.02)*math.cos(a0+t*turns*2*math.pi),0.04+(R0*(1-t)**0.95+0.02)*math.sin(a0+t*turns*2*math.pi),z0*(1-t)**1.15+0.01))
         for i in range(N+1):
-            t=i/N; ang=math.radians(j*120+t*430)
-            Rr=0.5*(1-t)**0.85+0.015; z=0.6-0.6*t
-            pts.append((1.1*Rr*math.cos(ang),-0.03+0.72*Rr*math.sin(ang)+0.1*t*t,z))
-            rad.append((0.028*(1-0.5*t)+0.004,(0.085*(1-t)**0.7+0.008)))
-        T.append(tube("ribbon",Magic,pts,rad,sides=4,up=(0,0,1)))
-    T.append(cone("core",Magic,r1=0.01,r2=0.15,depth=0.44,loc=(0,0.05,0.02),segs=6))
+            t=i/N; p=P3(t); tg=(P3(min(1,t+0.01))-P3(max(0,t-0.01))).normalized()
+            g=(p-Vector((0,0.04,-0.05))).normalized()          # along the cone generatrix
+            g=(g-tg*g.dot(tg)).normalized(); n=tg.cross(g).normalized()
+            w=w0*(0.75+0.25*math.sin(math.pi*min(1,t*1.6)))*(1-t)**0.6+0.01
+            h=th*(1-0.6*t)+0.006
+            rings.append([bm.verts.new(p+g*sx*w/2+n*sy*h/2) for sx,sy in ((1,1),(-1,1),(-1,-1),(1,-1))])
+        for r0,r1 in zip(rings[:-1],rings[1:]):
+            for k in range(4): bm.faces.new((r0[k],r0[(k+1)%4],r1[(k+1)%4],r1[k]))
+        bm.faces.new(list(reversed(rings[0]))); bm.faces.new(rings[-1])
+        bmesh.ops.recalc_face_normals(bm,faces=bm.faces[:])
+        return new_obj("ribbon",bm,Magic)
+    for j in range(3): T.append(ribbon(math.radians(j*120+20),1.05,0.75,0.62,0.26))
+    # thin wind ring around the waist, open on one side
+    ring=[]
+    for k in range(23):
+        a=math.radians(-110+k*14); tilt=0.05*math.sin(a)
+        ring.append((0.56*math.cos(a),0.04+0.5*math.sin(a),0.66+tilt))
+    T.append(tube("ring",Magic,ring,[(0.012,0.012)]+[(0.035,0.016)]*21+[(0.012,0.012)],sides=4,up=(0,0,1)))
+    T.append(cone("core",Magic,r1=0.012,r2=0.13,depth=0.4,loc=(0,0.05,0.02),segs=6))
     fin("Vey","tail",T,sharp=35)
     # daggers: pack knife meshes, retinted to materials and slightly curved
     bpy.ops.import_scene.fbx(filepath=R+"src/RogueHooded.fbx")

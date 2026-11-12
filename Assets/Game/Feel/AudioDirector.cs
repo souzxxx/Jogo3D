@@ -97,6 +97,7 @@ namespace Quintessence.Feel
             GameEvents.Shattered += OnShattered;
             GameEvents.QuintessenceActiveChanged += OnQuintessence;
             GameEvents.RoomCleared += OnRoomCleared;
+            GameEvents.RoomCleared += OnRoomClearedMusic;
             GameEvents.WaveStarted += OnWave;
             GameEvents.BossSpawned += OnBoss;
             GameEvents.BossPhaseChanged += OnBossPhase;
@@ -118,6 +119,7 @@ namespace Quintessence.Feel
             GameEvents.Shattered -= OnShattered;
             GameEvents.QuintessenceActiveChanged -= OnQuintessence;
             GameEvents.RoomCleared -= OnRoomCleared;
+            GameEvents.RoomCleared -= OnRoomClearedMusic;
             GameEvents.WaveStarted -= OnWave;
             GameEvents.BossSpawned -= OnBoss;
             GameEvents.BossPhaseChanged -= OnBossPhase;
@@ -155,6 +157,9 @@ namespace Quintessence.Feel
         void OnBlocked(Health who, DamageInfo info) => Play("block", 0.7f, 0.06f);
         void OnShattered(Health who) => Play("shatter", 0.9f, 0.05f);
         void OnQuintessence(bool on) => Play(on ? "quint_on" : "quint_off", 1f, 0f);
+        // sala limpa (inclusive a do mini-chefe): a musica de luta volta para a de ambiente
+        void OnRoomClearedMusic() => bossMusic = false;
+
         void OnRoomCleared() => Play("room_clear", 0.9f, 0f);
         void OnWave(int index, int total) => Play("wave", 0.8f, 0f);
         void OnBoss(Health boss, string name) { bossMusic = true; Play("boss_spawn", 1f, 0f); }
