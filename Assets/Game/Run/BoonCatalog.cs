@@ -35,7 +35,7 @@ namespace Quintessence.Run
             Add("air_dash", "Rajada", "Dash recarrega 25% mais rápido", ElementType.Air, BoonStat.DashCooldown, 0.25f);
 
             Add("all_dmg", "Golpe Certeiro", "+10% de dano em tudo", ElementType.None, BoonStat.DamageAll, 0.1f);
-            Add("all_switch", "Mão Trocada", "Golpe de Troca causa +25%", ElementType.None, BoonStat.SwitchStrike, 0.25f);
+            Add("all_switch", "Mão Pesada", "Golpe básico em inimigo marcado causa +25%", ElementType.None, BoonStat.SwitchStrike, 0.25f);
             Add("all_quint", "Centelha Prismática", "Quintessência enche 30% mais rápido", ElementType.None, BoonStat.QuintessenceGain, 0.3f);
             Add("all_hp", "Coração Firme", "+15 de vida máxima", ElementType.None, BoonStat.MaxHealth, 15f);
             Add("all_react", "Eco Elemental", "Reações causam +10%", ElementType.None, BoonStat.ReactionPower, 0.1f);

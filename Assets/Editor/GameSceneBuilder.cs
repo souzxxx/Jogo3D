@@ -55,6 +55,9 @@ public static class GameSceneBuilder
             catalog.FillDefaults();
             AssetDatabase.CreateAsset(catalog, catalogPath);
         }
+        // os textos das bencaos sao do codigo: refaz a lista para o asset nao ficar com descricao antiga
+        catalog.FillDefaults();
+        EditorUtility.SetDirty(catalog);
         director.BindBoons(catalog);
         director.BindBoss(EnemyDevSceneBuilder.BossPrefab(melee, bomber));
         director.BindShop(Prop("table_small", 1f), Prop("bottle_A_labeled_green", 1.8f), Prop("bottle_B_brown", 1.8f), ShopDecor());

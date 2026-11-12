@@ -175,16 +175,18 @@ namespace Quintessence.Game
         void Update()
         {
             if (Finished) return;
-            var kb = Keyboard.current;
-            if (kb != null)
+            if (MenuInput.InventoryPressed && !Busy && (!GameClock.Paused || hud.InventoryVisible)) SetInventory(!hud.InventoryVisible);
+            else if (MenuInput.PausePressed)
             {
-                if (kb.escapeKey.wasPressedThisFrame) SetPaused(!GameClock.Paused);
-                // Tab segurado mostra o mapa; so fecha o que o proprio Tab abriu
-                if (!GameClock.Paused && kb.tabKey.isPressed != mapByTab)
-                {
-                    mapByTab = kb.tabKey.isPressed;
-                    hud.ShowMap(Run, mapByTab);
-                }
+                // Esc fecha o inventario se ele estiver aberto; senao pausa
+                if (hud.InventoryVisible) SetInventory(false);
+                else SetPaused(!GameClock.Paused);
+            }
+            // mapa enquanto segura; so fecha o que o proprio atalho abriu
+            if (!GameClock.Paused && MenuInput.MapHeld != mapByTab)
+            {
+                mapByTab = MenuInput.MapHeld;
+                hud.ShowMap(Run, mapByTab);
             }
             if (GameClock.Paused || Busy) { hud.HidePrompt(); return; }
             // heroi fora da sala (atravessou parede, caiu): volta para a entrada
@@ -199,8 +201,16 @@ namespace Quintessence.Game
             }
             bool pressed = player.Input != null && player.Input.ConsumeInteract();
             if (near == null) { hud.HidePrompt(); return; }
-            hud.ShowPrompt("F — " + near.Prompt);
+            hud.ShowPrompt("E — " + near.Prompt);
             if (pressed) near.Use();
+        }
+
+        /// Abre ou fecha o inventario. O jogo para enquanto ele esta aberto.
+        public void SetInventory(bool open)
+        {
+            GameClock.SetPaused(open);
+            hud.ShowInventory(open, Run);
+            if (open) hud.ShowMap(Run, false);
         }
 
         public void SetPaused(bool paused)

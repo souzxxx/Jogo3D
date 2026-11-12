@@ -118,6 +118,13 @@ namespace Quintessence.UI
             return c;
         }
 
+        /// Com controle ligado, deixa este botao escolhido para o direcional navegar a partir dele.
+        public static void Focus(GameObject go)
+        {
+            if (go == null || UnityEngine.InputSystem.Gamepad.current == null || EventSystem.current == null) return;
+            EventSystem.current.SetSelectedGameObject(go);
+        }
+
         public static void EnsureEventSystem()
         {
             if (UnityEngine.Object.FindFirstObjectByType<EventSystem>() != null) return;
@@ -203,7 +210,7 @@ namespace Quintessence.UI
             var colors = b.colors;
             colors.highlightedColor = new Color(1.22f, 1.22f, 1.22f);
             colors.pressedColor = new Color(0.82f, 0.82f, 0.82f);
-            colors.selectedColor = Color.white;
+            colors.selectedColor = new Color(1.22f, 1.22f, 1.22f);
             colors.fadeDuration = 0.06f;
             b.colors = colors;
             b.onClick.AddListener(() => { Quintessence.Core.Sfx.Play("ui_click"); onClick?.Invoke(); });

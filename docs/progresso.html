@@ -36,6 +36,46 @@
   <p class="sub">Entrega mais recente no topo. Escopo em <a href="ESCOPO.md">ESCOPO.md</a> · kanban em <a href="https://github.com/users/souzxxx/projects/4">GitHub Projects</a>.</p>
 
   <section>
+    <h2>Combate novo: golpe básico neutro, skills no 1-2-3-4, controle e inventário</h2>
+    <div class="meta"><span class="tag who">Leonardo</span><span class="tag who">Nicolas</span><span class="tag ok">429 testes de regra + 16 testes jogando, todos passando</span></div>
+    <video src="img/s2_fogo_agua.mp4" controls muted loop playsinline></video>
+    <img src="img/inventario.png" alt="Inventário">
+    <div class="cols">
+      <div>
+        <h3>O que mudou no combate</h3>
+        <ul>
+          <li><b>Golpe básico sem elemento:</b> dá dano e empurra, mas não marca nem reage. Não existe mais "elemento atual", troca de elemento nem Golpe de Troca</li>
+          <li><b>Skills elementais nas teclas 1, 2, 3 e 4</b>, uma por elemento, cada uma com a sua recarga. Você começa com uma e desperta as outras nos Santuários</li>
+          <li><b>As skills combinam entre si:</b> uma marca, a de outro elemento detona. Fogo + Água = Vapor, Fogo + Terra = Magma, e assim nas seis reações</li>
+          <li>Cada skill tem um papel: <b>Fogo</b> é o ataque; a <b>Maré</b> cura 8% da vida e limpa status; o <b>Pilar de Pedra</b> bloqueia o próximo golpe por 3 s e quebra armadura; o <b>Vendaval</b> empurra tudo e recarrega o dash</li>
+          <li>O golpe básico bate 15% mais forte em quem está marcado, então ele preenche o intervalo entre as skills</li>
+          <li>Na Quintessência, até o golpe básico dispara reação</li>
+        </ul>
+        <h3 style="margin-top:14px">Controles</h3>
+        <ul>
+          <li>Teclado: WASD, mouse mira, clique esquerdo ataca, 1-4 skills, Espaço dash, R Quintessência, <b>E interage</b>, <b>I inventário</b>, Tab mapa, Esc pausa</li>
+          <li><b>Controle:</b> analógicos movem e miram, RT ou X ataca, direcional solta as skills, A dash, Y Quintessência, B interage, Select inventário, Start pausa. Os menus navegam pelo direcional</li>
+          <li><b>Inventário</b> novo: skills com o papel de cada uma, atributos da run e bênçãos. O jogo para enquanto está aberto</li>
+          <li>Barra de habilidades refeita: quatro skills com a tecla e a recarga de cada uma</li>
+          <li>Treino refeito em seis passos para ensinar esse modelo</li>
+        </ul>
+      </div>
+      <div>
+        <h3>Limites</h3>
+        <ul>
+          <li class="warn"><b>O controle não foi testado com um controle de verdade.</b> Está escrito e compila, mas não tenho como apertar um botão físico daqui</li>
+          <li class="warn">Subi o combo básico de 6/6/10 para 8/8/13 por conta própria: sem os efeitos elementais no golpe, o herói do roteiro passou a morrer na primeira sala</li>
+          <li class="warn"><b>A dificuldade mudou de novo e eu não sei para que lado.</b> Com uma skill só, o roteiro ainda sofre nas duas primeiras salas; com duas ou mais, passa. Precisa de você jogando</li>
+          <li class="warn">As bênçãos "+20% de dano de Fogo" e parecidas agora só afetam a skill e as reações daquele elemento</li>
+          <li class="warn">A bênção "Mão Trocada" virou "Mão Pesada" (golpe básico em alvo marcado +25%)</li>
+          <li class="warn">O dash perdeu as variações por elemento (rastro de fogo, duas cargas do Ar); o papel de cada elemento foi para a skill</li>
+          <li class="warn">O clique direito ficou como atalho para "a primeira skill pronta"; você não pediu, posso tirar</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section>
     <h2>Loja: o mercador reage e o preço mostra se dá para pagar</h2>
     <div class="meta"><span class="tag who">Nicolas</span><span class="tag ok">teste da loja confere cumprimento, recusa e agradecimento</span></div>
     <img src="img/loja_banca.png" alt="Loja com o mercador comemorando uma compra">

@@ -4,7 +4,7 @@ using UnityEngine.EventSystems;
 namespace Quintessence.UI
 {
     /// Botao cresce um pouco sob o mouse e afunda ao clicar. Usa tempo real para funcionar com o jogo pausado.
-    public class UiHover : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerDownHandler, IPointerUpHandler
+    public class UiHover : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerDownHandler, IPointerUpHandler, ISelectHandler, IDeselectHandler
     {
         public float hoverScale = 1.04f;
         bool over, down;
@@ -14,6 +14,9 @@ namespace Quintessence.UI
         public void OnPointerExit(PointerEventData e) { over = false; down = false; }
         public void OnPointerDown(PointerEventData e) => down = true;
         public void OnPointerUp(PointerEventData e) => down = false;
+        // no controle nao ha mouse: o botao escolhido pelo direcional se comporta como o que esta sob o cursor
+        public void OnSelect(BaseEventData e) => over = true;
+        public void OnDeselect(BaseEventData e) => over = false;
 
         void OnDisable() { over = down = false; transform.localScale = Vector3.one; }
 

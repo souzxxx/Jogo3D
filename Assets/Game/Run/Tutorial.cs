@@ -1,7 +1,7 @@
 namespace Quintessence.Run
 {
     /// Passos do treino, na ordem em que o jogo ensina.
-    public enum TutorialStep { Move, Dash, Attack, Skill, Switch, React, Quintessence, Done }
+    public enum TutorialStep { Move, Dash, Attack, Skill, React, Quintessence, Done }
 
     /// Em que passo o treino esta. So avanca com o sinal do passo atual: fazer outra coisa nao pula licao.
     public class TutorialState
@@ -41,9 +41,8 @@ namespace Quintessence.Run
         {
             TutorialStep.Move => "Mover",
             TutorialStep.Dash => "Dash",
-            TutorialStep.Attack => "Atacar e marcar",
-            TutorialStep.Skill => "Skill",
-            TutorialStep.Switch => "Trocar de elemento",
+            TutorialStep.Attack => "Atacar",
+            TutorialStep.Skill => "Skill elemental",
             TutorialStep.React => "Reação",
             TutorialStep.Quintessence => "Quintessência",
             _ => "Treino concluído",
@@ -52,13 +51,12 @@ namespace Quintessence.Run
         public static string Text(TutorialStep s) => s switch
         {
             TutorialStep.Move => "Ande pela sala com W A S D. O herói mira onde o mouse aponta.",
-            TutorialStep.Dash => "Aperte Espaço para dar um dash. Durante o dash você não leva dano.",
-            TutorialStep.Attack => "Clique para bater num boneco três vezes. Cada golpe deixa nele a marca do seu elemento.",
-            TutorialStep.Skill => "Botão direito usa a skill do elemento. Ela tem recarga: veja o ícone na barra.",
-            TutorialStep.Switch => "Você despertou um segundo elemento. Aperte Q ou E para trocar.",
-            TutorialStep.React => "Bata com o elemento novo num boneco que já tem a marca do outro. Marca + elemento diferente = reação.",
+            TutorialStep.Dash => "Aperte Espaço (A no controle) para dar um dash. Durante o dash você não leva dano.",
+            TutorialStep.Attack => "Clique esquerdo (RT no controle) para bater num boneco três vezes. O golpe básico não tem elemento.",
+            TutorialStep.Skill => "Aperte 1 perto de um boneco: é a skill de Fogo. Ela deixa a marca do elemento no inimigo e tem recarga.",
+            TutorialStep.React => "Você despertou a Água. Marque um boneco com 1 e acerte o mesmo boneco com 2: skills de elementos diferentes reagem.",
             TutorialStep.Quintessence => "Reações enchem a Quintessência. Com os quatro elementos e a barra cheia, aperte R.",
-            _ => "É isso: marque com um elemento, troque e detone com outro.",
+            _ => "É isso: marque com uma skill e detone com a de outro elemento.",
         };
     }
 }

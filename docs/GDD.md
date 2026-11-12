@@ -13,11 +13,11 @@
 
 ## Resumo em uma frase
 
-Você começa a run com um elemento, desperta os outros três pelo caminho e vence quando aprende a combiná-los.
+Você começa a run com uma skill elemental, desperta as outras três pelo caminho e vence quando aprende a combiná-las.
 
 ## Pilares
 
-1. **Os elementos são a build.** Trocar de elemento e detonar reações é a habilidade central; bênçãos, inimigos e chefe existem para alimentar isso.
+1. **Os elementos são a build.** Combinar as skills elementais para detonar reações é a habilidade central; bênçãos, inimigos e chefe existem para alimentar isso.
 2. **Toda run conta o arco da maestria.** Começa com um elemento e termina com quatro. A ordem em que você desperta muda a run.
 3. **Combate curto e legível.** Todo golpe inimigo avisa antes; toda reação mostra o nome e o efeito.
 
@@ -59,30 +59,34 @@ Não há diálogo. A história é contada pela estrutura da run: um elemento →
 
 ### Controles
 
-| Ação | Tecla |
-|---|---|
-| Mover | W A S D |
-| Mirar | mouse |
-| Atacar (combo de 3 golpes) | clique esquerdo |
-| Skill do elemento | clique direito |
-| Dash | Espaço |
-| Trocar de elemento | Q / E |
-| Quintessência | R |
-| Interagir (portas, baús, loja) | F |
-| Mapa | Tab (segurar) |
-| Pausa | Esc |
+| Ação | Teclado e mouse | Controle |
+|---|---|---|
+| Mover | W A S D | analógico esquerdo |
+| Mirar | mouse | analógico direito (sem ele, mira para onde anda) |
+| Golpe básico (combo de 3) | clique esquerdo | RT ou X |
+| Skill de Fogo / Água / Terra / Ar | 1 / 2 / 3 / 4 | direcional: cima / direita / baixo / esquerda |
+| Primeira skill pronta | clique direito | LT |
+| Dash | Espaço | A |
+| Quintessência | R | Y |
+| Interagir (portas, baús, loja) | E | B |
+| Inventário | I | Select |
+| Mapa | Tab (segurar) | clique do analógico direito |
+| Pausa | Esc | Start |
 
-### Os quatro elementos
+### Golpe básico e skills
 
-| | Fogo | Água | Terra | Ar |
+O **golpe básico não tem elemento**: dá dano, empurra e fecha o combo, mas não marca nem reage. As **skills elementais** são o que o herói desperta ao longo da run, uma por elemento, cada uma numa tecla e com a sua recarga. Além do dano, cada skill tem um papel:
+
+| | Fogo (1) | Água (2) | Terra (3) | Ar (4) |
 |---|---|---|---|---|
-| Identidade | Agressivo, dano contínuo | Alcance e controle | Pesado, quebra armadura | Mobilidade e crítico |
-| Skill | Labareda: cone, Queimadura | Maré: onda que empurra e Encharca | Pilar de Pedra: bloqueia e atordoa | Vendaval: radial, empurra |
-| Dash | Deixa rastro de fogo | Limpa status negativos | Curto, bloqueia 1 golpe | 2 cargas |
+| Skill | Labareda | Maré | Pilar de Pedra | Vendaval |
+| Forma | cone à frente | onda que empurra | pilar invocado | rajada em volta |
+| No inimigo | Queimadura | Encharcado | Atordoa e quebra armadura | Empurra |
+| No herói | — (é o ataque) | cura 8% da vida e limpa status | bloqueia o próximo golpe por 3 s | recarrega o dash (é a fuga) |
 
 ### Marca e reação
 
-O golpe de um elemento deixa a **marca** dele no inimigo. Acertar esse inimigo com **outro** elemento consome a marca e dispara a **reação** do par.
+Uma skill deixa no inimigo a **marca** do elemento dela. Acertar esse inimigo com a skill de **outro** elemento consome a marca e dispara a **reação** do par. O golpe básico não mexe na marca, mas bate 15% mais forte em quem está marcado.
 
 | Par | Reação | Efeito |
 |---|---|---|
@@ -93,9 +97,7 @@ O golpe de um elemento deixa a **marca** dele no inimigo. Acertar esse inimigo c
 | Água + Ar | Nevasca | Congela; o próximo golpe Estilhaça (+30%) |
 | Terra + Ar | Estilhaços | Dano em área com empurrão forte |
 
-**Golpe de Troca:** trocar de elemento logo depois de acertar dá bônus no golpe seguinte. Recompensa quem troca no ritmo da luta.
-
-**Quintessência:** reações enchem o medidor. Com os quatro elementos despertos e o medidor cheio, R ativa 8 segundos em que cada golpe dispara uma reação e o herói leva metade do dano.
+**Quintessência:** reações enchem o medidor. Com os quatro elementos despertos e o medidor cheio, R ativa 8 segundos em que até o golpe básico dispara uma reação e o herói leva metade do dano.
 
 ### A run
 
@@ -111,7 +113,7 @@ O golpe de um elemento deixa a **marca** dele no inimigo. Acertar esse inimigo c
 |---|---|---|
 | Rastejante | Corpo a corpo, vem em grupo | Área e reações |
 | Atirador | Projétil em linha, recua se você chega perto | Dash para fechar a distância |
-| Bruto | Armadura: leva 40% do dano | O finalizador de Terra quebra a armadura |
+| Bruto | Armadura: leva 40% do dano | O Pilar de Pedra quebra a armadura |
 | Explosivo | Corre, avisa um círculo e explode | Sair do círculo; a explosão também fere os outros inimigos |
 
 Vida e dano sobem a cada camada (de 100% para 149% de vida, de 100% para 135% de dano). O tempo de aviso dos golpes nunca diminui.
@@ -139,7 +141,8 @@ Vida e dano sobem a cada camada (de 100% para 149% de vida, de 100% para 135% de
 
 ### HUD
 
-- Barra de habilidades embaixo: os quatro elementos (cadeado nos que faltam), skill, dash e Quintessência, cada um com a tecla.
+- Barra de habilidades embaixo: as quatro skills nas teclas 1 a 4 (cadeado nas que faltam, recarga em cada uma), dash e Quintessência.
+- Inventário no I: skills despertas com o papel de cada uma, atributos da run e bênçãos.
 - Vida à esquerda, sala atual e Essência no topo, medalhas das bênçãos com o ícone do efeito.
 - Barra do chefe com as fases. Mapa da run no Tab.
 
@@ -161,7 +164,7 @@ Título com escolha do elemento inicial, Refúgio e Treino. Pausa com volumes e 
 
 # 2. DYNAMICS (o que acontece quando as regras encontram o jogador)
 
-- **Marcar, trocar, detonar.** A regra da marca transforma a troca de elemento no ritmo da luta: bater, trocar, bater. Ficar num elemento só funciona, mas é mais lento e não enche a Quintessência.
+- **Marcar e detonar.** Como só as skills marcam e cada uma tem recarga, a ordem importa: qual skill abre, qual fica guardada para detonar, e o golpe básico preenche o intervalo batendo mais forte em quem está marcado. Com uma skill só não há reação; o primeiro Santuário muda o jogo.
 - **A run começa estreita e abre.** Com um elemento não há reação; o primeiro Santuário muda o jogo. Isso faz o jogador querer o caminho do Santuário cedo, e a porta mostra onde ele está.
 - **Escolher porta é escolher risco.** Elite paga o dobro e uma bênção, mas o traço está escrito na porta. Loja só vale com Essência no bolso. Descanso é a saída de quem está quase morto.
 - **Os inimigos pedem elementos diferentes.** Bruto pede Terra; grupo de Rastejantes pede área (Tempestade de Fogo, Estilhaços); Atirador pede mobilidade (Ar). Quem despertou o elemento "errado" primeiro precisa se virar com reações.
@@ -175,9 +178,9 @@ Título com escolha do elemento inicial, Refúgio e Treino. Pausa com volumes e 
 
 | Momento | O que o jogador faz | O que queremos que ele sinta |
 |---|---|---|
-| Primeiro minuto | Bate com um elemento, vê a marca | "Entendi o básico" |
+| Primeiro minuto | Bate, usa a primeira skill, vê a marca | "Entendi o básico" |
 | Primeiro Santuário | Desperta o segundo elemento e detona a primeira reação | Descoberta: "então é assim que funciona" |
-| Meio da run | Troca de elemento de propósito para o inimigo da vez | Maestria: está escolhendo, não apertando botão |
+| Meio da run | Escolhe qual skill abrir e qual guardar para detonar | Maestria: está escolhendo, não apertando botão |
 | Primeira Quintessência | Aperta R com os quatro elementos | Poder: a tela inteira reage |
 | Guardião, última fase | Guarda o medidor e quebra o escudo | Tensão e alívio |
 | Tela de resultado | Vê os Fragmentos e volta ao Refúgio | "Mais uma" |

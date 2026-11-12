@@ -48,7 +48,6 @@ namespace Quintessence.Run.Tests
             t.Report(TutorialStep.Dash);
             t.Report(TutorialStep.Attack, 3f);
             t.Report(TutorialStep.Skill);
-            t.Report(TutorialStep.Switch);
             t.Report(TutorialStep.React);
             Assert.AreEqual(TutorialStep.Quintessence, t.Step);
             Assert.AreEqual(TutorialState.StepCount, t.Number);

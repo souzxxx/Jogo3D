@@ -17,7 +17,9 @@ Action roguelite 3D de câmera top-down: você começa a run com um elemento, de
 
 Abra `Assets/Scenes/Title.unity` no Unity e dê Play.
 
-WASD move · mouse mira · clique esquerdo ataca · clique direito skill · Espaço dash · Q/E troca elemento · R Quintessência · F interage · Tab mapa · Esc pausa
+WASD move · mouse mira · clique esquerdo ataca · 1 2 3 4 skills elementais · Espaço dash · R Quintessência · E interage · I inventário · Tab mapa · Esc pausa
+
+Com controle: analógico esquerdo move, direito mira, RT ou X ataca, direcional solta as skills, A dash, Y Quintessência, B interage, Select inventário, Start pausa.
 
 Testes: `unity test . --mode EditMode` e `unity test . --mode PlayMode` (os de PlayMode jogam as cenas com um roteiro e gravam quadros em `Logs/frames`).
 

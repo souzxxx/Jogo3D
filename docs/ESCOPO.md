@@ -20,7 +20,7 @@ Itens marcados com **[DECIDIR]** dependem do time ou do professor.
 **Sessão:** uma run completa em 10–15 min; 1–2 h até a primeira vitória
 
 ### Pilares
-1. **Os elementos são a build.** Trocar de elemento e detonar reações é a habilidade central. Todo sistema (bênçãos, inimigos, chefe) alimenta isso.
+1. **Os elementos são a build.** Combinar as skills elementais e detonar reações é a habilidade central. Todo sistema (bênçãos, inimigos, chefe) alimenta isso.
 2. **Toda run conta o arco da maestria.** Começa com um elemento, termina com quatro. A ordem em que você desperta muda a run.
 3. **Combate curto, legível e gostoso.** Telegrafia clara, animações curtas, impacto forte. Se não for bom com cápsulas cinzas, arte não salva.
 
@@ -88,7 +88,7 @@ Itens marcados com **[DECIDIR]** dependem do time ou do professor.
 
 ## 5. Design resumido
 
-**Controles:** WASD mover · mouse mira · clique esq. ataque · clique dir. skill · Espaço dash · Q/E troca elemento · R Quintessência · F interagir · Esc pausa.
+**Controles (desde 11/11):** WASD mover · mouse mira · clique esq. golpe básico · 1 2 3 4 skills elementais · Espaço dash · R Quintessência · E interagir · I inventário · Tab mapa · Esc pausa. Controle suportado (tabela no GDD).
 
 | | Fogo | Água | Terra | Ar |
 |---|---|---|---|---|
@@ -107,7 +107,7 @@ Itens marcados com **[DECIDIR]** dependem do time ou do professor.
 | Água + Ar | Nevasca | Congela; próximo hit Estilhaça |
 | Terra + Ar | Estilhaços | Lascas voam e acertam outros |
 
-**Golpe de Troca:** trocar de elemento logo depois de acertar dá +50% no próximo golpe. É o gancho de habilidade.
+**Mudança de 11/11 (pedido do Leonardo):** o golpe básico não tem mais elemento e não existe "elemento atual" nem Golpe de Troca. Só as skills marcam e reagem entre si; o golpe básico bate 15% mais forte em alvo marcado. Cada skill tem um papel: Fogo ataca, Água cura, Terra protege, Ar é a fuga. As tabelas acima de "Identidade" e "Dash" por elemento ficaram como registro do desenho anterior.
 **Quintessência:** medidor enche com reações; por 8 s cada hit dispara uma reação. Só com os 4 elementos despertos. Obrigatória pra quebrar o escudo da última fase do chefe.
 
 **Run:** mapa ramificado de ~8 salas. Cada porta mostra a recompensa.

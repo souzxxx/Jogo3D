@@ -24,8 +24,10 @@ namespace Quintessence.UI
         Image hpFill, hpLag, fade, roomIcon, bossFill;
         Text hpText, essenceText, roomText, promptText, bossName, bossHint, skillLabel, quintLabel;
         RectTransform promptBox, mapPanel, resultPanel, pausePanel, mapContent, bossBox, boonRow;
-        readonly Slot[] slots = new Slot[4];
-        Tile skillTile, dashTile, quintTile;
+        readonly Tile[] skillTiles = new Tile[4];
+        Tile dashTile, quintTile;
+        float[] lastCd = new float[4];
+        float skillLabelLeft;
         readonly Image[] dashPips = new Image[2];
         float lagHp = 1f;
         Health boss;
@@ -34,7 +36,6 @@ namespace Quintessence.UI
         string bossTitle = "";
         IReadOnlyList<Boon> boons;
 
-        class Slot { public RectTransform Root; public Image Disc, Icon, Cooldown, Ring; }
         class Tile { public RectTransform Root; public Image Back, Icon, Cooldown, Ring; public Text Key; }
 
         void Awake()
@@ -93,23 +94,13 @@ namespace Quintessence.UI
 
             // barra de habilidades
             var bar = UiKit.Box("Abilities", root, new Vector2(0.5f, 0), new Vector2(0, 40), new Vector2(820, 132));
-            KeyCap(bar, new Vector2(-376, 8), "Q");
+            // quatro skills, uma por elemento, nas teclas 1 a 4; cadeado nas que ainda nao despertaram
             for (int i = 0; i < 4; i++)
-            {
-                var s = new Slot { Root = UiKit.Rect("Element" + i, bar, center, new Vector2(-300 + i * 84, 8), new Vector2(72, 72)) };
-                UiKit.Image(s.Root, UiKit.Circle, new Color(0.02f, 0.02f, 0.04f, 0.9f));
-                s.Disc = UiKit.Image(UiKit.Rect("Disc", s.Root, center, Vector2.zero, new Vector2(64, 64)), UiKit.Circle, Slate);
-                s.Icon = UiKit.Image(UiKit.Rect("Icon", s.Root, center, Vector2.zero, new Vector2(42, 42)), UiKit.Icon(ElementIcon[i + 1]), UiKit.Cream);
-                s.Cooldown = Radial(UiKit.Rect("Cooldown", s.Root, center, Vector2.zero, new Vector2(64, 64)), UiKit.Circle);
-                s.Ring = UiKit.Image(UiKit.Rect("Ring", s.Root, center, Vector2.zero, new Vector2(86, 86)), UiKit.Ring, UiKit.Cream);
-                slots[i] = s;
-            }
-            KeyCap(bar, new Vector2(28, 8), "E");
-            UiKit.Image(UiKit.Rect("Divider", bar, center, new Vector2(74, 0), new Vector2(2, 96)), null, new Color(1, 1, 1, 0.12f));
+                skillTiles[i] = MakeTile(bar, new Vector2(-306 + i * 98, 8), SkillIcon[i + 1], (i + 1).ToString());
+            UiKit.Image(UiKit.Rect("Divider", bar, center, new Vector2(88, 0), new Vector2(2, 96)), null, new Color(1, 1, 1, 0.12f));
 
-            skillTile = MakeTile(bar, new Vector2(138, 8), "skill_fire", "BOTÃO DIR.");
-            dashTile = MakeTile(bar, new Vector2(238, 8), "dash", "ESPAÇO");
-            quintTile = MakeTile(bar, new Vector2(338, 8), "quintessence", "R");
+            dashTile = MakeTile(bar, new Vector2(176, 8), "dash", "ESPAÇO");
+            quintTile = MakeTile(bar, new Vector2(290, 8), "quintessence", "R");
             for (int i = 0; i < 2; i++)
                 dashPips[i] = UiKit.Image(UiKit.Rect("Pip" + i, dashTile.Root, new Vector2(0.5f, 1), new Vector2((i - 0.5f) * 20f, 8), new Vector2(14, 8)), null, UiKit.Cream);
             skillLabel = UiKit.Text(UiKit.Rect("SkillName", bar, new Vector2(0.5f, 1), new Vector2(0, 30), new Vector2(820, 30)), "", 24, UiKit.Cream);
@@ -142,7 +133,7 @@ namespace Quintessence.UI
 
             // aviso de interacao: tecla + texto
             promptBox = UiKit.Box("Prompt", root, new Vector2(0.5f, 0), new Vector2(0, 250), new Vector2(520, 60));
-            KeyCap(promptBox, new Vector2(-220, 0), "F");
+            KeyCap(promptBox, new Vector2(-220, 0), "E");
             promptText = UiKit.Text(UiKit.Rect("Text", promptBox, center, new Vector2(24, 0), new Vector2(420, 40)), "", 28, UiKit.Cream);
             promptBox.gameObject.SetActive(false);
 
@@ -246,31 +237,25 @@ namespace Quintessence.UI
             hpText.text = $"{Mathf.CeilToInt(hero.Health.Current)} / {Mathf.RoundToInt(hero.Health.Max)}";
 
             var awakened = hero.AwakenedElements;
-            var current = hero.CurrentElement;
             for (int i = 0; i < 4; i++)
             {
                 var e = Elements.All[i];
                 bool has = false;
                 foreach (var a in awakened) if (a == e) has = true;
-                bool isCurrent = has && current == e;
                 var c = ElementColors.Of(e);
-                var s = slots[i];
-                s.Disc.color = has ? (isCurrent ? c : Color.Lerp(c, Slate, 0.45f)) : Slate;
-                s.Icon.sprite = UiKit.Icon(has ? ElementIcon[i + 1] : "lock");
-                s.Icon.color = has ? UiKit.Cream : new Color(1, 1, 1, 0.28f);
-                s.Cooldown.fillAmount = has && !isCurrent ? hero.SkillCooldown01(e) : 0f;
-                s.Ring.enabled = isCurrent;
-                s.Root.localScale = Vector3.one * (isCurrent ? 1.16f : 1f);
+                var t = skillTiles[i];
+                float cd = has ? hero.SkillCooldown01(e) : 0f;
+                bool usable = has && cd <= 0f;
+                t.Icon.sprite = UiKit.Icon(has ? SkillIcon[i + 1] : "lock");
+                t.Icon.color = !has ? new Color(1, 1, 1, 0.28f) : usable ? Color.Lerp(c, UiKit.Cream, 0.3f) : new Color(1, 1, 1, 0.35f);
+                t.Cooldown.fillAmount = cd;
+                t.Ring.color = usable ? Color.Lerp(c, UiKit.Cream, 0.35f) : new Color(1, 1, 1, 0.15f);
+                t.Key.color = has ? UiKit.Cream : UiKit.Dim;
+                // acabou de usar: mostra o nome da skill por um instante
+                if (has && cd > lastCd[i] + 0.5f) { skillLabel.text = SkillName[i + 1]; skillLabel.color = Color.Lerp(c, UiKit.Cream, 0.4f); skillLabelLeft = 1.4f; }
+                lastCd[i] = cd;
             }
-
-            // skill do elemento atual
-            int ci = (int)current;
-            float cd = hero.SkillCooldown01(current);
-            skillTile.Icon.sprite = UiKit.Icon(SkillIcon[Mathf.Clamp(ci, 0, 4)]);
-            skillTile.Icon.color = cd > 0f ? new Color(1, 1, 1, 0.35f) : Color.Lerp(ElementColors.Of(current), UiKit.Cream, 0.35f);
-            skillTile.Cooldown.fillAmount = cd;
-            skillTile.Ring.color = cd > 0f ? new Color(1, 1, 1, 0.15f) : new Color(UiKit.Cream.r, UiKit.Cream.g, UiKit.Cream.b, 0.7f);
-            skillLabel.text = SkillName[Mathf.Clamp(ci, 0, 4)];
+            if (skillLabelLeft > 0f && (skillLabelLeft -= Time.unscaledDeltaTime) <= 0f) skillLabel.text = "";
 
             // dash
             bool canDash = hero.DashCharges > 0;
@@ -328,7 +313,7 @@ namespace Quintessence.UI
 
         public void ShowPrompt(string text)
         {
-            promptText.text = text.StartsWith("F — ") ? text.Substring(4) : text;
+            promptText.text = text.StartsWith("E — ") ? text.Substring(4) : text;
             if (!promptBox.gameObject.activeSelf) promptBox.gameObject.SetActive(true);
         }
 
@@ -399,7 +384,7 @@ namespace Quintessence.UI
             UiKit.Box("Box", pausePanel, center, new Vector2(0, top), new Vector2(780, 640), 0.94f);
             var title = UiKit.Text(UiKit.Rect("Title", pausePanel, center, new Vector2(0, top + 250), new Vector2(700, 80)), "PAUSADO", 64, UiKit.Cream);
             title.font = GameFonts.Title;
-            UiKit.Button(pausePanel, "Continuar", center, new Vector2(0, top + 150), new Vector2(640, 70), UiKit.Primary, resume);
+            UiKit.Focus(UiKit.Button(pausePanel, "Continuar", center, new Vector2(0, top + 150), new Vector2(640, 70), UiKit.Primary, resume).gameObject);
             UiOptions.Build(pausePanel, new Vector2(0, top - 20));
             UiKit.Button(pausePanel, "Menu principal", center, new Vector2(0, top - 235), new Vector2(640, 64), UiKit.Secondary, menu);
             if (hasBoons)
@@ -416,11 +401,91 @@ namespace Quintessence.UI
                 }
             }
             UiKit.Text(UiKit.Rect("Keys", pausePanel, new Vector2(0.5f, 0), new Vector2(0, 18), new Vector2(1700, 30)),
-                "WASD mover · mouse mira · clique ataca · botão direito skill · Espaço dash · Q/E troca elemento · R Quintessência · F interagir · Tab mapa",
+                "WASD mover · mouse mira · clique ataca · 1 2 3 4 skills · Espaço dash · R Quintessência · E interagir · I inventário · Tab mapa",
                 20, UiKit.Dim, TextAnchor.MiddleCenter, false);
         }
 
         public bool ResultVisible => resultPanel.gameObject.activeSelf;
+
+        RectTransform inventoryPanel;
+        public bool InventoryVisible => inventoryPanel != null && inventoryPanel.gameObject.activeSelf;
+
+        /// Inventario (tecla I): skills despertas, atributos somados na run, bencaos e Essencia.
+        public void ShowInventory(bool show, RunState run = null)
+        {
+            if (inventoryPanel == null)
+            {
+                if (!show) return;
+                inventoryPanel = Overlay("Inventory", new Color(0.03f, 0.02f, 0.06f, 0.86f));
+            }
+            inventoryPanel.gameObject.SetActive(show);
+            if (!show) return;
+            foreach (Transform child in inventoryPanel) Destroy(child.gameObject);
+            var center = new Vector2(0.5f, 0.5f);
+            var box = UiKit.Box("Box", inventoryPanel, center, new Vector2(0, 10), new Vector2(1320, 820), 0.95f);
+            var title = UiKit.Text(UiKit.Rect("Title", box, new Vector2(0.5f, 1), new Vector2(0, -34), new Vector2(900, 70)), "INVENTÁRIO", 56, UiKit.Paper);
+            title.font = GameFonts.Title;
+
+            // coluna da esquerda: as quatro skills
+            UiKit.Text(UiKit.Rect("H1", box, new Vector2(0, 1), new Vector2(60, -130), new Vector2(560, 34)), "SKILLS ELEMENTAIS", 24, UiKit.Dim, TextAnchor.MiddleLeft);
+            string[] role =
+            {
+                "", "Cone de fogo. Queima. O ataque.", "Onda que empurra e Encharca. Cura você e limpa status.",
+                "Ergue um pilar que atordoa e quebra armadura. Bloqueia o próximo golpe.", "Rajada em volta que empurra tudo. Recarrega o dash.",
+            };
+            for (int i = 0; i < 4; i++)
+            {
+                var e = Elements.All[i];
+                bool has = false;
+                if (hero != null) foreach (var a in hero.AwakenedElements) if (a == e) has = true;
+                var c = ElementColors.Of(e);
+                var row = UiKit.Box("Skill" + i, box, new Vector2(0, 1), new Vector2(60, -176 - i * 104), new Vector2(580, 92), 0.5f);
+                var disc = UiKit.Rect("Disc", row, new Vector2(0, 0.5f), new Vector2(14, 0), new Vector2(64, 64));
+                UiKit.Image(disc, UiKit.Circle, has ? Color.Lerp(c, new Color(0.05f, 0.04f, 0.08f), 0.4f) : Slate);
+                UiKit.Image(UiKit.Rect("Icon", disc, center, Vector2.zero, new Vector2(42, 42)), UiKit.Icon(has ? SkillIcon[i + 1] : "lock"), has ? UiKit.Cream : new Color(1, 1, 1, 0.3f));
+                UiKit.Text(UiKit.Rect("Name", row, new Vector2(0, 0.5f), new Vector2(94, 20), new Vector2(470, 34)),
+                    $"{i + 1}  ·  {SkillName[i + 1]}", 28, has ? UiKit.Cream : UiKit.Dim, TextAnchor.MiddleLeft);
+                var note = UiKit.Text(UiKit.Rect("Role", row, new Vector2(0, 0.5f), new Vector2(94, -18), new Vector2(470, 44)),
+                    has ? role[i + 1] : "Desperte este elemento num Santuário.", 20, has ? UiKit.Paper : UiKit.Dim, TextAnchor.MiddleLeft, false);
+                note.horizontalOverflow = HorizontalWrapMode.Wrap;
+            }
+            UiKit.Text(UiKit.Rect("Combo", box, new Vector2(0, 1), new Vector2(60, -606), new Vector2(580, 60)),
+                "Uma skill marca o inimigo. Outra skill, de outro elemento, detona a reação.\nO golpe básico não tem elemento, mas bate mais forte em quem está marcado.",
+                20, UiKit.Dim, TextAnchor.UpperLeft, false);
+
+            // coluna da direita: atributos e bencaos
+            UiKit.Text(UiKit.Rect("H2", box, new Vector2(0, 1), new Vector2(700, -130), new Vector2(560, 34)), "ATRIBUTOS DA RUN", 24, UiKit.Dim, TextAnchor.MiddleLeft);
+            var lines = new List<string>();
+            if (hero != null)
+            {
+                var m = hero.Modifiers;
+                lines.Add($"Vida: {Mathf.CeilToInt(hero.Health.Current)} / {Mathf.RoundToInt(hero.Health.Max)}");
+                if (run != null) lines.Add($"Essência: {run.Essence}");
+                lines.Add($"Dano: {m.DamageAll * 100f:0}%");
+                lines.Add($"Reações: {m.ReactionPower * 100f:0}%");
+                lines.Add($"Crítico: +{m.CritChanceAdd * 100f:0}%");
+                lines.Add($"Velocidade: {m.MoveSpeedMult * 100f:0}%");
+                lines.Add($"Recarga das skills: {m.SkillCooldownMult * 100f:0}%");
+                lines.Add($"Recarga do dash: {m.DashCooldownMult * 100f:0}%");
+            }
+            for (int i = 0; i < lines.Count; i++)
+                UiKit.Text(UiKit.Rect("Stat" + i, box, new Vector2(0, 1), new Vector2(700 + (i % 2) * 290, -172 - (i / 2) * 34), new Vector2(280, 30)),
+                    lines[i], 22, UiKit.Cream, TextAnchor.MiddleLeft, false);
+            UiKit.Text(UiKit.Rect("H3", box, new Vector2(0, 1), new Vector2(700, -330), new Vector2(560, 34)),
+                boons != null && boons.Count > 0 ? "BÊNÇÃOS" : "BÊNÇÃOS — nenhuma ainda", 24, UiKit.Dim, TextAnchor.MiddleLeft);
+            if (boons != null)
+                for (int i = 0; i < boons.Count && i < 10; i++)
+                {
+                    var c = boons[i].patron == ElementType.None ? new Color(0.85f, 0.72f, 0.4f) : ElementColors.Of(boons[i].patron);
+                    float y = -374 - i * 38;
+                    var medal = UiKit.Rect("Medal" + i, box, new Vector2(0, 1), new Vector2(700, y), new Vector2(32, 32));
+                    UiKit.Image(medal, UiKit.Circle, new Color(0.07f, 0.06f, 0.1f));
+                    UiKit.Image(UiKit.Rect("Icon", medal, center, Vector2.zero, new Vector2(22, 22)), UiKit.Icon(BoonEffects.Icon(boons[i].stat)), Color.Lerp(c, UiKit.Cream, 0.35f));
+                    UiKit.Text(UiKit.Rect("Boon" + i, box, new Vector2(0, 1), new Vector2(744, y), new Vector2(540, 32)),
+                        boons[i].name + " — " + boons[i].description, 21, UiKit.Cream, TextAnchor.MiddleLeft, false);
+                }
+            UiKit.Text(UiKit.Rect("Close", box, new Vector2(0.5f, 0), new Vector2(0, 22), new Vector2(900, 30)), "I ou Esc fecha", 20, UiKit.Dim, TextAnchor.MiddleCenter, false);
+        }
 
         RectTransform tutorialBox, tutorialFill;
         Text tutorialTitle, tutorialText;
@@ -455,8 +520,8 @@ namespace Quintessence.UI
             var title = UiKit.Text(UiKit.Rect("Title", resultPanel, center, new Vector2(0, 200), new Vector2(1500, 120)), "TREINO CONCLUÍDO", 92, new Color(0.9f, 0.76f, 0.42f));
             title.font = GameFonts.Title;
             UiKit.Text(UiKit.Rect("Stats", resultPanel, center, new Vector2(0, 70), new Vector2(1400, 120)),
-                "Marque com um elemento, troque e detone com outro.\nNa run você começa com um elemento só e desperta os outros nos Santuários.", 30, UiKit.Cream, TextAnchor.MiddleCenter, false);
-            UiKit.Button(resultPanel, "Começar a run", center, new Vector2(0, -60), new Vector2(380, 70), UiKit.Primary, start);
+                "Marque com uma skill e detone com a de outro elemento.\nNa run você começa com uma skill só e desperta as outras nos Santuários.", 30, UiKit.Cream, TextAnchor.MiddleCenter, false);
+            UiKit.Focus(UiKit.Button(resultPanel, "Começar a run", center, new Vector2(0, -60), new Vector2(380, 70), UiKit.Primary, start).gameObject);
             UiKit.Button(resultPanel, "Menu principal", center, new Vector2(0, -150), new Vector2(380, 70), UiKit.Secondary, menu);
         }
 
@@ -469,7 +534,7 @@ namespace Quintessence.UI
                 victory ? "VITÓRIA" : "VOCÊ CAIU", 104, victory ? new Color(0.9f, 0.76f, 0.42f) : new Color(0.78f, 0.3f, 0.28f));
             title.font = GameFonts.Title;
             UiKit.Text(UiKit.Rect("Stats", resultPanel, center, new Vector2(0, 70), new Vector2(1400, 120)), stats, 30, UiKit.Cream, TextAnchor.MiddleCenter, false);
-            UiKit.Button(resultPanel, "Jogar de novo", center, new Vector2(0, -60), new Vector2(380, 70), UiKit.Primary, again);
+            UiKit.Focus(UiKit.Button(resultPanel, "Jogar de novo", center, new Vector2(0, -60), new Vector2(380, 70), UiKit.Primary, again).gameObject);
             UiKit.Button(resultPanel, "Menu principal", center, new Vector2(0, -150), new Vector2(380, 70), UiKit.Secondary, menu);
         }
     }

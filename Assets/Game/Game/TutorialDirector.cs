@@ -30,7 +30,6 @@ namespace Quintessence.Game
             player.DashStarted += OnDash;
             player.SkillStarted += OnSkill;
             GameEvents.DamageDealt += OnDamage;
-            GameEvents.ElementSwitched += OnSwitch;
             GameEvents.ReactionTriggered += OnReaction;
             GameEvents.QuintessenceActiveChanged += OnQuintessence;
             Show();
@@ -40,7 +39,6 @@ namespace Quintessence.Game
         {
             if (player != null) { player.DashStarted -= OnDash; player.SkillStarted -= OnSkill; }
             GameEvents.DamageDealt -= OnDamage;
-            GameEvents.ElementSwitched -= OnSwitch;
             GameEvents.ReactionTriggered -= OnReaction;
             GameEvents.QuintessenceActiveChanged -= OnQuintessence;
         }
@@ -48,7 +46,6 @@ namespace Quintessence.Game
         void OnDash(Vector3 _) => Report(TutorialStep.Dash);
         void OnSkill(ElementType _) => Report(TutorialStep.Skill);
         void OnDamage(Health target, DamageInfo info, float applied) { if (info.SourceTeam == Team.Player) Report(TutorialStep.Attack); }
-        void OnSwitch(ElementType from, ElementType to) { if (from != ElementType.None) Report(TutorialStep.Switch); }
         void OnReaction(ReactionEvent e) => Report(TutorialStep.React);
         void OnQuintessence(bool on) { if (on) Report(TutorialStep.Quintessence); }
 
@@ -65,7 +62,8 @@ namespace Quintessence.Game
         {
             switch (State.Step)
             {
-                case TutorialStep.Switch:
+                case TutorialStep.React:
+                    // a segunda skill chega na hora de aprender a reacao
                     foreach (var e in Elements.All)
                         if (e != GameFlow.StartElement) { player.Awaken(e); break; }
                     break;
@@ -90,8 +88,7 @@ namespace Quintessence.Game
         void Update()
         {
             if (ended || player == null) return;
-            var kb = Keyboard.current;
-            if (kb != null && kb.escapeKey.wasPressedThisFrame)
+            if (MenuInput.PausePressed)
             {
                 bool pause = !GameClock.Paused;
                 GameClock.SetPaused(pause);

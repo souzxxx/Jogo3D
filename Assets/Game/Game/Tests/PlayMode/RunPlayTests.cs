@@ -183,6 +183,7 @@ namespace Quintessence.Game.PlayTests
             hud.UseCamera(cam);
             GameEvents.TelegraphStarted += ConsiderDodge;
 
+            hp.Pool.ExtraDamageTakenMultiplier = 0.5f; // confere as bencaos; o roteiro troca golpes parado e nao serve de regua de dificuldade
             bool shot = false;
             float limit = 120f, sinceInteract = 0f;
             while (director.Run.Boons.Count == 0 && !director.Finished && limit > 0f)
@@ -200,6 +201,7 @@ namespace Quintessence.Game.PlayTests
                     input.AimPoint = target.transform.position;
                     input.Move = d > 2.6f ? new Vector2(to.x / d, to.z / d) : Vector2.zero;
                     input.AttackHeld = d < 3.6f;
+                    if (d < 4.5f && player.AnySkillReady) input.PressSkill();
                 }
                 else if (director.Interactables.Count > 0)
                 {
@@ -274,7 +276,7 @@ namespace Quintessence.Game.PlayTests
             Assert.AreEqual(RoomType.Combat, director.Run.Current.Type);
             // Este teste confere o FLUXO da run, nao o balanceamento: a run curta chega ao chefe provisorio com so 2 elementos
             // e o roteiro joga mal, entao ele leva 40% do dano. Dificuldade se mede jogando de verdade.
-            hp.Pool.ExtraDamageTakenMultiplier = 0.4f;
+            hp.Pool.ExtraDamageTakenMultiplier = 0.3f;
             for (float t = 1.2f; t > 0f; t -= Time.deltaTime) yield return Step();
 
             // pausa: o tempo para e volta
@@ -283,6 +285,15 @@ namespace Quintessence.Game.PlayTests
             Assert.AreEqual(0f, Time.timeScale); Assert.IsTrue(hud.PauseVisible);
             yield return null;
             Shot(cam, "docs/img/pausa.png");
+            director.SetPaused(false);
+            // inventario: para o jogo e mostra skills, atributos e bencaos
+            director.SetInventory(true);
+            yield return null; yield return null;
+            Assert.IsTrue(hud.InventoryVisible); Assert.AreEqual(0f, Time.timeScale);
+            Shot(cam, "docs/img/inventario.png");
+            director.SetInventory(false);
+            Assert.IsFalse(hud.InventoryVisible); Assert.AreEqual(1f, Time.timeScale);
+            director.SetPaused(true);
             director.SetPaused(false);
             yield return null;
             Assert.AreEqual(1f, Time.timeScale); Assert.IsFalse(hud.PauseVisible);
@@ -314,8 +325,7 @@ namespace Quintessence.Game.PlayTests
                     float reach = target.GetComponent<BossBrain>() != null ? 1f : 0f; // o chefe e largo
                     input.Move = d > 2.6f + reach ? new Vector2(to.x / d, to.z / d) : Vector2.zero;
                     input.AttackHeld = d < 3.6f + reach;
-                    if (d < 4.5f + reach && player.SkillCooldown01(player.Element) <= 0f) input.PressSkill();
-                    if (sinceSwitch > 1.3f) { sinceSwitch = 0f; input.PressSwitch(1); }
+                    if (d < 4.5f + reach && player.AnySkillReady) input.PressSkill();
                 }
                 else if (director.Interactables.Count > 0)
                 {
@@ -418,7 +428,7 @@ namespace Quintessence.Game.PlayTests
             var hud = Object.FindFirstObjectByType<Hud>();
             player = Object.FindFirstObjectByType<PlayerController>();
             hp = player.GetComponent<Health>();
-            hp.Pool.ExtraDamageTakenMultiplier = 0.4f; // confere a loja, nao a dificuldade
+            hp.Pool.ExtraDamageTakenMultiplier = 0.1f; // confere a loja, nao a dificuldade: este roteiro troca golpes parado
             player.GetComponent<PlayerInputReader>().enabled = false;
             input = player.gameObject.AddComponent<ScriptedInput>();
             player.Input = input;
@@ -442,6 +452,7 @@ namespace Quintessence.Game.PlayTests
                     input.AimPoint = target.transform.position;
                     input.Move = d > 2.6f ? new Vector2(to.x / d, to.z / d) : Vector2.zero;
                     input.AttackHeld = d < 3.6f;
+                    if (d < 4.5f && player.AnySkillReady) input.PressSkill();
                 }
                 else if (director.Interactables.Count > 0)
                 {
@@ -460,7 +471,7 @@ namespace Quintessence.Game.PlayTests
             }
             input.Move = Vector2.zero; input.AttackHeld = false;
             GameEvents.TelegraphStarted -= ConsiderDodge;
-            Assert.AreEqual(RoomType.Shop, director.Run.Current.Type, "nao chegou a loja");
+            Assert.AreEqual(RoomType.Shop, director.Run.Current.Type, $"nao chegou a loja (vida {hp.Current:0}, fim {director.Finished}, sala {director.Run.Depth + 1}, tempo restante {limit:0})");
             for (int k = 0; k < 3000 && director.Busy; k++) yield return null;
             for (int k = 0; k < 20; k++) yield return null;
             Shot(cam, "docs/img/loja.png");
@@ -672,29 +683,27 @@ namespace Quintessence.Game.PlayTests
             yield return until(TutorialStep.Attack, 8f);
             input.AttackHeld = false;
 
+            // skill de Fogo (tecla 1) num boneco: marca
             for (float t = 1.5f; t > 0f; t -= Time.deltaTime) yield return null;
-            input.AimPoint = Closest().position;
-            input.PressSkill();
-            yield return until(TutorialStep.Skill, 4f);
-            Assert.AreEqual(2, player.Loadout.Awakened.Count, "o treino desperta o segundo elemento para a troca");
-
-            for (float t = 1.2f; t > 0f; t -= Time.deltaTime) yield return null;
-            input.PressSwitch(1);
-            yield return until(TutorialStep.Switch, 3f);
-
-            // o boneco ja tem a marca do primeiro elemento: bater com o segundo detona
             yield return Approach();
-            input.AttackHeld = true;
+            var marked = Closest();
+            input.AimPoint = marked.position;
+            input.PressElementSkill(1);
+            yield return until(TutorialStep.Skill, 4f);
+            Assert.AreEqual(2, player.Loadout.Awakened.Count, "o treino desperta a segunda skill para a reacao");
+
+            // skill de Agua (tecla 2) no mesmo boneco: reacao
+            for (float t = 0.8f; t > 0f; t -= Time.deltaTime) yield return null;
             for (float t = 12f; t > 0f && tut.State.Step == TutorialStep.React; t -= Time.deltaTime)
             {
-                // se a marca sumiu, volta ao primeiro elemento, marca de novo e troca
-                input.AimPoint = Closest().position;
-                var to = Closest().position - player.transform.position; to.y = 0;
-                input.Move = to.magnitude > 2.4f ? new Vector2(to.x, to.z).normalized : Vector2.zero;
-                if (Mathf.FloorToInt(t * 0.5f) != Mathf.FloorToInt((t + Time.deltaTime) * 0.5f)) input.PressSwitch(1);
+                var to = marked.position - player.transform.position; to.y = 0;
+                input.AimPoint = marked.position;
+                input.Move = to.magnitude > 3f ? new Vector2(to.x, to.z).normalized : Vector2.zero;
+                // se a marca expirou, o Fogo marca de novo assim que recarregar
+                if (to.magnitude <= 3.2f) input.PressElementSkill(player.SkillCooldown01(ElementType.Water) <= 0f ? 2 : 1);
                 yield return null;
             }
-            input.AttackHeld = false; input.Move = Vector2.zero;
+            input.Move = Vector2.zero;
             Assert.AreNotEqual(TutorialStep.React, tut.State.Step, "o treino travou na reacao");
             Shot(cam, "docs/img/treino_reacao.png");
 

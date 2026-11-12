@@ -65,6 +65,9 @@ namespace Quintessence.UI
             }
         }
 
+        void Start() => FocusFirstCard();
+        void FocusFirstCard() { if (cards[0] != null) UiKit.Focus(cards[0].gameObject); }
+
         void Update()
         {
             if (quintPip == null) return;
@@ -84,7 +87,7 @@ namespace Quintessence.UI
             var box = UiKit.Box("Box", sheet, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(1000, height), 1f);
             var title = UiKit.Text(UiKit.Rect("Title", box, new Vector2(0.5f, 1), new Vector2(0, -40), new Vector2(900, 70)), heading, 56, UiKit.Paper);
             title.font = GameFonts.Title;
-            UiKit.Button(box, "Voltar", new Vector2(0.5f, 0), new Vector2(0, 44), new Vector2(300, 60), UiKit.Primary, () => sheet.gameObject.SetActive(false));
+            UiKit.Focus(UiKit.Button(box, "Voltar", new Vector2(0.5f, 0), new Vector2(0, 44), new Vector2(300, 60), UiKit.Primary, () => { sheet.gameObject.SetActive(false); FocusFirstCard(); }).gameObject);
             return box;
         }
 
@@ -156,7 +159,7 @@ namespace Quintessence.UI
                     if (!can) t.color = UiKit.Dim;
                 }
             }
-            UiKit.Button(box, "Voltar", new Vector2(0.5f, 0), new Vector2(0, 56), new Vector2(300, 60), UiKit.Primary, () => ShowRefuge(false));
+            UiKit.Focus(UiKit.Button(box, "Voltar", new Vector2(0.5f, 0), new Vector2(0, 56), new Vector2(300, 60), UiKit.Primary, () => { ShowRefuge(false); FocusFirstCard(); }).gameObject);
             var wipe = UiKit.Button(box, confirmReset ? "Apagar mesmo?" : "Apagar progresso", new Vector2(1, 0), new Vector2(-50, 62), new Vector2(250, 46),
                 confirmReset ? UiKit.Danger : UiKit.Secondary, () =>
                 {
@@ -192,11 +195,11 @@ namespace Quintessence.UI
             UiKit.Image(quintPip, UiKit.Ring, UiKit.Paper);
             UiKit.Image(UiKit.Rect("Core", quintPip, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(16, 16)), UiKit.Circle, UiKit.Paper);
             UiKit.Text(UiKit.Rect("Sub", root, new Vector2(0.5f, 1), new Vector2(0, -222), new Vector2(1400, 44)),
-                "Comece com um elemento. Desperte os outros três. Alcance o quinto estado.", 28, UiKit.Cream, TextAnchor.MiddleCenter, false);
-            UiKit.Text(UiKit.Rect("Pick", root, new Vector2(0.5f, 0.5f), new Vector2(0, -52), new Vector2(1000, 40)), "ESCOLHA O ELEMENTO INICIAL", 26, UiKit.Dim);
+                "Comece com uma skill. Desperte as outras três. Alcance o quinto estado.", 28, UiKit.Cream, TextAnchor.MiddleCenter, false);
+            UiKit.Text(UiKit.Rect("Pick", root, new Vector2(0.5f, 0.5f), new Vector2(0, -52), new Vector2(1000, 40)), "ESCOLHA A PRIMEIRA SKILL", 26, UiKit.Dim);
 
             string[] names = { "Fogo", "Água", "Terra", "Ar" };
-            string[] notes = { "Agressivo\ndano contínuo", "Alcance\ne controle", "Pesado\nquebra armadura", "Mobilidade\ne crítico" };
+            string[] notes = { "Labareda\no ataque", "Maré\ncura e controle", "Pilar de Pedra\nproteção", "Vendaval\na fuga" };
             string[] iconNames = { "fire", "water", "earth", "air" };
             var mid = new Vector2(0.5f, 0.5f);
             for (int i = 0; i < 4; i++)
@@ -235,7 +238,7 @@ namespace Quintessence.UI
             sheet.gameObject.SetActive(false);
             UpdateRefugeLabel();
             UiKit.Text(UiKit.Rect("Keys", root, new Vector2(0.5f, 0), new Vector2(0, 24), new Vector2(1600, 30)),
-                "WASD mover · mouse mira · clique ataca · clique dir. skill · Espaço dash · Q/E troca elemento · R Quintessência · F interagir", 22, UiKit.Dim, TextAnchor.MiddleCenter, false);
+                "WASD mover · mouse mira · clique ataca · 1 2 3 4 skills · Espaço dash · R Quintessência · E interagir · I inventário  —  também funciona com controle", 22, UiKit.Dim, TextAnchor.MiddleCenter, false);
         }
 
         public void UseCamera(Camera cam)
