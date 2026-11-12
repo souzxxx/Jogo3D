@@ -707,6 +707,57 @@ namespace Quintessence.Game.PlayTests
         }
 
         [UnityTest, Timeout(600000)]
+        public IEnumerator Weaver_Keeps_Distance_And_Blinks()
+        {
+            GameEvents.Clear();
+            Time.timeScale = 1f;
+            Time.captureFramerate = 30;
+            GameFlow.StartElement = ElementType.Water;
+            GameFlow.Seed = 4; GameFlow.Layers = 5; GameFlow.Shrines = 1;
+            yield return EditorSceneManager.LoadSceneAsyncInPlayMode("Assets/Scenes/Run.unity", new LoadSceneParameters(LoadSceneMode.Single));
+            yield return null;
+            yield return null;
+            var director = Object.FindFirstObjectByType<RunDirector>();
+            var hud = Object.FindFirstObjectByType<Hud>();
+            cam = Camera.main;
+            hud.UseCamera(cam);
+            Object.FindFirstObjectByType<WaveSpawner>().enabled = false;
+            for (int k = 0; k < 2000 && director.Busy; k++) yield return null;
+            Assert.IsTrue(director.WeaverRun, "semente par: o chefe final e a Tecela");
+            var hero = Object.FindFirstObjectByType<PlayerController>();
+            hero.GetComponent<Health>().Pool.Invulnerable = true;
+            hero.Teleport(new Vector3(0, 0.05f, -2f), Vector3.forward);
+            director.ApplyLayout(-1);
+            director.DressBiome(Biome.Heart);
+            director.PlaceBiomeProps(Biome.Heart, 1);
+            string name = "";
+            GameEvents.BossSpawned += (_, n) => name = n;
+            var prefab = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Game/Enemies/Prefabs/Tecela.prefab");
+            Assert.IsNotNull(prefab);
+            var weaver = Object.Instantiate(prefab, new Vector3(0, 0, 2.5f), Quaternion.Euler(0, 180, 0)).GetComponent<BossBrain>();
+            for (int k = 0; k < 40; k++) yield return null;
+            Assert.AreEqual("Tecelã das Cinzas", name);
+            for (int k = 0; k < 900 && weaver.Blinks == 0; k++) yield return null;
+            Assert.Greater(weaver.Blinks, 0, "ela se teletransporta");
+            for (int k = 0; k < 60; k++) yield return null;
+            Assert.Greater(Vector3.Distance(weaver.transform.position, hero.transform.position), 4f, "e guarda distancia do heroi");
+            weaver.enabled = false;
+            hud.ShowBanner("", "", Color.clear, 0.01f);
+            for (int k = 0; k < 4; k++) yield return null;
+            Shot(cam, "docs/img/chefe_tecela.png");
+            weaver.enabled = true;
+            var hp = weaver.GetComponent<Health>();
+            hp.TakeDamage(new DamageInfo(hp.Max * 0.75f, ElementType.None, Team.Player, hero.gameObject));
+            for (int k = 0; k < 30; k++) yield return null;
+            Assert.AreEqual(2, weaver.Phase);
+            Assert.IsTrue(weaver.Shield.Up, "chefe final: a ultima fase levanta o escudo");
+            Object.Destroy(weaver.gameObject);
+            GameFlow.StartElement = ElementType.Fire;
+            GameFlow.Layers = 8; GameFlow.Shrines = 3;
+            Time.captureFramerate = 0;
+        }
+
+        [UnityTest, Timeout(600000)]
         public IEnumerator MiniBoss_Has_Phases_But_No_Shield()
         {
             GameEvents.Clear();

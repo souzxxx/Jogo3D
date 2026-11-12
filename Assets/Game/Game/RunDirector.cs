@@ -21,6 +21,8 @@ namespace Quintessence.Game
         [SerializeField] GameObject bossPrefab;
         [SerializeField] GameObject chargerPrefab;
         [SerializeField] GameObject miniBossPrefab;
+        [Tooltip("Segundo chefe final; a run sorteia entre ele e o Guardiao pela semente.")]
+        [SerializeField] GameObject weaverPrefab;
         [SerializeField] GameObject lobberPrefab;
         [SerializeField] GameObject shamanPrefab;
         [SerializeField] Material flatMaterial;
@@ -80,6 +82,10 @@ namespace Quintessence.Game
         }
 
         public void BindMiniBoss(GameObject prefab) => miniBossPrefab = prefab;
+        public void BindWeaver(GameObject prefab) => weaverPrefab = prefab;
+
+        /// O chefe final desta run: semente par traz a Tecela das Cinzas, impar o Guardiao.
+        public bool WeaverRun => weaverPrefab != null && (GameFlow.Seed & 1) == 0;
 
         public void BindExtraEnemies(GameObject charger, GameObject lobber, GameObject shaman)
         {
@@ -489,7 +495,7 @@ namespace Quintessence.Game
                 if (p.Lobber > 0 && lobberPrefab != null) w.entries.Add(new WaveEntry { prefab = lobberPrefab, count = p.Lobber });
                 if (p.Shaman > 0 && shamanPrefab != null) w.entries.Add(new WaveEntry { prefab = shamanPrefab, count = p.Shaman });
                 if (p.MiniBoss > 0 && miniBossPrefab != null) w.entries.Add(new WaveEntry { prefab = miniBossPrefab, count = p.MiniBoss });
-                if (p.Boss > 0) w.entries.Add(new WaveEntry { prefab = bossPrefab != null ? bossPrefab : brutePrefab, count = p.Boss });
+                if (p.Boss > 0) w.entries.Add(new WaveEntry { prefab = WeaverRun ? weaverPrefab : bossPrefab != null ? bossPrefab : brutePrefab, count = p.Boss });
                 waves.Add(w);
             }
             return waves;
