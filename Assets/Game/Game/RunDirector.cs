@@ -198,6 +198,22 @@ namespace Quintessence.Game
             GameEvents.RoomCleared += OnRoomCleared;
             GameEvents.Died += OnDied;
             GameEvents.BossSpawned += OnBossSpawned;
+            GameEvents.ElementAwakened += OnAwakened;
+        }
+
+        void OnAwakened(ElementType e)
+        {
+            if (player == null || Run == null || GameFlow.Tutorial) return;
+            int n = player.Loadout.Awakened.Count;
+            if (n == 2) Tip("react");
+            else if (n >= 4) Tip("quint");
+        }
+
+        /// Mostra a dica uma vez so por jogador.
+        void Tip(string id)
+        {
+            if (GameFlow.Tutorial || !Tips.Consume(id)) return;
+            hud.ShowTip(Tips.Text(id));
         }
 
         /// O chefe nao passa pela escala das salas: a Ascensao entra aqui.
@@ -212,6 +228,7 @@ namespace Quintessence.Game
             GameEvents.RoomCleared -= OnRoomCleared;
             GameEvents.Died -= OnDied;
             GameEvents.BossSpawned -= OnBossSpawned;
+            GameEvents.ElementAwakened -= OnAwakened;
         }
 
         void Start()
@@ -378,6 +395,11 @@ namespace Quintessence.Game
             hud.SetRoom($"Sala {Run.Depth + 1}/{Run.Map.LayerCount} · {RoomInfo.Name(node.Type)}", node.Type);
             yield return null;
 
+            if (first && Run.Depth == 0) Tip("start");
+            if (node.Type == RoomType.Shrine) Tip("shrine");
+            else if (node.Type == RoomType.Elite) Tip("elite");
+            else if (node.Type == RoomType.Shop) Tip("shop");
+            else if (node.Type == RoomType.Pact) Tip("pact");
             switch (node.Type)
             {
                 case RoomType.Shrine:
@@ -726,6 +748,7 @@ namespace Quintessence.Game
 
         void OpenLevelUp()
         {
+            Tip("level");
             if (talentRng == null) talentRng = new System.Random(GameFlow.Seed);
             talentOffer = TalentCatalog.Offer(Run.Talents, player.Loadout.Awakened, talentRng);
             if (talentOffer.Count == 0) { while (Run.Progress.ConsumePick()) { } return; }

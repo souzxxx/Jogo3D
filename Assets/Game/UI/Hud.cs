@@ -289,6 +289,7 @@ namespace Quintessence.UI
         void LateUpdate()
         {
             TickBanner();
+            TickTip();
             if (hero == null || (hero as UnityEngine.Object) == null)
             {
                 var go = GameObject.FindGameObjectWithTag("Player");
@@ -369,6 +370,33 @@ namespace Quintessence.UI
         }
 
         // ---------- API usada pela run ----------
+
+        RectTransform tipRoot;
+        Text tipText;
+        float tipLeft;
+        public string LastTip { get; private set; } = "";
+
+        /// Dica curta no rodape, acima da barra de habilidades. Some sozinha.
+        public void ShowTip(string text, float seconds = 7f)
+        {
+            if (tipRoot == null)
+            {
+                tipRoot = UiKit.Box("Tip", canvas.transform, new Vector2(0.5f, 0), new Vector2(0, 330), new Vector2(1100, 54), 0.85f);
+                UiKit.Image(UiKit.Rect("Mark", tipRoot, new Vector2(0, 0.5f), new Vector2(14, 0), new Vector2(30, 30)), UiKit.Icon("boon_skill"), new Color(0.9f, 0.76f, 0.42f));
+                tipText = UiKit.Text(UiKit.Rect("Text", tipRoot, new Vector2(0.5f, 0.5f), new Vector2(18, 0), new Vector2(1040, 46)), "", 24, UiKit.Cream, TextAnchor.MiddleCenter, false);
+            }
+            LastTip = text;
+            tipText.text = text;
+            tipLeft = seconds;
+            tipRoot.gameObject.SetActive(true);
+            tipRoot.SetSiblingIndex(Mathf.Max(0, fade.transform.GetSiblingIndex() - 1));
+        }
+
+        void TickTip()
+        {
+            if (tipRoot == null || !tipRoot.gameObject.activeSelf) return;
+            if ((tipLeft -= Time.unscaledDeltaTime) <= 0f) tipRoot.gameObject.SetActive(false);
+        }
 
         RectTransform bannerRoot;
         Text bannerTitle, bannerSub;

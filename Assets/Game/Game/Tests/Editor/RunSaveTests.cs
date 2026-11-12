@@ -55,5 +55,18 @@ namespace Quintessence.Game.Tests
             PlayerPrefs.SetString(Key, "{\"version\":99,\"hero\":1,\"layers\":10,\"maxHealth\":100}");
             Assert.IsNull(RunSaveStore.Load(), "versao desconhecida");
         }
+
+        [Test] public void Tips_ShowOnlyOnce_AndEveryTipHasText()
+        {
+            Tips.UseKey("quintessence.tips.edittest");
+            Tips.ResetAll();
+            Assert.IsTrue(Tips.Consume("shrine"));
+            Assert.IsFalse(Tips.Consume("shrine"), "a mesma dica nao volta");
+            Tips.UseKey("quintessence.tips.edittest"); // como se o jogo tivesse sido reaberto
+            Assert.IsTrue(Tips.WasSeen("shrine"));
+            foreach (var id in new[] { "start", "level", "shrine", "react", "elite", "shop", "pact", "quint" }) Assert.IsNotEmpty(Tips.Text(id), id);
+            Tips.ResetAll();
+            Tips.UseKey(Tips.DefaultKey);
+        }
     }
 }

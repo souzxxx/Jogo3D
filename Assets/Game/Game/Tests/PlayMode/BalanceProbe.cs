@@ -34,6 +34,7 @@ namespace Quintessence.Game.PlayTests
             GameFlow.AutoPickTalents = true;
             MetaStore.UseKey("quintessence.meta.test");
             RunSaveStore.UseKey("quintessence.run.probe");
+            Tips.UseKey("quintessence.tips.probe");
             PlayerPrefs.DeleteKey("quintessence.meta.test");
             foreach (var hero in Elements.All)
                 for (int seed = 1; seed <= 1; seed++)
@@ -110,6 +111,7 @@ namespace Quintessence.Game.PlayTests
             MetaStore.UseKey(MetaStore.DefaultKey);
             RunSaveStore.Clear();
             RunSaveStore.UseKey(RunSaveStore.DefaultKey);
+            Tips.UseKey(Tips.DefaultKey);
             GameFlow.Layers = 10; GameFlow.StartElement = ElementType.Fire;
             Time.captureFramerate = 0;
         }

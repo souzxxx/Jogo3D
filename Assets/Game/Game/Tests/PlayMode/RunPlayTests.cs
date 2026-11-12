@@ -40,6 +40,8 @@ namespace Quintessence.Game.PlayTests
             GameFlow.AutoPickTalents = true;
             RunSaveStore.UseKey(TestSaveKey + ".run");
             RunSaveStore.Clear();
+            Tips.UseKey(TestSaveKey + ".tips");
+            Tips.ResetAll();
             GameFlow.Resume = null;
         }
 
@@ -51,6 +53,8 @@ namespace Quintessence.Game.PlayTests
             GameFlow.AutoPickTalents = false;
             RunSaveStore.Clear();
             RunSaveStore.UseKey(RunSaveStore.DefaultKey);
+            Tips.ResetAll();
+            Tips.UseKey(Tips.DefaultKey);
             GameFlow.Resume = null;
         }
 
@@ -774,6 +778,8 @@ namespace Quintessence.Game.PlayTests
             Object.FindFirstObjectByType<WaveSpawner>().enabled = false;
             for (int k = 0; k < 2000 && director.Busy; k++) yield return null;
             Assert.IsNotNull(RunSaveStore.Load(), "entrar na primeira sala ja grava a run");
+            Assert.AreEqual(Tips.Text("start"), Object.FindFirstObjectByType<Hud>().LastTip, "a primeira sala mostra a dica de controles");
+            Assert.IsTrue(Tips.WasSeen("start"));
             var hero = Object.FindFirstObjectByType<PlayerController>();
             var hp = hero.GetComponent<Health>();
 
