@@ -173,7 +173,9 @@ Os tipos entram aos poucos: Ceifador na segunda sala, Arremessador na quarta, Xa
 
 ### Menus
 
-Título com escolha do elemento inicial, Refúgio e Treino. Pausa com volumes e lista de bênçãos. Resultado com o resumo da run e os Fragmentos ganhos.
+Título com os quatro heróis no altar (o herói da carta em foco comemora), Continuar run quando há uma salva, seletor de Ascensão depois da primeira vitória, Refúgio (com vitórias por herói), Grimório (heróis, inimigos e reações), Treino (com o herói da última carta em foco), Opções (volumes, tela cheia, tremor de tela) e Créditos. Na run: pausa com as opções, inventário (skills, reações, atributos, bênçãos e talentos), mapa com os trechos, escolha de talento a cada nível e dicas de primeira vez no rodapé. Resultado com herói, nível, abates, quem derrubou o herói e os Fragmentos ganhos.
+
+A build WebGL tem página de carregamento própria (arte do título, barra dourada e os controles) e abre direto no título.
 
 ---
 
