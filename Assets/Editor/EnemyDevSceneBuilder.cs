@@ -96,6 +96,95 @@ public static class EnemyDevSceneBuilder
         return prefab;
     }
 
+    /// Tecela das Cinzas: segundo chefe final. A esqueleto conjuradora do pack ampliada, com pecas proprias
+    /// (Assets/Art/Boss2) quando existirem; sem elas, cajado e cristais do pack.
+    public static GameObject WeaverPrefab(GameObject add1, GameObject add2)
+    {
+        const string fbx = KK + "Skeletons/Characters/Skeleton_Mage.fbx";
+        CombatDevSceneBuilder.Loop(fbx, "Idle", "Idle_Combat", "Running_A", "Walking_A");
+        var ctrl = CombatDevSceneBuilder.Controller(fbx, Dir + "Animation/Tecela.controller",
+            ("Idle", "Idle_Combat|Idle", 0f), ("Run", "Walking_A|Running_A", 0f), ("Attack", "Spellcast_Shoot|Spellcast_Long", 1f),
+            ("Cast", "Spellcast_Shoot|Spellcast_Long", 0.9f), ("Summon", "Spellcast_Summon|Spellcast_Raise", 1.3f),
+            ("Roar", "Spellcast_Raise|Taunt|Cheer", 0.9f), ("Hit", "Hit_B|Hit_A", 0.3f), ("Death", "Death_B|Death_A", 0f), ("Spawn", "Spawn_Ground|Skeletons_Awaken_Standing|Idle", 1.2f));
+        var def = Asset<BossDefinition>("Tecela", d =>
+        {
+            d.displayName = "Tecelã das Cinzas"; d.pattern = 1; d.maxHealth = 520f; d.moveSpeed = 2.6f;
+            d.cooldownByPhase = new[] { 1.6f, 1.25f, 0.95f };
+            d.fanDamage = 9f; d.fanCount = 4; d.fanCountLastPhase = 6; d.fanSpread = 18f;
+            d.eruptionDamage = 11f; d.eruptionCount = 4;
+            d.ringDamage = 11f; d.ringCount = 8;
+            d.blinkWindup = 0.7f; d.blinkDistance = 7.5f; d.blinkDamage = 10f; d.blinkRadius = 2.2f;
+            d.maxAdds = 3; d.addsPerPhaseChange = 2; d.addInterval = 9f;
+        });
+        def.projectilePrefab = ProjectilePrefab();
+        def.addPrefabs = new[] { add1, add2 };
+        EditorUtility.SetDirty(def);
+
+        AssetDatabase.Refresh();
+        bool art = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Art/Boss2/weaver_head.fbx") != null;
+        if (art) HeroBuilder.MatteParts("Assets/Art/Boss2");
+        var skin = art ? LookDevBuilder.Mat("WeaverBody", "Assets/Art/Boss2/weaver_body_texture.png", Color.white, Color.black, 0f)
+                       : LookDevBuilder.Mat("WeaverAsh", KK + "Skeletons/Characters/skeleton_texture.png", new Color(0.6f, 0.48f, 0.62f), Color.black, 0f);
+        var go = new GameObject("Tecela");
+        var col = go.AddComponent<CapsuleCollider>();
+        col.height = 4.8f; col.radius = 1.1f; col.center = new Vector3(0, 2.4f, 0);
+        go.AddComponent<Health>().Configure(def.maxHealth, Team.Enemy);
+        var agent = go.AddComponent<NavMeshAgent>();
+        agent.radius = 1.1f; agent.height = 4.8f; agent.angularSpeed = 0f;
+        var model = LookDevBuilder.Spawn("Skeletons/Characters/Skeleton_Mage.fbx", Vector3.zero, 0, skin);
+        model.name = "Model";
+        model.transform.SetParent(null, false);
+        model.transform.SetPositionAndRotation(Vector3.zero, Quaternion.identity);
+        model.transform.localScale = Vector3.one;
+        var hidden = new System.Collections.Generic.List<string>();
+        if (art)
+        {
+            foreach (var r in model.GetComponentsInChildren<Renderer>(true))
+                if (r.name.Contains("Hat") || r.name.Contains("Staff")) { r.gameObject.SetActive(false); hidden.Add(r.name); }
+            foreach (var (file, bone) in new[] { ("weaver_head", "head"), ("weaver_mantle", "chest"), ("weaver_core", "chest"), ("weaver_staff", "handslot.r"), ("weaver_shards", "chest") })
+                HeroBuilder.Attach(model, "Assets/Art/Boss2/" + file + ".fbx", bone);
+        }
+        Debug.Log("Tecela: arte propria " + art + ", escondidas: " + string.Join(", ", hidden));
+        model.transform.SetParent(go.transform, false);
+        model.transform.localScale = Vector3.one * 2.2f;
+        if (!art)
+        {
+            // sem a arte propria: cajado do pack e cristais ambar em volta dos ombros
+            Transform hand = null, chest = null;
+            foreach (var t in model.GetComponentsInChildren<Transform>(true)) { if (t.name == "handslot.r") hand = t; if (t.name == "chest") chest = t; }
+            if (hand != null && hand.childCount == 0)
+            {
+                var gear = LookDevBuilder.Mat("SkeletonGear", KK + "Skeletons/Props/skeleton_texture.png", new Color(0.7f, 0.66f, 0.68f), Color.black, 0f);
+                var staff = LookDevBuilder.Spawn("Skeletons/Props/Skeleton_Staff.fbx", Vector3.zero, 0, gear);
+                staff.transform.SetParent(hand, false);
+                staff.transform.localPosition = Vector3.zero; staff.transform.localRotation = Quaternion.identity;
+                var src = AssetDatabase.LoadAssetAtPath<GameObject>(KK + "Skeletons/Props/Skeleton_Staff.fbx");
+                staff.transform.localScale = Vector3.one * ((src != null ? src.transform.localScale.x : 1f) * model.transform.lossyScale.x / Mathf.Max(0.0001f, hand.lossyScale.x));
+            }
+            if (chest != null)
+            {
+                var amber = LookDevBuilder.Mat("Glow_Amber", null, new Color(0.85f, 0.5f, 0.16f) * 0.6f, new Color(0.85f, 0.5f, 0.16f) * 0.55f, 0f);
+                foreach (var (pos, euler, h) in new[] { (new Vector3(-0.32f, 0.2f, -0.1f), new Vector3(0, 0, 30), 0.42f), (new Vector3(0.32f, 0.2f, -0.1f), new Vector3(0, 0, -30), 0.42f), (new Vector3(0f, 0.3f, -0.25f), new Vector3(-25, 0, 0), 0.55f) })
+                {
+                    var c = new GameObject("AmberCrystal");
+                    c.transform.SetParent(chest, false);
+                    c.transform.localPosition = pos; c.transform.localRotation = Quaternion.Euler(euler); c.transform.localScale = new Vector3(0.14f, h, 0.14f);
+                    c.AddComponent<MeshFilter>().sharedMesh = LookDevBuilder.CrystalMesh();
+                    c.AddComponent<MeshRenderer>().sharedMaterial = amber;
+                }
+            }
+        }
+        var anim = CombatDevSceneBuilder.Animator(model, ctrl);
+        go.AddComponent<BossBrain>().Bind(def, anim);
+        var light = new GameObject("EmberLight").AddComponent<Light>();
+        light.transform.SetParent(go.transform, false);
+        light.transform.localPosition = new Vector3(0, 3f, 0.8f);
+        light.type = LightType.Point; light.color = new Color(1f, 0.55f, 0.3f); light.intensity = 2.2f; light.range = 7f;
+        var prefab = PrefabUtility.SaveAsPrefabAsset(go, Dir + "Prefabs/Tecela.prefab");
+        Object.DestroyImmediate(go);
+        return prefab;
+    }
+
     /// Carrasco: mini-chefe do meio da run. O esqueleto guerreiro do pack com o capuz e a foice do Ceifador,
     /// ampliado; usa o cerebro do chefe com numeros menores e sem o escudo da ultima fase.
     public static GameObject MiniBossPrefab(GameObject add1, GameObject add2)

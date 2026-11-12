@@ -1,0 +1,62 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7d95e51dfef644a3f9bfcb57deee04ee, type: 3}
+  m_Name: Tecela
+  m_EditorClassIdentifier: Quintessence.Enemies::Quintessence.Enemies.BossDefinition
+  displayName: "Tecel\xE3 das Cinzas"
+  pattern: 1
+  maxHealth: 520
+  moveSpeed: 2.6
+  cooldownByPhase:
+  - 1.6
+  - 1.25
+  - 0.95
+  slamDamage: 18
+  slamRadius: 3.2
+  slamOffset: 2.6
+  slamWindup: 0.9
+  slamRange: 5
+  projectilePrefab: {fileID: 5285576411816299366, guid: 6590da6c767a740e79055b4304b1f88e, type: 3}
+  fanDamage: 9
+  fanCount: 4
+  fanCountLastPhase: 6
+  fanSpread: 18
+  fanWindup: 0.8
+  projectileSpeed: 10
+  projectileRange: 18
+  eruptionDamage: 11
+  eruptionRadius: 2
+  eruptionCount: 4
+  eruptionWindup: 1.1
+  eruptionScatter: 4.5
+  chargeDamage: 16
+  chargeWidth: 1.7
+  chargeLength: 13
+  chargeWindup: 1.05
+  chargeSpeed: 26
+  ringDamage: 11
+  ringCircleRadius: 2.1
+  ringRadius: 5.7
+  ringCount: 8
+  ringWindup: 1.15
+  blinkWindup: 0.7
+  blinkDistance: 7.5
+  blinkDamage: 10
+  blinkRadius: 2.2
+  lastPhaseShield: 1
+  shieldTimeout: 12
+  addPrefabs:
+  - {fileID: 6533326598490615424, guid: 6a33730e289c84b789e1b7bc339e673b, type: 3}
+  - {fileID: 153203729657998027, guid: 01a9502a79d5142a9a550647f054284d, type: 3}
+  addInterval: 9
+  maxAdds: 3
+  addsPerPhaseChange: 2

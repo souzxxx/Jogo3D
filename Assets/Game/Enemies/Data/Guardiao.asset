@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: Guardiao
   m_EditorClassIdentifier: Quintessence.Enemies::Quintessence.Enemies.BossDefinition
   displayName: "Guardi\xE3o das Cinzas"
+  pattern: 0
   maxHealth: 600
   moveSpeed: 2.6
   cooldownByPhase:
@@ -47,6 +48,10 @@ MonoBehaviour:
   ringRadius: 5.7
   ringCount: 8
   ringWindup: 1.15
+  blinkWindup: 0.7
+  blinkDistance: 7.5
+  blinkDamage: 10
+  blinkRadius: 2.2
   lastPhaseShield: 1
   shieldTimeout: 12
   addPrefabs:

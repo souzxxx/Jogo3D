@@ -7,6 +7,8 @@ namespace Quintessence.Enemies
     public class BossDefinition : ScriptableObject
     {
         public string displayName = "Guardião das Cinzas";
+        [Tooltip("Rodizio de ataques: 0 = Guardiao (corpo a corpo), 1 = Tecela (distancia e teleporte).")]
+        public int pattern;
         public float maxHealth = 600f;
         public float moveSpeed = 2.6f;
         [Tooltip("Pausa entre ataques em cada fase.")]
@@ -49,6 +51,12 @@ namespace Quintessence.Enemies
         public float ringRadius = 5.7f;
         public int ringCount = 8;
         public float ringWindup = 1.15f;
+
+        [Header("Teleporte: some e reaparece longe do heroi")]
+        public float blinkWindup = 0.7f;
+        public float blinkDistance = 7.5f;
+        public float blinkDamage = 10f;
+        public float blinkRadius = 2.2f;
 
         [Header("Escudo da ultima fase")]
         [Tooltip("Desligado no mini-chefe: a ultima fase so acelera, sem escudo.")]

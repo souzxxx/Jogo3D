@@ -102,5 +102,19 @@ namespace Quintessence.Enemies.Tests
             Assert.IsTrue(charge, "a investida entra na segunda fase");
             Assert.IsTrue(ring, "o anel entra na ultima");
         }
+
+        [Test] public void Weaver_FightsFromRange_AndBlinks()
+        {
+            bool blink = false, slam = false, charge = false;
+            for (int phase = 0; phase < 3; phase++)
+                for (int i = 0; i < 12; i++)
+                {
+                    var a = BossRules.Next(phase, i, true, 1);
+                    blink |= a == BossAttack.Blink; slam |= a == BossAttack.Slam; charge |= a == BossAttack.Charge;
+                }
+            Assert.IsTrue(blink, "a Tecela se teletransporta");
+            Assert.IsFalse(slam || charge, "e nao luta corpo a corpo");
+            Assert.AreEqual(BossRules.Next(1, 3, true), BossRules.Next(1, 3, true, 0), "o Guardiao continua igual");
+        }
     }
 }

@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: Carrasco
   m_EditorClassIdentifier: Quintessence.Enemies::Quintessence.Enemies.BossDefinition
   displayName: Carrasco
+  pattern: 0
   maxHealth: 200
   moveSpeed: 3.3
   cooldownByPhase:
@@ -47,6 +48,10 @@ MonoBehaviour:
   ringRadius: 4.6
   ringCount: 6
   ringWindup: 1.15
+  blinkWindup: 0.7
+  blinkDistance: 7.5
+  blinkDamage: 10
+  blinkRadius: 2.2
   lastPhaseShield: 0
   shieldTimeout: 12
   addPrefabs:

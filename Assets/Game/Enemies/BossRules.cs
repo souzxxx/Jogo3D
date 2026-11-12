@@ -4,7 +4,8 @@ using UnityEngine;
 namespace Quintessence.Enemies
 {
     /// Charge: investida em linha larga. Ring: anel de erupcoes em volta dele (perto do chefe ou bem longe e seguro).
-    public enum BossAttack { Slam, Fan, Eruption, Charge, Ring }
+    /// Blink: some e reaparece num ponto avisado longe do heroi, com uma explosao no lugar.
+    public enum BossAttack { Slam, Fan, Eruption, Charge, Ring, Blink }
 
     /// Regras do chefe sem Unity de cena: fases, rodizio de ataques e o escudo da ultima fase.
     public static class BossRules
@@ -22,10 +23,20 @@ namespace Quintessence.Enemies
             new[] { BossAttack.Fan, BossAttack.Ring, BossAttack.Eruption, BossAttack.Charge, BossAttack.Slam, BossAttack.Eruption },
         };
 
-        /// Ataque numero index da fase. Longe demais para a Pancada, troca pelo Leque.
-        public static BossAttack Next(int phase, int index, bool inSlamRange)
+        /// Tecela das Cinzas: luta de longe, se teletransporta e levanta aneis.
+        static readonly BossAttack[][] weaver =
         {
-            var cycle = cycles[Mathf.Clamp(phase, 0, cycles.Length - 1)];
+            new[] { BossAttack.Fan, BossAttack.Eruption, BossAttack.Fan, BossAttack.Blink },
+            new[] { BossAttack.Blink, BossAttack.Fan, BossAttack.Ring, BossAttack.Eruption },
+            new[] { BossAttack.Blink, BossAttack.Ring, BossAttack.Fan, BossAttack.Eruption, BossAttack.Blink, BossAttack.Fan },
+        };
+
+        /// Ataque numero index da fase. Longe demais para a Pancada, troca pelo Leque.
+        /// pattern: 0 = Guardiao das Cinzas, 1 = Tecela das Cinzas.
+        public static BossAttack Next(int phase, int index, bool inSlamRange, int pattern = 0)
+        {
+            var set = pattern == 1 ? weaver : cycles;
+            var cycle = set[Mathf.Clamp(phase, 0, set.Length - 1)];
             var a = cycle[((index % cycle.Length) + cycle.Length) % cycle.Length];
             return a == BossAttack.Slam && !inSlamRange ? BossAttack.Fan : a;
         }

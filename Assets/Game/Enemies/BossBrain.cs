@@ -24,7 +24,9 @@ namespace Quintessence.Enemies
         NavMeshAgent agent;
         readonly List<Strike> strikes = new();
         readonly List<GameObject> adds = new();
-        float spawnLeft = 1.2f, cooldown = 1.5f, busy, addTimer, chargeWait, chargeLeft;
+        float spawnLeft = 1.2f, cooldown = 1.5f, busy, addTimer, chargeWait, chargeLeft, blinkWait;
+        Vector3 blinkTo;
+        public int Blinks { get; private set; }
         Vector3 chargeDir;
         bool chargeHit;
         public bool IsCharging => chargeLeft > 0f;
@@ -87,7 +89,7 @@ namespace Quintessence.Enemies
         void OnDied(DamageInfo info)
         {
             strikes.Clear();
-            chargeWait = chargeLeft = 0f;
+            chargeWait = chargeLeft = blinkWait = 0f;
             if (agent.enabled) agent.enabled = false;
             if (TryGetComponent(out Collider c)) c.enabled = false;
             // os reforcos caem junto com o chefe: a sala nunca fica presa esperando um inimigo esquecido
@@ -125,6 +127,13 @@ namespace Quintessence.Enemies
                 Resolve(s);
             }
 
+            if (blinkWait > 0f && (blinkWait -= dt) <= 0f)
+            {
+                // reaparece no ponto avisado (a explosao do aviso sai no mesmo instante)
+                if (agent.enabled && agent.isOnNavMesh) agent.Warp(blinkTo); else transform.position = blinkTo;
+                Blinks++;
+                GameEvents.RaiseAttackPerformed(new AttackEvent { Origin = blinkTo, Direction = Vector3.up, Element = ElementType.Fire, Range = definition.blinkRadius, Kind = AttackKind.Dash, Source = gameObject });
+            }
             if (chargeWait > 0f && (chargeWait -= dt) <= 0f)
             {
                 chargeLeft = ClearLength(chargeDir, definition.chargeLength) / Mathf.Max(1f, definition.chargeSpeed);
@@ -194,6 +203,16 @@ namespace Quintessence.Enemies
         void Chase(bool hasTarget, float distance)
         {
             if (!agent.enabled || !agent.isOnNavMesh) return;
+            if (definition.pattern == 1 && hasTarget)
+            {
+                // a Tecela guarda distancia: recua se o heroi encosta, para no meio do caminho, so se aproxima de longe
+                var away = transform.position - target.transform.position; away.y = 0f;
+                if (distance < 5.5f) { agent.isStopped = false; agent.SetDestination(Arena.Clamp(transform.position + away.normalized * 4f)); return; }
+                if (distance < 10f) { Stop(); return; }
+                agent.isStopped = false;
+                agent.SetDestination(target.transform.position);
+                return;
+            }
             if (!hasTarget || distance < definition.slamRange * 0.7f) { Stop(); return; }
             agent.isStopped = false;
             agent.SetDestination(target.transform.position);
@@ -208,7 +227,7 @@ namespace Quintessence.Enemies
 
         void Attack(Vector3 dir, float distance)
         {
-            var attack = BossRules.Next(Phase, attackIndex++, distance <= definition.slamRange);
+            var attack = BossRules.Next(Phase, attackIndex++, distance <= definition.slamRange, definition.pattern);
             cooldown = definition.cooldownByPhase[Mathf.Clamp(Phase, 0, definition.cooldownByPhase.Length - 1)];
             transform.rotation = Quaternion.LookRotation(dir);
             switch (attack)
@@ -261,6 +280,21 @@ namespace Quintessence.Enemies
                         Circle(p, definition.ringCircleRadius, definition.ringWindup + 0.55f, definition.ringDamage, Vector3.up);
                     busy = definition.ringWindup + 0.9f;
                     Play("Summon", 0.08f);
+                    break;
+                }
+                case BossAttack.Blink:
+                {
+                    // escolhe um ponto longe do heroi, dentro da sala, e avisa la e aqui
+                    var away = transform.position - target.transform.position; away.y = 0f;
+                    if (away.sqrMagnitude < 0.01f) away = Vector3.forward;
+                    var side = Quaternion.Euler(0, Random.Range(-70f, 70f), 0) * away.normalized;
+                    var dest = Arena.Clamp(target.transform.position + side * definition.blinkDistance);
+                    if (NavMesh.SamplePosition(dest, out var hit, 3f, NavMesh.AllAreas)) dest = hit.position;
+                    blinkTo = dest;
+                    blinkWait = definition.blinkWindup;
+                    Circle(dest, definition.blinkRadius, definition.blinkWindup, definition.blinkDamage, Vector3.up);
+                    busy = definition.blinkWindup + 0.35f;
+                    Play("Cast", 0.08f);
                     break;
                 }
                 case BossAttack.Eruption:
