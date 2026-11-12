@@ -495,7 +495,7 @@ namespace Quintessence.Feel
         {
             FindPlayer();
             if (player != null)
-                DamageNumber.Spawn(player.position + Vector3.up * 4.2f, $"ONDA {index + 1}/{total}", Color.white, 1.1f, 1.3f);
+                DamageNumber.Spawn(player.position + Vector3.up * 4.2f, total > 0 ? $"ONDA {index + 1}/{total}" : "REFORÇOS", Color.white, 1.1f, 1.3f);
         }
 
         void OnRoomCleared()

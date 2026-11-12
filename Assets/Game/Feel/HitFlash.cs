@@ -15,7 +15,8 @@ namespace Quintessence.Feel
 
         void Awake()
         {
-            renderers = GetComponentsInChildren<Renderer>(true);
+            // o circulo da aura (Porta-Estandarte) e um marcador no chao: nao pisca nem toma a tinta do status
+            renderers = System.Array.FindAll(GetComponentsInChildren<Renderer>(true), r => r.gameObject.name != "AuraRing");
             block = new MaterialPropertyBlock();
             // a cor propria do material (cinza do Guardiao, tom quente do Explosivo) e preservada: o piscar multiplica por ela
             baseColors = new Color[renderers.Length];
