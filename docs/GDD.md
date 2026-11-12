@@ -109,12 +109,12 @@ Uma skill deixa no inimigo a **marca** do elemento dela. Acertar esse inimigo co
 ### A run
 
 - Mapa ramificado de 10 camadas. Depois de cada sala, de uma a três portas mostram o tipo da próxima sala e a recompensa.
-- A descida atravessa três trechos, cada um com luz e cor de corrupção próprias: **Salões de Cinza**, **Cripta Afogada** e **Jardim de Pedra**. A última sala é o **Coração das Cinzas**.
-- **Combate:** 2 ondas (3 da sexta sala em diante). **Elite:** 3 ondas, um traço (Velozes, Resistentes ou Ferozes) anunciado na porta e um **Campeão** na última onda; paga o dobro de Essência e uma bênção.
-- **Santuário:** desperta um elemento à escolha. **Mestre:** uma de três bênçãos. **Loja:** poção, elixir e bênçãos por Essência. **Descanso:** cura 30%.
+- A descida atravessa três trechos, cada um com luz, cor da pedra e da corrupção, adereços e mistura de inimigos próprios: **Salões de Cinza** (forja: braseiros, bigornas, vigas queimadas), **Cripta Afogada** (sarcófagos, urnas, água parada; mais inimigos de longe) e **Jardim de Pedra** (árvores petrificadas, cogumelos, cervo de pedra; mais inimigos pesados). A última sala é o **Coração das Cinzas** (obelisco de brasa e cristais âmbar).
+- **Combate:** 2 ondas (3 da sexta sala em diante). **Elite:** 3 ondas, um traço (Velozes, Resistentes ou Ferozes) anunciado na porta e um **Campeão** na última onda (da sexta sala em diante, no lugar dele vem o **Carrasco**, um mini-chefe em três fases sem escudo); paga o dobro de Essência e uma bênção.
+- **Santuário:** desperta um elemento à escolha ou **aprofunda uma skill que já tem** (graus II e III: +30% de dano e recarga 10% menor cada). É a escolha entre espalhar (mais reações) e concentrar. **Mestre:** uma de três bênçãos. **Loja:** poção, elixir e bênçãos por Essência. **Descanso:** cura 30%.
 - **Tesouro:** um baú com Essência e um gole de vida. **Pacto:** um ganho forte por um custo permanente, à escolha entre Sangue (+25% de dano, −20% de vida máxima), Vidro (skills 25% mais rápidas, recebe +25% de dano) e Ganância (toda a Essência por um talento). Dá para recusar.
-- **Chefe:** o Guardião das Cinzas, em três fases. Na última ele levanta um escudo que só a Quintessência quebra.
-- Doze arranjos de sala com cobertura e três perigos que ferem herói e inimigo: respiradouro de brasa, armadilha de espinhos e barril de pólvora (qualquer golpe acende; fere bem mais os inimigos e acende os barris vizinhos).
+- **Chefe:** o Guardião das Cinzas, em três fases, com cinco ataques avisados: Pancada, Leque de brasas, Erupção, Investida (da segunda fase) e Anel de Cinzas com faixa segura (da terceira). Na última ele levanta um escudo que só a Quintessência quebra.
+- Dezesseis arranjos de sala com cobertura e três perigos que ferem herói e inimigo: respiradouro de brasa, armadilha de espinhos e barril de pólvora (qualquer golpe acende; fere bem mais os inimigos e acende os barris vizinhos).
 
 ### Inimigos
 
@@ -132,9 +132,10 @@ Os tipos entram aos poucos: Ceifador na segunda sala, Arremessador na quarta, Xa
 
 ### Progressão
 
-- **Na run:** Essência (moeda da loja) e bênçãos (20 no catálogo; cada Mestre só oferece a do próprio elemento a quem já o despertou).
+- **Na run:** Essência (moeda da loja) e bênçãos (29 no catálogo; cada Mestre só oferece a do próprio elemento a quem já o despertou).
 - **Nível e talentos:** inimigo derrotado dá experiência. Cada nível oferece três talentos para escolher um, com a sala limpa. São 17: cinco de corpo (combo, finalizador, vida, recarga por abate, Essência) e três por skill, que só aparecem com o elemento desperto. Exemplos: Labareda deixa o chão em chamas; Maré congela; Pilar bloqueia mais um golpe e devolve dano; Vendaval dá pressa; +1 carga de dash. Bênçãos mudam números; talentos mudam o que as skills fazem.
-- **Entre runs:** Fragmentos, 3 por sala vencida e 15 por vencer o Guardião. No **Refúgio** compram cinco melhorias permanentes: Vigor (vida), Força (dano), Bolsa (Essência inicial), Foco (Quintessência) e Fôlego (cura por sala). O progresso é salvo no navegador.
+- **Entre runs:** Fragmentos, 3 por sala vencida e 15 por vencer o Guardião. No **Refúgio** compram sete melhorias permanentes: Vigor (vida), Força (dano), Bolsa (Essência inicial), Foco (Quintessência), Fôlego (cura por sala), Sabedoria (experiência) e Intuição (trocar as opções de talento). O progresso é salvo no navegador.
+- **Ascensão:** cada vitória libera um nível de desafio (até cinco). Cada nível dá +12% de vida e +10% de dano aos inimigos e +25% de Fragmentos.
 
 ### Estados e erros
 
