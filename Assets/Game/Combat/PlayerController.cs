@@ -149,6 +149,8 @@ namespace Quintessence.Combat
         }
 
         bool thorns;
+        /// A explosao do despertar usa o caminho das skills, mas nao leva efeitos da ultima skill (Agua Gelada).
+        bool bursting;
 
         /// Impeto: cada inimigo derrotado adianta as recargas.
         void OnAnyDied(Health target, DamageInfo info)
@@ -215,7 +217,9 @@ namespace Quintessence.Combat
             var b = (Kit ?? HeroKit.Of(who)).Burst;
             if (b.Damage <= 0f) return;
             Bursts++;
+            bursting = true;
             ShapedHit(who, transform.position, AimDirection, b.Radius, 360f, b.Damage * (1f + mods.BurstBonus), b.Knockback, AttackKind.Skill, 0f, b.Applies, b.Status, b.StatusTime);
+            bursting = false;
             if (b.Heal > 0f) health.Heal(health.Max * b.Heal);
             GameEvents.RaiseQuintessenceBurst(b.Name, transform.position, b.Radius, who);
         }
@@ -507,8 +511,12 @@ namespace Quintessence.Combat
                 bool crit = chance > 0f && UnityEngine.Random.value < chance;
                 float marked = basic && target.TryGetComponent(out ElementMark m) && m.State.HasMark ? 1f + markedTargetBonus + mods.SwitchStrikeAdd : 1f;
                 if (mods.BurningBonus > 0f && target.TryGetComponent(out StatusHolder burning) && burning.State.Has(StatusType.Burn)) marked *= 1f + mods.BurningBonus;
-                // Flanqueador: o golpe vai no sentido para onde o alvo olha = pegou pelas costas
-                if (mods.FlankBonus > 0f && to.sqrMagnitude > 0.01f && Vector3.Dot(target.transform.forward, to.normalized) > 0.35f) marked *= 1f + mods.FlankBonus;
+                // Flanqueador: o heroi esta atras de quem ele acerta (medido do heroi, nao do ponto da skill: o Pilar nasce longe)
+                if (mods.FlankBonus > 0f && target.GetComponent<UnityEngine.AI.NavMeshAgent>() != null)
+                {
+                    var fromHero = target.transform.position - transform.position; fromHero.y = 0f;
+                    if (fromHero.sqrMagnitude > 0.01f && Vector3.Dot(target.transform.forward, fromHero.normalized) > 0.35f) marked *= 1f + mods.FlankBonus;
+                }
                 var info = new DamageInfo(damage * mods.Damage(element) * marked * (crit ? critMultiplier : 1f), element, health.Team, gameObject)
                 {
                     Point = overlap[i].ClosestPoint(origin),
@@ -520,7 +528,7 @@ namespace Quintessence.Combat
                 hits++;
                 if (applyStatus && !target.IsDead)
                     StatusHolder.GetOrAdd(target).Apply(statusType, statusDuration * mods.StatusDurationMult, health.Team, gameObject);
-                if (kind == AttackKind.Skill && !thorns && castElement == ElementType.Water && mods.WaterFreezeSeconds > 0f && !target.IsDead)
+                if (kind == AttackKind.Skill && !thorns && !bursting && castElement == ElementType.Water && mods.WaterFreezeSeconds > 0f && !target.IsDead)
                     StatusHolder.GetOrAdd(target).Apply(StatusType.Frozen, mods.WaterFreezeSeconds, health.Team, gameObject);
                 if (applySecond && !target.IsDead)
                     StatusHolder.GetOrAdd(target).Apply(secondType, secondDuration * mods.StatusDurationMult, health.Team, gameObject);
