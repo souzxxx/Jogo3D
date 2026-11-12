@@ -225,7 +225,8 @@ Sprints sem data até confirmar a entrega. S0 é de todos e destrava o resto.
 - [x] HUD com ícones de verdade e barra de habilidades (11/11). Falta: botões e telas de pausa/resultado
 - [x] Menu de título com identidade própria: altar dos cinco, aprendiz, emblema e pedestal que acende com o mouse (11/11)
 - [x] Passada única de animação (11/11): combo, skill por elemento, dash direcional, reação a dano, morte; inimigos recuam; Guardião com golpe saltado e rugido. Só clipes do pack
-- [ ] Trazer os heróis do Quintessence 2D (Rax, Liora, Brann, Vey) para o 3D no lugar do mago do pack — pedido do Leonardo em 11/11
+- [x] Heróis do Quintessence 2D (Rax, Liora, Brann, Vey) no 3D (12/11): peças modeladas no Blender sobre os corpos do pack, um herói por elemento inicial, com passiva e golpes próprios. Falta: retoque na crina do Rax e no redemoinho do Vey
+- [x] Leva da madrugada de 12/11: nível e 17 talentos; Ceifador, Arremessador, Xamã e Campeão de Elite; barril de pólvora e espinhos; 12 layouts; salas de Tesouro e Pacto; três biomas; run de 10 salas; dificuldade das salas comuns apertada com base numa sonda por roteiro (`BalanceProbe`). Falta: um humano jogar para calibrar
 
 ## 9. Riscos
 

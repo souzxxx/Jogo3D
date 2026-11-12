@@ -35,9 +35,16 @@ A corrupção é "bonita, mas errada": ela ilumina e aquece, e por isso ninguém
 
 ### O herói
 
-Um aprendiz que domina um único elemento, escolhido pelo jogador no início. Sozinho, um elemento só reforça o desequilíbrio. O caminho dele é despertar os outros três nos **Santuários** e aprender a usá-los juntos.
+Quatro aprendizes, cada um nascido de um elemento. O jogador escolhe um no início. Sozinho, um elemento só reforça o desequilíbrio: o caminho é despertar os outros três nos **Santuários** e aprender a usá-los juntos.
 
-**[planejado]** trocar o mago do pack pelos quatro heróis do Quintessence 2D (Rax, Liora, Brann e Vey), um por elemento.
+| Herói | Quem é | Elemento e primeira skill | Passiva |
+|---|---|---|---|
+| **Rax** | Felino caçador, garras | Fogo · Labareda | Garras do Caçador: combo básico +15% |
+| **Liora** | Espírito cervo-raposa, orbe d'água | Água · Maré | Seiva da Fonte: cura 6% ao limpar a sala; a Maré cura mais 3% |
+| **Brann** | Texugo veterano, martelo de pedra | Terra · Pilar de Pedra | Couro Velho: +20 de vida máxima |
+| **Vey** | Espírito do vento encapuzado, sem pernas, duas adagas | Ar · Vendaval | Passo de Brisa: +10% de velocidade, dash 20% mais rápido |
+
+São os heróis do Quintessence 2D. No 3D usam os corpos e as animações do pack com cabeça, cauda e arma próprias. A parte mágica de cada um (crina, orbe, rachaduras do martelo, olhos e debrum) assume a cor da última skill usada.
 
 ### Quintessência
 
@@ -101,11 +108,13 @@ Uma skill deixa no inimigo a **marca** do elemento dela. Acertar esse inimigo co
 
 ### A run
 
-- Mapa ramificado de 8 camadas. Depois de cada sala, de uma a três portas mostram o tipo da próxima sala e a recompensa.
-- **Combate:** 2 ondas. **Elite:** 3 ondas e um traço (Velozes, Resistentes ou Ferozes) anunciado na porta; paga o dobro de Essência e uma bênção.
+- Mapa ramificado de 10 camadas. Depois de cada sala, de uma a três portas mostram o tipo da próxima sala e a recompensa.
+- A descida atravessa três trechos, cada um com luz e cor de corrupção próprias: **Salões de Cinza**, **Cripta Afogada** e **Jardim de Pedra**. A última sala é o **Coração das Cinzas**.
+- **Combate:** 2 ondas (3 da sexta sala em diante). **Elite:** 3 ondas, um traço (Velozes, Resistentes ou Ferozes) anunciado na porta e um **Campeão** na última onda; paga o dobro de Essência e uma bênção.
 - **Santuário:** desperta um elemento à escolha. **Mestre:** uma de três bênçãos. **Loja:** poção, elixir e bênçãos por Essência. **Descanso:** cura 30%.
+- **Tesouro:** um baú com Essência e um gole de vida. **Pacto:** um ganho forte por um custo permanente, à escolha entre Sangue (+25% de dano, −20% de vida máxima), Vidro (skills 25% mais rápidas, recebe +25% de dano) e Ganância (toda a Essência por um talento). Dá para recusar.
 - **Chefe:** o Guardião das Cinzas, em três fases. Na última ele levanta um escudo que só a Quintessência quebra.
-- Seis arranjos de sala com cobertura e um respiradouro de brasa que fere quem pisa, herói ou inimigo.
+- Doze arranjos de sala com cobertura e três perigos que ferem herói e inimigo: respiradouro de brasa, armadilha de espinhos e barril de pólvora (qualquer golpe acende; fere bem mais os inimigos e acende os barris vizinhos).
 
 ### Inimigos
 
@@ -115,12 +124,16 @@ Uma skill deixa no inimigo a **marca** do elemento dela. Acertar esse inimigo co
 | Atirador | Projétil em linha, recua se você chega perto | Dash para fechar a distância |
 | Bruto | Armadura: leva 40% do dano | O Pilar de Pedra quebra a armadura |
 | Explosivo | Corre, avisa um círculo e explode | Sair do círculo; a explosão também fere os outros inimigos |
+| Ceifador | Avisa uma linha larga e atravessa a sala por ela | Sair da linha e bater enquanto ele se recupera |
+| Arremessador | Joga uma bomba onde o herói está | Sair do círculo avisado |
+| Xamã | Cura os aliados feridos em volta (aviso verde); sozinho, atira | Derrubar primeiro |
 
-Vida e dano sobem a cada camada (de 100% para 149% de vida, de 100% para 135% de dano). O tempo de aviso dos golpes nunca diminui.
+Os tipos entram aos poucos: Ceifador na segunda sala, Arremessador na quarta, Xamã na quinta. Vida e dano sobem a cada camada (9% de vida e 6,5% de dano por camada). O tempo de aviso dos golpes nunca diminui.
 
 ### Progressão
 
 - **Na run:** Essência (moeda da loja) e bênçãos (20 no catálogo; cada Mestre só oferece a do próprio elemento a quem já o despertou).
+- **Nível e talentos:** inimigo derrotado dá experiência. Cada nível oferece três talentos para escolher um, com a sala limpa. São 17: cinco de corpo (combo, finalizador, vida, recarga por abate, Essência) e três por skill, que só aparecem com o elemento desperto. Exemplos: Labareda deixa o chão em chamas; Maré congela; Pilar bloqueia mais um golpe e devolve dano; Vendaval dá pressa; +1 carga de dash. Bênçãos mudam números; talentos mudam o que as skills fazem.
 - **Entre runs:** Fragmentos, 3 por sala vencida e 15 por vencer o Guardião. No **Refúgio** compram cinco melhorias permanentes: Vigor (vida), Força (dano), Bolsa (Essência inicial), Foco (Quintessência) e Fôlego (cura por sala). O progresso é salvo no navegador.
 
 ### Estados e erros
@@ -203,6 +216,5 @@ Título com escolha do elemento inicial, Refúgio e Treino. Pausa com volumes e 
 ## O que falta
 
 - **[planejado]** Chefe com modelo e identidade próprios (hoje é um esqueleto do pack ampliado).
-- **[planejado]** Heróis do Quintessence 2D no lugar do mago do pack.
 - **[planejado]** Passada única de animação.
 - **[planejado]** Refúgio como sala 3D (hoje é um painel no título).
