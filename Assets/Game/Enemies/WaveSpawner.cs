@@ -75,6 +75,7 @@ namespace Quintessence.Enemies
         }
 
         public void SetAutoStart(bool value) => autoStart = value;
+        public void SetSpawnRadius(float radius) => spawnRadius = radius;
 
         public void Begin()
         {

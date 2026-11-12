@@ -2,10 +2,16 @@ using UnityEngine;
 
 namespace Quintessence.Core
 {
-    /// Limites da sala (20 x 16, centrada na origem) com folga. Quem sair daqui e trazido de volta.
+    /// Limites da sala (centrada na origem) com folga. Quem sair daqui e trazido de volta.
+    /// O padrao e a sala de 20 x 16; a run configura o tamanho dela ao abrir e volta ao padrao ao fechar.
     public static class Arena
     {
-        public const float HalfX = 10.6f, HalfZ = 8.6f, MinY = -1.5f, MaxY = 8f;
+        public const float DefaultHalfX = 10.6f, DefaultHalfZ = 8.6f, MinY = -1.5f, MaxY = 8f;
+        public static float HalfX { get; private set; } = DefaultHalfX;
+        public static float HalfZ { get; private set; } = DefaultHalfZ;
+
+        public static void Configure(float halfX, float halfZ) { HalfX = Mathf.Max(4f, halfX); HalfZ = Mathf.Max(4f, halfZ); }
+        public static void ResetSize() { HalfX = DefaultHalfX; HalfZ = DefaultHalfZ; }
 
         public static bool Contains(Vector3 p) =>
             Mathf.Abs(p.x) <= HalfX && Mathf.Abs(p.z) <= HalfZ && p.y >= MinY && p.y <= MaxY && !float.IsNaN(p.x + p.y + p.z);
