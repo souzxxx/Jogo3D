@@ -109,6 +109,8 @@ namespace Quintessence.UI
                 {
                     var rankText = UiKit.Text(UiKit.Rect("Rank", card, new Vector2(0.5f, 1), new Vector2(0, -350), new Vector2(330, 26)), rankLine, 18,
                         syn.Contains("!") ? new Color(0.9f, 0.76f, 0.42f) : UiKit.Dim, TextAnchor.MiddleCenter, false);
+                    // o encolher so funciona com quebra de linha ligada (texto que transborda nao encolhe)
+                    rankText.horizontalOverflow = HorizontalWrapMode.Wrap; rankText.verticalOverflow = VerticalWrapMode.Truncate;
                     rankText.resizeTextForBestFit = true; rankText.resizeTextMinSize = 12; rankText.resizeTextMaxSize = 18;
                 }
                 var b = UiKit.Button(card, $"Escolher  [{i + 1}]", new Vector2(0.5f, 0), new Vector2(0, 26), new Vector2(300, 60), UiKit.Primary, () => pick(index));

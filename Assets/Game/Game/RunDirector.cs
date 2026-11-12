@@ -863,7 +863,7 @@ namespace Quintessence.Game
         void OnDied(Health target, DamageInfo info)
         {
             // quem desmorona no fim do Cerco (fonte = spawner) nao conta como abate do heroi
-            bool collapsed = spawner != null && info.Source == spawner.gameObject;
+            bool collapsed = info.NoCredit;
             if (target != playerHealth && target.Team == Team.Enemy && Run != null && !Finished && !collapsed
                 && (target.GetComponent<EnemyBrain>() != null || target.GetComponent<BossBrain>() != null)) GrantKillXp(target);
             if (target == playerHealth && !Finished) { KilledBy = KillerName(info.Source); StartCoroutine(Finish(false)); }
