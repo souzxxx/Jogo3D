@@ -25,6 +25,16 @@ namespace Quintessence.Run
             _ => "",
         };
 
+        /// Como o heroi golpeia (o kit em si mora no combate; aqui fica o texto para os menus).
+        public static string Style(ElementType e) => e switch
+        {
+            ElementType.Fire => "Garras: golpes curtos e rápidos",
+            ElementType.Water => "Chicote: alcança longe, numa faixa estreita",
+            ElementType.Earth => "Martelo: lento, largo e pesado",
+            ElementType.Air => "Adagas: o mais rápido, mais crítico",
+            _ => "",
+        };
+
         public static void Apply(ElementType hero, HeroModifiers m)
         {
             switch (hero)
