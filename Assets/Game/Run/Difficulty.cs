@@ -3,7 +3,7 @@ using System;
 namespace Quintessence.Run
 {
     /// O que deixa uma sala de Elite diferente: os inimigos ganham um traco, alem de virem em tres ondas.
-    public enum EliteModifier { None, Swift, Sturdy, Fierce, Volatile, Warded }
+    public enum EliteModifier { None, Swift, Sturdy, Fierce, Volatile, Warded, Splitting }
 
     /// Multiplicadores aplicados aos inimigos de uma sala. 1 = como esta na ficha do inimigo.
     public struct Difficulty
@@ -13,6 +13,8 @@ namespace Quintessence.Run
         public bool Volatile;
         /// Golpes que cada inimigo bloqueia ao nascer.
         public int Wards;
+        /// Ao cair, vira dois Cinzentos (Elite Divisores).
+        public bool Splits;
         public static Difficulty Base => new() { Health = 1f, Damage = 1f, Speed = 1f, Cooldown = 1f, Size = 1f };
     }
 
@@ -42,6 +44,7 @@ namespace Quintessence.Run
                 case EliteModifier.Fierce: d.Damage *= FierceDamage; break;
                 case EliteModifier.Volatile: d.Volatile = true; break;
                 case EliteModifier.Warded: d.Wards = 1; d.Health *= 1.15f; break;
+                case EliteModifier.Splitting: d.Splits = true; d.Health *= 0.85f; break;
             }
             return d;
         }
@@ -53,7 +56,7 @@ namespace Quintessence.Run
             {
                 uint h = (uint)seed * 2654435761u ^ (uint)(nodeId + 1) * 40503u;
                 h ^= h >> 13; h *= 2246822519u; h ^= h >> 16;
-                return (EliteModifier)(1 + h % 5);
+                return (EliteModifier)(1 + h % 6);
             }
         }
 
@@ -64,6 +67,7 @@ namespace Quintessence.Run
             EliteModifier.Fierce => "Ferozes",
             EliteModifier.Volatile => "Voláteis",
             EliteModifier.Warded => "Protegidos",
+            EliteModifier.Splitting => "Divisores",
             _ => "",
         };
 
@@ -74,6 +78,7 @@ namespace Quintessence.Run
             EliteModifier.Fierce => "causam 20% mais dano",
             EliteModifier.Volatile => "explodem ao morrer: saia do círculo",
             EliteModifier.Warded => "o primeiro golpe em cada um é bloqueado",
+            EliteModifier.Splitting => "ao cair, cada um vira dois Cinzentos: área resolve",
             _ => "",
         };
     }

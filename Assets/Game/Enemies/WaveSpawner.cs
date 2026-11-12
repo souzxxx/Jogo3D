@@ -39,6 +39,9 @@ namespace Quintessence.Enemies
         /// A ultima onda traz um Campeao: um inimigo maior, com mais que o dobro de vida, que paga mais.
         public bool Champion { get; set; }
         public Health LastChampion { get; private set; }
+        /// O que nasce quando um Divisor cai (Cinzento). A run define.
+        public GameObject SplitPrefab { get; set; }
+        public int Splits { get; private set; }
         [Tooltip("Segundos de luta sem ninguem levar dano ate os inimigos serem trazidos para perto do heroi.")]
         [SerializeField] float stallSeconds = 25f;
         StallTimer stall;
@@ -115,6 +118,8 @@ namespace Quintessence.Enemies
                     bool champion = Champion && index == waves.Count - 1 && k == 1;
                     var keep = Scaling;
                     if (champion) Scaling = new EnemyScaling { Health = keep.Health * 1.7f, Damage = keep.Damage * 1.15f, Speed = keep.Speed, Cooldown = keep.Cooldown, Size = keep.Size * 1.3f };
+                    // o Cinzento e o que nasce de um Divisor: ele mesmo nunca se divide
+                    else if (keep.Splits && entry.prefab == SplitPrefab) { var small = keep; small.Splits = false; Scaling = small; }
                     var go = Instantiate(entry.prefab, pos, Quaternion.identity, transform);
                     Scaling = keep;
                     if (champion)
@@ -130,6 +135,25 @@ namespace Quintessence.Enemies
                     }
                     go.GetComponent<Health>().Died += _ => State.NotifyDeath();
                 }
+        }
+
+        /// Um Divisor caiu: nascem count Cinzentos em volta do corpo, que contam para a onda e nao se dividem de novo.
+        public void SpawnSplit(Vector3 at, int count)
+        {
+            if (SplitPrefab == null || State == null || State.Cleared) return;
+            State.AddAlive(count);
+            var keep = Scaling;
+            var child = keep; child.Splits = false; child.Volatile = false;
+            Scaling = child;
+            for (int i = 0; i < count; i++)
+            {
+                var p = at + Quaternion.Euler(0, 360f * i / count + 30f, 0) * Vector3.forward * 0.9f;
+                if (NavMesh.SamplePosition(p, out var hit, 2f, NavMesh.AllAreas)) p = hit.position;
+                var go = Instantiate(SplitPrefab, p, Quaternion.identity, transform);
+                go.GetComponent<Health>().Died += _ => State.NotifyDeath();
+                Splits++;
+            }
+            Scaling = keep;
         }
 
         Vector3 PickPoint(float angle)

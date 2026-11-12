@@ -1645,6 +1645,25 @@ namespace Quintessence.Game.PlayTests
             Assert.IsNotNull(Object.FindFirstObjectByType<VolatileBurst>(), "o Volatil deixa o circulo");
             for (int k = 0; k < 3000 && blasts == 0; k++) yield return null; // a camera lenta do abate dura muitos quadros no teste
             Assert.Greater(blasts, 0, "e o circulo explode");
+
+            // Divisores: quem cai vira dois Cinzentos, que contam para a onda e nao se dividem de novo
+            foreach (var e in Object.FindObjectsByType<EnemyBrain>(FindObjectsSortMode.None)) Object.Destroy(e.gameObject);
+            foreach (var b in Object.FindObjectsByType<VolatileBurst>(FindObjectsSortMode.None)) Object.Destroy(b.gameObject);
+            yield return null;
+            director.StartEncounter(RoomType.Elite, 4, EliteModifier.Splitting);
+            for (int k = 0; k < 90 && Object.FindObjectsByType<EnemyBrain>(FindObjectsSortMode.None).Length == 0; k++) yield return null;
+            for (int k = 0; k < 25; k++) yield return null;
+            var splitSpawner = Object.FindFirstObjectByType<WaveSpawner>();
+            var splitter = Object.FindObjectsByType<EnemyBrain>(FindObjectsSortMode.None).First(e => e.Definition.attack != EnemyAttackKind.Explode && e.GetComponent<Champion>() == null && e.Definition.displayName != "Cinzento");
+            Assert.IsTrue(splitter.Scaling.Splits);
+            int aliveBefore = splitSpawner.State.Alive;
+            splitter.GetComponent<Health>().TakeDamage(new DamageInfo(9999f, ElementType.None, Team.Player));
+            yield return null;
+            Assert.AreEqual(2, splitSpawner.Splits, "o Divisor vira dois");
+            Assert.AreEqual(aliveBefore + 1, splitSpawner.State.Alive, "a onda conta os dois (um caiu, dois nasceram)");
+            var babies = Object.FindObjectsByType<EnemyBrain>(FindObjectsSortMode.None).Where(e => e.Definition.displayName == "Cinzento" && !e.GetComponent<Health>().IsDead).ToList();
+            Assert.GreaterOrEqual(babies.Count, 2);
+            Assert.IsFalse(babies.Any(b => b.Scaling.Splits), "os Cinzentos nao se dividem de novo");
             GameFlow.Layers = 8; GameFlow.Shrines = 3;
             Time.captureFramerate = 0;
         }

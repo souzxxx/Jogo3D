@@ -42,7 +42,7 @@ Quatro aprendizes, cada um nascido de um elemento. O jogador escolhe um no iníc
 | **Rax** | Felino caçador, garras | Fogo · Labareda | Garras do Caçador: combo básico +15% |
 | **Liora** | Espírito cervo-raposa, orbe d'água | Água · Maré | Seiva da Fonte: cura 8% ao limpar a sala; a Maré cura mais 3% |
 | **Brann** | Texugo veterano, martelo de pedra | Terra · Pilar de Pedra | Couro Velho: +20 de vida máxima |
-| **Vey** | Espírito do vento encapuzado, sem pernas, duas adagas | Ar · Vendaval | Passo de Brisa: +10% de velocidade, dash 20% mais rápido |
+| **Vey** | Espírito do vento encapuzado, sem pernas, duas adagas | Ar · Vendaval | Passo de Brisa: +10% de velocidade, dash 20% mais rápido, 20% de esquiva e +10 de vida |
 
 São os heróis do Quintessence 2D. No 3D usam os corpos e as animações do pack com cabeça, cauda e arma próprias. A parte mágica de cada um (crina, orbe, rachaduras do martelo, olhos e debrum) assume a cor da última skill usada.
 
@@ -112,7 +112,7 @@ Uma skill deixa no inimigo a **marca** do elemento dela. Acertar esse inimigo co
 
 - Mapa ramificado de 10 camadas. Depois de cada sala, de uma a três portas mostram o tipo da próxima sala e a recompensa.
 - A descida atravessa três trechos, cada um com luz, cor da pedra e da corrupção, adereços e mistura de inimigos próprios: **Salões de Cinza** (forja: braseiros, bigornas, vigas queimadas), **Cripta Afogada** (sarcófagos, urnas, água parada; mais inimigos de longe) e **Jardim de Pedra** (árvores petrificadas, cogumelos, cervo de pedra; mais inimigos pesados). A última sala é o **Coração das Cinzas** (obelisco de brasa e cristais âmbar).
-- **Combate:** 2 ondas (3 da sexta sala em diante). **Elite:** 3 ondas, um traço anunciado na porta (Velozes, Resistentes, Ferozes, Voláteis, que explodem ao morrer, ou Protegidos, que bloqueiam o primeiro golpe) e um **Campeão** na última onda (da sexta sala em diante, no lugar dele vem o **Carrasco**, um mini-chefe em três fases sem escudo); paga o dobro de Essência e uma bênção.
+- **Combate:** 2 ondas (3 da sexta sala em diante). **Elite:** 3 ondas, um traço anunciado na porta (Velozes, Resistentes, Ferozes, Voláteis, que explodem ao morrer, Protegidos, que bloqueiam o primeiro golpe, ou Divisores, que ao cair viram dois Cinzentos) e um **Campeão** na última onda (da sexta sala em diante, no lugar dele vem o **Carrasco**, um mini-chefe em três fases sem escudo); paga o dobro de Essência e uma bênção.
 - **Santuário:** desperta um elemento à escolha ou **aprofunda uma skill que já tem** (graus II e III: +30% de dano e recarga 10% menor cada). É a escolha entre espalhar (mais reações) e concentrar. **Mestre:** uma de três bênçãos. **Loja:** poção, elixir e bênçãos por Essência. **Descanso:** cura 30%.
 - **Provação:** sala de luta comum com um desafio sorteado no letreiro: **Contra o relógio** (limpar em 60 s com duas ondas, 84 s com três) ou **Ileso** (tomar no máximo três golpes; golpes no mesmo instante contam um). Cumprida, dá um talento extra e 15 de Essência; perdida, a sala segue normal e só o prêmio some. Aparece da terceira camada em diante, no máximo uma por camada.
 - **Tesouro:** um baú com Essência e um gole de vida. **Pacto:** três pactos sorteados entre cinco, cada um com um ganho forte e um custo permanente: Sangue (+25% de dano, −20% de vida máxima), Vidro (skills 25% mais rápidas, recebe +25% de dano), Ganância (toda a Essência por um talento), Eco (reações +30%, −15% de vida máxima) e Pressa (mais velocidade e dash, recebe +15% de dano). Dá para recusar.

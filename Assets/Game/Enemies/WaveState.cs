@@ -37,5 +37,8 @@ namespace Quintessence.Enemies
         }
 
         public void NotifyDeath() { if (alive > 0) alive--; }
+
+        /// Inimigos que nascem no meio da onda (Divisores): a sala so limpa quando eles caem tambem.
+        public void AddAlive(int count) { if (count > 0 && !Cleared) alive += count; }
     }
 }

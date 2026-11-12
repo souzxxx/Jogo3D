@@ -98,5 +98,22 @@ namespace Quintessence.Enemies.Tests
             Assert.AreEqual(1, w.Tick(0.1f));
             Assert.AreEqual(1, w.Alive);
         }
+
+        [Test] public void WaveState_CountsEnemiesBornMidWave()
+        {
+            var w = new WaveState(new[] { 2 }, 0f);
+            w.Start();
+            Assert.AreEqual(0, w.Tick(0.1f));
+            w.NotifyDeath();
+            w.AddAlive(2); // um Divisor caiu e virou dois
+            w.NotifyDeath();
+            Assert.AreEqual(-1, w.Tick(0.1f));
+            Assert.IsFalse(w.Cleared, "ainda ha dois vivos");
+            w.NotifyDeath(); w.NotifyDeath();
+            w.Tick(0.1f);
+            Assert.IsTrue(w.Cleared);
+            w.AddAlive(3);
+            Assert.AreEqual(0, w.Alive, "sala limpa nao reabre");
+        }
     }
 }

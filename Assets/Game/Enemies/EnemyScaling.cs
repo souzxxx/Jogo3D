@@ -8,6 +8,8 @@ namespace Quintessence.Enemies
         public bool Volatile;
         /// Golpes bloqueados ao nascer (Elite Protegidos).
         public int Wards;
+        /// Ao cair, vira dois Cinzentos (Elite Divisores). Os Cinzentos nao se dividem.
+        public bool Splits;
         public static EnemyScaling None => new() { Health = 1f, Damage = 1f, Speed = 1f, Cooldown = 1f, Size = 1f };
     }
 }

@@ -83,7 +83,7 @@ namespace Quintessence.Run.Tests
                 Assert.IsNotEmpty(DifficultyCurve.Name(m));
                 Assert.IsNotEmpty(DifficultyCurve.Describe(m));
             }
-            Assert.AreEqual(5, seen.Count);
+            Assert.AreEqual(6, seen.Count, "os seis tracos saem");
         }
 
         [Test]
