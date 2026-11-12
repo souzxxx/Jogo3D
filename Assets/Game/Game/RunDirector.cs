@@ -100,8 +100,12 @@ namespace Quintessence.Game
         public void BindMiniBoss(GameObject prefab) => miniBossPrefab = prefab;
         [SerializeField] GameObject cryptMiniBossPrefab;
         public void BindCryptMiniBoss(GameObject prefab) => cryptMiniBossPrefab = prefab;
-        /// Mini-chefe das Elites do trecho: na Cripta, a Sacerdotisa Afogada; nos outros, o Carrasco.
-        public GameObject MiniBossFor(Biome biome) => biome == Biome.Crypt && cryptMiniBossPrefab != null ? cryptMiniBossPrefab : miniBossPrefab;
+        [SerializeField] GameObject gardenMiniBossPrefab;
+        public void BindGardenMiniBoss(GameObject prefab) => gardenMiniBossPrefab = prefab;
+        /// Mini-chefe das Elites do trecho: Cripta = Sacerdotisa Afogada, Jardim = Colosso de Pedra, Saloes = Carrasco.
+        public GameObject MiniBossFor(Biome biome) =>
+            biome == Biome.Crypt && cryptMiniBossPrefab != null ? cryptMiniBossPrefab
+            : biome == Biome.Garden && gardenMiniBossPrefab != null ? gardenMiniBossPrefab : miniBossPrefab;
         Biome encounterBiome = Biome.Ashes;
         public void BindElementals(GameObject swarm, GameObject ember, GameObject sentinel) { swarmPrefab = swarm; emberPrefab = ember; sentinelPrefab = sentinel; }
         public void BindGuard(GameObject guard) => guardPrefab = guard;

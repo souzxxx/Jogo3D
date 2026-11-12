@@ -213,7 +213,7 @@ namespace Quintessence.UI
                 ("Espectro", "Avisa um círculo nas suas costas e aparece ali. Não fique parado.", foe),
                 ("Cinzentos", "Bando pequeno e rápido. Skills de área resolvem.", foe),
                 ("Elementais", "Brasa Viva (Fogo), Afogado (Água) e Sentinela (Terra).", foe),
-                ("Campeão e chefes", "Elites: Carrasco ou Sacerdotisa. Fim: Guardião, Tecelã ou Rainha.", gold),
+                ("Campeão e chefes", "Elites: Carrasco, Sacerdotisa, Colosso. Fim: Guardião, Tecelã, Rainha.", gold),
             }, 49);
             Column(1130, "REAÇÕES", new (string, string, Color)[]
             {

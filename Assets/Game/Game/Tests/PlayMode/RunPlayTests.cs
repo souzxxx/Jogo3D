@@ -1273,8 +1273,29 @@ namespace Quintessence.Game.PlayTests
             Object.FindFirstObjectByType<WaveSpawner>().enabled = false;
             for (int k = 0; k < 2000 && director.Busy; k++) yield return null;
             Assert.AreEqual("Sacerdotisa", director.MiniBossFor(Biome.Crypt).name, "na Cripta, a Sacerdotisa");
-            Assert.AreEqual("Carrasco", director.MiniBossFor(Biome.Ashes).name, "nos outros trechos, o Carrasco");
-            Assert.AreEqual("Carrasco", director.MiniBossFor(Biome.Garden).name);
+            Assert.AreEqual("Carrasco", director.MiniBossFor(Biome.Ashes).name, "nos Saloes, o Carrasco");
+            Assert.AreEqual("Colosso", director.MiniBossFor(Biome.Garden).name, "no Jardim, o Colosso de Pedra");
+            var colossus = Object.Instantiate(director.MiniBossFor(Biome.Garden), new Vector3(6f, 0, 3f), Quaternion.Euler(0, 180, 0)).GetComponent<BossBrain>();
+            Assert.AreEqual(ElementType.Earth, colossus.Definition.element);
+            Assert.IsFalse(colossus.Definition.lastPhaseShield, "mini-chefe nao tem o escudo final");
+            Assert.IsTrue(colossus.GetComponentsInChildren<Transform>(true).Any(t => t.name == "Skeleton_Shield_Large_B"), "escudo e machado do pack");
+            {
+                colossus.enabled = false;
+                var follow = cam.GetComponent<FollowCamera>();
+                if (follow != null) follow.enabled = false;
+                var at = colossus.transform.position;
+                float fov = cam.fieldOfView;
+                cam.transform.position = at + new Vector3(2.5f, 4f, -8.5f);
+                cam.transform.LookAt(at + Vector3.up * 2f);
+                cam.fieldOfView = 40f;
+                hud.ShowBanner("", "", Color.clear, 0.01f);
+                for (int k = 0; k < 4; k++) yield return null;
+                Shot(cam, "docs/img/colosso.png");
+                cam.fieldOfView = fov;
+                if (follow != null) follow.enabled = true;
+            }
+            Object.Destroy(colossus.gameObject);
+            yield return null;
             var hero = Object.FindFirstObjectByType<PlayerController>();
             hero.GetComponent<Health>().Pool.Invulnerable = true;
             hero.Teleport(new Vector3(0, 0.05f, -2f), Vector3.forward);
