@@ -7,6 +7,7 @@ namespace Quintessence.Feel
     {
         Vector3 from, to;
         float duration, t, height;
+        Material material;
 
         public static LobbedBomb Spawn(Vector3 from, Vector3 to, float duration, Material flat)
         {
@@ -17,6 +18,7 @@ namespace Quintessence.Feel
             var m = new Material(flat) { color = new Color(0.16f, 0.14f, 0.15f) };
             go.GetComponent<Renderer>().material = m;
             var b = go.AddComponent<LobbedBomb>();
+            b.material = m;
             b.from = from; b.to = to; b.duration = Mathf.Max(0.1f, duration);
             b.height = 2.5f + Vector3.Distance(from, to) * 0.25f;
             go.transform.position = from;
@@ -33,5 +35,7 @@ namespace Quintessence.Feel
             transform.Rotate(360f * Time.deltaTime, 200f * Time.deltaTime, 0f);
             if (k >= 1f) Destroy(gameObject);
         }
+
+        void OnDestroy() { if (material != null) Destroy(material); }
     }
 }
