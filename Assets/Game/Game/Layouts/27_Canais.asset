@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e2ca81051d317428ea372b142d2aa5d1, type: 3}
+  m_Name: 27_Canais
+  m_EditorClassIdentifier: Quintessence.Game::Quintessence.Game.RoomLayout
+  displayName: Canais
+  pieces:
+  - prefab: {fileID: 2975407918271604318, guid: 6dfedd868214a4e1bb5cc6bf442ed60f, type: 3}
+    position: {x: -3.4, y: 0, z: 1.2}
+    rotation: 90
+  - prefab: {fileID: 2975407918271604318, guid: 6dfedd868214a4e1bb5cc6bf442ed60f, type: 3}
+    position: {x: 3.4, y: 0, z: 1.2}
+    rotation: 90
+  - prefab: {fileID: 4187731875860395566, guid: 56ae20eb1792b41b7b66b9d726e1599e, type: 3}
+    position: {x: 0, y: 0, z: 3.6}
+    rotation: 0
+  - prefab: {fileID: 4187731875860395566, guid: 56ae20eb1792b41b7b66b9d726e1599e, type: 3}
+    position: {x: -7, y: 0, z: -2.8}
+    rotation: 0
+  - prefab: {fileID: 4187731875860395566, guid: 56ae20eb1792b41b7b66b9d726e1599e, type: 3}
+    position: {x: 7, y: 0, z: -2.8}
+    rotation: 0
+  biomes: 01000000i

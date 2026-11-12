@@ -198,14 +198,18 @@ namespace Quintessence.Game
         public string CurrentLayout { get; private set; } = "";
 
         /// Layout da sala: a primeira sala da run so sorteia entre os sem perigo (so cobertura e barris).
+        /// Arranjo da sala: os do trecho pesam o triplo, os de outro trecho ficam de fora; a primeira sala nao tem perigo.
         int PickLayout(MapNode node)
         {
-            if (node.Layer > 0) return LayoutPicker.Pick(GameFlow.Seed, node.Id, layouts.Length);
-            var safe = new List<int>();
-            for (int i = 0; i < layouts.Length; i++) if (layouts[i] != null && !layouts[i].HasHazard) safe.Add(i);
-            if (safe.Count == 0) return LayoutPicker.Pick(GameFlow.Seed, node.Id, layouts.Length);
-            return safe[LayoutPicker.Pick(GameFlow.Seed, node.Id, safe.Count)];
+            var biome = Biomes.For(node.Layer, Run.Map.LayerCount);
+            var weights = new int[layouts.Length];
+            for (int i = 0; i < layouts.Length; i++)
+                weights[i] = layouts[i] == null || (node.Layer == 0 && layouts[i].HasHazard) ? 0 : layouts[i].WeightFor(biome);
+            int pick = LayoutPicker.PickWeighted(GameFlow.Seed, node.Id, weights);
+            return pick >= 0 ? pick : LayoutPicker.Pick(GameFlow.Seed, node.Id, layouts.Length);
         }
+        /// Indice do arranjo com este nome (-1 se nao houver). Para os testes e as capturas.
+        public int LayoutIndex(string displayName) => System.Array.FindIndex(layouts, l => l != null && l.displayName == displayName);
         Transform layoutRoot;
 
         /// Troca o arranjo da sala. index < 0 = sala vazia. Publico para a cena de teste e as capturas.

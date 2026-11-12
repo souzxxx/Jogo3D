@@ -42,6 +42,24 @@ namespace Quintessence.Game.Tests
             Assert.IsFalse(LayoutPicker.UsesLayout(RoomType.Shrine));
             Assert.IsFalse(LayoutPicker.UsesLayout(RoomType.Master));
         }
+
+        [Test] public void WeightedPick_RespectsZeroAndProportion()
+        {
+            Assert.AreEqual(-1, LayoutPicker.PickWeighted(1, 1, new[] { 0, 0 }));
+            Assert.AreEqual(-1, LayoutPicker.PickWeighted(1, 1, new int[0]));
+            var weights = new[] { 1, 0, 3, 0 };
+            var count = new int[4];
+            for (int seed = 0; seed < 400; seed++)
+                for (int node = 0; node < 10; node++)
+                {
+                    int i = LayoutPicker.PickWeighted(seed, node, weights);
+                    Assert.AreEqual(i, LayoutPicker.PickWeighted(seed, node, weights), "deterministico");
+                    count[i]++;
+                }
+            Assert.AreEqual(0, count[1]); Assert.AreEqual(0, count[3], "peso zero nunca sai");
+            float ratio = count[2] / (float)count[0];
+            Assert.That(ratio, Is.InRange(2.4f, 3.7f), "peso 3 sai cerca de tres vezes mais que peso 1");
+        }
     }
 
     /// Confere os assets de layout de verdade: nada bloqueia a entrada, as portas ou sai da sala.
@@ -51,6 +69,24 @@ namespace Quintessence.Game.Tests
             .Select(g => AssetDatabase.LoadAssetAtPath<RoomLayout>(AssetDatabase.GUIDToAssetPath(g))).ToList();
 
         [Test] public void ThereAreAtLeastSixLayouts() => Assert.GreaterOrEqual(All().Count, 6);
+
+        [Test] public void EveryStretchHasLayoutsOfItsOwn_ThatStayOutOfTheOthers()
+        {
+            var all = All();
+            foreach (var b in new[] { Biome.Ashes, Biome.Crypt, Biome.Garden })
+            {
+                var home = all.Where(l => l.biomes != null && l.biomes.Contains(b)).ToList();
+                Assert.GreaterOrEqual(home.Count, 1, Biomes.Name(b) + " tem arranjo proprio");
+                foreach (var l in home)
+                {
+                    Assert.AreEqual(3, l.WeightFor(b), l.displayName);
+                    foreach (var other in new[] { Biome.Ashes, Biome.Crypt, Biome.Garden }.Where(o => !l.biomes.Contains(o)))
+                        Assert.AreEqual(0, l.WeightFor(other), l.displayName + " fora de " + Biomes.Name(other));
+                }
+            }
+            Assert.GreaterOrEqual(all.Count(l => l.biomes == null || l.biomes.Count == 0), 20, "a maioria vale para qualquer trecho");
+            Assert.AreEqual(1, all.First(l => l.biomes == null || l.biomes.Count == 0).WeightFor(Biome.Crypt));
+        }
 
         [Test] public void EveryLayoutHasNamedPiecesWithPrefabs()
         {

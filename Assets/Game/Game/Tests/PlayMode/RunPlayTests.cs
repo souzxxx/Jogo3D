@@ -902,6 +902,57 @@ namespace Quintessence.Game.PlayTests
             Time.captureFramerate = 0;
         }
 
+        [UnityTest, Timeout(300000)]
+        public IEnumerator Stretch_Layouts_Are_Built_And_Walkable()
+        {
+            GameEvents.Clear();
+            Time.timeScale = 1f;
+            Time.captureFramerate = 30;
+            GameFlow.StartElement = ElementType.Earth;
+            GameFlow.Seed = 3; GameFlow.Layers = 5; GameFlow.Shrines = 1;
+            yield return EditorSceneManager.LoadSceneAsyncInPlayMode("Assets/Scenes/Run.unity", new LoadSceneParameters(LoadSceneMode.Single));
+            yield return null;
+            yield return null;
+            var director = Object.FindFirstObjectByType<RunDirector>();
+            var hud = Object.FindFirstObjectByType<Hud>();
+            cam = Camera.main;
+            hud.UseCamera(cam);
+            Object.FindFirstObjectByType<WaveSpawner>().enabled = false;
+            for (int k = 0; k < 2000 && director.Busy; k++) yield return null;
+            var hero = Object.FindFirstObjectByType<PlayerController>();
+            hero.GetComponent<Health>().Pool.Invulnerable = true;
+            var follow = cam.GetComponent<FollowCamera>();
+            if (follow != null) follow.enabled = false;
+            hud.HideTip();
+            var path = new UnityEngine.AI.NavMeshPath();
+            foreach (var (name, file, biome) in new[] { ("Forja", "forja", Biome.Ashes), ("Cisterna", "cisterna", Biome.Crypt), ("Canais", "canais", Biome.Crypt),
+                ("Bosque de Pedra", "bosque", Biome.Garden), ("Pedreira", "pedreira", Biome.Garden) })
+            {
+                int index = director.LayoutIndex(name);
+                Assert.GreaterOrEqual(index, 0, "falta o arranjo " + name);
+                director.DressBiome(biome);
+                director.ApplyLayout(index);
+                hero.Teleport(new Vector3(0, 0.05f, -7.5f), Vector3.forward);
+                for (int k = 0; k < 6; k++) yield return null;
+                // da entrada da sala da para chegar ao fundo, onde ficam as portas, e aos dois cantos de cima
+                foreach (var goal in new[] { new Vector3(0, 0, 8.5f), new Vector3(-12f, 0, 7.5f), new Vector3(12f, 0, 7.5f) })
+                {
+                    Assert.IsTrue(UnityEngine.AI.NavMesh.SamplePosition(goal, out var hit, 2f, UnityEngine.AI.NavMesh.AllAreas), name + ": chao perto de " + goal);
+                    Assert.IsTrue(UnityEngine.AI.NavMesh.CalculatePath(hero.transform.position, hit.position, UnityEngine.AI.NavMesh.AllAreas, path), name);
+                    Assert.AreEqual(UnityEngine.AI.NavMeshPathStatus.PathComplete, path.status, name + ": caminho ate " + goal);
+                }
+                cam.transform.position = new Vector3(0, 23f, -15f);
+                cam.transform.LookAt(new Vector3(0, 0, 0.6f));
+                hud.ShowBanner("", "", Color.clear, 0.01f);
+                for (int k = 0; k < 3; k++) yield return null;
+                Shot(cam, $"docs/img/arranjo_{file}.png");
+            }
+            if (follow != null) follow.enabled = true;
+            GameFlow.StartElement = ElementType.Fire;
+            GameFlow.Layers = 8; GameFlow.Shrines = 3;
+            Time.captureFramerate = 0;
+        }
+
         [UnityTest, Timeout(600000)]
         public IEnumerator Elementals_And_The_Swarm()
         {

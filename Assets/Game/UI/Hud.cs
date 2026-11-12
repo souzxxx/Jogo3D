@@ -382,6 +382,8 @@ namespace Quintessence.UI
         /// Dica curta no rodape, acima da barra de habilidades. Some sozinha.
         const float TipHigh = 330f, TipLow = 96f;
 
+        public void HideTip() { if (tipRoot != null) tipRoot.gameObject.SetActive(false); }
+
         public void ShowTip(string text, float seconds = 7f)
         {
             if (tipRoot == null)

@@ -591,6 +591,21 @@ public static class GameSceneBuilder
         Make("22_Galeria", "Galeria", (barrier, -5.5f, 2.4f, 30), (barrier, -1.8f, 0.2f, -30), (barrier, 1.8f, 2.4f, 30), (barrier, 5.5f, 0.2f, -30),
             (spikes, 3.6f, -2.6f, 0), (column, -6.8f, -3.6f, 0));
         Make("6_Cruz", "Cruz", (barrier, 0f, 2.6f, 0), (barrier, -4.2f, -0.8f, 90), (barrier, 4.2f, -0.8f, 90), (vent, -4.2f, 3.6f, 0), (vent, 4.2f, 3.6f, 0));
+        // arranjos de um trecho so: aparecem nele com o triplo de chance e nunca nos outros
+        void Home(RoomLayout layout, params Quintessence.Run.Biome[] biomes)
+        {
+            layout.biomes = new List<Quintessence.Run.Biome>(biomes);
+            EditorUtility.SetDirty(layout);
+        }
+        Home(Make("23_Forja", "Forja", (vent, -3.6f, 2.8f, 0), (vent, 3.6f, 2.8f, 0), (vent, -3.6f, -0.8f, 0), (vent, 3.6f, -0.8f, 0),
+            (barrier, 0f, 1f, 90), (powder, 0f, 3.8f, 0), (column, -7f, -3f, 0), (column, 7f, -3f, 0)), Quintessence.Run.Biome.Ashes);
+        Home(Make("24_Cisterna", "Cisterna", (pool, -4.6f, 2.4f, 0), (pool, 4.6f, 2.4f, 0), (pool, -4.6f, -1.8f, 0), (pool, 4.6f, -1.8f, 0),
+            (column, 0f, 0.4f, 0), (pillar, 0f, 3.8f, 0)), Quintessence.Run.Biome.Crypt);
+        Home(Make("25_Bosque", "Bosque de Pedra", (pillar, -6f, 2.8f, 0), (pillar, -2.4f, 3.4f, 0), (pillar, 2.2f, 2.6f, 0), (pillar, 6.2f, 3.2f, 0),
+            (pillar, -4.4f, 0f, 0), (pillar, 0.2f, 0.8f, 0), (pillar, 4.6f, -0.2f, 0), (pillar, -6.6f, -3f, 0), (pillar, 6.4f, -3.2f, 0), (rubble, -1.8f, -2.4f, 60)), Quintessence.Run.Biome.Garden);
+        Home(Make("26_Pedreira", "Pedreira", (rubble, -5f, 2.4f, 30), (rubble, -1f, 3.4f, 120), (rubble, 3.6f, 2f, 200), (rubble, 6.4f, -1f, 80),
+            (spikes, -3f, 0f, 0), (spikes, 2.4f, -0.8f, 0), (column, -6.8f, -3.2f, 0)), Quintessence.Run.Biome.Garden);
+        Home(Make("27_Canais", "Canais", (strip, -3.4f, 1.2f, 90), (strip, 3.4f, 1.2f, 90), (pillar, 0f, 3.6f, 0), (pillar, -7f, -2.8f, 0), (pillar, 7f, -2.8f, 0)), Quintessence.Run.Biome.Crypt);
         return list.ToArray();
     }
 
