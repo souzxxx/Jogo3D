@@ -89,7 +89,7 @@ namespace Quintessence.Run.Tests
             var offer = TalentCatalog.Offer(new TalentBook(), new[] { ElementType.Fire }, new System.Random(seed));
             Assert.AreEqual(3, offer.Count);
             Assert.AreEqual(3, offer.Select(t => t.Id).Distinct().Count());
-            foreach (var t in offer) Assert.IsTrue(t.Element == ElementType.None || t.Element == ElementType.Fire, t.Id);
+            foreach (var t in offer) Assert.IsTrue((t.Element == ElementType.None || t.Element == ElementType.Fire) && t.Second == ElementType.None, t.Id);
         }
 
         [Test] public void Talent_StopsBeingOffered_AtMaxRank()
@@ -139,11 +139,28 @@ namespace Quintessence.Run.Tests
             Assert.AreEqual("III", RunState.Roman(3));
         }
 
+        [Test] public void ReactionTalents_NeedBothElements_AndBoostOnlyTheirPair()
+        {
+            var pairs = TalentCatalog.All.Where(t => t.Effect == TalentEffect.ReactionBoost).ToList();
+            Assert.AreEqual(6, pairs.Count, "uma por reacao");
+            for (int seed = 1; seed < 60; seed++)
+            {
+                foreach (var t in TalentCatalog.Offer(new TalentBook(), new[] { ElementType.Fire, ElementType.Water }, new System.Random(seed)))
+                    if (t.Second != ElementType.None)
+                        Assert.AreEqual("react_steam", t.Id, "com Fogo e Agua, so o Vapor");
+            }
+            var m = new HeroModifiers();
+            TalentCatalog.Apply(m, TalentCatalog.Find("react_steam"));
+            Assert.AreEqual(1.4f, m.ReactionBonus(ElementType.Water, ElementType.Fire), 0.001f, "simetrico");
+            Assert.AreEqual(1f, m.ReactionBonus(ElementType.Fire, ElementType.Earth), 0.001f, "o Magma nao muda");
+        }
+
                 static string Dump(HeroModifiers m)
         {
             var sb = new System.Text.StringBuilder();
             foreach (var f in typeof(HeroModifiers).GetFields()) sb.Append(f.Name).Append('=').Append(f.GetValue(m)).Append(';');
             foreach (var e in Elements.All) sb.Append(m.Damage(e)).Append('|').Append(m.SkillRange(e)).Append('|').Append(m.SkillCooldown(e)).Append(';');
+            foreach (var a in Elements.All) foreach (var b in Elements.All) sb.Append(m.ReactionBonus(a, b)).Append(',');
             return sb.ToString();
         }
     }

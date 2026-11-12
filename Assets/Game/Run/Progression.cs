@@ -62,6 +62,7 @@ namespace Quintessence.Run
         WaterHeal, WaterFreeze, WaterCooldown,
         EarthBlocks, EarthRange, EarthThorns,
         AirDashCharge, AirRange, AirHaste,
+        ReactionBoost,
     }
 
     public class Talent
@@ -69,6 +70,10 @@ namespace Quintessence.Run
         public string Id, Name, Description;
         /// None = talento de corpo, sempre disponivel. Os de elemento so aparecem com o elemento desperto.
         public ElementType Element;
+        /// Talento de reacao: o segundo elemento do par. Aparece so com os dois despertos.
+        public ElementType Second;
+        /// Nome curto para o cartao (o da reacao, nos talentos de reacao).
+        public string Tag = "";
         public TalentEffect Effect;
         public float Value;
         public int MaxRank = 1;
@@ -125,6 +130,18 @@ namespace Quintessence.Run
 
             Add("air_dash", "Asas", "+1 carga de dash", ElementType.Air, TalentEffect.AirDashCharge, 1f, 1);
             Add("air_range", "Olho da Tormenta", "Vendaval atinge uma área 25% maior", ElementType.Air, TalentEffect.AirRange, 0.25f, 2);
+            void Pair(string id, string name, string reaction, ElementType a, ElementType b) =>
+                list.Add(new Talent
+                {
+                    Id = id, Name = name, Description = reaction + " causa +40% e pega uma área maior", Element = a, Second = b,
+                    Effect = TalentEffect.ReactionBoost, Value = 0.4f, MaxRank = 2, Tag = reaction,
+                });
+            Pair("react_storm", "Olho da Fornalha", "Tempestade de Fogo", ElementType.Fire, ElementType.Air);
+            Pair("react_steam", "Névoa Densa", "Vapor", ElementType.Fire, ElementType.Water);
+            Pair("react_magma", "Coração de Lava", "Magma", ElementType.Fire, ElementType.Earth);
+            Pair("react_mud", "Atoleiro", "Lama", ElementType.Water, ElementType.Earth);
+            Pair("react_blizzard", "Inverno Profundo", "Nevasca", ElementType.Water, ElementType.Air);
+            Pair("react_shards", "Chuva de Pedra", "Estilhaços", ElementType.Earth, ElementType.Air);
             Add("air_haste", "Corrente de Ar", "Depois do Vendaval, +35% de velocidade por 3 s", ElementType.Air, TalentEffect.AirHaste, 3f, 1);
             return list;
         }
@@ -133,6 +150,12 @@ namespace Quintessence.Run
         {
             foreach (var t in All) if (t.Id == id) return t;
             return null;
+        }
+
+        static bool Has(IReadOnlyList<ElementType> list, ElementType e)
+        {
+            foreach (var a in list) if (a == e) return true;
+            return false;
         }
 
         public static void Apply(HeroModifiers m, Talent t)
@@ -156,6 +179,7 @@ namespace Quintessence.Run
                 case TalentEffect.AirDashCharge: m.DashChargesAdd += (int)t.Value; break;
                 case TalentEffect.AirRange: m.AddSkillRange(ElementType.Air, t.Value); break;
                 case TalentEffect.AirHaste: m.AirHasteSeconds += t.Value; break;
+                case TalentEffect.ReactionBoost: m.AddReactionBonus(t.Element, t.Second, t.Value); break;
             }
         }
 
@@ -166,12 +190,8 @@ namespace Quintessence.Run
             foreach (var t in All)
             {
                 if (!book.CanTake(t)) continue;
-                if (t.Element != ElementType.None)
-                {
-                    bool has = false;
-                    foreach (var a in awakened) if (a == t.Element) has = true;
-                    if (!has) continue;
-                }
+                if (t.Element != ElementType.None && !Has(awakened, t.Element)) continue;
+                if (t.Second != ElementType.None && !Has(awakened, t.Second)) continue;
                 pool.Add(t);
             }
             var offer = new List<Talent>();

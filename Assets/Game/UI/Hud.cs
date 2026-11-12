@@ -51,7 +51,7 @@ namespace Quintessence.UI
 
         public bool LevelUpVisible => levelPanel != null && levelPanel.gameObject.activeSelf;
 
-        static string TalentIcon(Talent t) => t.Element != ElementType.None ? SkillIcon[(int)t.Element] : t.Effect switch
+        static string TalentIcon(Talent t) => t.Second != ElementType.None ? "boon_reaction" : t.Element != ElementType.None ? SkillIcon[(int)t.Element] : t.Effect switch
         {
             TalentEffect.MaxHealth => "boon_health",
             TalentEffect.Essence => "essence",
@@ -77,14 +77,15 @@ namespace Quintessence.UI
             {
                 var t = offer[i];
                 int index = i;
-                var c = t.Element == ElementType.None ? new Color(0.85f, 0.72f, 0.4f) : ElementColors.Of(t.Element);
+                var c = t.Element == ElementType.None ? new Color(0.85f, 0.72f, 0.4f)
+                    : t.Second != ElementType.None ? Color.Lerp(ElementColors.Of(t.Element), ElementColors.Of(t.Second), 0.5f) : ElementColors.Of(t.Element);
                 var card = UiKit.Box("Card" + i, levelPanel, center, new Vector2((i - (offer.Count - 1) / 2f) * 400f, -30), new Vector2(360, 470), 0.96f);
                 UiKit.Image(UiKit.Rect("Band", card, new Vector2(0.5f, 1), new Vector2(0, -8), new Vector2(344, 8)), null, c);
                 var disc = UiKit.Rect("Disc", card, new Vector2(0.5f, 1), new Vector2(0, -34), new Vector2(120, 120));
                 UiKit.Image(disc, UiKit.Circle, Color.Lerp(c, new Color(0.05f, 0.04f, 0.08f), 0.55f));
                 UiKit.Image(UiKit.Stretch("Ring", disc), UiKit.Ring, Color.Lerp(c, UiKit.Cream, 0.3f));
                 UiKit.Image(UiKit.Rect("Icon", disc, center, Vector2.zero, new Vector2(74, 74)), UiKit.Icon(TalentIcon(t)), UiKit.Cream);
-                string where = t.Element == ElementType.None ? "CORPO" : SkillName[(int)t.Element].ToUpperInvariant();
+                string where = t.Second != ElementType.None ? "REAÇÃO · " + t.Tag.ToUpperInvariant() : t.Element == ElementType.None ? "CORPO" : SkillName[(int)t.Element].ToUpperInvariant();
                 UiKit.Text(UiKit.Rect("Where", card, new Vector2(0.5f, 1), new Vector2(0, -168), new Vector2(330, 26)), where, 19, Color.Lerp(c, UiKit.Cream, 0.3f));
                 UiKit.Text(UiKit.Rect("Name", card, new Vector2(0.5f, 1), new Vector2(0, -198), new Vector2(330, 44)), t.Name, 32, UiKit.Cream);
                 var desc = UiKit.Text(UiKit.Rect("Desc", card, new Vector2(0.5f, 1), new Vector2(0, -250), new Vector2(310, 96)), t.Description, 23, UiKit.Paper, TextAnchor.MiddleCenter, false);
