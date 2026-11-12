@@ -223,7 +223,7 @@ public static class GameSceneBuilder
     static GameObject[] RoomDecors()
     {
         var warm = new Color(1f, 0.74f, 0.45f);
-        var list = new GameObject[9];
+        var list = new GameObject[11];
         // Descanso: acampamento com camas, mesa posta e barril
         list[3] = Decor("RestDecor", warm, new Vector3(0, 2.6f, 1f),
             ("bed_decorated", -7.6f, 2.6f, 90, 1f, 0f, true), ("bed_floor", -7.6f, -0.6f, 90, 1f, 0f, false), ("bed_floor", -7.6f, -2.6f, 80, 1f, 0f, false),
@@ -258,6 +258,20 @@ public static class GameSceneBuilder
             pact.Add((i % 2 == 0 ? "candle_thin_lit" : "candle_melted", Mathf.Sin(a) * 8.2f * 0.82f, -1.6f + Mathf.Cos(a) * 2.2f - 1.2f, i * 40f, 1f, 0f, false));
         }
         list[8] = Decor("PactDecor", new Color(0.8f, 0.35f, 0.45f), new Vector3(0, 2.8f, -1f), pact.ToArray());
+        // Provacao e Cerco tem luta e arranjo: so pecas presas a parede ou miudas junto dela, nada solido no meio
+        // Provacao: estandartes brancos, prateleiras de velas e castiçais (luz fria, sala de prova)
+        list[9] = Decor("TrialDecor", new Color(0.75f, 0.85f, 1f), new Vector3(0, 3f, 2f),
+            ("banner_shield_white", -9.3f, 3.2f, 90, 1f, 1.5f, false), ("banner_shield_white", 9.3f, 3.2f, -90, 1f, 1.5f, false),
+            ("shelf_small_candles", -9.3f, -1f, 90, 1f, 0.9f, false), ("shelf_small_candles", 9.3f, -1f, -90, 1f, 0.9f, false),
+            ("candle_triple", -9f, 1.2f, 0, 1f, 0f, false), ("candle_triple", 9f, 1.2f, 0, 1f, 0f, false),
+            ("candle_thin_lit", -9f, -3.6f, 0, 1f, 0f, false), ("candle_thin_lit", 9f, -3.6f, 0, 1f, 0f, false));
+        // Cerco: posto de guerra, escudos e espadas nas paredes, estandartes vermelhos e tochas (luz quente)
+        list[10] = Decor("SiegeDecor", new Color(1f, 0.55f, 0.3f), new Vector3(0, 3f, 1f),
+            ("sword_shield", -9.3f, 2.4f, 90, 1f, 1.5f, false), ("sword_shield", 9.3f, 2.4f, -90, 1f, 1.5f, false),
+            ("sword_shield_broken", -9.3f, -1.4f, 90, 1f, 1.5f, false), ("sword_shield_broken", 9.3f, -1.4f, -90, 1f, 1.5f, false),
+            ("banner_thin_red", -9.3f, 0.5f, 90, 1f, 1.6f, false), ("banner_thin_red", 9.3f, 0.5f, -90, 1f, 1.6f, false),
+            ("torch_lit", -9f, 4.2f, 0, 1f, 0f, false), ("torch_lit", 9f, 4.2f, 0, 1f, 0f, false),
+            ("keg", -9f, -4.4f, 30, 1f, 0f, false), ("keg", 9f, -4.4f, -20, 1f, 0f, false));
         return list;
     }
 
