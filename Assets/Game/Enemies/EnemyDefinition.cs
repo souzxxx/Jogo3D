@@ -6,7 +6,7 @@ namespace Quintessence.Enemies
     /// Explode: avisa um circulo em volta de si, explode (fere heroi e outros inimigos) e morre.
     /// Charge: avisa uma linha e corre por ela. Lob: avisa um circulo onde o heroi esta e a bomba cai ali.
     /// Heal: cura os aliados feridos em volta; sem ninguem para curar, atira.
-    public enum EnemyAttackKind { Melee, Projectile, Explode, Charge, Lob, Heal }
+    public enum EnemyAttackKind { Melee, Projectile, Explode, Charge, Lob, Heal, Ambush }
 
     /// Numeros de um tipo de inimigo.
     [CreateAssetMenu(menuName = "Quintessence/Enemy Definition")]

@@ -526,6 +526,25 @@ public static class EnemyDevSceneBuilder
         return prefab;
     }
 
+    /// Espectro: o esqueleto de capuz do pack, escurecido, com a lamina; some e reaparece nas costas do heroi.
+    public static GameObject ShadePrefab()
+    {
+        const string rogueFbx = KK + "Skeletons/Characters/Skeleton_Rogue.fbx";
+        var ctrl = CombatDevSceneBuilder.Controller(rogueFbx, Dir + "Animation/Espectro.controller",
+            ("Idle", "Idle_Combat|Idle", 0f), ("Run", "Running_B|Running_A", 0f), ("Attack", "1H_Melee_Attack_Stab|1H_Melee_Attack_Chop", 0.9f),
+            ("Hit", "Hit_A|Hit_B", 0.3f), ("Death", "Death_A|Death_B", 0f), ("Spawn", "Spawn_Ground|Skeletons_Awaken_Standing|Idle", 0.7f));
+        var def = Asset<EnemyDefinition>("Espectro", d =>
+        {
+            d.displayName = "Espectro"; d.maxHealth = 30; d.moveSpeed = 3.4f;
+            d.attack = EnemyAttackKind.Ambush; d.damage = 11; d.knockback = 6;
+            d.attackRange = 10f; d.telegraphTime = 0.95f; d.recoverTime = 0.7f; d.cooldown = 3.2f;
+            d.strikeRadius = 1.7f; d.keepDistance = 6f;
+        });
+        // capuz e osso escurecidos, um pouco frios: sombra, sem brilho
+        var shade = LookDevBuilder.Mat("SkeletonShade", KK + "Skeletons/Characters/skeleton_texture.png", new Color(0.42f, 0.4f, 0.52f), Color.black, 0f);
+        return EnemyPrefab("Espectro", "Skeletons/Characters/Skeleton_Rogue.fbx", def, ctrl, shade, 1f, "Skeleton_Blade", "handslot.r");
+    }
+
     /// Porta-Estandarte: esqueleto guerreiro do pack com o cajado na mao e um estandarte do pack nas costas.
     /// Fica atras do bando e atira de longe; enquanto vive, quem esta no circulo dele bate mais forte e anda mais rapido.
     public static GameObject BannerPrefab()

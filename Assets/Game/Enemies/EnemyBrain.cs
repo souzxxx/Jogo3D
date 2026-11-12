@@ -112,6 +112,19 @@ namespace Quintessence.Enemies
         float safetyCheck;
 
         FrontGuard guard;
+        /// Quantas vezes o Espectro apareceu nas costas do heroi (para os testes).
+        public int Ambushes { get; private set; }
+
+        /// Ponto nas costas do heroi, no chao navegavel e dentro da sala.
+        Vector3 AmbushPoint()
+        {
+            var t = target.transform;
+            var back = -t.forward; back.y = 0f;
+            if (back.sqrMagnitude < 0.01f) back = (transform.position - t.position).normalized;
+            var p = t.position + back.normalized * 1.6f;
+            if (!Arena.Contains(p)) p = t.position + (transform.position - t.position).normalized * 1.6f;
+            return NavMesh.SamplePosition(p, out var hit, 2f, NavMesh.AllAreas) ? hit.position : t.position;
+        }
 
         void OnDamaged(DamageInfo info, float applied)
         {
@@ -181,6 +194,8 @@ namespace Quintessence.Enemies
                         kind = healing ? EnemyAttackKind.Heal : EnemyAttackKind.Projectile;
                     }
                     if (kind == EnemyAttackKind.Lob && hasTarget) strikePoint = target.transform.position;
+                    // Espectro: avisa um circulo nas costas do heroi e aparece ali no fim do aviso
+                    if (kind == EnemyAttackKind.Ambush && hasTarget) strikePoint = AmbushPoint();
                     if (kind == EnemyAttackKind.Heal) strikePoint = transform.position;
                     bool line = kind == EnemyAttackKind.Projectile || kind == EnemyAttackKind.Charge;
                     bool charge = kind == EnemyAttackKind.Charge;
@@ -228,7 +243,7 @@ namespace Quintessence.Enemies
 
             Vector3 goal = target.transform.position;
             bool stop = false;
-            if (definition.attack == EnemyAttackKind.Projectile || definition.attack == EnemyAttackKind.Lob || definition.attack == EnemyAttackKind.Heal)
+            if (definition.attack == EnemyAttackKind.Projectile || definition.attack == EnemyAttackKind.Lob || definition.attack == EnemyAttackKind.Heal || definition.attack == EnemyAttackKind.Ambush)
             {
                 if (distance < definition.keepDistance) goal = transform.position - toDir * 4f;   // recua
                 else if (distance <= definition.attackRange * 0.9f) stop = true;                 // ja esta em posicao
@@ -253,6 +268,23 @@ namespace Quintessence.Enemies
                 return;
             }
             if (definition.attack == EnemyAttackKind.Heal && healing) { HealAllies(); return; }
+            if (definition.attack == EnemyAttackKind.Ambush)
+            {
+                // some de onde esta e reaparece no circulo avisado; quem ficou parado nas costas leva o golpe
+                GameEvents.RaiseAttackPerformed(new AttackEvent { Origin = transform.position, Direction = Vector3.up, Element = ElementType.None, Range = 1.2f, Kind = AttackKind.Dash, Source = gameObject });
+                if (agent.enabled && agent.isOnNavMesh) agent.Warp(strikePoint); else transform.position = strikePoint;
+                Ambushes++;
+                GameEvents.RaiseAttackPerformed(new AttackEvent { Origin = strikePoint, Direction = Vector3.up, Element = ElementType.None, Range = definition.strikeRadius, Kind = AttackKind.Dash, Source = gameObject });
+                if (target == null || target.IsDead) return;
+                var hit = target.transform.position - strikePoint; hit.y = 0f;
+                if (hit.sqrMagnitude > 0.01f) transform.rotation = Quaternion.LookRotation(hit);
+                if (hit.magnitude > definition.strikeRadius + 0.3f) return;
+                target.TakeDamage(new DamageInfo(Damage, definition.element, health.Team, gameObject)
+                {
+                    Point = target.transform.position + Vector3.up * 1.2f, Direction = hit.sqrMagnitude > 0.01f ? hit.normalized : transform.forward, Knockback = definition.knockback,
+                });
+                return;
+            }
             if (definition.attack == EnemyAttackKind.Lob)
             {
                 // orbe d'agua cai em poca (respingo, sem estouro de fogo); a bomba comum explode
