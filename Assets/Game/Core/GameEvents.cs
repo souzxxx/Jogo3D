@@ -45,6 +45,8 @@ namespace Quintessence.Core
         /// Nao e ataque no heroi (cura do Xama): desenha em verde.
         public bool Friendly;
         public GameObject Source;
+        /// Elemento do que e arremessado (Agua = orbe do Afogado). None = bomba comum.
+        public ElementType Element;
     }
 
     /// Area de efeito que fica no chao (rastro de fogo, poca de lava...).
@@ -90,6 +92,8 @@ namespace Quintessence.Core
         public static event Action<bool, bool> BossShieldChanged;
         /// Explosao de um inimigo suicida: (ponto, raio).
         public static event Action<Vector3, float> Exploded;
+        /// Um orbe elemental caiu e deixa uma poca (ponto, raio, elemento, segundos). O diretor da run cria a poca.
+        public static event Action<Vector3, float, ElementType, float> PuddleLanded;
         /// (indice da onda comecando em 0, total de ondas)
         public static event Action<int, int> WaveStarted;
         /// Um golpe foi esquivado (passiva do Vey).
@@ -134,6 +138,7 @@ namespace Quintessence.Core
         public static void RaiseBossShield(bool up, bool needsQuintessence) => BossShieldChanged?.Invoke(up, needsQuintessence);
         public static void RaiseArmorChanged(Health enemy, bool armored) => ArmorChanged?.Invoke(enemy, armored);
         public static void RaiseExploded(Vector3 point, float radius) => Exploded?.Invoke(point, radius);
+        public static void RaisePuddleLanded(Vector3 point, float radius, ElementType element, float seconds) => PuddleLanded?.Invoke(point, radius, element, seconds);
         public static void RaiseEvaded(Health target) => Evaded?.Invoke(target);
         public static void RaiseQuintessenceCharge(float amount) => QuintessenceCharge?.Invoke(amount);
         public static void RaiseAmbient(int index) => AmbientChanged?.Invoke(index);
@@ -155,7 +160,7 @@ namespace Quintessence.Core
         {
             DamageDealt = null; Died = null; HitBlocked = null; Shattered = null; MarkApplied = null; ReactionTriggered = null;
             MarkCleared = null; StatusApplied = null; StatusEnded = null; AttackPerformed = null; ZoneSpawned = null;
-            TelegraphStarted = null; TelegraphCancelled = null; AttackMissed = null; EnemySpawned = null; WaveStarted = null; ArmorChanged = null; Exploded = null;
+            TelegraphStarted = null; TelegraphCancelled = null; AttackMissed = null; EnemySpawned = null; WaveStarted = null; ArmorChanged = null; Exploded = null; PuddleLanded = null;
             EnemyHealed = null; ChampionSpawned = null; AmbientChanged = null; QuintessenceCharge = null; Evaded = null;
             BossSpawned = null; BossPhaseChanged = null; BossShieldChanged = null;
             ElementSwitched = null; ElementAwakened = null;

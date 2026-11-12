@@ -986,6 +986,79 @@ namespace Quintessence.Game.PlayTests
             Time.captureFramerate = 0;
         }
 
+        [UnityTest, Timeout(300000)]
+        public IEnumerator Drowned_Leaves_A_Puddle_That_Soaks_And_Marks()
+        {
+            GameEvents.Clear();
+            Time.timeScale = 1f;
+            Time.captureFramerate = 30;
+            GameFlow.StartElement = ElementType.Fire;
+            GameFlow.Seed = 3; GameFlow.Layers = 5; GameFlow.Shrines = 1;
+            yield return EditorSceneManager.LoadSceneAsyncInPlayMode("Assets/Scenes/Run.unity", new LoadSceneParameters(LoadSceneMode.Single));
+            yield return null;
+            yield return null;
+            var director = Object.FindFirstObjectByType<RunDirector>();
+            var hud = Object.FindFirstObjectByType<Hud>();
+            cam = Camera.main;
+            hud.UseCamera(cam);
+            Object.FindFirstObjectByType<WaveSpawner>().enabled = false;
+            for (int k = 0; k < 2000 && director.Busy; k++) yield return null;
+            director.ApplyLayout(-1);
+            director.DressBiome(Biome.Crypt);
+            var hero = Object.FindFirstObjectByType<PlayerController>();
+            var hp = hero.GetComponent<Health>();
+            hp.Pool.Invulnerable = true;
+            hero.Teleport(new Vector3(0, 0.05f, -3f), Vector3.forward);
+            GameObject Load(string n) => UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Game/Enemies/Prefabs/" + n + ".prefab");
+            var drowned = Object.Instantiate(Load("Afogado"), new Vector3(0, 0, 4f), Quaternion.Euler(0, 180, 0)).GetComponent<Health>();
+            Assert.IsTrue(drowned.GetComponentsInChildren<Transform>(true).Any(t => t.name == "Skeleton_Staff"), "segura o cajado do pack");
+            // elemental de Agua: resiste a Agua, fraco a Terra
+            float full = drowned.Current;
+            drowned.TakeDamage(new DamageInfo(10f, ElementType.Earth, Team.Player, hero.gameObject));
+            Assert.AreEqual(full - 16f, drowned.Current, 0.01f, "fraco a Terra");
+            // joga o orbe e deixa a poca
+            WaterPuddle puddle = null;
+            for (int k = 0; k < 1200 && puddle == null; k++) { yield return null; puddle = Object.FindFirstObjectByType<WaterPuddle>(); }
+            Assert.IsNotNull(puddle, "o orbe do Afogado deixa uma poca");
+            Assert.AreEqual(ElementType.Water, puddle.Element);
+            drowned.GetComponent<EnemyBrain>().enabled = false;
+            // quem esta na poca: o heroi fica encharcado; o inimigo fica marcado com Agua
+            hero.Teleport(puddle.transform.position + new Vector3(0, 0.05f, 0), Vector3.forward);
+            var crawler = Object.Instantiate(Load("Rastejante"), puddle.transform.position + new Vector3(0.8f, 0, 0.4f), Quaternion.identity).GetComponent<Health>();
+            crawler.GetComponent<EnemyBrain>().enabled = false;
+            int pulses = puddle.Pulses;
+            for (int k = 0; k < 60 && puddle != null && puddle.Pulses < pulses + 2; k++) yield return null;
+            Assert.IsNotNull(puddle, "a poca dura alguns segundos");
+            Assert.IsTrue(hero.GetComponent<StatusHolder>().State.Has(StatusType.Soaked), "o heroi na poca fica encharcado");
+            Assert.AreEqual(ElementType.Water, crawler.GetComponent<ElementMark>().State.Element, "o inimigo na poca fica marcado com Agua");
+            hero.Teleport(puddle.transform.position + new Vector3(0, 0.05f, -4.5f), Vector3.forward);
+            hud.ShowBanner("", "", Color.clear, 0.01f);
+            hud.HideTip();
+            for (int k = 0; k < 4; k++) yield return null;
+            Shot(cam, "docs/img/inimigo_afogado.png");
+            {
+                // de perto, para conferir o Afogado e a poca
+                var follow = cam.GetComponent<FollowCamera>();
+                if (follow != null) follow.enabled = false;
+                drowned.transform.position = puddle.transform.position + new Vector3(-2.6f, 0, 1.2f);
+                drowned.transform.rotation = Quaternion.LookRotation(Vector3.back + Vector3.right * 0.4f);
+                var at = drowned.transform.position;
+                float fov = cam.fieldOfView;
+                cam.transform.position = at + new Vector3(2.6f, 3f, -5.4f);
+                cam.transform.LookAt(at + new Vector3(1.2f, 0.8f, 0f));
+                cam.fieldOfView = 40f;
+                for (int k = 0; k < 3; k++) yield return null;
+                Shot(cam, "docs/img/afogado_perto.png");
+                cam.fieldOfView = fov;
+                if (follow != null) follow.enabled = true;
+            }
+            // some sozinha
+            for (int k = 0; k < 400 && puddle != null; k++) yield return null;
+            Assert.IsTrue(puddle == null, "a poca seca");
+            GameFlow.Layers = 8; GameFlow.Shrines = 3;
+            Time.captureFramerate = 0;
+        }
+
         [UnityTest, Timeout(600000)]
         public IEnumerator Elementals_And_The_Swarm()
         {

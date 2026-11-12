@@ -173,7 +173,7 @@ namespace Quintessence.Enemies
                         Point = line ? transform.position : strikePoint, Direction = strikeDir,
                         Radius = charge ? definition.chargeWidth : line ? 0.35f : kind == EnemyAttackKind.Heal ? definition.healRadius : definition.strikeRadius,
                         Length = charge ? ClearDistance(strikeDir, definition.chargeDistance) : line ? ClearDistance(strikeDir, definition.projectileRange) : 0f,
-                        Duration = definition.telegraphTime, IsLine = line, Friendly = kind == EnemyAttackKind.Heal, Lobbed = kind == EnemyAttackKind.Lob, Source = gameObject,
+                        Duration = definition.telegraphTime, IsLine = line, Friendly = kind == EnemyAttackKind.Heal, Lobbed = kind == EnemyAttackKind.Lob, Source = gameObject, Element = definition.element,
                     });
                     Play("Attack", 0.08f);
                     break;
@@ -239,7 +239,9 @@ namespace Quintessence.Enemies
             if (definition.attack == EnemyAttackKind.Heal && healing) { HealAllies(); return; }
             if (definition.attack == EnemyAttackKind.Lob)
             {
-                GameEvents.RaiseExploded(strikePoint, definition.strikeRadius);
+                // orbe d'agua cai em poca (respingo, sem estouro de fogo); a bomba comum explode
+                if (definition.puddleSeconds > 0f) GameEvents.RaisePuddleLanded(strikePoint, definition.strikeRadius, definition.element, definition.puddleSeconds);
+                else GameEvents.RaiseExploded(strikePoint, definition.strikeRadius);
                 if (target == null || target.IsDead) return;
                 var off = target.transform.position - strikePoint; off.y = 0f;
                 if (off.magnitude > definition.strikeRadius + 0.3f) return;

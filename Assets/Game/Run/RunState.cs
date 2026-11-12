@@ -114,8 +114,8 @@ namespace Quintessence.Run
     {
         public struct WavePlan
         {
-            public int Melee, Ranged, Brute, Bomber, Boss, Charger, Lobber, Shaman, MiniBoss, Swarm, Ember, Sentinel, Guard;
-            public int Total => Melee + Ranged + Brute + Bomber + Boss + Charger + Lobber + Shaman + MiniBoss + Swarm + Ember + Sentinel + Guard;
+            public int Melee, Ranged, Brute, Bomber, Boss, Charger, Lobber, Shaman, MiniBoss, Swarm, Ember, Sentinel, Guard, Drowned;
+            public int Total => Melee + Ranged + Brute + Bomber + Boss + Charger + Lobber + Shaman + MiniBoss + Swarm + Ember + Sentinel + Guard + Drowned;
         }
 
         public const int MiniBossDepth = 5;
@@ -181,9 +181,10 @@ namespace Quintessence.Run
                     if (biome == Biome.Crypt) { w.Melee--; if (i % 2 == 0) w.Ranged++; else w.Lobber++; }
                     else if (biome == Biome.Garden) { w.Melee--; if (i % 2 == 0) w.Charger++; else w.Brute++; }
                 }
-                // os elementais do trecho: Brasa Viva nos Saloes de Cinza, Sentinela de Pedra no Jardim
+                // os elementais do trecho: Brasa Viva nos Saloes de Cinza, Afogado na Cripta, Sentinela de Pedra no Jardim
                 if (i == 1 && biome == Biome.Ashes && depth >= 1 && w.Melee >= 1) { w.Melee--; w.Ember++; }
                 if (i == 1 && biome == Biome.Garden && w.Ranged >= 1) { w.Ranged--; w.Sentinel++; }
+                if (i == 1 && biome == Biome.Crypt && w.Lobber >= 1) { w.Lobber--; w.Drowned++; }
                 waves[i] = w;
             }
             return waves;

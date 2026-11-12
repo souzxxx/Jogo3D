@@ -198,8 +198,7 @@ namespace Quintessence.UI
                 ("Xamã", "Cura os aliados feridos (aviso verde). Derrube primeiro.", foe),
                 ("Escudeiro", "Escudo na frente. Contorne, congele, enraíze ou use reações.", foe),
                 ("Cinzentos", "Bando pequeno e rápido. Skills de área resolvem.", foe),
-                ("Brasa Viva", "Elemental de Fogo: fraca a Água, estoura ao morrer.", foe),
-                ("Sentinela de Pedra", "Torre parada de Terra: fraca a Ar, não é empurrada.", foe),
+                ("Elementais", "Brasa Viva (Fogo, estoura), Afogado (Água, deixa poça) e Sentinela (Terra, torre).", foe),
                 ("Campeão, Carrasco e chefes", "Fecham as Elites. No fim: o Guardião (corpo a corpo) ou a Tecelã (de longe).", gold),
             }, 53);
             Column(1130, "REAÇÕES", new (string, string, Color)[]

@@ -61,6 +61,9 @@ namespace Quintessence.Enemies
         [Tooltip("Meia largura do corredor da investida.")]
         public float chargeWidth = 0.9f;
 
+        [Tooltip("So para Lob: segundos da poca que o orbe deixa no chao (0 = sem poca). Afogado.")]
+        public float puddleSeconds;
+
         [Header("Cura")]
         public float healAmount = 14f;
         public float healRadius = 6f;

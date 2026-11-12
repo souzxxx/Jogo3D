@@ -64,6 +64,7 @@ public static class GameSceneBuilder
         EnemyDevSceneBuilder.ElementalPrefabs(out var swarm, out var ember, out var sentinel);
         director.BindElementals(swarm, ember, sentinel);
         director.BindGuard(EnemyDevSceneBuilder.GuardPrefab());
+        director.BindDrowned(EnemyDevSceneBuilder.DrownedPrefab(), PuddlePrefab());
         const string catalogPath = "Assets/Game/Run/Data/Boons.asset";
         var catalog = AssetDatabase.LoadAssetAtPath<Quintessence.Run.BoonCatalog>(catalogPath);
         if (catalog == null)
@@ -471,6 +472,23 @@ public static class GameSceneBuilder
 
     /// Poca de corrupcao: manchas redondas sobrepostas, borda de cinza escura e superficie de brilho baixo
     /// (no mesmo registro dos respiradouros). width x depth em metros: a area que fere.
+    /// Poca d'agua do Afogado: raio 2 (o jogo escala para o raio do golpe). Agua parada, fosca, um pouco de brilho frio.
+    static GameObject PuddlePrefab()
+    {
+        const string path = "Assets/Game/Game/Prefabs/Obstacles/WaterPuddle.prefab";
+        var root = new GameObject("WaterPuddle");
+        var rim = LookDevBuilder.Mat("PuddleRim2", null, new Color(0.09f, 0.11f, 0.12f), Color.black, 0f);
+        var water = LookDevBuilder.Mat("Puddle_Water", null, new Color(0.07f, 0.17f, 0.21f), new Color(0.01f, 0.04f, 0.05f), 0f);
+        Disc(root.transform, "Rim", Vector3.zero, 4.4f, 0.012f, rim);
+        Disc(root.transform, "Water", Vector3.zero, 4f, 0.022f, water);
+        Disc(root.transform, "Ripple", new Vector3(0.5f, 0, -0.3f), 1.6f, 0.026f, rim);
+        Disc(root.transform, "RippleIn", new Vector3(0.5f, 0, -0.3f), 1.3f, 0.028f, water);
+        root.AddComponent<WaterPuddle>();
+        var prefab = PrefabUtility.SaveAsPrefabAsset(root, path);
+        Object.DestroyImmediate(root);
+        return prefab;
+    }
+
     static GameObject PoolPrefab(string name, float width, float depth, int seed)
     {
         string path = "Assets/Game/Game/Prefabs/Obstacles/" + name + ".prefab";

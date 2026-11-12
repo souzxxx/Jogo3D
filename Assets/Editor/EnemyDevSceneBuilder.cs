@@ -465,6 +465,58 @@ public static class EnemyDevSceneBuilder
         return prefab;
     }
 
+    /// Afogado: elemental de Agua da Cripta. Esqueleto mago palido e esverdeado com o cajado do pack; joga um orbe
+    /// que deixa uma poca d'agua (encharca o heroi, marca os inimigos). Resiste a Agua, fraco a Terra.
+    public static GameObject DrownedPrefab()
+    {
+        const string mageFbx = KK + "Skeletons/Characters/Skeleton_Mage.fbx";
+        var ctrl = CombatDevSceneBuilder.Controller(mageFbx, Dir + "Animation/Afogado.controller",
+            ("Idle", "Idle_Combat|Idle", 0f), ("Run", "Walking_A|Running_A", 0f), ("Attack", "Spellcast_Long|Spellcast_Shoot|Spellcast_Raise", 1f),
+            ("Hit", "Hit_A|Hit_B", 0.3f), ("Death", "Death_A", 0f), ("Spawn", "Spawn_Ground|Skeletons_Awaken_Standing|Idle", 0.7f));
+        var def = Asset<EnemyDefinition>("Afogado", d =>
+        {
+            d.displayName = "Afogado"; d.maxHealth = 40; d.moveSpeed = 3f;
+            d.attack = EnemyAttackKind.Lob; d.damage = 8; d.knockback = 3; d.element = ElementType.Water;
+            d.attackRange = 9.5f; d.telegraphTime = 1f; d.recoverTime = 0.5f; d.cooldown = 2.6f;
+            d.strikeRadius = 2.2f; d.keepDistance = 5.5f;
+            d.affinity = ElementType.Water; d.puddleSeconds = 5f;
+        });
+        // osso e trapo encharcados: a mesma textura do pack com a tunica e o chapeu puxados para verde-agua, fosco
+        string tex = Recolor(KK + "Skeletons/Characters/skeleton_texture.png", "Assets/Art/Enemies/skeleton_texture_drowned.png", 0.56f, 0.22f);
+        var drowned = LookDevBuilder.Mat("SkeletonDrowned2", tex, new Color(0.86f, 0.94f, 0.94f), Color.black, 0f);
+        return EnemyPrefab("Afogado", "Skeletons/Characters/Skeleton_Mage.fbx", def, ctrl, drowned, 1.05f, "Skeleton_Staff", "handslot.r");
+    }
+
+    /// Copia uma textura do pack girando a matiz so das cores saturadas (pano, chapeu); osso e metal, quase sem cor, ficam.
+    /// Devolve o caminho da copia. hueShift em voltas (0,5 = cor oposta).
+    static string Recolor(string source, string target, float hueShift, float minSaturation)
+    {
+        var tex = new Texture2D(2, 2);
+        tex.LoadImage(System.IO.File.ReadAllBytes(source));
+        var px = tex.GetPixels();
+        for (int i = 0; i < px.Length; i++)
+        {
+            Color.RGBToHSV(px[i], out float h, out float s, out float v);
+            if (s < minSaturation) continue;
+            var c = Color.HSVToRGB(Mathf.Repeat(h + hueShift, 1f), s * 0.62f, v * 0.88f);
+            c.a = px[i].a;
+            px[i] = c;
+        }
+        tex.SetPixels(px);
+        System.IO.File.WriteAllBytes(target, tex.EncodeToPNG());
+        Object.DestroyImmediate(tex);
+        AssetDatabase.ImportAsset(target);
+        var src = (TextureImporter)AssetImporter.GetAtPath(source);
+        var dst = (TextureImporter)AssetImporter.GetAtPath(target);
+        if (src != null && dst != null)
+        {
+            dst.filterMode = src.filterMode; dst.mipmapEnabled = src.mipmapEnabled; dst.textureCompression = src.textureCompression;
+            dst.sRGBTexture = src.sRGBTexture; dst.maxTextureSize = src.maxTextureSize;
+            dst.SaveAndReimport();
+        }
+        return target;
+    }
+
     /// Usa as pecas de Assets/Art/Enemies2 quando existirem; sem elas, so a tinta e a escala.
     public static void ElementalPrefabs(out GameObject swarm, out GameObject ember, out GameObject sentinel)
     {

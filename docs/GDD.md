@@ -134,6 +134,7 @@ Uma skill deixa no inimigo a **marca** do elemento dela. Acertar esse inimigo co
 | Cinzentos | Bando de três ou quatro, pequenos e rápidos | Skills de área |
 | Brasa Viva | Elemental de Fogo (Salões de Cinza): não queima, estoura ao morrer | Água, e sair do círculo depois |
 | Sentinela de Pedra | Torre parada de Terra (Jardim de Pedra), não é empurrada | Ar, ou fechar a distância |
+| Afogado | Elemental de Água (Cripta Afogada): joga um orbe que deixa uma poça; a poça encharca o herói e marca com Água os inimigos dentro | Terra; e usar a poça para reagir (Fogo vira Vapor, Ar vira Nevasca) |
 
 **Afinidade elemental:** inimigo elemental leva metade do dano do próprio elemento e 1,6 vez do elemento que o vence (Água vence Fogo, Terra vence Água, Ar vence Terra, Fogo vence Ar).
 

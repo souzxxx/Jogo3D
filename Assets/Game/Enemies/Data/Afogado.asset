@@ -1,0 +1,46 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a9cf8aada748e4833867add4efcb33fc, type: 3}
+  m_Name: Afogado
+  m_EditorClassIdentifier: Quintessence.Enemies::Quintessence.Enemies.EnemyDefinition
+  displayName: Afogado
+  maxHealth: 40
+  moveSpeed: 3
+  armored: 0
+  armoredDamageTaken: 0.4
+  attack: 4
+  damage: 8
+  knockback: 3
+  attackRange: 9.5
+  telegraphTime: 1
+  recoverTime: 0.5
+  cooldown: 2.6
+  element: 2
+  strikeOffset: 1.5
+  strikeRadius: 2.2
+  explosionDamageToEnemies: 12
+  affinity: 2
+  immovable: 0
+  burstOnDeath: 0
+  guardArc: 0
+  guardDamageTaken: 0.15
+  turnSpeed: 540
+  chargeDistance: 8
+  chargeSpeed: 22
+  chargeWidth: 0.9
+  puddleSeconds: 5
+  healAmount: 14
+  healRadius: 6
+  projectilePrefab: {fileID: 0}
+  projectileSpeed: 11
+  projectileRange: 16
+  keepDistance: 5.5

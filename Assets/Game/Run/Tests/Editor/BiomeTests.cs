@@ -88,5 +88,21 @@ namespace Quintessence.Run.Tests
             var w3 = EncounterPlanner.Plan(RoomType.Combat, EncounterPlanner.GuardDepth)[0];
             Assert.GreaterOrEqual(w3.Melee, 1, "continua havendo Rastejante na onda");
         }
+
+        [Test] public void Crypt_BringsTheDrowned_InPlaceOfAThrower()
+        {
+            bool seen = false;
+            for (int d = 0; d < 10; d++)
+            {
+                var plain = EncounterPlanner.Plan(RoomType.Combat, d);
+                var crypt = EncounterPlanner.Plan(RoomType.Combat, d, Biome.Crypt);
+                Assert.AreEqual(0, EncounterPlanner.Plan(RoomType.Combat, d, Biome.Ashes).Sum(w => w.Drowned), "so na Cripta");
+                Assert.AreEqual(0, EncounterPlanner.Plan(RoomType.Combat, d, Biome.Garden).Sum(w => w.Drowned));
+                Assert.AreEqual(plain.Sum(w => w.Total), crypt.Sum(w => w.Total), "troca, nao soma");
+                Assert.LessOrEqual(crypt.Sum(w => w.Drowned), 1);
+                seen |= crypt.Sum(w => w.Drowned) > 0;
+            }
+            Assert.IsTrue(seen, "a Cripta tem Afogado em alguma profundidade");
+        }
     }
 }
