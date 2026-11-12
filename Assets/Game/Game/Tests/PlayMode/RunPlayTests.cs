@@ -1459,6 +1459,15 @@ namespace Quintessence.Game.PlayTests
             scripted.AttackHeld = false;
             Assert.IsTrue(crit, "o golpe depois da esquiva perfeita e critico");
             Assert.IsFalse(hero.PerfectCritReady, "e so um");
+            // perigo de chao (poca, respiradouro) atravessado no dash nao conta: nao da para encher a barra na sala vazia
+            for (int k = 0; k < 40; k++) yield return null;
+            int dodges = hero.PerfectDodges;
+            scripted.PressDash();
+            for (int k = 0; k < 30 && !hero.IsDashing; k++) yield return null;
+            var hazard = new GameObject("PocaDeTeste");
+            hp.TakeDamage(new DamageInfo(2f, ElementType.None, Team.Enemy, hazard) { IsReaction = true });
+            Object.Destroy(hazard);
+            Assert.AreEqual(dodges, hero.PerfectDodges, "perigo de chao nao e esquiva perfeita");
             GameFlow.StartElement = ElementType.Fire;
             GameFlow.Layers = 8; GameFlow.Shrines = 3;
             Time.captureFramerate = 0;

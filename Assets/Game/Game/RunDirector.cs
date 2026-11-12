@@ -669,7 +669,7 @@ namespace Quintessence.Game
             Run.Restore(s.current, s.visited, s.essence, s.roomsCleared);
             Run.Kills = s.kills;
             Run.Rerolls = s.rerolls;
-            Run.TalentChoices = s.talentChoices >= 3 ? s.talentChoices : 3; // save antigo: 3
+            if (s.talentChoices >= 3) Run.TalentChoices = Mathf.Min(s.talentChoices, 4); // save antigo (0): fica o valor do Refugio
             for (int i = 0; i < Run.SkillRank.Length && i < s.ranks.Length; i++) Run.SkillRank[i] = Mathf.Clamp(s.ranks[i], 1, RunState.MaxSkillRank);
             Run.Progress.Restore(s.level, s.xp, s.pending, s.totalXp);
             // a escolha da maestria so continua pendente se o save e da primeira sala e ela ainda nao foi usada
