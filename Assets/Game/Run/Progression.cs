@@ -71,6 +71,7 @@ namespace Quintessence.Run
         AirDashCharge, AirRange, AirHaste,
         ReactionBoost,
         Flank, SureFooted, BurstPower, Contagion, Alchemy,
+        HunterInstinct, RisingTide, StoneSkin, Tailwind,
     }
 
     public class Talent
@@ -85,6 +86,8 @@ namespace Quintessence.Run
         public TalentEffect Effect;
         public float Value;
         public int MaxRank = 1;
+        /// Talento de assinatura: so aparece para este heroi (None = qualquer um).
+        public ElementType Hero;
     }
 
     /// O que o heroi ja escolheu na run.
@@ -202,6 +205,13 @@ namespace Quintessence.Run
             Add("body_awaken", "Despertar Intenso", "A explosão da Quintessência causa +50%", ElementType.None, TalentEffect.BurstPower, 0.5f, 2);
             Add("body_contagion", "Contágio", "Quando um inimigo marcado cai, a marca pula para o vizinho mais perto", ElementType.None, TalentEffect.Contagion, 5f, 1);
             Add("body_alchemy", "Alquimia", "Fusões causam +40%", ElementType.None, TalentEffect.Alchemy, 0.4f, 2);
+            // assinaturas: um por heroi, so para ele
+            void Signature(string id, string name, string text, ElementType hero, TalentEffect fx, float value) =>
+                list.Add(new Talent { Id = id, Name = name, Description = text, Element = ElementType.None, Effect = fx, Value = value, MaxRank = 1, Hero = hero });
+            Signature("hero_rax", "Instinto do Caçador", "Golpes em quem tem menos de 30% de vida causam +40%", ElementType.Fire, TalentEffect.HunterInstinct, 0.4f);
+            Signature("hero_liora", "Maré Crescente", "Cada reação cura 3 de vida", ElementType.Water, TalentEffect.RisingTide, 3f);
+            Signature("hero_brann", "Pele de Pedra", "+25 de vida máxima e o Pilar bloqueia mais um golpe", ElementType.Earth, TalentEffect.StoneSkin, 25f);
+            Signature("hero_vey", "Corrente de Ar", "Dash recarrega 30% mais rápido e +10% de velocidade", ElementType.Air, TalentEffect.Tailwind, 0.3f);
 
             Add("fire_trail", "Rastro de Brasa", "Labareda deixa o chão em chamas por 3 s", ElementType.Fire, TalentEffect.FireTrail, 3f, 1);
             Add("fire_range", "Fornalha", "Labareda alcança 20% mais longe", ElementType.Fire, TalentEffect.FireRange, 0.2f, 2);
@@ -272,11 +282,15 @@ namespace Quintessence.Run
                 case TalentEffect.BurstPower: m.BurstBonus += t.Value; break;
                 case TalentEffect.Contagion: m.MarkSpread = System.Math.Max(m.MarkSpread, t.Value); break;
                 case TalentEffect.Alchemy: m.FusionBonus += t.Value; break;
+                case TalentEffect.HunterInstinct: m.ExecuteBonus += t.Value; break;
+                case TalentEffect.RisingTide: m.HealOnReaction += t.Value; break;
+                case TalentEffect.StoneSkin: m.MaxHealthAdd += t.Value; m.EarthBlocksAdd += 1; break;
+                case TalentEffect.Tailwind: m.DashCooldownMult *= 1f - t.Value; m.MoveSpeedMult += 0.1f; break;
             }
         }
 
         /// Ate count talentos diferentes que ainda cabem, de corpo ou de elementos ja despertos.
-        public static List<Talent> Offer(TalentBook book, IReadOnlyList<ElementType> awakened, Random rng, int count = 3)
+        public static List<Talent> Offer(TalentBook book, IReadOnlyList<ElementType> awakened, Random rng, int count = 3, ElementType hero = ElementType.None)
         {
             var pool = new List<Talent>();
             foreach (var t in All)
@@ -284,6 +298,8 @@ namespace Quintessence.Run
                 if (!book.CanTake(t)) continue;
                 if (t.Element != ElementType.None && !Has(awakened, t.Element)) continue;
                 if (t.Second != ElementType.None && !Has(awakened, t.Second)) continue;
+                // assinatura de outro heroi: fora
+                if (t.Hero != ElementType.None && t.Hero != hero) continue;
                 // o despertar so vale com os quatro elementos: oferece a partir do terceiro
                 if (t.Effect == TalentEffect.BurstPower && awakened.Count < 3) continue;
                 // Contagio so serve com reacao possivel (dois elementos); Alquimia so com Fusao (tres)

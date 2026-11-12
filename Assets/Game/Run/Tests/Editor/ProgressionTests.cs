@@ -256,5 +256,31 @@ namespace Quintessence.Run.Tests
             Assert.AreEqual(1f + Synergy.DamageBonus, m.Damage(ElementType.Fire), 1e-4f);
             Assert.AreEqual(1f + Synergy.DamageBonus, m.Damage(ElementType.Water), 1e-4f);
         }
+
+        [Test] public void EachHero_HasOneSignature_OfferedOnlyToThem()
+        {
+            foreach (var hero in Elements.All)
+            {
+                var own = TalentCatalog.All.Where(t => t.Hero == hero).ToList();
+                Assert.AreEqual(1, own.Count, hero + " tem uma assinatura");
+                bool seenOwn = false;
+                for (int seed = 0; seed < 300; seed++)
+                {
+                    var offer = TalentCatalog.Offer(new TalentBook(), new[] { hero }, new System.Random(seed), 4, hero);
+                    Assert.IsFalse(offer.Any(t => t.Hero != ElementType.None && t.Hero != hero), "nunca a assinatura de outro heroi");
+                    seenOwn |= offer.Any(t => t.Hero == hero);
+                }
+                Assert.IsTrue(seenOwn, hero + ": a propria aparece");
+                var m = new HeroModifiers();
+                Assert.AreNotEqual(Newtonsoft(m), Apply(m, own[0]), "a assinatura muda alguma coisa");
+            }
+            Assert.IsFalse(TalentCatalog.Offer(new TalentBook(), new[] { ElementType.Fire }, new System.Random(1), 40).Any(t => t.Hero != ElementType.None), "sem heroi informado, nenhuma assinatura");
+            var rax = new HeroModifiers();
+            TalentCatalog.Apply(rax, TalentCatalog.All.First(t => t.Id == "hero_rax"));
+            Assert.AreEqual(0.4f, rax.ExecuteBonus, 1e-4f);
+        }
+
+        static string Newtonsoft(HeroModifiers m) => m.ToJson();
+        static string Apply(HeroModifiers m, Talent t) { TalentCatalog.Apply(m, t); return m.ToJson(); }
     }
 }

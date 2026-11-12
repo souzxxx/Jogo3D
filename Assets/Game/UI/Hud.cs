@@ -64,6 +64,10 @@ namespace Quintessence.UI
             TalentEffect.SureFooted => "boon_speed",
             TalentEffect.BurstPower => "quintessence",
             TalentEffect.Contagion => "boon_reaction",
+            TalentEffect.HunterInstinct => "boon_crit",
+            TalentEffect.RisingTide => "boon_leech",
+            TalentEffect.StoneSkin => "boon_health",
+            TalentEffect.Tailwind => "boon_dash",
             TalentEffect.Alchemy => "boon_element",
             _ => "boon_damage",
         };
@@ -96,7 +100,7 @@ namespace Quintessence.UI
                 UiKit.Image(disc, UiKit.Circle, Color.Lerp(c, new Color(0.05f, 0.04f, 0.08f), 0.55f));
                 UiKit.Image(UiKit.Stretch("Ring", disc), UiKit.Ring, Color.Lerp(c, UiKit.Cream, 0.3f));
                 UiKit.Image(UiKit.Rect("Icon", disc, center, Vector2.zero, new Vector2(74, 74)), UiKit.Icon(TalentIcon(t)), UiKit.Cream);
-                string where = t.Second != ElementType.None ? "REAÇÃO · " + t.Tag.ToUpperInvariant() : t.Element == ElementType.None ? "CORPO" : SkillName[(int)t.Element].ToUpperInvariant();
+                string where = t.Hero != ElementType.None ? "ASSINATURA" : t.Second != ElementType.None ? "REAÇÃO · " + t.Tag.ToUpperInvariant() : t.Element == ElementType.None ? "CORPO" : SkillName[(int)t.Element].ToUpperInvariant();
                 UiKit.Text(UiKit.Rect("Where", card, new Vector2(0.5f, 1), new Vector2(0, -168), new Vector2(330, 26)), where, 19, Color.Lerp(c, UiKit.Cream, 0.3f));
                 UiKit.Text(UiKit.Rect("Name", card, new Vector2(0.5f, 1), new Vector2(0, -198), new Vector2(330, 44)), t.Name, 32, UiKit.Cream);
                 var desc = UiKit.Text(UiKit.Rect("Desc", card, new Vector2(0.5f, 1), new Vector2(0, -250), new Vector2(310, 96)), t.Description, 23, UiKit.Paper, TextAnchor.MiddleCenter, false);

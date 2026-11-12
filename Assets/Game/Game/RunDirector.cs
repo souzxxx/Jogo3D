@@ -1194,7 +1194,7 @@ namespace Quintessence.Game
         void OpenLevelUp()
         {
             talentRng = TalentRng();
-            talentOffer = TalentCatalog.Offer(Run.Talents, player.Loadout.Awakened, talentRng, Run.TalentChoices);
+            talentOffer = TalentCatalog.Offer(Run.Talents, player.Loadout.Awakened, talentRng, Run.TalentChoices, GameFlow.StartElement);
             if (talentOffer.Count == 0) { while (Run.Progress.ConsumePick()) { } masteryPicks = 0; return; }
             if (GameFlow.AutoPickTalents) { PickTalent(0); return; }
             levelUpOpen = true;
@@ -1209,7 +1209,7 @@ namespace Quintessence.Game
         {
             if (!levelUpOpen || Run.Rerolls <= 0) return;
             Run.Rerolls--;
-            var fresh = TalentCatalog.Offer(Run.Talents, player.Loadout.Awakened, TalentRng(), Run.TalentChoices);
+            var fresh = TalentCatalog.Offer(Run.Talents, player.Loadout.Awakened, TalentRng(), Run.TalentChoices, GameFlow.StartElement);
             if (fresh.Count == 0) { Run.Rerolls++; return; }
             talentOffer = fresh;
             Sfx.Play("ui_click");
