@@ -275,6 +275,62 @@ public static class EnemyDevSceneBuilder
         return prefab;
     }
 
+    /// Colosso de Pedra: mini-chefe das Elites do Jardim. O esqueleto guerreiro do pack ampliado, tingido de pedra musgosa,
+    /// com o machado e o escudo grande do pack; elemental de Terra (fraco a Ar), pancadas e investidas pesadas.
+    public static GameObject GardenMiniBossPrefab(GameObject add1, GameObject add2)
+    {
+        const string fbx = KK + "Skeletons/Characters/Skeleton_Warrior.fbx";
+        var ctrl = CombatDevSceneBuilder.Controller(fbx, Dir + "Animation/Colosso.controller",
+            ("Idle", "Idle_Combat|Idle", 0f), ("Run", "Walking_A|Running_A", 0f), ("Attack", "2H_Melee_Attack_Chop|1H_Melee_Attack_Jump_Chop", 1.15f),
+            ("Cast", "Throw|Idle", 1f), ("Summon", "Cheer|Taunt|Idle", 1.3f),
+            ("Roar", "Taunt|Cheer|Idle", 0.8f), ("Hit", "Hit_B|Hit_A", 0.3f), ("Death", "Death_B|Death_A", 0f), ("Spawn", "Spawn_Ground|Skeletons_Awaken_Standing|Idle", 1f));
+        var def = Asset<BossDefinition>("Colosso", d =>
+        {
+            d.displayName = "Colosso de Pedra"; d.pattern = 0; d.element = ElementType.Earth; d.maxHealth = 230f; d.moveSpeed = 2.6f;
+            d.cooldownByPhase = new[] { 1.8f, 1.45f, 1.15f };
+            d.slamDamage = 15f; d.slamRadius = 3f; d.slamOffset = 2.2f; d.slamWindup = 0.95f; d.slamRange = 4.5f;
+            d.fanDamage = 7f; d.fanCount = 3; d.fanCountLastPhase = 4;
+            d.eruptionDamage = 10f; d.eruptionCount = 3; d.eruptionRadius = 2f;
+            d.chargeDamage = 14f; d.chargeWidth = 1.5f; d.chargeLength = 11f; d.chargeWindup = 1.05f; d.chargeSpeed = 22f;
+            d.ringDamage = 10f; d.ringCount = 6; d.ringRadius = 4.8f; d.ringCircleRadius = 1.9f;
+            d.lastPhaseShield = false; d.maxAdds = 1; d.addsPerPhaseChange = 1; d.addInterval = 12f;
+        });
+        def.projectilePrefab = ProjectilePrefab();
+        def.addPrefabs = new[] { add1, add2 };
+        EditorUtility.SetDirty(def);
+
+        var skin = LookDevBuilder.Mat("SkeletonColossus", KK + "Skeletons/Characters/skeleton_texture.png", new Color(0.62f, 0.7f, 0.6f), Color.black, 0f);
+        var go = new GameObject("Colosso");
+        var col = go.AddComponent<CapsuleCollider>();
+        col.height = 3.9f; col.radius = 1f; col.center = new Vector3(0, 1.95f, 0);
+        go.AddComponent<Health>().Configure(def.maxHealth, Team.Enemy);
+        go.AddComponent<ElementalAffinity>().Set(ElementType.Earth);
+        var agent = go.AddComponent<NavMeshAgent>();
+        agent.radius = 1f; agent.height = 3.9f; agent.angularSpeed = 0f;
+        var model = LookDevBuilder.Spawn("Skeletons/Characters/Skeleton_Warrior.fbx", Vector3.zero, 0, skin);
+        model.name = "Model";
+        model.transform.SetParent(go.transform, false);
+        model.transform.localScale = Vector3.one * 1.75f;
+        var gear = LookDevBuilder.Mat("SkeletonGear", KK + "Skeletons/Props/skeleton_texture.png", new Color(0.7f, 0.66f, 0.68f), Color.black, 0f);
+        foreach (var (prop, boneName, euler) in new[] { ("Skeleton_Axe", "handslot.r", Vector3.zero), ("Skeleton_Shield_Large_B", "handslot.l", new Vector3(-90, 0, 0)) })
+        {
+            Transform hand = null;
+            foreach (var t in model.GetComponentsInChildren<Transform>(true)) if (t.name == boneName) hand = t;
+            if (hand == null) continue;
+            var held = LookDevBuilder.Spawn("Skeletons/Props/" + prop + ".fbx", Vector3.zero, 0, gear);
+            held.name = prop;
+            held.transform.SetParent(hand, false);
+            held.transform.localPosition = Vector3.zero; held.transform.localRotation = Quaternion.Euler(euler);
+            var src = AssetDatabase.LoadAssetAtPath<GameObject>(KK + "Skeletons/Props/" + prop + ".fbx");
+            held.transform.localScale = Vector3.one * ((src != null ? src.transform.localScale.x : 1f) * model.transform.lossyScale.x / Mathf.Max(0.0001f, hand.lossyScale.x));
+        }
+        var anim = CombatDevSceneBuilder.Animator(model, ctrl);
+        go.AddComponent<BossBrain>().Bind(def, anim);
+        var prefab = PrefabUtility.SaveAsPrefabAsset(go, Dir + "Prefabs/Colosso.prefab");
+        Object.DestroyImmediate(go);
+        return prefab;
+    }
+
     /// Carrasco: mini-chefe do meio da run. O esqueleto guerreiro do pack com o capuz e a foice do Ceifador,
     /// ampliado; usa o cerebro do chefe com numeros menores e sem o escudo da ultima fase.
     public static GameObject MiniBossPrefab(GameObject add1, GameObject add2)
