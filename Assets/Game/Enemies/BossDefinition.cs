@@ -1,3 +1,4 @@
+using Quintessence.Core;
 using UnityEngine;
 
 namespace Quintessence.Enemies
@@ -9,6 +10,10 @@ namespace Quintessence.Enemies
         public string displayName = "Guardião das Cinzas";
         [Tooltip("Rodizio de ataques: 0 = Guardiao (corpo a corpo), 1 = Tecela (distancia e teleporte).")]
         public int pattern;
+        [Tooltip("Elemento dos golpes (Fogo no Guardiao e na Tecela; Agua na Rainha Afogada). Agua cai com respingo, nao com estouro de fogo.")]
+        public ElementType element = ElementType.Fire;
+        [Tooltip("Segundos da poca que cada circulo da Erupcao deixa (0 = sem poca). Rainha Afogada.")]
+        public float eruptionPuddleSeconds;
         public float maxHealth = 600f;
         public float moveSpeed = 2.6f;
         [Tooltip("Pausa entre ataques em cada fase.")]

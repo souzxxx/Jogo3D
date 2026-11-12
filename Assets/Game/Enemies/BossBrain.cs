@@ -17,7 +17,7 @@ namespace Quintessence.Enemies
         public BossShield Shield { get; private set; }
         public BossDefinition Definition => definition;
 
-        struct Strike { public float Time; public Vector3 Point, Direction; public float Radius, Damage; public bool Projectile; }
+        struct Strike { public float Time; public Vector3 Point, Direction; public float Radius, Damage; public bool Projectile, Puddle; }
 
         Health health, target;
         IHeroStatus hero;
@@ -137,7 +137,7 @@ namespace Quintessence.Enemies
                 // reaparece no ponto avisado (a explosao do aviso sai no mesmo instante)
                 if (agent.enabled && agent.isOnNavMesh) agent.Warp(blinkTo); else transform.position = blinkTo;
                 Blinks++;
-                GameEvents.RaiseAttackPerformed(new AttackEvent { Origin = blinkTo, Direction = Vector3.up, Element = ElementType.Fire, Range = definition.blinkRadius, Kind = AttackKind.Dash, Source = gameObject });
+                GameEvents.RaiseAttackPerformed(new AttackEvent { Origin = blinkTo, Direction = Vector3.up, Element = definition.element, Range = definition.blinkRadius, Kind = AttackKind.Dash, Source = gameObject });
             }
             if (chargeWait > 0f && (chargeWait -= dt) <= 0f)
             {
@@ -309,7 +309,7 @@ namespace Quintessence.Enemies
                     {
                         var off = i == 0 ? Vector2.zero : Random.insideUnitCircle * definition.eruptionScatter;
                         var p = target.transform.position + new Vector3(off.x, 0f, off.y);
-                        Circle(p, definition.eruptionRadius, definition.eruptionWindup + i * 0.12f, definition.eruptionDamage, Vector3.up);
+                        Circle(p, definition.eruptionRadius, definition.eruptionWindup + i * 0.12f, definition.eruptionDamage, Vector3.up, definition.eruptionPuddleSeconds > 0f);
                     }
                     busy = definition.eruptionWindup + 0.3f;
                     Play("Summon", 0.08f);
@@ -333,10 +333,10 @@ namespace Quintessence.Enemies
             return Mathf.Max(2f, best - 1.5f);
         }
 
-        void Circle(Vector3 point, float radius, float windup, float damage, Vector3 dir)
+        void Circle(Vector3 point, float radius, float windup, float damage, Vector3 dir, bool puddle = false)
         {
             GameEvents.RaiseTelegraph(new TelegraphEvent { Point = point, Direction = dir, Radius = radius, Duration = windup });
-            strikes.Add(new Strike { Time = windup, Point = point, Radius = radius, Damage = damage, Direction = dir });
+            strikes.Add(new Strike { Time = windup, Point = point, Radius = radius, Damage = damage, Direction = dir, Puddle = puddle });
         }
 
         void Resolve(Strike s)
@@ -344,15 +344,17 @@ namespace Quintessence.Enemies
             if (s.Projectile)
             {
                 Projectile.Spawn(definition.projectilePrefab, transform.position + Vector3.up * 1.6f + s.Direction * 1.4f, s.Direction,
-                    definition.projectileSpeed, definition.projectileRange, s.Damage, 3f, ElementType.Fire, health.Team, gameObject);
+                    definition.projectileSpeed, definition.projectileRange, s.Damage, 3f, definition.element, health.Team, gameObject);
                 return;
             }
-            GameEvents.RaiseExploded(s.Point, s.Radius);
+            // agua cai com respingo (e, na Erupcao da Rainha, deixa poca); fogo estoura
+            if (definition.element == ElementType.Water) GameEvents.RaisePuddleLanded(s.Point, s.Radius, ElementType.Water, s.Puddle ? definition.eruptionPuddleSeconds : 0f);
+            else GameEvents.RaiseExploded(s.Point, s.Radius);
             if (target == null || target.IsDead) return;
             var d = target.transform.position - s.Point;
             d.y = 0f;
             if (d.magnitude > s.Radius + 0.3f) return;
-            target.TakeDamage(new DamageInfo(s.Damage, ElementType.Fire, health.Team, gameObject)
+            target.TakeDamage(new DamageInfo(s.Damage, definition.element, health.Team, gameObject)
             {
                 Point = target.transform.position + Vector3.up * 1.2f, Direction = d.sqrMagnitude > 0.01f ? d.normalized : transform.forward, Knockback = 6f,
             });

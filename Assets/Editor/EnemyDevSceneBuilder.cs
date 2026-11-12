@@ -186,6 +186,67 @@ public static class EnemyDevSceneBuilder
         return prefab;
     }
 
+    /// Rainha Afogada: terceiro chefe final. O esqueleto mago do pack, ampliado, com a textura recolorida do Afogado e o cajado;
+    /// golpes de Agua, Erupcoes que deixam pocas, teleporte da segunda fase. Afogados e Rastejantes como reforco.
+    public static GameObject QueenPrefab(GameObject add1, GameObject add2)
+    {
+        const string fbx = KK + "Skeletons/Characters/Skeleton_Mage.fbx";
+        var ctrl = CombatDevSceneBuilder.Controller(fbx, Dir + "Animation/Rainha.controller",
+            ("Idle", "Idle_Combat|Idle", 0f), ("Run", "Walking_A|Running_A", 0f), ("Attack", "Spellcast_Long|Spellcast_Shoot", 1f),
+            ("Cast", "Spellcast_Shoot|Spellcast_Long", 0.9f), ("Summon", "Spellcast_Summon|Spellcast_Raise", 1.3f),
+            ("Roar", "Spellcast_Raise|Taunt|Cheer", 0.9f), ("Hit", "Hit_B|Hit_A", 0.3f), ("Death", "Death_B|Death_A", 0f), ("Spawn", "Spawn_Ground|Skeletons_Awaken_Standing|Idle", 1.2f));
+        var def = Asset<BossDefinition>("Rainha", d =>
+        {
+            d.displayName = "Rainha Afogada"; d.pattern = 2; d.element = ElementType.Water; d.maxHealth = 560f; d.moveSpeed = 2.2f;
+            d.cooldownByPhase = new[] { 1.8f, 1.45f, 1.1f };
+            d.slamDamage = 16f; d.slamRadius = 3f;
+            d.fanDamage = 8f; d.fanCount = 3; d.fanCountLastPhase = 5; d.fanSpread = 20f;
+            d.eruptionDamage = 10f; d.eruptionCount = 3; d.eruptionRadius = 2.2f; d.eruptionPuddleSeconds = 6f;
+            d.ringDamage = 10f; d.ringCount = 8;
+            d.blinkWindup = 0.8f; d.blinkDistance = 6f; d.blinkDamage = 10f; d.blinkRadius = 2.2f;
+            d.maxAdds = 3; d.addsPerPhaseChange = 2; d.addInterval = 10f;
+        });
+        def.projectilePrefab = ProjectilePrefab();
+        def.addPrefabs = new[] { add1, add2 };
+        EditorUtility.SetDirty(def);
+
+        string tex = Recolor(KK + "Skeletons/Characters/skeleton_texture.png", "Assets/Art/Enemies/skeleton_texture_drowned.png", 0.56f, 0.22f);
+        var skin = LookDevBuilder.Mat("QueenDrowned", tex, new Color(0.8f, 0.92f, 0.95f), Color.black, 0f);
+        var go = new GameObject("Rainha");
+        var col = go.AddComponent<CapsuleCollider>();
+        col.height = 5f; col.radius = 1.15f; col.center = new Vector3(0, 2.5f, 0);
+        go.AddComponent<Health>().Configure(def.maxHealth, Team.Enemy);
+        go.AddComponent<ElementalAffinity>().Set(ElementType.Water);
+        var agent = go.AddComponent<NavMeshAgent>();
+        agent.radius = 1.15f; agent.height = 5f; agent.angularSpeed = 0f;
+        var model = LookDevBuilder.Spawn("Skeletons/Characters/Skeleton_Mage.fbx", Vector3.zero, 0, skin);
+        model.name = "Model";
+        model.transform.SetParent(go.transform, false);
+        model.transform.localScale = Vector3.one * 2.3f;
+        Transform hand = null;
+        foreach (var t in model.GetComponentsInChildren<Transform>(true)) if (t.name == "handslot.r") hand = t;
+        if (hand != null)
+        {
+            var gear = LookDevBuilder.Mat("SkeletonGear", KK + "Skeletons/Props/skeleton_texture.png", new Color(0.7f, 0.66f, 0.68f), Color.black, 0f);
+            var staff = LookDevBuilder.Spawn("Skeletons/Props/Skeleton_Staff.fbx", Vector3.zero, 0, gear);
+            staff.name = "Skeleton_Staff";
+            staff.transform.SetParent(hand, false);
+            staff.transform.localPosition = Vector3.zero; staff.transform.localRotation = Quaternion.identity;
+            var src = AssetDatabase.LoadAssetAtPath<GameObject>(KK + "Skeletons/Props/Skeleton_Staff.fbx");
+            staff.transform.localScale = Vector3.one * ((src != null ? src.transform.localScale.x : 1f) * model.transform.lossyScale.x / Mathf.Max(0.0001f, hand.lossyScale.x));
+        }
+        var anim = CombatDevSceneBuilder.Animator(model, ctrl);
+        go.AddComponent<BossBrain>().Bind(def, anim);
+        // luz fria e baixa: agua parada, sem neon
+        var light = new GameObject("TideLight").AddComponent<Light>();
+        light.transform.SetParent(go.transform, false);
+        light.transform.localPosition = new Vector3(0, 3f, 0.8f);
+        light.type = LightType.Point; light.color = new Color(0.45f, 0.75f, 0.85f); light.intensity = 1.6f; light.range = 7f;
+        var prefab = PrefabUtility.SaveAsPrefabAsset(go, Dir + "Prefabs/Rainha.prefab");
+        Object.DestroyImmediate(go);
+        return prefab;
+    }
+
     /// Carrasco: mini-chefe do meio da run. O esqueleto guerreiro do pack com o capuz e a foice do Ceifador,
     /// ampliado; usa o cerebro do chefe com numeros menores e sem o escudo da ultima fase.
     public static GameObject MiniBossPrefab(GameObject add1, GameObject add2)

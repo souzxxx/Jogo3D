@@ -1,0 +1,64 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7d95e51dfef644a3f9bfcb57deee04ee, type: 3}
+  m_Name: Rainha
+  m_EditorClassIdentifier: Quintessence.Enemies::Quintessence.Enemies.BossDefinition
+  displayName: Rainha Afogada
+  pattern: 2
+  element: 2
+  eruptionPuddleSeconds: 6
+  maxHealth: 560
+  moveSpeed: 2.2
+  cooldownByPhase:
+  - 1.8
+  - 1.45
+  - 1.1
+  slamDamage: 16
+  slamRadius: 3
+  slamOffset: 2.6
+  slamWindup: 0.9
+  slamRange: 5
+  projectilePrefab: {fileID: 5285576411816299366, guid: 6590da6c767a740e79055b4304b1f88e, type: 3}
+  fanDamage: 8
+  fanCount: 3
+  fanCountLastPhase: 5
+  fanSpread: 20
+  fanWindup: 0.8
+  projectileSpeed: 10
+  projectileRange: 18
+  eruptionDamage: 10
+  eruptionRadius: 2.2
+  eruptionCount: 3
+  eruptionWindup: 1.1
+  eruptionScatter: 4.5
+  chargeDamage: 16
+  chargeWidth: 1.7
+  chargeLength: 13
+  chargeWindup: 1.05
+  chargeSpeed: 26
+  ringDamage: 10
+  ringCircleRadius: 2.1
+  ringRadius: 5.7
+  ringCount: 8
+  ringWindup: 1.15
+  blinkWindup: 0.8
+  blinkDistance: 6
+  blinkDamage: 10
+  blinkRadius: 2.2
+  lastPhaseShield: 1
+  shieldTimeout: 12
+  addPrefabs:
+  - {fileID: 7081413231538838477, guid: ae3a3b3fc8ec84f80855eefce6c55ec3, type: 3}
+  - {fileID: 153203729657998027, guid: 01a9502a79d5142a9a550647f054284d, type: 3}
+  addInterval: 10
+  maxAdds: 3
+  addsPerPhaseChange: 2

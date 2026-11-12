@@ -116,5 +116,21 @@ namespace Quintessence.Enemies.Tests
             Assert.IsFalse(slam || charge, "e nao luta corpo a corpo");
             Assert.AreEqual(BossRules.Next(1, 3, true), BossRules.Next(1, 3, true, 0), "o Guardiao continua igual");
         }
+
+        [Test] public void Queen_FloodsWithEruptions_AndBlinksOnlyFromPhaseTwo()
+        {
+            int eruptions = 0;
+            for (int i = 0; i < 4; i++)
+            {
+                var a = BossRules.Next(0, i, true, 2);
+                Assert.AreNotEqual(BossAttack.Blink, a, "na primeira fase ela nao some");
+                if (a == BossAttack.Eruption) eruptions++;
+            }
+            Assert.GreaterOrEqual(eruptions, 2, "a Erupcao e o ataque dela");
+            bool blink = false;
+            for (int i = 0; i < 6; i++) blink |= BossRules.Next(1, i, true, 2) == BossAttack.Blink;
+            Assert.IsTrue(blink, "da segunda fase em diante se teletransporta");
+            Assert.AreEqual(BossAttack.Fan, BossRules.Next(0, 2, false, 2), "longe demais para a Pancada: leque");
+        }
     }
 }

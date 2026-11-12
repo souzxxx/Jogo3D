@@ -33,11 +33,19 @@ namespace Quintessence.Enemies
             new[] { BossAttack.Blink, BossAttack.Ring, BossAttack.Fan, BossAttack.Eruption, BossAttack.Blink, BossAttack.Fan },
         };
 
+        /// Rainha Afogada: anda ate o heroi devagar; Erupcoes que deixam pocas, orbes d'agua em leque e, da segunda fase, teleporte.
+        static readonly BossAttack[][] queen =
+        {
+            new[] { BossAttack.Eruption, BossAttack.Fan, BossAttack.Slam, BossAttack.Eruption },
+            new[] { BossAttack.Eruption, BossAttack.Blink, BossAttack.Fan, BossAttack.Slam, BossAttack.Ring },
+            new[] { BossAttack.Ring, BossAttack.Eruption, BossAttack.Blink, BossAttack.Fan, BossAttack.Eruption, BossAttack.Slam },
+        };
+
         /// Ataque numero index da fase. Longe demais para a Pancada, troca pelo Leque.
-        /// pattern: 0 = Guardiao das Cinzas, 1 = Tecela das Cinzas.
+        /// pattern: 0 = Guardiao das Cinzas, 1 = Tecela das Cinzas, 2 = Rainha Afogada.
         public static BossAttack Next(int phase, int index, bool inSlamRange, int pattern = 0)
         {
-            var set = pattern == 1 ? weaver : cycles;
+            var set = pattern == 1 ? weaver : pattern == 2 ? queen : cycles;
             var cycle = set[Mathf.Clamp(phase, 0, set.Length - 1)];
             var a = cycle[((index % cycle.Length) + cycle.Length) % cycle.Length];
             return a == BossAttack.Slam && !inSlamRange ? BossAttack.Fan : a;
