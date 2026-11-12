@@ -232,7 +232,7 @@ namespace Quintessence.Run.Tests
             Assert.AreEqual(0, p.GrantFeats(loss).Count, "cada feito paga uma vez so");
             Assert.AreEqual(3 * Feats.Reward, p.Shards);
             p.EndRun(10, true, 1f, ElementType.Fire);
-            var won = p.GrantFeats(new RunRecord { Victory = true, Ascension = 3, Quintessences = 1, ShieldBreaks = 1, TrialsPassed = 1 });
+            var won = p.GrantFeats(new RunRecord { Final = true, Victory = true, Ascension = 3, Quintessences = 1, ShieldBreaks = 1, TrialsPassed = 1 });
             CollectionAssert.IsSubsetOf(new[] { Feat.FirstWin, Feat.Ascended, Feat.Quintessence, Feat.ShieldBreak, Feat.Trial }, won);
             Assert.IsFalse(p.Has(Feat.AllHeroes), "falta vencer com os outros tres");
             var back = MetaProgress.Parse(p.Serialize());
@@ -246,9 +246,10 @@ namespace Quintessence.Run.Tests
         {
             var p = new MetaProgress();
             foreach (var e in Elements.All) p.EndRun(10, true, 1f, e);
-            Assert.Contains(Feat.AllHeroes, p.GrantFeats(new RunRecord { Victory = true }));
+            Assert.IsFalse(p.GrantFeats(new RunRecord { Quintessences = 1 }).Contains(Feat.AllHeroes), "no meio da run nao confere o save inteiro");
+            Assert.Contains(Feat.AllHeroes, p.GrantFeats(new RunRecord { Victory = true, Final = true }));
             p.AddHeroXp(ElementType.Air, 500);
-            Assert.Contains(Feat.MasteryFive, p.GrantFeats(new RunRecord()));
+            Assert.Contains(Feat.MasteryFive, p.GrantFeats(new RunRecord { Final = true }));
         }
     }
 }

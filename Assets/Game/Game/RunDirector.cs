@@ -837,11 +837,12 @@ namespace Quintessence.Game
             int unlockedNow = Ascension.Unlocked(MetaStore.Current.Wins);
             MasteryGained = Mastery.RunXp(Run.RoomsCleared, Run.Kills, victory);
             MasteryLevelsUp = MetaStore.Current.AddHeroXp(GameFlow.StartElement, MasteryGained);
-            NewFeats.AddRange(MetaStore.Current.GrantFeats(new RunRecord
+            var endFeats = MetaStore.Current.GrantFeats(new RunRecord
             {
-                Victory = victory, Ascension = GameFlow.Ascension, Kills = Run.Kills, Talents = Run.Talents.Count,
+                Final = true, Victory = victory, Ascension = GameFlow.Ascension, Kills = Run.Kills, Talents = Run.Talents.Count,
                 Quintessences = quintessences, Fusions = fusions, TrialsPassed = trialsPassed, ShieldBreaks = shieldBreaks,
-            }));
+            });
+            NewFeats.AddRange(endFeats);
             NewAscension = unlockedNow > unlockedBefore ? unlockedNow : 0;
             MetaStore.Save();
             ShardsEarned = shards;
@@ -857,7 +858,8 @@ namespace Quintessence.Game
             Sfx.Play(victory ? "victory" : "defeat");
             hud.ShowResult(victory, stats, GameFlow.RestartRun, GameFlow.ToTitle);
             // feito novo: um sino depois do som do resultado
-            if (NewFeats.Count > 0) { yield return new WaitForSecondsRealtime(0.9f); Sfx.Play("feat"); }
+            // os do meio da run ja tocaram na hora
+            if (endFeats.Count > 0) { yield return new WaitForSecondsRealtime(0.9f); Sfx.Play("feat"); }
         }
 
         // ---------- trechos da run ----------

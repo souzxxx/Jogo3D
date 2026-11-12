@@ -93,6 +93,8 @@ namespace Quintessence.Run
     {
         public bool Victory;
         public int Ascension, Kills, Talents, Quintessences, Fusions, TrialsPassed, ShieldBreaks;
+        /// Fim da run: so entao valem os feitos que olham o save inteiro (os quatro herois, maestria 5).
+        public bool Final;
     }
 
     /// Feitos: metas permanentes, cada uma paga Fragmentos uma vez so.
@@ -130,9 +132,9 @@ namespace Quintessence.Run
             var list = new System.Collections.Generic.List<Feat>();
             void Check(Feat f, bool ok) { if (ok && !p.Has(f)) list.Add(f); }
             Check(Feat.FirstWin, r.Victory);
-            Check(Feat.AllHeroes, p.HeroWins(ElementType.Fire) > 0 && p.HeroWins(ElementType.Water) > 0 && p.HeroWins(ElementType.Earth) > 0 && p.HeroWins(ElementType.Air) > 0);
-            Check(Feat.MasteryFive, p.MasteryLevel(ElementType.Fire) >= Mastery.MaxLevel || p.MasteryLevel(ElementType.Water) >= Mastery.MaxLevel
-                || p.MasteryLevel(ElementType.Earth) >= Mastery.MaxLevel || p.MasteryLevel(ElementType.Air) >= Mastery.MaxLevel);
+            Check(Feat.AllHeroes, r.Final && p.HeroWins(ElementType.Fire) > 0 && p.HeroWins(ElementType.Water) > 0 && p.HeroWins(ElementType.Earth) > 0 && p.HeroWins(ElementType.Air) > 0);
+            Check(Feat.MasteryFive, r.Final && (p.MasteryLevel(ElementType.Fire) >= Mastery.MaxLevel || p.MasteryLevel(ElementType.Water) >= Mastery.MaxLevel
+                || p.MasteryLevel(ElementType.Earth) >= Mastery.MaxLevel || p.MasteryLevel(ElementType.Air) >= Mastery.MaxLevel));
             Check(Feat.Ascended, r.Victory && r.Ascension >= 3);
             Check(Feat.Quintessence, r.Quintessences > 0);
             Check(Feat.Trial, r.TrialsPassed > 0);
