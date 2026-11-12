@@ -27,7 +27,7 @@ Testes: `unity test . --mode EditMode` e `unity test . --mode PlayMode` (os de P
 
 ## Build WebGL
 
-**Pendente (Leonardo, 12/11 de manhã):** subir `Builds/Quintessence-WebGL.zip` no itch.io (o zip mais recente foi gerado e conferido no Chrome durante a madrugada; nada foi enviado).
+**Pendente (Leonardo, 12/11 de manhã):** subir `Builds/Quintessence-WebGL.zip` no itch.io (o zip mais recente, de 24,5 MB, foi gerado às 09h11 e conferido no Chrome; nada foi enviado).
 
 Menu **Quintessence > Build WebGL (itch.io)** ou `unity build --target WebGL --execute-method BuildTools.BuildWebGL -o Builds/WebGL`. A pasta `Builds/` não vai pro git; para o itch.io, compacte o conteúdo de `Builds/WebGL` com o `index.html` na raiz.
 
