@@ -49,6 +49,15 @@ namespace Quintessence.Game
         [SerializeField] RoomLayout[] layouts = new RoomLayout[0];
         [SerializeField] Vector3 entryPoint = new(0, 0.05f, -5.5f);
         [SerializeField] float doorLine = 7.15f;
+        [Tooltip("Meia largura e meia profundidade da sala, com folga (limites para resgatar quem sai).")]
+        [SerializeField] Vector2 arenaHalf = new(Arena.DefaultHalfX, Arena.DefaultHalfZ);
+        [Tooltip("Os arranjos foram desenhados para 20 x 16: na sala maior as pecas se espalham nesta proporcao.")]
+        [SerializeField] Vector2 layoutSpread = Vector2.one;
+
+        /// Tamanho da sala da run (o builder chama ao montar a cena).
+        public void BindRoomSize(Vector3 entry, float doors, Vector2 half, Vector2 spread) { entryPoint = entry; doorLine = doors; arenaHalf = half; layoutSpread = spread; }
+        public Vector2 LayoutSpread => layoutSpread;
+        public Vector3 EntryPoint => entryPoint;
         [SerializeField] float interactRange = 2.4f;
 
         public RunState Run { get; private set; }
@@ -108,10 +117,11 @@ namespace Quintessence.Game
         public void BindBiomeProps(BiomeProps[] sets) => biomeProps = sets;
 
         /// Onde os adereços do trecho entram: cantos da frente e as duas laterais, longe da entrada, das portas e dos layouts.
+        /// Em fracao da meia sala (10 x 8 na sala padrao): cantos da frente e as laterais.
         static readonly (Vector3 pos, float rot)[] PropSpots =
         {
-            (new Vector3(-6.6f, 0, -7.1f), 20f), (new Vector3(6.6f, 0, -7.1f), -25f),
-            (new Vector3(-8.6f, 0, 0.1f), 90f), (new Vector3(8.5f, 0, -2.7f), -90f),
+            (new Vector3(-0.66f, 0, -0.89f), 20f), (new Vector3(0.66f, 0, -0.89f), -25f),
+            (new Vector3(-0.86f, 0, 0.01f), 90f), (new Vector3(0.85f, 0, -0.34f), -90f),
         };
         public int BiomePropsPlaced { get; private set; }
 
@@ -128,7 +138,8 @@ namespace Quintessence.Game
             {
                 var prefab = set[(start + i) % set.Length];
                 if (prefab == null) continue;
-                var (pos, rot) = PropSpots[i];
+                var (frac, rot) = PropSpots[i];
+                var pos = new Vector3(frac.x * (Arena.HalfX - 0.6f), 0, frac.z * (Arena.HalfZ - 0.6f));
                 var go = Instantiate(prefab, pos, Quaternion.Euler(0, rot + ((seed + i * 37) % 3 - 1) * 12f, 0), layoutRoot);
                 go.name = prefab.name;
                 BiomePropsPlaced++;
@@ -201,16 +212,19 @@ namespace Quintessence.Game
             if (index < 0 || index >= layouts.Length || layouts[index] == null) return;
             CurrentLayout = layouts[index].displayName;
             foreach (var p in layouts[index].pieces)
-                if (p.prefab != null) Instantiate(p.prefab, p.position, Quaternion.Euler(0, p.rotation, 0), layoutRoot);
+                if (p.prefab != null) Instantiate(p.prefab, new Vector3(p.position.x * layoutSpread.x, p.position.y, p.position.z * layoutSpread.y), Quaternion.Euler(0, p.rotation, 0), layoutRoot);
         }
 
         void Awake()
         {
+            Arena.Configure(arenaHalf.x, arenaHalf.y);
             GameClock.SetPaused(false);
             hud = FindFirstObjectByType<Hud>();
             if (hud == null) hud = new GameObject("Hud").AddComponent<Hud>();
             dresser = gameObject.AddComponent<BiomeDresser>();
         }
+
+        void OnDestroy() => Arena.ResetSize();
 
         void OnEnable()
         {
@@ -1134,7 +1148,7 @@ namespace Quintessence.Game
             if (withMaster && masterPrefab != null)
             {
                 if (layoutRoot == null) layoutRoot = new GameObject("Layout").transform;
-                var m = Instantiate(masterPrefab, new Vector3(-6.8f, 0, -2.6f), Quaternion.Euler(0, 120, 0), layoutRoot);
+                var m = Instantiate(masterPrefab, new Vector3(-6.8f * layoutSpread.x, 0, -2.6f * layoutSpread.y), Quaternion.Euler(0, 120, 0), layoutRoot);
                 m.name = "Mestre";
                 Label(m.transform, new Vector3(0, 3.2f, 0), "MESTRE", new Color(0.88f, 0.74f, 0.42f), 0.7f);
                 masterNpc = m.GetComponent<Merchant>();

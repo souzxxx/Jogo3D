@@ -65,8 +65,9 @@ public static class LookDevBuilder
             foreach (var mf in child.GetComponentsInChildren<MeshFilter>())
                 if (mf.GetComponent<Collider>() == null) mf.gameObject.AddComponent<MeshCollider>();
         }
-        Box("FloorCollider", new Vector3(0, -0.5f, 0), new Vector3(24, 1, 20));
-        Box("FrontLimit", new Vector3(0, 2, -8.3f), new Vector3(24, 6, 0.6f));
+        float w = RoomW * 4f, d = RoomD * 4f;
+        Box("FloorCollider", new Vector3(0, -0.5f, 0), new Vector3(w + 4f, 1, d + 4f));
+        Box("FrontLimit", new Vector3(0, 2, -(d / 2f + 0.3f)), new Vector3(w + 4f, 6, 0.6f));
     }
 
     static void Box(string name, Vector3 center, Vector3 size)
@@ -293,6 +294,9 @@ public static class LookDevBuilder
         l.shadowStrength = 0.85f;
     }
 
+    /// Tamanho da sala em placas de piso (4 m cada). O titulo e as cenas de teste usam 5 x 4; a run usa uma maior.
+    public static int RoomW = 5, RoomD = 4;
+
     static void Room()
     {
         var probe = Spawn("Dungeon/floor_tile_large.fbx", Vector3.zero, 0, Dungeon);
@@ -303,7 +307,7 @@ public static class LookDevBuilder
         Object.DestroyImmediate(probe);
         if (T < 1) T = 4;
 
-        const int W = 5, D = 4;
+        int W = RoomW, D = RoomD;
         var rng = new System.Random(7);
         for (int i = 0; i < W; i++)
         for (int j = 0; j < D; j++)
@@ -315,7 +319,7 @@ public static class LookDevBuilder
         float hx = W * T / 2f, hz = D * T / 2f;
         string[] back = { "wall.fbx", "wall_cracked.fbx", "wall_arched.fbx", "wall.fbx", "wall_broken.fbx" };
         for (int i = 0; i < W; i++)
-            Spawn("Dungeon/" + back[i], new Vector3((i - (W - 1) / 2f) * T, 0, hz), 0, Dungeon);
+            Spawn("Dungeon/" + back[i % back.Length], new Vector3((i - (W - 1) / 2f) * T, 0, hz), 0, Dungeon);
         for (int j = 0; j < D; j++)
         {
             float z = (j - (D - 1) / 2f) * T;
@@ -325,15 +329,17 @@ public static class LookDevBuilder
         Spawn("Dungeon/wall_corner.fbx", new Vector3(-hx, 0, hz), 0, Dungeon);
         Spawn("Dungeon/wall_corner.fbx", new Vector3(hx, 0, hz), 270, Dungeon);
 
-        Spawn("Dungeon/pillar_decorated.fbx", new Vector3(-8.6f, 0, 2f), 0, Prop, 0.8f);
-        Spawn("Dungeon/pillar_decorated.fbx", new Vector3(8.6f, 0, 2f), 0, Prop, 0.8f);
-        Spawn("Dungeon/barrel_large.fbx", new Vector3(-8.6f, 0, 6.4f), 20, Prop);
-        Spawn("Dungeon/barrel_small_stack.fbx", new Vector3(-7.2f, 0, 6.6f), 0, Prop);
-        Spawn("Dungeon/crates_stacked.fbx", new Vector3(8.3f, 0, 6.3f), -15, Prop);
-        Spawn("Dungeon/chest_gold.fbx", new Vector3(0, 0, 6.2f), 180, Prop);
-        Spawn("Dungeon/rubble_half.fbx", new Vector3(-8.3f, 0, -2f), 100, Prop, 0.5f);
+        // posicoes pensadas para 20 x 16 e esticadas para o tamanho da sala
+        float sx = hx / 10f, sz = hz / 8f;
+        Spawn("Dungeon/pillar_decorated.fbx", new Vector3(-(hx - 1.4f), 0, 2f * sz), 0, Prop, 0.8f);
+        Spawn("Dungeon/pillar_decorated.fbx", new Vector3(hx - 1.4f, 0, 2f * sz), 0, Prop, 0.8f);
+        Spawn("Dungeon/barrel_large.fbx", new Vector3(-(hx - 1.4f), 0, hz - 1.6f), 20, Prop);
+        Spawn("Dungeon/barrel_small_stack.fbx", new Vector3(-(hx - 2.8f), 0, hz - 1.4f), 0, Prop);
+        Spawn("Dungeon/crates_stacked.fbx", new Vector3(hx - 1.7f, 0, hz - 1.7f), -15, Prop);
+        Spawn("Dungeon/chest_gold.fbx", new Vector3(0, 0, hz - 1.8f), 180, Prop);
+        Spawn("Dungeon/rubble_half.fbx", new Vector3(-(hx - 1.7f), 0, -2f * sz), 100, Prop, 0.5f);
 
-        foreach (float x in new[] { -8f, -4f, 4f, 8f })
+        foreach (float x in new[] { -0.8f * hx, -0.4f * hx, 0.4f * hx, 0.8f * hx })
         {
             Spawn("Dungeon/torch_mounted.fbx", new Vector3(x, 2.2f, hz - 0.55f), 180, Prop);
             Point("TorchLight", new Vector3(x, 2.9f, hz - 1.1f), new Color(1f, 0.55f, 0.2f), 2.2f, 7f);
@@ -342,12 +348,18 @@ public static class LookDevBuilder
         }
 
         // corrupcao: rachaduras de brasa no chao + cristais ambar
-        Crack(new Vector3(-7.5f, 0, -6.5f), 35, 9, 11);
-        Crack(new Vector3(6.8f, 0, -7.4f), 5, 7, 23);
-        Crack(new Vector3(-2f, 0, 4.5f), 80, 6, 5);
-        Crystals(new Vector3(-8.4f, 0, -5.6f), 31);
-        Crystals(new Vector3(8.2f, 0, -6.2f), 47);
-        Crystals(new Vector3(8.6f, 0, 2.6f), 59);
+        Crack(new Vector3(-7.5f * sx, 0, -6.5f * sz), 35, 9, 11);
+        Crack(new Vector3(6.8f * sx, 0, -7.4f * sz), 5, 7, 23);
+        Crack(new Vector3(-2f * sx, 0, 4.5f * sz), 80, 6, 5);
+        Crystals(new Vector3(-(hx - 1.6f), 0, -5.6f * sz), 31);
+        Crystals(new Vector3(hx - 1.8f, 0, -6.2f * sz), 47);
+        Crystals(new Vector3(hx - 1.4f, 0, 2.6f * sz), 59);
+        if (W > 5)
+        {
+            // sala grande: mais uma rachadura e mais cristais para o meio nao ficar vazio
+            Crack(new Vector3(4f * sx, 0, 1.5f * sz), 200, 7, 41);
+            Crystals(new Vector3(-(hx - 1.6f), 0, 3.4f * sz), 73);
+        }
     }
 
     static void Crack(Vector3 start, float heading, int segments, int seed)

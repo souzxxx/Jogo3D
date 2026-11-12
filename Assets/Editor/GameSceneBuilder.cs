@@ -26,8 +26,21 @@ public static class GameSceneBuilder
         AssetDatabase.SaveAssets();
     }
 
-    static void BuildRun() => CombatDevSceneBuilder.BuildPlayable("Run", RunPath, root =>
+    /// A sala da run: 7 x 5 placas (28 x 20 m). Cenarios e lojas, desenhados para 20 x 16, se espalham nesta proporcao.
+    const int RunW = 7, RunD = 5;
+    static float SX = 1f, SZ = 1f;
+
+    static void BuildRun()
     {
+        LookDevBuilder.RoomW = RunW; LookDevBuilder.RoomD = RunD;
+        SX = RunW / 5f * 1f; SZ = RunD / 4f;
+        try { BuildRunScene(); }
+        finally { LookDevBuilder.RoomW = 5; LookDevBuilder.RoomD = 4; SX = SZ = 1f; }
+    }
+
+    static void BuildRunScene() => CombatDevSceneBuilder.BuildPlayable("Run", RunPath, root =>
+    {
+        float hx = RunW * 2f, hz = RunD * 2f;
         // o bau decorativo do look-dev fica bem onde a porta do meio abre
         foreach (Transform child in root) if (child.name.StartsWith("chest")) { Object.DestroyImmediate(child.gameObject); break; }
         EnemyDevSceneBuilder.Bake(root, "Assets/Scenes/Run_NavMesh.asset");
@@ -37,6 +50,7 @@ public static class GameSceneBuilder
         sp.transform.SetParent(root, false);
         sp.transform.position = new Vector3(0, 0, 1);
         var spawner = sp.AddComponent<WaveSpawner>();
+        spawner.SetSpawnRadius(7f * Mathf.Min(SX, SZ) + 1f);
         spawner.SetAutoStart(false);
         EditorUtility.SetDirty(spawner);
 
@@ -71,6 +85,7 @@ public static class GameSceneBuilder
         for (int i = 0; i < banners.Length; i++) bannerPrefabs[i] = Prop(banners[i], 1f);
         var stone = LookDevBuilder.Mat("Stone", null, new Color(0.33f, 0.34f, 0.42f), Color.black, 0f);
         director.BindLayouts(Layouts());
+        director.BindRoomSize(new Vector3(0, 0.05f, -(hz - 2.5f)), hz - 0.85f, new Vector2(hx + 0.6f, hz + 0.6f), new Vector2(SX, SZ));
         director.BindTutorial(DummyPrefab());
         director.BindDecor(RoomDecors());
         director.BindMaster(MasterPrefab());
@@ -91,7 +106,7 @@ public static class GameSceneBuilder
         var root = new GameObject("ShopDecor");
         GameObject P(string model, float x, float z, float rot, float scale = 1f, float y = 0f)
         {
-            var go = LookDevBuilder.Spawn("Dungeon/" + model + ".fbx", new Vector3(x, y, z), rot, mat, scale);
+            var go = LookDevBuilder.Spawn("Dungeon/" + model + ".fbx", new Vector3(x * SX, y, z * SZ), rot, mat, scale);
             go.name = model;
             go.transform.SetParent(root.transform, true);
             return go;
@@ -141,7 +156,7 @@ public static class GameSceneBuilder
         var ctrl = CombatDevSceneBuilder.Controller(fbx, dir + "Merchant.controller", ("Idle", "Idle", 0f),
             ("Greet", "Interact|Cheer", 1.1f), ("Thanks", "Cheer", 1.1f), ("Refuse", "Hit_A|Hit_B", 0.6f));
         var cloth = LookDevBuilder.Mat("Merchant", CombatDevSceneBuilder.KK + "Adventurers/Props/rogue_texture.png", Color.white, Color.black, 0f);
-        var who = LookDevBuilder.Spawn("Adventurers/Characters/Mage.fbx", new Vector3(-6.2f, 0, 0.75f), 180, cloth);
+        var who = LookDevBuilder.Spawn("Adventurers/Characters/Mage.fbx", new Vector3(-6.2f * SX, 0, 0.75f * SZ), 180, cloth);
         who.name = "Merchant";
         LookDevBuilder.Hide(who, "1H_Wand", "2H_Staff", "Spellbook_open");
         who.transform.SetParent(root.transform, true);
@@ -151,14 +166,14 @@ public static class GameSceneBuilder
         // luz propria para as estantes, que sumiam no escuro do fundo, e velas em cima dos barris
         var shelfLight = new GameObject("ShelfLight").AddComponent<Light>();
         shelfLight.transform.SetParent(root.transform, false);
-        shelfLight.transform.position = new Vector3(-6.2f, 2.4f, 1.5f);
+        shelfLight.transform.position = new Vector3(-6.2f * SX, 2.4f, 1.5f * SZ);
         shelfLight.type = LightType.Point; shelfLight.color = new Color(1f, 0.78f, 0.5f); shelfLight.intensity = 2.6f; shelfLight.range = 5f;
         P("candle_triple", -9.0f, 0.2f, 0, 1f, 1.25f);
         P("banner_patternA_green", -6.2f, 3.05f, 0, 1f, 1.5f);
 
         var lamp = new GameObject("StallLight").AddComponent<Light>();
         lamp.transform.SetParent(root.transform, false);
-        lamp.transform.position = new Vector3(-6.2f, 3.0f, -1.6f);
+        lamp.transform.position = new Vector3(-6.2f * SX, 3.0f, -1.6f * SZ);
         lamp.type = LightType.Point; lamp.color = new Color(1f, 0.72f, 0.42f); lamp.intensity = 2.2f; lamp.range = 7f;
 
         var prefab = PrefabUtility.SaveAsPrefabAsset(root, dir + "ShopDecor.prefab");
@@ -174,7 +189,7 @@ public static class GameSceneBuilder
         var root = new GameObject(name);
         foreach (var p in pieces)
         {
-            var go = LookDevBuilder.Spawn("Dungeon/" + p.model + ".fbx", new Vector3(p.x, p.y, p.z), p.rot, mat, p.scale);
+            var go = LookDevBuilder.Spawn("Dungeon/" + p.model + ".fbx", new Vector3(p.x * SX, p.y, p.z * SZ), p.rot, mat, p.scale);
             go.name = p.model;
             go.transform.SetParent(root.transform, true);
             if (!p.solid) continue;
@@ -186,7 +201,7 @@ public static class GameSceneBuilder
         }
         var lamp = new GameObject("DecorLight").AddComponent<Light>();
         lamp.transform.SetParent(root.transform, false);
-        lamp.transform.position = lightPos;
+        lamp.transform.position = new Vector3(lightPos.x * SX, lightPos.y, lightPos.z * SZ);
         lamp.type = LightType.Point; lamp.color = lightColor; lamp.intensity = 2.2f; lamp.range = 8f;
         var prefab = PrefabUtility.SaveAsPrefabAsset(root, dir + name + ".prefab");
         Object.DestroyImmediate(root);

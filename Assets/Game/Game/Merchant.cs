@@ -51,7 +51,7 @@ namespace Quintessence.Game
             var to = customer.position - transform.position; to.y = 0f;
             if (to.sqrMagnitude > 0.05f)
                 transform.rotation = Quaternion.RotateTowards(transform.rotation, Quaternion.LookRotation(to), 220f * Time.deltaTime);
-            if (!Greeted && to.magnitude < 7.5f)
+            if (!Greeted && to.magnitude < 10.5f)
             {
                 Greeted = true;
                 React("Greet", 1.1f, greetLine);
