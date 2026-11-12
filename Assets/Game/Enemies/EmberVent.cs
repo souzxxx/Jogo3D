@@ -48,6 +48,8 @@ namespace Quintessence.Enemies
             {
                 var h = buffer[i].GetComponentInParent<Health>();
                 if (h == null || h.IsDead || !seen.Add(h)) continue;
+                // so criatura: cristal, barril e boneco nao sao feridos pelo chao
+                if (h.Team == Team.Enemy && h.GetComponent<UnityEngine.AI.NavMeshAgent>() == null) continue;
                 var flat = h.transform.position - transform.position;
                 flat.y = 0f;
                 if (flat.magnitude > radius + 0.3f) continue;
