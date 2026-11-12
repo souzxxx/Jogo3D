@@ -180,7 +180,7 @@ namespace Quintessence.UI
                 ("Ceifador", "Avisa uma linha e atravessa a sala. Saia e bata na volta.", foe),
                 ("Arremessador", "Joga a bomba onde você está. Saia do círculo.", foe),
                 ("Xamã", "Cura os aliados feridos (aviso verde). Derrube primeiro.", foe),
-                ("Campeão e Carrasco", "Fecham as salas de Elite. Pagam mais Essência e experiência.", gold),
+                ("Campeão, Carrasco e chefes", "Fecham as Elites. No fim: o Guardião (corpo a corpo) ou a Tecelã (de longe).", gold),
             }, 74);
             Column(1130, "REAÇÕES", new (string, string, Color)[]
             {
