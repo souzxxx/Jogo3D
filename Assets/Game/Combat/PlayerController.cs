@@ -215,7 +215,7 @@ namespace Quintessence.Combat
             var b = (Kit ?? HeroKit.Of(who)).Burst;
             if (b.Damage <= 0f) return;
             Bursts++;
-            ShapedHit(who, transform.position, AimDirection, b.Radius, 360f, b.Damage, b.Knockback, AttackKind.Skill, 0f, b.Applies, b.Status, b.StatusTime);
+            ShapedHit(who, transform.position, AimDirection, b.Radius, 360f, b.Damage * (1f + mods.BurstBonus), b.Knockback, AttackKind.Skill, 0f, b.Applies, b.Status, b.StatusTime);
             if (b.Heal > 0f) health.Heal(health.Max * b.Heal);
             GameEvents.RaiseQuintessenceBurst(b.Name, transform.position, b.Radius, who);
         }
@@ -284,7 +284,13 @@ namespace Quintessence.Combat
             float moveMul = mods.MoveSpeedMult;
             if (hasteLeft > 0f) { hasteLeft -= dt; moveMul *= 1.35f; }
             bool canAct = true;
-            if (TryGetComponent(out StatusHolder status)) { moveMul *= status.State.MoveMultiplier; canAct = status.State.CanAct; }
+            if (TryGetComponent(out StatusHolder status))
+            {
+                // Pes Firmes: encharcado nao deixa lento (o resto do status vale)
+                float statusMove = status.State.MoveMultiplier;
+                if (mods.SureFooted && statusMove > 0f && statusMove < 1f) statusMove = 1f;
+                moveMul *= statusMove; canAct = status.State.CanAct;
+            }
 
             var mv = Input.Move;
             var moveDir = Vector3.ClampMagnitude(new Vector3(mv.x, 0f, mv.y), 1f);
@@ -501,6 +507,8 @@ namespace Quintessence.Combat
                 bool crit = chance > 0f && UnityEngine.Random.value < chance;
                 float marked = basic && target.TryGetComponent(out ElementMark m) && m.State.HasMark ? 1f + markedTargetBonus + mods.SwitchStrikeAdd : 1f;
                 if (mods.BurningBonus > 0f && target.TryGetComponent(out StatusHolder burning) && burning.State.Has(StatusType.Burn)) marked *= 1f + mods.BurningBonus;
+                // Flanqueador: o golpe vai no sentido para onde o alvo olha = pegou pelas costas
+                if (mods.FlankBonus > 0f && to.sqrMagnitude > 0.01f && Vector3.Dot(target.transform.forward, to.normalized) > 0.35f) marked *= 1f + mods.FlankBonus;
                 var info = new DamageInfo(damage * mods.Damage(element) * marked * (crit ? critMultiplier : 1f), element, health.Team, gameObject)
                 {
                     Point = overlap[i].ClosestPoint(origin),

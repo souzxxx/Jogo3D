@@ -50,6 +50,12 @@ namespace Quintessence.Core
         /// Chance de esquivar um golpe inteiro.
         public float Evasion;
         public float XpMult = 1f;
+        /// Dano a mais em golpes pelas costas do alvo (Flanqueador).
+        public float FlankBonus;
+        /// Nao fica lento encharcado (Pes Firmes).
+        public bool SureFooted;
+        /// Dano a mais na explosao do despertar da Quintessencia.
+        public float BurstBonus;
 
         static int Pair(ElementType a, ElementType b) => System.Math.Min((int)a, (int)b) * 5 + System.Math.Max((int)a, (int)b);
         /// Multiplicador so da reacao daquele par (simetrico). 1 = sem bonus.
@@ -88,6 +94,8 @@ namespace Quintessence.Core
             BasicDamageMult = FinisherMult = EssenceMult = XpMult = 1f;
             Evasion = FireTrailSeconds = BurningBonus = WaterHealAdd = WaterFreezeSeconds = EarthThorns = AirHasteSeconds = SkillRefundOnKill = 0f;
             EarthBlocksAdd = DashChargesAdd = 0;
+            FlankBonus = BurstBonus = 0f;
+            SureFooted = false;
         }
     }
 }
