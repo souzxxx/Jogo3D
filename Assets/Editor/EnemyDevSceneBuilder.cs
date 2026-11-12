@@ -484,10 +484,11 @@ public static class EnemyDevSceneBuilder
         const string tex = KK + "Skeletons/Characters/skeleton_texture.png";
         var ash = LookDevBuilder.Mat("SkeletonSwarm", tex, new Color(0.62f, 0.6f, 0.62f), Color.black, 0f);
         var coal = LookDevBuilder.Mat("SkeletonEmber", tex, new Color(1.05f, 0.58f, 0.42f), Color.black, 0f);
-        var moss = LookDevBuilder.Mat("SkeletonSentinel", tex, new Color(0.66f, 0.76f, 0.62f), Color.black, 0f);
+        var moss = LookDevBuilder.Mat("SkeletonSentinel2", tex, new Color(0.5f, 0.68f, 0.52f), Color.black, 0f);
         dress = art ? (new[] { ("cinzento_head", "head"), ("cinzento_back", "chest"), ("cinzento_weapon", "handslot.r") }, new string[0]) : default;
         swarm = EnemyPrefab("Cinzento", "Skeletons/Characters/Skeleton_Minion.fbx", swarmDef, swarmCtrl, ash, 0.65f);
-        dress = art ? (new[] { ("brasa_head", "head"), ("brasa_body", "chest"), ("brasa_weapon", "handslot.r") }, new[] { "Skeleton_Warrior_Helmet" }) : default;
+        dress = art ? (new[] { ("brasa_head", "head"), ("brasa_body", "chest"), ("brasa_shoulder_l", "upperarm.l"), ("brasa_shoulder_r", "upperarm.r"), ("brasa_weapon", "handslot.r") },
+            new[] { "Skeleton_Warrior_Helmet", "Skeleton_Warrior_Cloak" }) : default;
         ember = EnemyPrefab("BrasaViva", "Skeletons/Characters/Skeleton_Warrior.fbx", emberDef, emberCtrl, coal, 1.1f);
         dress = art ? (new[] { ("sentinela_head", "head"), ("sentinela_back", "chest"), ("sentinela_base", "root"), ("sentinela_weapon", "handslot.r") }, new[] { "Skeleton_Mage_Hat" }) : default;
         sentinel = EnemyPrefab("Sentinela", "Skeletons/Characters/Skeleton_Mage.fbx", sentinelDef, sentinelCtrl, moss, 1.25f);

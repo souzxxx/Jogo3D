@@ -62,6 +62,15 @@ public static class HeroBuilder
                     m.SetColor("_EmissionColor", c * (m.name == "Glow" ? (path.Contains("/Garden/") ? 0.7f : 1.1f) : 0.25f));
                 }
                 if (path.Contains("/Biomes/") && m.name == "Water" && m.HasProperty("_Smoothness")) m.SetFloat("_Smoothness", 0.55f);
+                // inimigos elementais: as chamas da Brasa acendem laranja, o olho e o cristal da Sentinela verde-palido
+                if (path.Contains("/Enemies2/") && m.name == "Magic" && m.HasProperty("_EmissionColor"))
+                {
+                    var glow = path.Contains("brasa") ? new Color(0.95f, 0.42f, 0.12f) : new Color(0.62f, 0.85f, 0.6f);
+                    m.SetColor("_BaseColor", glow * 0.8f);
+                    m.EnableKeyword("_EMISSION");
+                    m.globalIlluminationFlags = MaterialGlobalIlluminationFlags.RealtimeEmissive;
+                    m.SetColor("_EmissionColor", glow * (path.Contains("brasa") ? 0.9f : 0.6f));
+                }
                 // a pedra do cajado do Xama e verde-cura
                 if (path.Contains("/Enemies/") && m.name == "Magic" && m.HasProperty("_EmissionColor"))
                 {
