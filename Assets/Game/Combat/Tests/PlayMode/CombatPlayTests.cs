@@ -143,12 +143,13 @@ namespace Quintessence.Combat.PlayTests
             input.PressQuintessence();
             yield return Play(0.3f);
             Assert.IsTrue(quintOn, "medidor cheio + quatro elementos deveria ativar");
+            Assert.AreEqual(1, player.Bursts, "o despertar solta a explosao do heroi");
             float full = hp.TakeDamage(new DamageInfo(10, ElementType.None, Team.Enemy));
             Assert.AreEqual(5f, full, 0.01f, "na Quintessencia o heroi leva metade do dano");
             int beforeQ = reactions.Count;
             yield return RunTo(a2.transform, 2.4f, 3f);
             yield return Attack(a2, 2.6f);
-            Assert.GreaterOrEqual(reactions.Count - beforeQ, 3, "na Quintessencia ate o golpe basico dispara reacao");
+            Assert.GreaterOrEqual(reactions.Count - beforeQ, 2, "na Quintessencia ate o golpe basico dispara reacao (o despertar ja empurrou e queimou o alvo)");
             yield return Play(5.4f);
             Assert.IsFalse(quintOn, "a Quintessencia dura 8 s");
             yield return Play(0.6f);

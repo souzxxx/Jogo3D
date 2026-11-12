@@ -89,6 +89,7 @@ namespace Quintessence.Feel
             GameEvents.BossShieldChanged += OnBossShield;
             GameEvents.Exploded += OnExploded;
             GameEvents.PuddleLanded += OnPuddle;
+            GameEvents.QuintessenceBurst += OnBurst;
             GameEvents.EnemyHealed += OnEnemyHealed;
             GameEvents.ChampionSpawned += OnChampion;
             GameEvents.Evaded += OnEvaded;
@@ -121,6 +122,7 @@ namespace Quintessence.Feel
             GameEvents.BossShieldChanged -= OnBossShield;
             GameEvents.Exploded -= OnExploded;
             GameEvents.PuddleLanded -= OnPuddle;
+            GameEvents.QuintessenceBurst -= OnBurst;
             GameEvents.EnemyHealed -= OnEnemyHealed;
             GameEvents.ChampionSpawned -= OnChampion;
             GameEvents.Evaded -= OnEvaded;
@@ -422,6 +424,22 @@ namespace Quintessence.Feel
             DamageNumber.Spawn(p + Vector3.up * 1.2f, "+" + Mathf.RoundToInt(amount), green, 0.8f, 0.9f);
             accents?.Emit(ElementType.Air, p, Vector3.up, 60f, 10, 2.5f, green);
         }
+
+        /// Despertar da Quintessencia: o nome da explosao do heroi, um anel largo na cor dele e um clarao.
+        void OnBurst(string name, Vector3 point, float radius, ElementType hero)
+        {
+            var c = ElementColors.Of(hero);
+            var p = point + Vector3.up * 0.7f;
+            Ring(p, 90, radius / 0.25f, 0.6f, 1.2f, 0.45f, c);
+            Ring(p + Vector3.up * 0.3f, 70, radius / 0.35f, 0.5f, 0.9f, 0.5f, UiColorsCream);
+            accents?.Emit(hero, p, Vector3.up, 180f, 60, radius * 1.4f);
+            Burst(p, Vector3.up, 180f, 80, 3f, 10f, 0.35f, 1f, 0.7f, c);
+            LightFlash(p + Vector3.up, c, 14f, radius * 3f, 0.45f);
+            CameraShake.Add(0.7f);
+            DamageNumber.Spawn(point + Vector3.up * 4.2f, name.ToUpperInvariant(), Color.Lerp(c, Color.white, 0.35f), 1.15f, 2f);
+        }
+
+        static readonly Color UiColorsCream = new(0.96f, 0.9f, 0.78f);
 
         /// Orbe d'agua caindo: respingo e anel da cor do elemento, sem clarao de fogo.
         void OnPuddle(Vector3 point, float radius, ElementType element, float seconds)

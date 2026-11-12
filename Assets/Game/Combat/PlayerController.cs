@@ -203,10 +203,28 @@ namespace Quintessence.Combat
         }
 
         /// Comeco de run: o heroi volta a ter so o elemento inicial.
+        ElementType hero;
+        /// Quantas explosoes de despertar sairam (para os testes).
+        public int Bursts { get; private set; }
+
+        /// Despertar da Quintessencia: a explosao do heroi em volta dele. Ja com a Quintessencia ativa, reage com tudo que pega.
+        void QuintessenceBurst()
+        {
+            // sem kit escolhido (cenas de teste), vale o do elemento inicial do Inspector
+            var who = hero != ElementType.None ? hero : startingElement;
+            var b = (Kit ?? HeroKit.Of(who)).Burst;
+            if (b.Damage <= 0f) return;
+            Bursts++;
+            ShapedHit(who, transform.position, AimDirection, b.Radius, 360f, b.Damage, b.Knockback, AttackKind.Skill, 0f, b.Applies, b.Status, b.StatusTime);
+            if (b.Heal > 0f) health.Heal(health.Max * b.Heal);
+            GameEvents.RaiseQuintessenceBurst(b.Name, transform.position, b.Radius, who);
+        }
+
         public void ResetLoadout(ElementType starting)
         {
             loadout = new LoadoutState(starting);
             Element = starting;
+            hero = starting;
             mods.Reset();
             for (int i = 0; i < skillCd.Length; i++) skillCd[i] = 0f;
             if (TryGetComponent(out HeroSkin skin)) skin.Show(starting);
@@ -250,6 +268,7 @@ namespace Quintessence.Combat
             {
                 health.Pool.ExtraDamageTakenMultiplier = QuintessenceState.DamageTaken;
                 GameEvents.RaiseQuintessenceActive(true);
+                QuintessenceBurst();
             }
             if (quint.Active) GameEvents.RaiseQuintessenceMeter(quint.Normalized);
             if (quint.Tick(dt))

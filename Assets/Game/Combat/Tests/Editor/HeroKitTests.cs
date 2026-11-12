@@ -17,6 +17,23 @@ namespace Quintessence.Combat.Tests
             }
         }
 
+        [Test] public void EveryHero_HasItsOwnQuintessenceBurst()
+        {
+            var names = new System.Collections.Generic.HashSet<string>();
+            foreach (var e in Elements.All)
+            {
+                var b = HeroKit.Of(e).Burst;
+                Assert.IsNotEmpty(b.Name, e.ToString());
+                Assert.IsTrue(names.Add(b.Name), "cada heroi tem a sua: " + b.Name);
+                Assert.Greater(b.Damage, 0f);
+                Assert.GreaterOrEqual(b.Radius, 4f, "pega o bando em volta");
+                Assert.IsTrue(b.Applies && b.StatusTime > 0f, e + ": deixa um efeito");
+            }
+            Assert.Greater(HeroKit.Of(ElementType.Water).Burst.Heal, 0f, "a da Liora cura");
+            Assert.AreEqual(StatusType.Stun, HeroKit.Of(ElementType.Earth).Burst.Status, "a do Brann atordoa");
+            Assert.Greater(HeroKit.Of(ElementType.Air).Burst.Knockback, HeroKit.Of(ElementType.Fire).Burst.Knockback, "a do Vey empurra mais longe");
+        }
+
         [Test] public void Kits_AreDifferent_ButDealSimilarDamagePerSecond()
         {
             float lo = float.MaxValue, hi = 0f;

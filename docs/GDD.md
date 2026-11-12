@@ -48,7 +48,7 @@ São os heróis do Quintessence 2D. No 3D usam os corpos e as animações do pac
 
 ### Quintessência
 
-O quinto estado: o que os elementos eram antes de se separarem. Quem carrega os quatro e os faz reagir o bastante entra nele por alguns segundos, e nesse tempo todo golpe dispara uma reação. É a única coisa que quebra o escudo do Guardião.
+O quinto estado: o que os elementos eram antes de se separarem. Quem carrega os quatro e os faz reagir o bastante entra nele por alguns segundos, e nesse tempo todo golpe dispara uma reação. É a única coisa que quebra o escudo do Guardião. Ao entrar nele, cada herói solta o seu **despertar**: Rax, a Erupção do Caçador (queima tudo em volta); Liora, a Maré da Fonte (encharca e cura 15% da vida); Brann, o Rugido da Montanha (atordoa); Vey, o Olho do Vendaval (empurra longe e cega).
 
 ### O Guardião das Cinzas
 
