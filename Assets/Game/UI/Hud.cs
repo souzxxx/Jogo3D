@@ -437,10 +437,11 @@ namespace Quintessence.UI
         {
             if (bannerRoot == null)
             {
-                bannerRoot = UiKit.Rect("Banner", canvas.transform, new Vector2(0.5f, 1), new Vector2(0, -210), new Vector2(1400, 160));
+                // no alto, abaixo da barra do chefe: no meio da tela o letreiro cobria o heroi e os inimigos na entrada da sala
+                bannerRoot = UiKit.Rect("Banner", canvas.transform, new Vector2(0.5f, 1), new Vector2(0, -112), new Vector2(1400, 150));
                 bannerBack = UiKit.Image(UiKit.Rect("Back", bannerRoot, new Vector2(0.5f, 1), new Vector2(0, 14), new Vector2(1900, 170)), UiKit.VerticalVignette, new Color(0.02f, 0.02f, 0.04f, 0.7f));
                 bannerSub = UiKit.Text(UiKit.Rect("Sub", bannerRoot, new Vector2(0.5f, 1), new Vector2(0, 0), new Vector2(1400, 36)), "", 26, UiKit.Dim);
-                bannerTitle = UiKit.Text(UiKit.Rect("Title", bannerRoot, new Vector2(0.5f, 1), new Vector2(0, -38), new Vector2(1400, 90)), "", 72, UiKit.Cream);
+                bannerTitle = UiKit.Text(UiKit.Rect("Title", bannerRoot, new Vector2(0.5f, 1), new Vector2(0, -36), new Vector2(1400, 84)), "", 64, UiKit.Cream);
                 bannerTitle.font = GameFonts.Title;
                 bannerRoot.SetSiblingIndex(0);
             }

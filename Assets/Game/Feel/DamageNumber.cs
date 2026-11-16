@@ -8,8 +8,11 @@ namespace Quintessence.Feel
     public class DamageNumber : MonoBehaviour
     {
         static Font font;
-        // textos recentes, para empilhar em vez de sobrepor quando saem varios no mesmo lugar
-        static readonly List<(Vector3 pos, float time)> recent = new();
+        // textos vivos: o novo nasce acima dos que estao perto. Ele sobe mais rapido que os antigos (que ja desaceleraram),
+        // entao a distancia so aumenta; nascer abaixo fazia o novo alcancar o antigo e escrever por cima dele
+        static readonly List<DamageNumber> live = new();
+        /// Quanto o novo sobe a mais que um antigo ja lento antes de desacelerar tambem (2,2 m/s caindo a 5 m/s2 ate 0,4).
+        const float CatchUp = 0.5f;
         TextMesh front, shadow;
         Vector3 velocity;
         float life, total, baseSize;
@@ -18,21 +21,32 @@ namespace Quintessence.Feel
         public static void Spawn(Vector3 position, string text, Color color, float size = 1f, float seconds = 0.75f)
         {
             if (font == null) font = GameFonts.Display;
-            float now = Time.unscaledTime;
-            recent.RemoveAll(x => now - x.time > 0.45f);
-            int stack = 0;
-            foreach (var r in recent)
-                if (Mathf.Abs(r.pos.x - position.x) < 1.6f && Mathf.Abs(r.pos.z - position.z) < 1.6f) stack++;
-            recent.Add((position, now));
+            live.RemoveAll(x => x == null);
+            var spot = position + new Vector3(Random.Range(-0.25f, 0.25f), 0f, 0f);
+            for (int pass = 0; pass < 8; pass++)
+            {
+                bool moved = false;
+                foreach (var other in live)
+                {
+                    var o = other.transform.position;
+                    float gap = 0.62f * (other.baseSize + size) * 0.5f + 0.1f;
+                    if (Mathf.Abs(o.x - spot.x) < 1.8f * Mathf.Max(size, other.baseSize) && Mathf.Abs(o.z - spot.z) < 1.6f && o.y - spot.y < gap + CatchUp && spot.y - o.y < gap)
+                    { spot.y = o.y + gap; moved = true; }
+                }
+                if (!moved) break;
+            }
             var go = new GameObject("DamageNumber");
-            go.transform.position = position + new Vector3(Random.Range(-0.25f, 0.25f) + (stack % 2 == 0 ? 0.35f : -0.35f) * Mathf.Min(stack, 1), 0.62f * stack * size, 0f);
+            go.transform.position = spot;
             var n = go.AddComponent<DamageNumber>();
             n.shadow = Make(go.transform, text, new Vector3(0.05f, -0.05f, 0.02f));
             n.front = Make(go.transform, text, Vector3.zero);
             n.color = color; n.total = n.life = seconds; n.baseSize = size;
             n.velocity = new Vector3(Random.Range(-0.3f, 0.3f), 2.2f, 0f);
             n.Apply();
+            live.Add(n);
         }
+
+        void OnDestroy() => live.Remove(this);
 
         static TextMesh Make(Transform parent, string text, Vector3 offset)
         {
