@@ -5,7 +5,7 @@
 > Os trechos de lore marcados como **[proposta]** foram escritos para fechar o documento e precisam do ok do grupo.
 
 **Grupo:** Leonardo de Souza (combate), Enzo Canavero (inimigos e salas), Nicolas Volf (run, meta e UI), Miguel Damasio (visual e som)
-**Plataforma:** navegador (WebGL), teclado e mouse
+**Plataforma:** Windows e navegador (WebGL), no itch.io; teclado e mouse ou controle
 **Gênero:** roguelite de ação com câmera de cima
 **Sessão:** uma run em 10 a 15 minutos
 
@@ -152,7 +152,7 @@ Os tipos entram aos poucos: Ceifador na segunda sala, Cinzentos na terceira, Arr
 
 - **Na run:** Essência (moeda da loja) e bênçãos (29 no catálogo; cada Mestre só oferece a do próprio elemento a quem já o despertou).
 - **Nível e talentos:** inimigo derrotado dá experiência. Cada nível oferece três talentos para escolher um, com a sala limpa. São 33: onze de corpo (combo, finalizador, vida, recarga por abate, Essência, Flanqueador para golpes pelas costas, Pés Firmes contra a lentidão do encharcado, Despertar Intenso, que só aparece com três elementos, Contágio, em que a marca de quem cai pula para o vizinho, Alquimia, que fortalece as Fusões, e Cadência, em que a skill de outro elemento até 3 s depois da anterior causa +15% por nível, com o aviso "CADÊNCIA" sobre o herói), quatro de assinatura, um por herói e só para ele (Rax: Instinto do Caçador, +40% em quem tem menos de 30% de vida; Liora: Maré Crescente, cada reação cura; Brann: Pele de Pedra, +25 de vida e mais um bloqueio do Pilar; Vey: Vento de Cauda, dash mais rápido e +10% de velocidade), três por skill, que só aparecem com o elemento desperto, e seis de reação, que fortalecem uma reação quando os dois elementos dela estão despertos. Exemplos: Labareda deixa o chão em chamas; Maré congela; Pilar bloqueia mais um golpe e devolve dano; Vendaval dá pressa; +1 carga de dash. Bênçãos mudam números; talentos mudam o que as skills fazem.
-- **Entre runs:** Fragmentos, 3 por sala vencida e 15 por vencer o Guardião. No **Refúgio** compram oito melhorias permanentes: Vigor (vida), Força (dano), Bolsa (Essência inicial), Foco (Quintessência), Fôlego (cura por sala), Sabedoria (experiência), Intuição (trocar as opções de talento) e Clarividência (4 opções em cada escolha de talento). O progresso é salvo no navegador.
+- **Entre runs:** Fragmentos, 3 por sala vencida e 15 por vencer o Guardião. No **Refúgio** compram oito melhorias permanentes: Vigor (vida), Força (dano), Bolsa (Essência inicial), Foco (Quintessência), Fôlego (cura por sala), Sabedoria (experiência), Intuição (trocar as opções de talento) e Clarividência (4 opções em cada escolha de talento). O progresso é salvo na máquina (no navegador, na versão WebGL).
 - **Continuar:** a run é gravada ao entrar em cada sala. Fechar o jogo e voltar retoma do começo daquela sala. Começar uma run nova ou terminá-la apaga o save.
 - **Ascensão:** cada vitória libera um nível de desafio (até cinco). Cada nível dá +12% de vida e +10% de dano aos inimigos e +25% de Fragmentos.
 - **Sintonia:** concentrar talentos de um elemento (os da skill dele e os de reação que o envolvem) fortalece aquele elemento: com 3 pontos a skill causa +20%; com 5, também recarrega 15% mais rápido. O cartão do talento mostra quantos pontos ele soma; é o motivo para especializar o build.
@@ -196,7 +196,9 @@ Os tipos entram aos poucos: Ceifador na segunda sala, Cinzentos na terceira, Arr
 
 Título com os quatro heróis no altar (o herói da carta em foco comemora), Continuar run quando há uma salva, seletor de Ascensão depois da primeira vitória, Refúgio (com vitórias por herói), Grimório (heróis, inimigos e reações), Feitos, Treino (com o herói da última carta em foco), Opções (volumes, tela cheia, tremor de tela e dificuldade: Normal ou Tranquila, em que o herói recebe 35% menos dano de tudo; vale na hora, até pela pausa, e aparece no resultado) e Créditos. Na run: pausa com as opções, inventário (skills, reações, atributos, bênçãos e talentos), mapa com os trechos, escolha de talento a cada nível e dicas de primeira vez no rodapé. Resultado com herói, nível, abates, quem derrubou o herói e os Fragmentos ganhos.
 
-A build WebGL tem página de carregamento própria (arte do título, barra dourada e os controles) e abre direto no título.
+A build WebGL tem página de carregamento própria (arte do título, barra dourada e os controles) e abre direto no título. A build Windows abre direto no título, em tela cheia.
+
+A interface se ajusta a qualquer proporção de tela (16:9, 16:10, 4:3 ou janela larga) sem que um texto passe por cima do outro, e os textos longos encolhem para caber na caixa.
 
 ---
 
@@ -240,5 +242,4 @@ A build WebGL tem página de carregamento própria (arte do título, barra doura
 
 ## O que falta
 
-- **[planejado]** Passada única de animação.
 - **[planejado]** Refúgio como sala 3D (hoje é um painel no título).

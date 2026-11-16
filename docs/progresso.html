@@ -35,6 +35,27 @@
   <h1>Quintessence 3D — Progresso</h1>
   <p class="sub">Entrega mais recente no topo. Escopo em <a href="ESCOPO.md">ESCOPO.md</a> · kanban em <a href="https://github.com/users/souzxxx/projects/4">GitHub Projects</a>. · <b>resumo da noite por tema em <a href="novidades.html">novidades.html</a></b>.</p>
 
+  <section id="s6-rubrica">
+    <h2>16/11 — Rubrica final: interface em qualquer tela, visual sem neon e build Windows</h2>
+    <div class="meta"><span class="tag who">Leonardo</span><span class="tag who">Miguel</span><span class="tag who">Enzo</span><span class="tag ok">549 testes de regra + 37 testes jogando, todos passando</span></div>
+    <p>A rubrica final chegou: <b>4 frentes com o mesmo peso</b> (controles e câmera; desempenho e colisões; modelos e materiais; estados e erros), entrega até <b>25/11</b>, build <b>Windows</b> obrigatória e jogo na jam do itch.io. Detalhes e donos em <a href="ESCOPO.md">ESCOPO.md</a>, seção 6.</p>
+    <p><b>Texto por cima de texto (Leonardo).</b> Os testes sempre fotografavam em 16:9; na aba Game do editor, baixa e larga, a interface ficava mais larga que a tela e se encavalava. Agora ela se ajusta a qualquer proporção (16:10, 4:3, ultrawide) sem sobrepor nada. Os textos longos (dicas, talentos, resultado, inventário) encolhem para caber na caixa: antes o Unity ignorava o encolhimento e o texto vazava. O filete colorido das cartas do título não corta mais a linha de baixo, e o nome do chefe aparece só no letreiro, sem a cópia flutuante por cima. Na build de PC o título ganhou o botão <b>SAIR</b>, que não aparece no navegador.</p>
+    <p><b>Nada de neon (Miguel).</b> Bloom de 1,0 para 0,4, só no que é luz de verdade, e sem a saturação extra de +10. Rachaduras do chão com metade do brilho e tom de brasa em vez de vermelho puro. Os anéis (herói, marca nos inimigos, escudo do chefe, aura do Porta-Estandarte) e o contorno dos avisos de ataque ficaram foscos e mais transparentes, puxados para a pedra do pack.</p>
+    <p><b>Build Windows (Enzo).</b> <code>BuildTools.BuildWindows</code> gera <code>Builds/Windows/Quintessence.exe</code>, que abre em tela cheia direto no título. O zip <code>Builds/Quintessence-Windows.zip</code> tem 47 MB. O WebGL foi refeito com o visual novo (23,8 MB).</p>
+    <div class="cols">
+      <div><h3>Aba larga, antes</h3><img src="img/s6_titulo_largo_antes.png" alt="Título numa janela larga e baixa: cartas, botões e textos se sobrepõem"></div>
+      <div><h3>Aba larga, depois</h3><img src="img/s6_titulo_largo_depois.png" alt="Mesmo título: a interface encolhe por inteiro e nada se sobrepõe"></div>
+      <div><h3>Combate, antes</h3><img src="img/s6_combate_antes.jpg" alt="Rachaduras vermelhas brilhantes, anéis saturados e bloom forte"></div>
+      <div><h3>Combate, depois</h3><img src="img/s6_combate_depois.jpg" alt="Rachaduras de brasa discretas, aviso de ataque laranja fosco e anel do herói discreto"></div>
+    </div>
+    <h3>Limites</h3>
+    <ul>
+      <li>A build Windows ainda não rodou num Windows de verdade (no Mac não abre e o PC Linux não tem Wine). Falta rodar e medir FPS numa sala cheia e no chefe</li>
+      <li>"A tela inicial não mostra elemento nenhum": não reproduzi. Em todas as proporções testadas, orbes, ícones e heróis aparecem. Se continuar, falta um print do editor</li>
+      <li>Itch.io e jam continuam pendentes (Leonardo)</li>
+    </ul>
+  </section>
+
   <section id="manha2">
     <h2>Manhã, segunda leva: quatro arranjos novos (31 no total), o talento Cadência e a Elite Espinhosos</h2>
     <div class="meta"><span class="tag who">Nicolas</span><span class="tag who">Leonardo</span><span class="tag who">Enzo</span><span class="tag ok">testes de caminho: da entrada se chega às portas e aos dois cantos de cima em todos</span></div>

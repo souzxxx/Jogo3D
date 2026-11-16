@@ -1,9 +1,9 @@
-# Quintessence 3D — Documento de Escopo (RASCUNHO v0)
+# Quintessence 3D — Documento de Escopo
 
 > Projeto 3D · Jogos Digitais e Interação · Insper
 > Equipe: **Leonardo** (souzxxx), **Nicolas** (NicolasVolf), **Enzo** (canavero), **Miguel** (EuMiguelll)
-> Entrega: **A CONFIRMAR** — assumindo o mesmo formato do 2D: build WebGL no itch.io + GitHub + GDD no Milanote + Blackboard
-> Status: rascunho para aprovação. Nada de código antes de fechar este documento.
+> Entrega: **até 25/11/2026** (rígida, -2 pontos por dia de atraso). Build para **Windows** (obrigatória) e WebGL na jam do itch.io (https://itch.io/jam/projeto-jogo-3d-insper-20262), código no GitHub com créditos no README, GDD atualizado, confirmação no Blackboard
+> Status: jogo completo; reta final de acabamento guiada pela rubrica final (seção 6).
 
 Itens marcados com **[DECIDIR]** dependem do time ou do professor.
 
@@ -16,7 +16,7 @@ Itens marcados com **[DECIDIR]** dependem do time ou do professor.
 É a versão 3D do nosso projeto pessoal *Quintessence* (2D, Godot): mesmo mundo e mesmo sistema de elementos, refeito do zero em Unity 3D. Mundo, nomes e personagens são **originais** (inspiração em jogos de roguelite cooperativo de salas e em fantasia elemental, sem usar IP de ninguém).
 
 **Gênero:** action roguelite 3D, câmera top-down 3/4 fixa
-**Plataforma:** WebGL (itch.io) · **Engine:** Unity 6000.6.4f1, URP · **Idioma:** PT-BR
+**Plataforma:** Windows (obrigatória) e WebGL, os dois no itch.io · **Engine:** Unity 6000.6.4f1, URP · **Idioma:** PT-BR
 **Sessão:** uma run completa em 10–15 min; 1–2 h até a primeira vitória
 
 ### Pilares
@@ -28,7 +28,7 @@ Itens marcados com **[DECIDIR]** dependem do time ou do professor.
 
 ## 2. O que é sucesso
 
-- **Nota A+**: 7 rubricas A incluindo as de peso 2, no máximo 1 C, nenhum D.
+- **Nota A**: conceito A nas 4 frentes da rubrica final (seção 6). A nota é a média das quatro, então nenhuma pode ficar para trás.
 - Em 1 minuto o jogador entende marca → reação. Em 5 minutos ele troca de elemento de propósito.
 - Cada pessoa entrega a sua frente sem travar ninguém desde o primeiro dia.
 
@@ -58,7 +58,7 @@ Itens marcados com **[DECIDIR]** dependem do time ou do professor.
 
 | Restrição | Consequência |
 |---|---|
-| Build **WebGL** | URP com orçamento apertado: poucas luzes em tempo real, sombras só da luz principal, sem compute shader, texturas comprimidas, build < ~80 MB. Save em `PlayerPrefs`. Sem botão "Sair". |
+| Build **Windows** (obrigatória) e **WebGL** | URP com orçamento apertado pensando no WebGL: poucas luzes em tempo real, sombras só da luz principal, sem compute shader, texturas comprimidas, build < ~80 MB. Save em `PlayerPrefs`. Sem botão "Sair". |
 | Todos na mesma versão do Unity (`6000.6.4f1`) | Versão diferente quebra o projeto. |
 | Uma sessão do Claude, uma pessoa por vez | Cada parte é fechada e commitada com o nome de quem assumiu. Frentes em pastas/assemblies separados pra não dar conflito de cena. |
 | Créditos de assets no README | Crédito entra no mesmo commit do asset. |
@@ -117,26 +117,18 @@ Tipos de sala: Combate (2–3 ondas) · Santuário (desperta elemento) · Mestre
 
 ---
 
-## 6. Rubricas — estratégia [DECIDIR com o professor]
+## 6. Rubricas (rubrica final do professor, recebida em 16/11)
 
-| Rubrica | Peso proposto | Dono |
-|---|---|---|
-| Blueprint (Conceito e Narrativa) | 1 | Nicolas |
-| Mecânicas | **2** | Leonardo |
-| Feedback e Clareza de Interação | 1 | Miguel |
-| UI/HUD e Menus | 1 | Nicolas |
-| Engajamento e Imersão | 1 | Leonardo |
-| Level design e Progressão | 1 | Enzo |
-| Design de Som e Música | **descartada** | Enzo |
-| Efeitos Visuais e Polimento | **2** | Miguel |
-| Replayability | 1 | Nicolas |
-| Balanceamento | **descartada** | Enzo |
-| Estados e Erros (obrigatória) | 1 | Leonardo |
-| GDD em DDE (obrigatória) | 1 | Nicolas |
+A tabela de 7 rubricas com pesos que propusemos antes ficou obsoleta. A rubrica oficial do Projeto 3D tem **4 frentes com o mesmo peso** e a nota final é a média delas (A = 8,5 a 10 · B = 6 a 8,5 · C = 4 a 6 · D = 0 a 4). O enunciado pede um jogo "simples, porém completo e bem-acabado": daqui até a entrega, acabamento vale mais que sistema novo.
 
-**Pendente:** pesos e descartes só fecham na conversa com o professor; a tabela acima é a proposta que levamos.
+| Frente | O que o professor olha | Dono | Onde estamos |
+|---|---|---|---|
+| 1. Controles, câmera e sensação 3D | Controles responsivos e claros; câmera que acompanha sem desorientar; entender profundidade, direção e distância | Leonardo | WASD + mouse e controle; câmera 3/4 fixa que segue o herói; avisos de ataque no chão. Leonardo jogou 3 runs em 16/11: nada travou e a câmera não prendeu |
+| 2. Desempenho, fluidez e colisões | Sem travamentos nem quedas de FPS; não prender em quina, não atravessar, não tremer | Enzo | 120 FPS no WebGL (Chrome, Mac); NavMesh nos inimigos; peças em L com um colisor por braço; roteiros de teste contornam a mobília pela NavMesh. Falta medir no Windows |
+| 3. Modelos 3D, materiais e texturas | Assets bem importados, escala e orientação certas, materiais coerentes, visual polido | Miguel | Pack KayKit (CC0) e peças próprias modeladas no Blender sobre os corpos do pack. 16/11: anéis, avisos, rachaduras e bloom foscos (estavam com cara de neon) |
+| 4. Gerenciamento de estados e erros | Começar, perder, vencer e reiniciar sem ficar preso; recuperação justa | Leonardo | Título, run salva a cada sala (Continuar), pausa com voltar ao título, telas de vitória e derrota com "de novo" e "título", save inválido vira run nova |
 
-Raciocínio: o jogo **é** mecânica de elementos + efeito visual de elementos, então dobramos as duas. Som e Balanceamento são onde o A é mais caro pra um action 3D em pouco tempo; mesmo descartadas, ficam em nível B (ninguém entrega jogo mudo).
+**Interface em qualquer tela (16/11):** a interface se adapta à proporção da janela (`CanvasScaler` em Expand, referência 1920x1080) e os textos longos encolhem para caber na caixa (`UiKit.Fit`). Antes disso, na aba Game do editor, baixa e larga, os textos se sobrepunham.
 
 ---
 
@@ -163,7 +155,7 @@ Sprints sem data até confirmar a entrega. S0 é de todos e destrava o resto.
 - [x] Cena de look-dev aprovada pelo time — **Miguel**
 - [x] Contratos entre frentes (eventos, `ElementType`, `DamageInfo`, `Health`) — **Leonardo**
 - [x] Build WebGL gerada e testada no navegador (18,8 MB); falta subir no itch.io — **Nicolas**
-- [ ] Validar pesos da rubrica com o professor — **Nicolas** (fica para a semana de 16/11: não há mais aula nesta semana)
+- [x] Rubrica final recebida em 16/11: 4 frentes com o mesmo peso (seção 6)
 
 ### Leonardo — Combate e elementos
 - [x] S1 · Movimento, mira no mouse, câmera seguindo
@@ -215,12 +207,21 @@ Sprints sem data até confirmar a entrega. S0 é de todos e destrava o resto.
 
 ---
 
+### S6 — Rubrica final (16/11 a 25/11)
+- [x] Interface que se adapta a qualquer proporção de tela; textos longos encolhem em vez de vazar; carta do título sem o filete por cima do texto; nome do chefe sem letreiro duplicado — **Leonardo**
+- [x] Anéis, avisos de ataque, rachaduras e bloom foscos, no tom do pack — **Miguel**
+- [x] Build Windows (`BuildTools.BuildWindows`) — **Enzo**
+- [x] ESCOPO, GDD e página de progresso com a rubrica final e as plataformas — **Miguel**
+- [ ] Subir as builds Windows e WebGL na jam do itch.io, com como jogar, prints e vídeo — **Leonardo**
+- [ ] Rodar a build Windows num PC com Windows e medir FPS numa sala cheia e no chefe — **Enzo**
+- [ ] Colar o GDD no Milanote e aprovar a lore marcada como [proposta] — **Nicolas**
+
 ### Fila (depois do jogo fechado)
 
 - Loja: "melhorou muito, mas dá pra deixar melhor depois" (Leonardo, 11/11). Pendências conhecidas: estantes somem no fundo, mercador não reage, modelo próprio para ele.
 - Refúgio como sala 3D de verdade (hoje é um painel no título).
 - [x] Portas, baús de bênção e santuários com modelos do pack (11/11). Falta: estandarte por tipo de sala visível na porta
-- [ ] Regra de estilo (pedido do Leonardo em 11/11): tudo que criarmos espelha os assets do pack — fosco, cor contida, nada de neon
+- [x] Regra de estilo (pedido do Leonardo em 11/11): tudo que criarmos espelha os assets do pack — fosco, cor contida, nada de neon. Passada nos anéis, avisos, rachaduras e bloom em 16/11
 - [ ] Personalizar o chefe (hoje é o esqueleto guerreiro do pack ampliado) — pedido do Leonardo em 11/11
 - [x] HUD com ícones de verdade e barra de habilidades (11/11). Falta: botões e telas de pausa/resultado
 - [x] Menu de título com identidade própria: altar dos cinco, aprendiz, emblema e pedestal que acende com o mouse (11/11)
