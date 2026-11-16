@@ -83,6 +83,111 @@ namespace Quintessence.Game.PlayTests
             Assert.IsEmpty(problems, $"{problems.Count} de {checks} aproximacoes com problema:\n" + string.Join("\n", problems.Take(25)));
         }
 
+        /// Medida (rubrica 1, visibilidade): em quantos pontos andaveis de cada arranjo alguma peca fica entre a camera e o heroi.
+        [UnityTest, Explicit, Timeout(600000)]
+        public IEnumerator Measure_Camera_Occlusion()
+        {
+            GameEvents.Clear();
+            GameFlow.StartElement = ElementType.Air; GameFlow.Seed = 3; GameFlow.Layers = 5; GameFlow.Shrines = 1;
+            yield return EditorSceneManager.LoadSceneAsyncInPlayMode("Assets/Scenes/Run.unity", new LoadSceneParameters(LoadSceneMode.Single));
+            yield return null; yield return null;
+            var director = Object.FindFirstObjectByType<RunDirector>();
+            Object.FindFirstObjectByType<WaveSpawner>().enabled = false;
+            for (int k = 0; k < 2000 && director.Busy; k++) yield return null;
+            hero = Object.FindFirstObjectByType<PlayerController>();
+            body = hero.GetComponent<CharacterController>();
+            var cam = Camera.main;
+            var lines = new List<string>();
+            int total = 0, hidden = 0;
+            for (int i = 0; i < director.LayoutCount; i++)
+            {
+                director.ApplyLayout(i);
+                for (int k = 0; k < 3; k++) yield return null;
+                int n = 0, h = 0;
+                var names = new HashSet<string>();
+                for (float x = -Arena.HalfX + 2f; x <= Arena.HalfX - 2f; x += 1.5f)
+                for (float z = -Arena.HalfZ + 2f; z <= Arena.HalfZ - 2f; z += 1.5f)
+                {
+                    var p = new Vector3(x, 0.05f, z);
+                    if (!Free(p)) continue;
+                    hero.Teleport(p, Vector3.forward);
+                    yield return null;
+                    n++;
+                    var chest = hero.transform.position + Vector3.up * 1f;
+                    var from = cam.transform.position;
+                    var hits = Physics.RaycastAll(from, (chest - from).normalized, Vector3.Distance(from, chest) - 0.6f, ~0, QueryTriggerInteraction.Ignore)
+                        .Where(r => r.collider.GetComponentInParent<PlayerController>() == null).ToArray();
+                    if (hits.Length > 0) { h++; foreach (var r in hits) names.Add(r.collider.transform.root.name + "/" + r.collider.name); }
+                }
+                total += n; hidden += h;
+                lines.Add($"{director.CurrentLayout}: {h} de {n} pontos com o heroi escondido · {string.Join(", ", names.Take(6))}");
+            }
+            lines.Insert(0, $"total: {hidden} de {total} pontos ({100f * hidden / Mathf.Max(1, total):0.0}%)");
+            File.WriteAllText("Logs/oclusao.txt", string.Join("\n", lines));
+        }
+
+        /// Rubrica 1 (visibilidade): com o heroi atras de um pilar, a camera esconde a peca da frente e devolve quando ele sai.
+        [UnityTest, Timeout(600000)]
+        public IEnumerator Pieces_In_Front_Of_The_Hero_Are_Hidden()
+        {
+            GameEvents.Clear();
+            Time.captureFramerate = 30;
+            GameFlow.StartElement = ElementType.Air; GameFlow.Seed = 3; GameFlow.Layers = 5; GameFlow.Shrines = 1;
+            yield return EditorSceneManager.LoadSceneAsyncInPlayMode("Assets/Scenes/Run.unity", new LoadSceneParameters(LoadSceneMode.Single));
+            yield return null; yield return null;
+            var director = Object.FindFirstObjectByType<RunDirector>();
+            Object.FindFirstObjectByType<WaveSpawner>().enabled = false;
+            for (int k = 0; k < 2000 && director.Busy; k++) yield return null;
+            hero = Object.FindFirstObjectByType<PlayerController>();
+            hero.GetComponent<Health>().Pool.Invulnerable = true;
+            body = hero.GetComponent<CharacterController>();
+            var cam = Camera.main;
+            var follow = cam.GetComponent<FollowCamera>();
+            Assert.IsNotNull(follow);
+            int tested = 0, open = 0, hid = 0;
+            bool shot = false;
+            foreach (var name in new[] { "Pilares", "Clareira", "Arsenal", "Bosque de Pedra" })
+            {
+                director.ApplyLayout(director.LayoutIndex(name));
+                for (int k = 0; k < 3; k++) yield return null;
+                var pieces = GameObject.Find("Layout").GetComponentsInChildren<Collider>().Where(c => !c.isTrigger).ToList();
+                foreach (var c in pieces.Take(6))
+                {
+                    // logo ao norte da peca: e onde ela fica entre a camera (ao sul, no alto) e o heroi
+                    var p = new Vector3(c.bounds.center.x, 0.05f, c.bounds.max.z + body.radius + 0.4f);
+                    if (!Free(p)) continue;
+                    hero.Teleport(p, Vector3.forward);
+                    for (int k = 0; k < 30; k++) yield return null;
+                    var chest = hero.transform.position + Vector3.up;
+                    var from = cam.transform.position;
+                    var visible = Physics.RaycastAll(from, (chest - from).normalized, Vector3.Distance(from, chest) - 0.9f, ~0, QueryTriggerInteraction.Ignore)
+                        .Select(h => h.collider).Where(x => x.GetComponentInParent<PlayerController>() == null)
+                        .SelectMany(x => x.GetComponentsInChildren<Renderer>()).Where(r => r.enabled && r.shadowCastingMode != UnityEngine.Rendering.ShadowCastingMode.ShadowsOnly).ToList();
+                    tested++;
+                    if (visible.Count > 0) open++;
+                    if (follow.HiddenCount > 0)
+                    {
+                        hid++;
+                        if (!shot && name == "Pilares")
+                        {
+                            shot = true;
+                            yield return AspectShots.Shoot(cam, "docs/img/s6_camera_pilar_depois.png", new Vector2Int(960, 540));
+                            follow.enabled = false; // devolve as pecas: o mesmo quadro sem o recurso
+                            yield return AspectShots.Shoot(cam, "docs/img/s6_camera_pilar_antes.png", new Vector2Int(960, 540));
+                            follow.enabled = true;
+                        }
+                    }
+                }
+                // longe de tudo, nada fica escondido
+                hero.Teleport(new Vector3(0, 0.05f, -Arena.HalfZ + 2.2f), Vector3.forward);
+                for (int k = 0; k < 30; k++) yield return null;
+            }
+            Time.captureFramerate = 0;
+            Assert.Greater(tested, 6, "poucos pontos atras de pecas para testar");
+            Assert.Greater(hid, tested / 2, "nesses pontos a peca deveria estar na frente do heroi e ser escondida");
+            Assert.AreEqual(0, open, $"em {open} de {tested} pontos uma peca ainda tapava o heroi");
+        }
+
         static IEnumerable<Vector3> Directions()
         {
             for (int a = 0; a < 360; a += 45) yield return Quaternion.Euler(0, a, 0) * Vector3.forward;
