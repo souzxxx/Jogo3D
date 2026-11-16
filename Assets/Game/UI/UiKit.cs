@@ -113,7 +113,8 @@ namespace Quintessence.UI
             var s = go.AddComponent<CanvasScaler>();
             s.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
             s.referenceResolution = new Vector2(1920, 1080);
-            s.matchWidthOrHeight = 0.5f;
+            // Expand: a tela nunca fica menor que 1920x1080 de referencia, entao nada se sobrepoe em 16:10, 4:3 ou numa aba Game baixa e larga
+            s.screenMatchMode = CanvasScaler.ScreenMatchMode.Expand;
             go.AddComponent<GraphicRaycaster>();
             return c;
         }
@@ -162,6 +163,18 @@ namespace Quintessence.UI
             img.color = color;
             img.raycastTarget = raycast;
             return img;
+        }
+
+        /// Texto que encolhe ate caber na caixa. O Unity so aplica o best fit com quebra de linha e corte;
+        /// com Overflow (o padrao daqui) o texto ignora o tamanho minimo e vaza por cima do que estiver ao lado.
+        public static Text Fit(Text t, int min, int max)
+        {
+            t.resizeTextForBestFit = true;
+            t.resizeTextMinSize = min;
+            t.resizeTextMaxSize = max;
+            t.horizontalOverflow = HorizontalWrapMode.Wrap;
+            t.verticalOverflow = VerticalWrapMode.Truncate;
+            return t;
         }
 
         public static Text Text(RectTransform rt, string text, int size, Color color, TextAnchor align = TextAnchor.MiddleCenter, bool bold = true)

@@ -116,7 +116,7 @@ namespace Quintessence.UI
                         syn.Contains("!") ? new Color(0.9f, 0.76f, 0.42f) : UiKit.Dim, TextAnchor.MiddleCenter, false);
                     // o encolher so funciona com quebra de linha ligada (texto que transborda nao encolhe)
                     rankText.horizontalOverflow = HorizontalWrapMode.Wrap; rankText.verticalOverflow = VerticalWrapMode.Truncate;
-                    rankText.resizeTextForBestFit = true; rankText.resizeTextMinSize = 12; rankText.resizeTextMaxSize = 18;
+                    UiKit.Fit(rankText, 12, 18);
                 }
                 var b = UiKit.Button(card, $"Escolher  [{i + 1}]", new Vector2(0.5f, 0), new Vector2(0, 26), new Vector2(300, 60), UiKit.Primary, () => pick(index));
                 if (i == 0) UiKit.Focus(b.gameObject);
@@ -409,7 +409,7 @@ namespace Quintessence.UI
                 tipRoot = UiKit.Box("Tip", canvas.transform, new Vector2(0.5f, 0), new Vector2(0, 330), new Vector2(1100, 54), 0.85f);
                 UiKit.Image(UiKit.Rect("Mark", tipRoot, new Vector2(0, 0.5f), new Vector2(14, 0), new Vector2(30, 30)), UiKit.Icon("boon_skill"), new Color(0.9f, 0.76f, 0.42f));
                 tipText = UiKit.Text(UiKit.Rect("Text", tipRoot, new Vector2(0.5f, 0.5f), new Vector2(24, 0), new Vector2(1020, 46)), "", 24, UiKit.Cream, TextAnchor.MiddleCenter, false);
-                tipText.resizeTextForBestFit = true; tipText.resizeTextMinSize = 16; tipText.resizeTextMaxSize = 24;
+                UiKit.Fit(tipText, 16, 24);
             }
             LastTip = text;
             tipText.text = text;
@@ -634,7 +634,7 @@ namespace Quintessence.UI
                 var heroLine = UiKit.Text(UiKit.Rect("Hero", box, new Vector2(0.5f, 1), new Vector2(0, -92), new Vector2(1200, 30)),
                     $"{HeroPassives.HeroName(first)}  ·  {HeroPassives.Style(first)}  ·  {HeroPassives.Title(first)}: {HeroPassives.Describe(first)}", 22, Color.Lerp(ElementColors.Of(first), UiKit.Cream, 0.5f), TextAnchor.MiddleCenter, false);
                 heroLine.horizontalOverflow = HorizontalWrapMode.Wrap; heroLine.verticalOverflow = VerticalWrapMode.Truncate;
-                heroLine.resizeTextForBestFit = true; heroLine.resizeTextMinSize = 14; heroLine.resizeTextMaxSize = 22;
+                UiKit.Fit(heroLine, 14, 22);
             }
 
             // coluna da esquerda: as quatro skills
@@ -719,7 +719,7 @@ namespace Quintessence.UI
                 "FUSÕES (3 elementos): Obsidiana · Magma + Água   Incêndio · Magma + Ar   Ciclone · Vapor + Ar   Gêiser · Vapor + Terra   Barro Cozido · Lama + Fogo   Poeira · Lama + Ar",
                 17, awakenedCount >= 3 ? UiKit.Cream : UiKit.Dim, TextAnchor.MiddleLeft, false);
             fusionLine.horizontalOverflow = HorizontalWrapMode.Wrap; fusionLine.verticalOverflow = VerticalWrapMode.Truncate;
-            fusionLine.resizeTextForBestFit = true; fusionLine.resizeTextMinSize = 11; fusionLine.resizeTextMaxSize = 17;
+            UiKit.Fit(fusionLine, 11, 17);
             if (talents != null && talents.Count > 0)
             {
                 var seen = new List<string>();
@@ -733,7 +733,7 @@ namespace Quintessence.UI
                 var tl = UiKit.Text(UiKit.Rect("Talents", box, new Vector2(0, 1), new Vector2(60, -722), new Vector2(1200, 50)),
                     $"TALENTOS (nível {progress?.Level ?? 1}):  " + string.Join("  ·  ", parts), 21, UiKit.Cream, TextAnchor.UpperLeft, false);
                 tl.horizontalOverflow = HorizontalWrapMode.Wrap; tl.verticalOverflow = VerticalWrapMode.Truncate;
-                tl.resizeTextForBestFit = true; tl.resizeTextMinSize = 13; tl.resizeTextMaxSize = 21; // muitos talentos encolhem, nao descem sobre a Sintonia
+                UiKit.Fit(tl, 13, 21); // muitos talentos encolhem, nao descem sobre a Sintonia
                 // Sintonia: quantos talentos de cada elemento e o grau que eles ja deram
                 var syn = new List<string>();
                 foreach (var e in Elements.All)
@@ -748,7 +748,7 @@ namespace Quintessence.UI
                     var st = UiKit.Text(UiKit.Rect("Synergy", box, new Vector2(0, 1), new Vector2(60, -770), new Vector2(940, 34)),
                         "SINTONIA:  " + string.Join("   ·   ", syn), 19, new Color(0.9f, 0.76f, 0.42f), TextAnchor.MiddleLeft, false);
                     st.horizontalOverflow = HorizontalWrapMode.Wrap; st.verticalOverflow = VerticalWrapMode.Truncate;
-                    st.resizeTextForBestFit = true; st.resizeTextMinSize = 12; st.resizeTextMaxSize = 19;
+                    UiKit.Fit(st, 12, 19);
                 }
             }
             UiKit.Text(UiKit.Rect("Close", box, new Vector2(1, 0), new Vector2(-40, 22), new Vector2(260, 30)), "I ou Esc fecha", 20, UiKit.Dim, TextAnchor.MiddleRight, false);
@@ -803,7 +803,7 @@ namespace Quintessence.UI
             title.font = GameFonts.Title;
             var statsText = UiKit.Text(UiKit.Rect("Stats", resultPanel, center, new Vector2(0, 75), new Vector2(1500, 230)), stats, 28, UiKit.Cream, TextAnchor.MiddleCenter, false);
             // com subida de maestria e Ascensao nova o texto passa de cinco linhas: encolhe em vez de vazar
-            statsText.resizeTextForBestFit = true; statsText.resizeTextMinSize = 18; statsText.resizeTextMaxSize = 28;
+            UiKit.Fit(statsText, 18, 28);
             UiKit.Focus(UiKit.Button(resultPanel, "Jogar de novo", center, new Vector2(0, -130), new Vector2(380, 70), UiKit.Primary, again).gameObject);
             UiKit.Button(resultPanel, "Menu principal", center, new Vector2(0, -215), new Vector2(380, 70), UiKit.Secondary, menu);
         }

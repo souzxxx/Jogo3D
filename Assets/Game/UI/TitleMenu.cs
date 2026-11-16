@@ -35,6 +35,9 @@ namespace Quintessence.UI
         /// Ha uma run salva (o Refugio avisa que as compras so valem na proxima run nova).
         public bool RunInProgress { get; private set; }
 
+        /// Sair so faz sentido no executavel (Windows/Mac): no WebGL o Application.Quit nao fecha a aba.
+        public static bool QuitAvailable => !Application.isEditor && Application.platform != RuntimePlatform.WebGLPlayer;
+
         public void ShowContinue(string label, Action onContinue)
         {
             if (canvas == null) return;
@@ -234,7 +237,7 @@ namespace Quintessence.UI
                 var f = UiKit.Text(UiKit.Rect("Fus" + i, box, new Vector2(0, 1), new Vector2(1130, -684 - i * 28), new Vector2(500, 26)),
                     $"{FusionRules.Name(fusions[i])}: {FusionRules.Describe(fusions[i])}", 16, UiKit.Paper, TextAnchor.MiddleLeft, false);
                 f.horizontalOverflow = HorizontalWrapMode.Wrap; f.verticalOverflow = VerticalWrapMode.Truncate;
-                f.resizeTextForBestFit = true; f.resizeTextMinSize = 11; f.resizeTextMaxSize = 16; // uma linha por fusao
+                UiKit.Fit(f, 11, 16); // uma linha por fusao
             }
         }
 
@@ -299,7 +302,7 @@ namespace Quintessence.UI
             string HeroLine(ElementType e) => $"{HeroPassives.HeroName(e)}: maestria {meta.MasteryLevel(e)}, {meta.HeroWins(e)} {(meta.HeroWins(e) == 1 ? "vitória" : "vitórias")}";
             var heroLine = UiKit.Text(UiKit.Rect("HeroWins", box, new Vector2(0.5f, 1), new Vector2(0, -192), new Vector2(1100, 28)),
                 $"{HeroLine(ElementType.Fire)}   ·   {HeroLine(ElementType.Water)}   ·   {HeroLine(ElementType.Earth)}   ·   {HeroLine(ElementType.Air)}", 21, UiKit.Dim, TextAnchor.MiddleCenter, false);
-            heroLine.resizeTextForBestFit = true; heroLine.resizeTextMinSize = 14; heroLine.resizeTextMaxSize = 21;
+            UiKit.Fit(heroLine, 14, 21);
 
             for (int i = 0; i < MetaInfo.Count; i++)
             {
@@ -389,12 +392,12 @@ namespace Quintessence.UI
                 UiKit.Image(orb, UiKit.Circle, Color.Lerp(c, new Color(0.05f, 0.04f, 0.08f), 0.35f));
                 UiKit.Image(UiKit.Stretch("Rim", orb), UiKit.Ring, Color.Lerp(c, UiKit.Cream, 0.45f));
                 UiKit.Image(UiKit.Rect("Icon", orb, mid, Vector2.zero, new Vector2(44, 44)), UiKit.Icon(iconNames[i]), UiKit.Cream);
-                UiKit.Text(UiKit.Rect("Name", card, new Vector2(0.5f, 1), new Vector2(0, -90), new Vector2(240, 48)), names[i], 38, UiKit.Cream);
-                UiKit.Image(UiKit.Rect("Rule", card, new Vector2(0.5f, 1), new Vector2(0, -148), new Vector2(72, 4)), null, Color.Lerp(c, UiKit.Cream, 0.2f));
-                UiKit.Text(UiKit.Rect("Note", card, new Vector2(0.5f, 0), new Vector2(0, 12), new Vector2(240, 58)), notes[i], 21, UiKit.Paper, TextAnchor.MiddleCenter, false);
+                UiKit.Text(UiKit.Rect("Name", card, new Vector2(0.5f, 1), new Vector2(0, -84), new Vector2(240, 48)), names[i], 38, UiKit.Cream);
+                UiKit.Image(UiKit.Rect("Rule", card, new Vector2(0.5f, 1), new Vector2(0, -138), new Vector2(72, 4)), null, Color.Lerp(c, UiKit.Cream, 0.2f));
+                UiKit.Fit(UiKit.Text(UiKit.Rect("Note", card, new Vector2(0.5f, 0), new Vector2(0, 10), new Vector2(236, 54)), notes[i], 21, UiKit.Paper, TextAnchor.MiddleCenter, false), 15, 21);
                 heroWinLabels[i] = UiKit.Text(UiKit.Rect("Wins", card, new Vector2(1, 1), new Vector2(-38, -18), new Vector2(70, 22)), "", 17, new Color(0.9f, 0.76f, 0.42f), TextAnchor.MiddleRight, false);
                 heroMasteryLabels[i] = UiKit.Text(UiKit.Rect("Mastery", card, new Vector2(0, 1), new Vector2(12, -18), new Vector2(80, 22)), "", 17, UiKit.Cream, TextAnchor.MiddleLeft, false);
-                heroMasteryLabels[i].resizeTextForBestFit = true; heroMasteryLabels[i].resizeTextMinSize = 12; heroMasteryLabels[i].resizeTextMaxSize = 17;
+                UiKit.Fit(heroMasteryLabels[i], 12, 17);
             }
             var open = UiKit.Button(root, "REFÚGIO", new Vector2(0.5f, 0), new Vector2(-560, 74), new Vector2(340, 58), UiKit.Primary, () => ShowRefuge(true));
             void Small(string label, float x, Action act) =>
@@ -405,6 +408,13 @@ namespace Quintessence.UI
             Small("TREINO", 170, () => OnTutorial?.Invoke());
             Small("OPÇÕES", 390, ShowOptions);
             Small("CRÉDITOS", 610, ShowCredits);
+            // na build de PC nao ha aba para fechar: Sair no canto oposto ao Continuar (no navegador e no editor ele nao aparece)
+            if (QuitAvailable)
+            {
+                var quit = UiKit.Button(root, "SAIR", new Vector2(0, 1), new Vector2(110, -50), new Vector2(160, 54), UiKit.Secondary, Application.Quit);
+                quit.name = "Quit";
+                quit.transform.Find("Label").GetComponent<UnityEngine.UI.Text>().fontSize = 24;
+            }
             refugeLabel = open.transform.Find("Label").GetComponent<UnityEngine.UI.Text>();
             refugeLabel.fontSize = 26;
             refuge = UiKit.Stretch("Refuge", root);
