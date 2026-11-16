@@ -68,6 +68,59 @@ namespace Quintessence.Game.PlayTests
             MetaStore.UseKey(MetaStore.DefaultKey);
         }
 
+        /// Paineis com mais texto (talentos, pausa, resultado e as folhas do titulo) em tres proporcoes.
+        [UnityTest, Explicit, Timeout(300000)]
+        public IEnumerator Panels_In_Many_Aspects()
+        {
+            PlayerPrefs.DeleteKey("quintessence.meta.test");
+            MetaStore.UseKey("quintessence.meta.test");
+            GameEvents.Clear();
+            Directory.CreateDirectory("Logs/aspect");
+            var sizes = new[] { new Vector2Int(1280, 720), new Vector2Int(1600, 680), new Vector2Int(1024, 768) };
+            yield return EditorSceneManager.LoadSceneAsyncInPlayMode("Assets/Scenes/Title.unity", new LoadSceneParameters(LoadSceneMode.Single));
+            yield return null; yield return null;
+            var menu = Object.FindFirstObjectByType<TitleMenu>();
+            menu.UseCamera(Camera.main);
+            var sheets = new (string name, System.Action open)[]
+            {
+                ("opcoes", menu.ShowOptions), ("grimorio", menu.ShowGrimoire), ("feitos", menu.ShowFeats), ("creditos", menu.ShowCredits),
+                ("refugio", () => menu.ShowRefuge(true)),
+            };
+            foreach (var (name, open) in sheets)
+            {
+                open();
+                yield return null;
+                foreach (var s in sizes) yield return Shoot(Camera.main, $"Logs/aspect/p_{name}_{s.x}x{s.y}.png", s);
+                menu.CloseOverlay();
+                yield return null;
+            }
+
+            GameFlow.Seed = 7; GameFlow.StartElement = ElementType.Earth;
+            yield return EditorSceneManager.LoadSceneAsyncInPlayMode("Assets/Scenes/Run.unity", new LoadSceneParameters(LoadSceneMode.Single));
+            for (int i = 0; i < 30; i++) yield return null;
+            var hud = Object.FindFirstObjectByType<Hud>();
+            var director = Object.FindFirstObjectByType<RunDirector>();
+            hud.UseCamera(Camera.main);
+            var all = new System.Collections.Generic.List<ElementType>(Elements.All);
+            var offer = Quintessence.Run.TalentCatalog.Offer(director.Run.Talents, all, new System.Random(3), 4, ElementType.Earth);
+            hud.ShowLevelUp(3, offer, _ => { }, 2, () => { });
+            foreach (var s in sizes) yield return Shoot(Camera.main, $"Logs/aspect/p_talentos_{s.x}x{s.y}.png", s);
+            hud.ShowLevelUp(0, null, null);
+            hud.ShowPause(true, () => { }, () => { });
+            foreach (var s in sizes) yield return Shoot(Camera.main, $"Logs/aspect/p_pausa_{s.x}x{s.y}.png", s);
+            hud.ShowPause(false);
+            string stats = "Ascensão 2   ·   Brann   ·   Nível 9   ·   84 inimigos derrotados   ·   12 talentos e 7 bênçãos\nDerrubado por: Rainha Afogada (golpe de maré)"
+                + "\nSalas vencidas: 9   ·   Essência: 140   ·   Elementos: 4/4   ·   Tempo: 14:32"
+                + "\nBuild: Sintonia de Terra 2 · Fusões 6 · Cadências 31 · esquivas perfeitas 4 · Pele de Pedra"
+                + "\n+42 Fragmentos para o Refúgio (total: 188)   ·   Brann +60 de maestria"
+                + "\nMaestria 3 de Brann: começa a run com um talento à escolha"
+                + "\nFeitos: Mestre das Fusões, Intocável (+20 Fragmentos)";
+            hud.ShowResult(false, stats, () => { }, () => { });
+            for (int i = 0; i < 40; i++) yield return null;
+            foreach (var s in sizes) yield return Shoot(Camera.main, $"Logs/aspect/p_resultado_{s.x}x{s.y}.png", s);
+            MetaStore.UseKey(MetaStore.DefaultKey);
+        }
+
         public static IEnumerator Shoot(Camera c, string path, Vector2Int s)
         {
             var rt = new RenderTexture(s.x, s.y, 24, RenderTextureFormat.ARGB32, RenderTextureReadWrite.sRGB);

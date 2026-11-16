@@ -95,7 +95,7 @@ namespace Quintessence.UI
         {
             confirmReset = false;
             refuge.gameObject.SetActive(show);
-            if (show) BuildRefuge();
+            if (show) { refuge.SetAsLastSibling(); BuildRefuge(); }
             UpdateRefugeLabel();
         }
 
@@ -154,6 +154,7 @@ namespace Quintessence.UI
         {
             foreach (Transform child in sheet) Destroy(child.gameObject);
             sheet.gameObject.SetActive(true);
+            sheet.SetAsLastSibling();
             UiKit.Image(UiKit.Stretch("Shade", sheet), null, new Color(0.02f, 0.02f, 0.04f, 0.95f), true);
             var box = UiKit.Box("Box", sheet, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(width, height), 1f);
             var title = UiKit.Text(UiKit.Rect("Title", box, new Vector2(0.5f, 1), new Vector2(0, -40), new Vector2(900, 70)), heading, 56, UiKit.Paper);
@@ -179,9 +180,9 @@ namespace Quintessence.UI
                 for (int i = 0; i < rows.Length; i++)
                 {
                     float y = -160 - i * step;
-                    UiKit.Text(UiKit.Rect("N", box, top, new Vector2(x, y), new Vector2(500, 30)), rows[i].name, 23, rows[i].color, TextAnchor.MiddleLeft);
-                    var t = UiKit.Text(UiKit.Rect("T", box, top, new Vector2(x, y - 30), new Vector2(500, step - 30)), rows[i].text, 18, UiKit.Paper, TextAnchor.UpperLeft, false);
-                    t.horizontalOverflow = HorizontalWrapMode.Wrap;
+                    UiKit.Text(UiKit.Rect("N", box, top, new Vector2(x, y), new Vector2(500, 28)), rows[i].name, 22, rows[i].color, TextAnchor.MiddleLeft);
+                    // o texto encolhe se nao couber no espaco ate o proximo nome (antes vazava por cima dele)
+                    UiKit.Fit(UiKit.Text(UiKit.Rect("T", box, top, new Vector2(x, y - 26), new Vector2(500, step - 26)), rows[i].text, 18, UiKit.Paper, TextAnchor.UpperLeft, false), 13, 18);
                 }
             }
             string[] element = { "", "Fogo", "Água", "Terra", "Ar" };
@@ -217,7 +218,7 @@ namespace Quintessence.UI
                 ("Cinzentos", "Bando pequeno e rápido. Skills de área resolvem.", foe),
                 ("Elementais", "Brasa Viva (Fogo), Afogado (Água) e Sentinela (Terra).", foe),
                 ("Campeão e chefes", "Elites: Carrasco, Sacerdotisa, Colosso. Fim: Guardião, Tecelã, Rainha.", gold),
-            }, 49);
+            }, 53);
             Column(1130, "REAÇÕES", new (string, string, Color)[]
             {
                 ("Vapor · Fogo + Água", "Nuvem: quem está dentro erra metade dos ataques.", Color.Lerp(ElementColors.Of(ElementType.Fire), ElementColors.Of(ElementType.Water), 0.5f)),
@@ -226,18 +227,17 @@ namespace Quintessence.UI
                 ("Lama · Água + Terra", "Enraíza e encharca: ninguém sai do lugar.", Color.Lerp(ElementColors.Of(ElementType.Water), ElementColors.Of(ElementType.Earth), 0.5f)),
                 ("Nevasca · Água + Ar", "Congela; o próximo golpe estilhaça com +30%.", Color.Lerp(ElementColors.Of(ElementType.Water), ElementColors.Of(ElementType.Air), 0.5f)),
                 ("Estilhaços · Terra + Ar", "Lascas em área grande que empurram longe.", Color.Lerp(ElementColors.Of(ElementType.Earth), ElementColors.Of(ElementType.Air), 0.5f)),
-            }, 80);
+            }, 74);
             UiKit.Text(UiKit.Rect("Hint", box, new Vector2(0.5f, 0), new Vector2(0, 112), new Vector2(1500, 30)),
                 "Uma skill marca o inimigo; a skill de outro elemento detona a reação. O golpe básico não tem elemento.", 20, UiKit.Dim, TextAnchor.MiddleCenter, false);
             // fusoes: abaixo das reacoes
-            UiKit.Text(UiKit.Rect("FusH", box, new Vector2(0, 1), new Vector2(1130, -650), new Vector2(500, 30)), "FUSÕES · TERCEIRO ELEMENTO", 22, UiKit.Dim, TextAnchor.MiddleLeft);
+            UiKit.Text(UiKit.Rect("FusH", box, new Vector2(0, 1), new Vector2(1130, -606), new Vector2(500, 30)), "FUSÕES · TERCEIRO ELEMENTO", 22, UiKit.Dim, TextAnchor.MiddleLeft);
             var fusions = new[] { FusionKind.Obsidian, FusionKind.Wildfire, FusionKind.Cyclone, FusionKind.Geyser, FusionKind.Kiln, FusionKind.DustStorm };
             for (int i = 0; i < fusions.Length; i++)
             {
-                var f = UiKit.Text(UiKit.Rect("Fus" + i, box, new Vector2(0, 1), new Vector2(1130, -684 - i * 28), new Vector2(500, 26)),
-                    $"{FusionRules.Name(fusions[i])}: {FusionRules.Describe(fusions[i])}", 16, UiKit.Paper, TextAnchor.MiddleLeft, false);
-                f.horizontalOverflow = HorizontalWrapMode.Wrap; f.verticalOverflow = VerticalWrapMode.Truncate;
-                UiKit.Fit(f, 11, 16); // uma linha por fusao
+                // ate duas linhas por fusao: com uma so, a mais longa encolhia a ponto de nao dar para ler
+                UiKit.Fit(UiKit.Text(UiKit.Rect("Fus" + i, box, new Vector2(0, 1), new Vector2(1130, -640 - i * 38), new Vector2(490, 46)),
+                    $"{FusionRules.Name(fusions[i])}: {FusionRules.Describe(fusions[i])}", 16, UiKit.Paper, TextAnchor.UpperLeft, false), 13, 16);
             }
         }
 
