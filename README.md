@@ -25,11 +25,14 @@ Com controle: analógico esquerdo move, direito mira, RT ou X ataca, direcional 
 
 Testes: `unity test . --mode EditMode` e `unity test . --mode PlayMode` (os de PlayMode jogam as cenas com um roteiro e gravam quadros em `Logs/frames`).
 
-## Build WebGL
+## Builds (entrega até 25/11)
 
-**Pendente (Leonardo, 12/11 de manhã):** subir `Builds/Quintessence-WebGL.zip` no itch.io (o zip mais recente, de 24,5 MB, foi gerado às 09h24 e conferido no Chrome; nada foi enviado).
+A entrega pede build **Windows** e o jogo na jam do itch.io: https://itch.io/jam/projeto-jogo-3d-insper-20262. **Pendente (Leonardo):** subir `Builds/Quintessence-Windows.zip` (47 MB) e `Builds/Quintessence-WebGL.zip` (23,8 MB), os dois de 16/11, e inscrever o jogo na jam.
 
-Menu **Quintessence > Build WebGL (itch.io)** ou `unity build --target WebGL --execute-method BuildTools.BuildWebGL -o Builds/WebGL`. A pasta `Builds/` não vai pro git; para o itch.io, compacte o conteúdo de `Builds/WebGL` com o `index.html` na raiz.
+- **Windows:** menu **Quintessence > Build Windows** ou `unity build --target StandaloneWindows64 --execute-method BuildTools.BuildWindows -o Builds/Windows`. Para o itch.io, zipe a pasta `Builds/Windows` inteira, sem `Quintessence_BackUpThisFolder_ButDontShipItWithYourGame` (o `.exe` sozinho não roda). Precisa do módulo "Windows Build Support (Mono)" no Unity (`unity install-modules -e 6000.6.4f1 -m windows-mono`).
+- **WebGL:** menu **Quintessence > Build WebGL (itch.io)** ou `unity build --target WebGL --execute-method BuildTools.BuildWebGL -o Builds/WebGL`. Para o itch.io, compacte o conteúdo de `Builds/WebGL` com o `index.html` na raiz.
+
+A pasta `Builds/` não vai pro git.
 
 ## Look-dev
 
