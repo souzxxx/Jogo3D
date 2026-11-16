@@ -57,7 +57,7 @@ namespace Quintessence.Feel
         public void SetMark(ElementType e)
         {
             mark = e;
-            if (e != ElementType.None) { var c = ElementColors.Of(e); ringMat.color = new Color(c.r * 0.9f, c.g * 0.9f, c.b * 0.9f, 0.8f); }
+            if (e != ElementType.None) { var c = ElementColors.Of(e); ringMat.color = CombatFeedback.Muted(c, 0.6f); }
         }
 
         readonly System.Collections.Generic.HashSet<StatusType> active = new();
@@ -84,7 +84,7 @@ namespace Quintessence.Feel
                 armorRing = new GameObject("ArmorRing").transform;
                 armorRing.SetParent(transform, false);
                 armorRing.gameObject.AddComponent<MeshFilter>().sharedMesh = CombatFeedback.RingMesh;
-                armorRing.gameObject.AddComponent<MeshRenderer>().sharedMaterial = new Material(feedback.FlatMaterial) { color = new Color(0.55f, 0.62f, 0.75f, 0.75f) };
+                armorRing.gameObject.AddComponent<MeshRenderer>().sharedMaterial = new Material(feedback.FlatMaterial) { color = CombatFeedback.Muted(new Color(0.55f, 0.62f, 0.75f), 0.5f) };
             }
             armorRing.gameObject.SetActive(on);
             barTimer = 9999f;

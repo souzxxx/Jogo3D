@@ -16,6 +16,11 @@ namespace Quintessence.Feel
 
         public Material FlatMaterial => flatMaterial;
         public static Mesh RingMesh { get; private set; }
+
+        static readonly Color Stone = new(0.16f, 0.13f, 0.12f);
+        /// Cor de elemento como acento fosco: puxada para a pedra do pack e meio transparente.
+        /// Os aneis usam material sem luz, entao cor pura e opaca le como neon ao lado dos modelos KayKit.
+        public static Color Muted(Color c, float alpha) { var m = Color.Lerp(c, Stone, 0.3f); m.a = alpha; return m; }
         public static Mesh DiscMesh { get; private set; }
         readonly Dictionary<GameObject, TelegraphVisual> telegraphs = new();
         readonly Dictionary<Health, float> affinityLabel = new();
@@ -304,7 +309,7 @@ namespace Quintessence.Feel
                 float s = aura.Radius / Mathf.Max(0.01f, enemy.transform.lossyScale.x);
                 ring.transform.localScale = new Vector3(s, 1f, s);
                 ring.AddComponent<MeshFilter>().sharedMesh = RingMesh;
-                auraMaterial ??= new Material(flatMaterial) { color = new Color(0.6f, 0.14f, 0.2f, 0.55f) }; // carmim: nao confunde com o anel do heroi nem com aviso de ataque
+                auraMaterial ??= new Material(flatMaterial) { color = Muted(new Color(0.6f, 0.14f, 0.2f), 0.4f) }; // carmim: nao confunde com o anel do heroi nem com aviso de ataque
                 ring.AddComponent<MeshRenderer>().sharedMaterial = auraMaterial;
             }
         }
@@ -322,7 +327,6 @@ namespace Quintessence.Feel
             var bc = BossElement == ElementType.Fire ? new Color(1f, 0.45f, 0.1f) : ElementColors.Of(BossElement);
             Ring(p, 90, 14f, 0.6f, 1.4f, 0.7f, bc);
             LightFlash(p, bc, 16f, 18f, 0.8f);
-            DamageNumber.Spawn(b.transform.position + Vector3.up * 6.5f, name.ToUpperInvariant(), new Color(1f, 0.7f, 0.3f), 1.7f, 2.4f);
             CameraShake.Add(0.8f);
             // nasce das cinzas: brasas subindo e pedra voando em volta (a Rainha, da agua)
             accents?.Emit(BossElement, b.transform.position + Vector3.up, Vector3.forward, 180f, 90, 5f);
@@ -340,7 +344,7 @@ namespace Quintessence.Feel
         {
             shieldCage = new GameObject("BossShieldCage").transform;
             shieldCage.SetParent(transform, false);
-            shieldMat = new Material(flatMaterial) { color = new Color(Steel.r, Steel.g, Steel.b, 0.75f) };
+            shieldMat = new Material(flatMaterial) { color = Muted(Steel, 0.45f) };
             var tilts = new[] { new Vector3(0, 0, 0), new Vector3(62, 0, 0), new Vector3(62, 120, 0) };
             foreach (var t in tilts)
             {
@@ -575,7 +579,7 @@ namespace Quintessence.Feel
                 accents?.Emit(current, p, Vector3.forward, 180f, 30, 4f);
                 var c = ElementColors.Of(current);
                 presenceTarget = Color.Lerp(c, Color.white, 0.35f);
-                if (playerRingMat != null) playerRingMat.color = new Color(c.r, c.g, c.b, 0.9f);
+                if (playerRingMat != null) playerRingMat.color = Muted(c, 0.5f);
                 if (presence != null) presence.intensity = presenceBase;
             }
         }
@@ -640,7 +644,7 @@ namespace Quintessence.Feel
             if (quintessence) return;
             var c = ElementColors.Of(to);
             presenceTarget = Color.Lerp(c, Color.white, 0.35f);
-            if (playerRingMat != null) playerRingMat.color = new Color(c.r * 0.85f, c.g * 0.85f, c.b * 0.85f, 0.7f);
+            if (playerRingMat != null) playerRingMat.color = Muted(c, 0.45f);
             // a cor do heroi segue a ultima skill usada; o efeito da skill ja mostra a troca
         }
 
@@ -765,8 +769,8 @@ namespace Quintessence.Feel
                 if (quintessence)
                 {
                     // prismatico: o anel e a luz giram pelas cores dos quatro elementos
-                    var prism = Color.HSVToRGB(Mathf.Repeat(Time.time * 0.9f, 1f), 0.55f, 1f);
-                    if (playerRingMat != null) playerRingMat.color = prism;
+                    var prism = Color.HSVToRGB(Mathf.Repeat(Time.time * 0.9f, 1f), 0.4f, 0.9f);
+                    if (playerRingMat != null) playerRingMat.color = Muted(prism, 0.6f);
                     if (playerRing != null) playerRing.localScale = Vector3.one * (1.35f + 0.12f * Mathf.Sin(Time.time * 12f));
                     presenceTarget = Color.Lerp(prism, Color.white, 0.5f);
                     if (presence != null) presence.intensity = presenceBase * 2.6f;

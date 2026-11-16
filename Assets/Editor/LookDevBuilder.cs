@@ -537,6 +537,12 @@ public static class LookDevBuilder
             tm.mode.Override(TonemappingMode.Neutral);
             EditorUtility.SetDirty(profile);
         }
+        // valores reaplicados a cada build (o perfil ja existe no disco): bloom so no que e luz de verdade
+        // e sem saturacao extra, para os efeitos nao virarem neon ao lado dos modelos foscos do KayKit
+        if (profile.TryGet(out Bloom bl)) { bl.intensity.Override(0.4f); bl.threshold.Override(1.15f); bl.scatter.Override(0.6f); }
+        if (profile.TryGet(out ColorAdjustments adj)) adj.saturation.Override(0f);
+        EditorUtility.SetDirty(profile);
+        AssetDatabase.SaveAssets();
         var go = new GameObject("PostFX");
         go.transform.SetParent(root, false);
         var v = go.AddComponent<Volume>();
