@@ -82,8 +82,13 @@ namespace Quintessence.Game
             hud.ShowTutorialEnd(() => GameFlow.StartRun(GameFlow.StartElement), GameFlow.ToTitle);
         }
 
-        void Show() => hud.ShowTutorial(State.Number, TutorialState.StepCount, TutorialState.Title(State.Step),
-            TutorialState.Text(State.Step, GameFlow.StartElement, SecondElement), State.Progress01);
+        bool shownPad;
+        void Show()
+        {
+            shownPad = InputMode.Gamepad;
+            hud.ShowTutorial(State.Number, TutorialState.StepCount, TutorialState.Title(State.Step),
+                TutorialState.Text(State.Step, GameFlow.StartElement, SecondElement, shownPad), State.Progress01);
+        }
 
         /// O elemento que o treino desperta na hora da reacao: o primeiro que nao e o do heroi.
         static ElementType SecondElement
@@ -94,6 +99,7 @@ namespace Quintessence.Game
         void Update()
         {
             if (ended || player == null) return;
+            if (InputMode.Gamepad != shownPad) Show(); // trocou de teclado para controle (ou o contrario): o passo fala dos botoes certos
             if (MenuInput.PausePressed)
             {
                 bool pause = !GameClock.Paused;

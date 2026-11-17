@@ -87,5 +87,22 @@ namespace Quintessence.Run.Tests
             StringAssert.Contains("com 1", react);
             Assert.AreEqual(TutorialState.Text(TutorialStep.Move), TutorialState.Text(TutorialStep.Move, Quintessence.Core.ElementType.Water));
         }
+
+        [Test]
+        public void Gamepad_Texts_Speak_Of_Pad_Buttons()
+        {
+            var E = Quintessence.Core.ElementType.Earth; var F = Quintessence.Core.ElementType.Fire;
+            foreach (TutorialStep s in System.Enum.GetValues(typeof(TutorialStep)))
+            {
+                var t = TutorialState.Text(s, E, F, true);
+                Assert.IsNotEmpty(t);
+                StringAssert.DoesNotContain("Aperte 1", t); StringAssert.DoesNotContain("W A S D", t); StringAssert.DoesNotContain("Clique", t);
+            }
+            StringAssert.Contains("direcional para baixo", TutorialState.Text(TutorialStep.Skill, E, F, true));
+            var react = TutorialState.Text(TutorialStep.React, E, F, true);
+            StringAssert.Contains("para baixo", react);
+            StringAssert.Contains("para cima", react);
+            Assert.AreEqual(TutorialState.Text(TutorialStep.Skill, E, F), TutorialState.Text(TutorialStep.Skill, E, F, false));
+        }
     }
 }
