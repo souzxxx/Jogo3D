@@ -370,7 +370,7 @@ namespace Quintessence.UI
                 bossFill.color = bossShield ? new Color(0.55f, 0.62f, 0.75f) : new Color(0.8f, 0.42f, 0.16f);
                 bossName.text = $"{bossTitle.ToUpperInvariant()}  ·  FASE {bossPhase}/3";
                 bossHint.text = !bossShield ? "" : bossNeedsQuint
-                    ? (hero.QuintessenceReady ? "ESCUDO — aperte R e ataque!" : hero.QuintessenceActive ? "ESCUDO — ataque agora!" : "ESCUDO — bata nele e cause reações para encher a Quintessência")
+                    ? (hero.QuintessenceReady ? $"ESCUDO — aperte {(Pad ? "Y" : "R")} e ataque!" : hero.QuintessenceActive ? "ESCUDO — ataque agora!" : "ESCUDO — bata nele e cause reações para encher a Quintessência")
                     : "ESCUDO — aguente firme, ele vai ceder";
             }
 
@@ -797,7 +797,8 @@ namespace Quintessence.UI
                 }
             }
             UiKit.Text(UiKit.Rect("Keys", pausePanel, new Vector2(0.5f, 0), new Vector2(0, 18), new Vector2(1700, 30)),
-                "WASD mover · mouse mira · clique ataca · 1 2 3 4 skills · Espaço dash · R Quintessência · E interagir · I inventário · Tab mapa",
+                Pad ? "analógico esquerdo move · direito mira · RT ataca · direcional skills · A dash · Y Quintessência · B interagir · Select inventário · R3 mapa"
+                    : "WASD mover · mouse mira · clique ataca · 1 2 3 4 skills · Espaço dash · R Quintessência · E interagir · I inventário · Tab mapa",
                 20, UiKit.Dim, TextAnchor.MiddleCenter, false);
         }
 
@@ -948,7 +949,7 @@ namespace Quintessence.UI
                     UiKit.Fit(st, 12, 19);
                 }
             }
-            UiKit.Text(UiKit.Rect("Close", box, new Vector2(1, 0), new Vector2(-40, 22), new Vector2(260, 30)), "I ou Esc fecha", 20, UiKit.Dim, TextAnchor.MiddleRight, false);
+            UiKit.Text(UiKit.Rect("Close", box, new Vector2(1, 0), new Vector2(-40, 22), new Vector2(260, 30)), Pad ? "Select ou Start fecha" : "I ou Esc fecha", 20, UiKit.Dim, TextAnchor.MiddleRight, false);
         }
 
         RectTransform tutorialBox, tutorialFill;
