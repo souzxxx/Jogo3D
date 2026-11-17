@@ -814,7 +814,7 @@ public static class GameSceneBuilder
             var hero = HeroBuilder.Build(i, idle);
             hero.name = "TitleHero" + i;
             hero.transform.SetParent(root, false);
-            float hx = (i - 1.5f) * 2.6f, hz = 3.4f - Mathf.Abs(i - 1.5f) * 0.7f - 1.9f;
+            float hx = (i - 1.5f) * 2.6f, hz = 3.4f - Mathf.Abs(i - 1.5f) * 0.7f - 2.5f; // meio passo a frente das colunas: a cabeca nao encosta no emblema
             hero.transform.SetPositionAndRotation(new Vector3(hx, 0, hz), Quaternion.Euler(0, 180 + (1.5f - i) * 9f, 0));
         }
         var go = new GameObject("TitleController");
