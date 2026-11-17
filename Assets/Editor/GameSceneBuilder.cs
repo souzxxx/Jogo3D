@@ -102,6 +102,7 @@ public static class GameSceneBuilder
         director.BindMaster(MasterPrefab());
         director.BindBiomeProps(BiomePropSets());
         director.BindProps(Prop("wall_doorway", 1f), bannerPrefabs, Prop("column", 1f), Prop("chest_gold", 1f), stone);
+        director.BindEmblems(EmblemPrefabs());
         EditorUtility.SetDirty(director);
         var hud = new GameObject("Hud");
         hud.transform.SetParent(root, false);
@@ -727,6 +728,31 @@ public static class GameSceneBuilder
         return list.ToArray();
     }
 
+    /// Emblemas de Fogo, Agua, Terra e Ar (modelados no Blender, ArtSource/Emblems) como prefabs que giram sobre os totens.
+    internal static GameObject[] EmblemPrefabs()
+    {
+        AssetDatabase.Refresh();
+        HeroBuilder.MatteParts("Assets/Art/Emblems");
+        const string dir = "Assets/Game/Game/Prefabs/Emblems/";
+        System.IO.Directory.CreateDirectory(dir);
+        AssetDatabase.Refresh();
+        var list = new GameObject[4];
+        string[] files = { "emblem_fire", "emblem_water", "emblem_earth", "emblem_air" };
+        for (int i = 0; i < 4; i++)
+        {
+            var asset = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Art/Emblems/" + files[i] + ".fbx");
+            if (asset == null) { Debug.LogWarning("emblema nao encontrado: " + files[i]); continue; }
+            var root = new GameObject(files[i]);
+            var model = (GameObject)PrefabUtility.InstantiatePrefab(asset);
+            model.name = "Model";
+            model.transform.SetParent(root.transform, false);
+            root.AddComponent<Quintessence.Game.EmblemSpin>();
+            list[i] = PrefabUtility.SaveAsPrefabAsset(root, dir + files[i] + ".prefab");
+            Object.DestroyImmediate(root);
+        }
+        return list;
+    }
+
     static void BuildTitle()
     {
         var root = LookDevBuilder.BeginArena("Title");
@@ -748,6 +774,7 @@ public static class GameSceneBuilder
             st.GetComponent<Renderer>().sharedMaterial = LookDevBuilder.Mat("Title_" + name, null, c * 0.85f, c * glow, 0f);
             return st;
         }
+        var emblems = EmblemPrefabs();
         // altar dos cinco: quatro pedestais em arco, um por elemento, e o do meio, mais alto, ainda apagado
         for (int i = 0; i < 4; i++)
         {
@@ -755,7 +782,13 @@ public static class GameSceneBuilder
             var col = LookDevBuilder.Spawn("Dungeon/column.fbx", new Vector3(x, 0, z), 0, prop);
             var rs = col.GetComponentsInChildren<Renderer>();
             var b = rs[0].bounds; foreach (var r in rs) b.Encapsulate(r.bounds);
-            Stone("ElementStone" + i, new Vector3(x, b.max.y + 0.42f, z), 0.8f, colors[i], 0.12f);
+            // emblema modelado do elemento sobre a coluna (antes uma esfera lisa)
+            var emblem = (GameObject)PrefabUtility.InstantiatePrefab(emblems[i]);
+            emblem.name = "ElementStone" + i;
+            emblem.transform.SetParent(root, false);
+            // logo acima da coluna: mais alto encosta na frase do titulo, mais baixo some atras da cabeca do heroi
+            emblem.transform.position = new Vector3(x, b.max.y + 0.1f, z);
+            emblem.transform.localScale = Vector3.one * 1.3f;
             var l = new GameObject("ElementLight" + i).AddComponent<Light>();
             l.transform.SetParent(root, false);
             l.transform.position = new Vector3(x, b.max.y + 1.1f, z - 0.9f);

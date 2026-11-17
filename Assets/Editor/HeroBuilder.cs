@@ -62,6 +62,18 @@ public static class HeroBuilder
                     m.SetColor("_EmissionColor", c * (m.name == "Glow" ? (path.Contains("/Garden/") ? 0.7f : 1.1f) : 0.25f));
                 }
                 if (path.Contains("/Biomes/") && m.name == "Water" && m.HasProperty("_Smoothness")) m.SetFloat("_Smoothness", 0.55f);
+                // emblemas dos totens: o miolo da chama, o ambar, a gota clara e a fita do vento acendem de leve (abaixo do bloom)
+                if (path.Contains("/Emblems/") && m.HasProperty("_EmissionColor"))
+                {
+                    float glow = m.name switch { "FlameCore" => 0.55f, "Flame" => 0.22f, "Amber" => 0.28f, "WaterLight" => 0.25f, "WindLight" => 0.2f, _ => 0f };
+                    if (glow > 0f)
+                    {
+                        var c = m.HasProperty("_BaseColor") ? m.GetColor("_BaseColor") : Color.white;
+                        m.EnableKeyword("_EMISSION");
+                        m.globalIlluminationFlags = MaterialGlobalIlluminationFlags.RealtimeEmissive;
+                        m.SetColor("_EmissionColor", c * glow);
+                    }
+                }
                 // inimigos elementais: as chamas da Brasa acendem laranja, o olho e o cristal da Sentinela verde-palido
                 if (path.Contains("/Enemies2/") && m.name == "Magic" && m.HasProperty("_EmissionColor"))
                 {
