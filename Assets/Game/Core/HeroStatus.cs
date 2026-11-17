@@ -17,6 +17,8 @@ namespace Quintessence.Core
         bool QuintessenceActive { get; }
         bool QuintessenceReady { get; }
         HeroModifiers Modifiers { get; }
+        /// Ponto do chao para onde o heroi mira (mouse ou analogico direito).
+        UnityEngine.Vector3 AimPoint { get; }
     }
 
     /// Pausa do jogo. Quem mexe em Time.timeScale (pausa de impacto) consulta aqui antes de devolver o tempo.

@@ -50,6 +50,7 @@ namespace Quintessence.Combat
 
         public IPlayerInput Input { get; set; }
         public Vector3 AimDirection { get; private set; } = Vector3.forward;
+        public Vector3 AimPoint { get; private set; }
         public bool IsMoving { get; private set; }
         public bool IsDashing => dash.IsDashing;
         public bool IsAttacking => combo.IsAttacking;
@@ -346,7 +347,8 @@ namespace Quintessence.Combat
 
             var mv = Input.Move;
             var moveDir = Vector3.ClampMagnitude(new Vector3(mv.x, 0f, mv.y), 1f);
-            var toAim = Input.AimPoint - transform.position;
+            AimPoint = Input.AimPoint;
+            var toAim = AimPoint - transform.position;
             toAim.y = 0f;
             if (toAim.sqrMagnitude > 0.04f) AimDirection = toAim.normalized;
 
