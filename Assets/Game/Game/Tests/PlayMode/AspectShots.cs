@@ -29,6 +29,7 @@ namespace Quintessence.Game.PlayTests
             var menu = Object.FindFirstObjectByType<TitleMenu>();
             Assert.IsNotNull(menu);
             menu.UseCamera(Camera.main);
+            for (float t = 0; t < 2.5f; t += Time.deltaTime) yield return null; // as particulas dos pedestais precisam de um tempo para encher
             Directory.CreateDirectory("Logs/aspect");
             foreach (var s in Sizes) yield return Shoot(Camera.main, $"Logs/aspect/title_{s.x}x{s.y}.png", s);
             MetaStore.UseKey(MetaStore.DefaultKey);

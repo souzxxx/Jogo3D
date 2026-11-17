@@ -322,7 +322,11 @@ namespace Quintessence.Game
             GameEvents.AttackPerformed += OnAttackForTrial;
             GameEvents.PerfectDodge += OnPerfectDodge;
             GameEvents.Thorns += OnThorns;
+            GameEvents.TelegraphStarted += OnMeleeWindup;
         }
+
+        // corpo a corpo nao tem circulo no chao: a primeira arma erguida ensina a ler a animacao
+        void OnMeleeWindup(TelegraphEvent e) { if (e.Melee) Tip("melee"); }
 
         // Pes no Chao: cada dash do heroi conta
         void OnAttackForTrial(AttackEvent e)
@@ -573,6 +577,7 @@ namespace Quintessence.Game
             GameEvents.AttackPerformed -= OnAttackForTrial;
             GameEvents.PerfectDodge -= OnPerfectDodge;
             GameEvents.Thorns -= OnThorns;
+            GameEvents.TelegraphStarted -= OnMeleeWindup;
         }
 
         void Start()
