@@ -28,8 +28,8 @@ namespace Quintessence.Feel
         {
             ring = new GameObject("MarkRing").transform;
             ring.SetParent(transform, false);
-            ring.gameObject.AddComponent<MeshFilter>().sharedMesh = CombatFeedback.RingMesh;
-            ringMat = new Material(feedback.FlatMaterial);
+            ring.gameObject.AddComponent<MeshFilter>().sharedMesh = CombatFeedback.RuneRingMesh;
+            ringMat = feedback.RingMaterial(new Color(0.8f, 0.8f, 0.8f));
             ring.gameObject.AddComponent<MeshRenderer>().sharedMaterial = ringMat;
             ring.gameObject.SetActive(false);
 
@@ -57,7 +57,7 @@ namespace Quintessence.Feel
         public void SetMark(ElementType e)
         {
             mark = e;
-            if (e != ElementType.None) { var c = ElementColors.Of(e); ringMat.color = CombatFeedback.Muted(c, 0.6f); }
+            if (e != ElementType.None) feedback.TintRing(ringMat, ElementColors.Of(e));
         }
 
         readonly System.Collections.Generic.HashSet<StatusType> active = new();
@@ -83,8 +83,8 @@ namespace Quintessence.Feel
             {
                 armorRing = new GameObject("ArmorRing").transform;
                 armorRing.SetParent(transform, false);
-                armorRing.gameObject.AddComponent<MeshFilter>().sharedMesh = CombatFeedback.RingMesh;
-                armorRing.gameObject.AddComponent<MeshRenderer>().sharedMaterial = new Material(feedback.FlatMaterial) { color = CombatFeedback.Muted(new Color(0.55f, 0.62f, 0.75f), 0.5f) };
+                armorRing.gameObject.AddComponent<MeshFilter>().sharedMesh = CombatFeedback.RuneRingMesh;
+                armorRing.gameObject.AddComponent<MeshRenderer>().sharedMaterial = feedback.RingMaterial(new Color(0.55f, 0.62f, 0.75f));
             }
             armorRing.gameObject.SetActive(on);
             barTimer = 9999f;

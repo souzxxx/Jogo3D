@@ -121,10 +121,13 @@ public static class CombatDevSceneBuilder
 
         var fb = new GameObject("CombatFeedback");
         fb.transform.SetParent(root, false);
-        fb.AddComponent<CombatFeedback>().Configure(LookDevBuilder.Additive(), flat);
+        // aneis no chao: Lit fosco com emissao ligada (a cor do brilho muda em jogo; a variante precisa entrar na build)
+        var ringLit = LookDevBuilder.Mat("RingLit", null, Color.white, new Color(0.02f, 0.02f, 0.02f), 0f);
+        fb.AddComponent<CombatFeedback>().Configure(LookDevBuilder.Additive(), flat, ringLit);
         var fso = new SerializedObject(fb.GetComponent<CombatFeedback>());
         fso.FindProperty("particleMaterial").objectReferenceValue = LookDevBuilder.Additive();
         fso.FindProperty("flatMaterial").objectReferenceValue = flat;
+        fso.FindProperty("litMaterial").objectReferenceValue = ringLit;
         fso.ApplyModifiedPropertiesWithoutUndo();
 
         var cam = LookDevBuilder.MakeCamera();

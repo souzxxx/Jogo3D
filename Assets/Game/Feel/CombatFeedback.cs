@@ -12,10 +12,14 @@ namespace Quintessence.Feel
         [SerializeField] Material particleMaterial;
         [Tooltip("Material transparente sem luz para anel e barras (Sprites/Default).")]
         [SerializeField] Material flatMaterial;
+        /// URP Lit fosco dos aneis no chao (criado pelo construtor de cena para entrar na build). Sem ele, os aneis usam o material plano.
+        [SerializeField] Material litMaterial;
         [SerializeField] bool hitStop = true;
 
         public Material FlatMaterial => flatMaterial;
         public static Mesh RingMesh { get; private set; }
+        /// Anel de gomos com chanfro, no estilo das pecas low-poly do pack: le como objeto do chao, nao como luz.
+        public static Mesh RuneRingMesh { get; private set; }
 
         static readonly Color Stone = new(0.16f, 0.13f, 0.12f);
         /// Cor de elemento como acento fosco: puxada para a pedra do pack e meio transparente.
@@ -40,11 +44,30 @@ namespace Quintessence.Feel
         ElementType current;
         Coroutine stop;
 
-        public void Configure(Material particle, Material flat) { particleMaterial = particle; flatMaterial = flat; }
+        public void Configure(Material particle, Material flat, Material lit = null) { particleMaterial = particle; flatMaterial = flat; litMaterial = lit; }
+
+        /// Material de um anel no chao com a cor de um elemento: pedra iluminada com a cor como acento e um brilho baixo,
+        /// que nao chega no bloom, para continuar legivel nas salas escuras.
+        public Material RingMaterial(Color c)
+        {
+            var m = new Material(litMaterial != null ? litMaterial : flatMaterial);
+            TintRing(m, c);
+            return m;
+        }
+
+        public void TintRing(Material m, Color c)
+        {
+            if (m == null) return;
+            if (litMaterial == null) { m.color = Muted(c, 0.5f); return; }
+            var body = Color.Lerp(c, Stone, 0.25f); body.a = 1f;
+            m.color = body;
+            m.SetColor("_EmissionColor", new Color(c.r, c.g, c.b) * 0.22f);
+        }
 
         void Awake()
         {
             if (RingMesh == null) RingMesh = BuildRing(0.9f, 1f, 48);
+            if (RuneRingMesh == null) RuneRingMesh = BuildRuneRing(10, 0.8f, 1f, 0.07f, 7f);
             if (DiscMesh == null) DiscMesh = BuildRing(0f, 1f, 40);
             var go = new GameObject("FxParticles");
             go.transform.SetParent(transform, false);
@@ -319,8 +342,8 @@ namespace Quintessence.Feel
                 ring.transform.localPosition = Vector3.up * 0.06f;
                 float s = aura.Radius / Mathf.Max(0.01f, enemy.transform.lossyScale.x);
                 ring.transform.localScale = new Vector3(s, 1f, s);
-                ring.AddComponent<MeshFilter>().sharedMesh = RingMesh;
-                auraMaterial ??= new Material(flatMaterial) { color = Muted(new Color(0.6f, 0.14f, 0.2f), 0.4f) }; // carmim: nao confunde com o anel do heroi nem com aviso de ataque
+                ring.AddComponent<MeshFilter>().sharedMesh = RuneRingMesh;
+                auraMaterial ??= RingMaterial(new Color(0.6f, 0.14f, 0.2f)); // carmim: nao confunde com o anel do heroi nem com aviso de ataque
                 ring.AddComponent<MeshRenderer>().sharedMaterial = auraMaterial;
             }
         }
@@ -355,7 +378,7 @@ namespace Quintessence.Feel
         {
             shieldCage = new GameObject("BossShieldCage").transform;
             shieldCage.SetParent(transform, false);
-            shieldMat = new Material(flatMaterial) { color = Muted(Steel, 0.45f) };
+            shieldMat = RingMaterial(Steel);
             var tilts = new[] { new Vector3(0, 0, 0), new Vector3(62, 0, 0), new Vector3(62, 120, 0) };
             foreach (var t in tilts)
             {
@@ -590,7 +613,7 @@ namespace Quintessence.Feel
                 accents?.Emit(current, p, Vector3.forward, 180f, 30, 4f);
                 var c = ElementColors.Of(current);
                 presenceTarget = Color.Lerp(c, Color.white, 0.35f);
-                if (playerRingMat != null) playerRingMat.color = Muted(c, 0.5f);
+                TintRing(playerRingMat, c);
                 if (presence != null) presence.intensity = presenceBase;
             }
         }
@@ -655,7 +678,7 @@ namespace Quintessence.Feel
             if (quintessence) return;
             var c = ElementColors.Of(to);
             presenceTarget = Color.Lerp(c, Color.white, 0.35f);
-            if (playerRingMat != null) playerRingMat.color = Muted(c, 0.45f);
+            TintRing(playerRingMat, c);
             // a cor do heroi segue a ultima skill usada; o efeito da skill ja mostra a troca
         }
 
@@ -684,15 +707,15 @@ namespace Quintessence.Feel
             if (presence != null) presenceBase = presence.intensity;
             var r = new GameObject("PlayerElementRing");
             r.transform.SetParent(transform, false);
-            r.AddComponent<MeshFilter>().sharedMesh = RingMesh;
-            playerRingMat = new Material(flatMaterial);
+            r.AddComponent<MeshFilter>().sharedMesh = RuneRingMesh;
+            playerRingMat = RingMaterial(new Color(0.95f, 0.88f, 0.72f));
             r.AddComponent<MeshRenderer>().sharedMaterial = playerRingMat;
             playerRing = r.transform;
             heroStatus = go.GetComponent<IHeroStatus>();
             // mira: anel pequeno no ponto do chao mirado e uma seta curta nos pes do heroi.
             // Na camera inclinada o cursor da tela nem sempre parece estar onde o golpe vai; no chao fica claro
-            aimMat = new Material(flatMaterial) { color = Muted(new Color(0.95f, 0.88f, 0.72f), 0.4f) };
-            aimRing = Part("AimRing", RingMesh, aimMat);
+            aimMat = RingMaterial(new Color(0.95f, 0.88f, 0.72f));
+            aimRing = Part("AimRing", RuneRingMesh, aimMat);
             aimArrow = Part("AimArrow", ArrowMesh(), aimMat);
         }
 
@@ -826,7 +849,7 @@ namespace Quintessence.Feel
                 UpdateAim();
                 if (playerRing != null)
                 {
-                    playerRing.SetPositionAndRotation(player.position + Vector3.up * 0.05f, Quaternion.Euler(0, -Time.time * 60f, 0));
+                    playerRing.SetPositionAndRotation(player.position + Vector3.up * 0.05f, Quaternion.Euler(0, -Time.time * 20f, 0));
                     playerRing.localScale = Vector3.one * 1.05f;
                 }
                 if (presence != null) presence.color = Color.Lerp(presence.color, presenceTarget, dt * 8f);
@@ -834,7 +857,7 @@ namespace Quintessence.Feel
                 {
                     // prismatico: o anel e a luz giram pelas cores dos quatro elementos
                     var prism = Color.HSVToRGB(Mathf.Repeat(Time.time * 0.9f, 1f), 0.4f, 0.9f);
-                    if (playerRingMat != null) playerRingMat.color = Muted(prism, 0.6f);
+                    TintRing(playerRingMat, prism);
                     if (playerRing != null) playerRing.localScale = Vector3.one * (1.35f + 0.12f * Mathf.Sin(Time.time * 12f));
                     presenceTarget = Color.Lerp(prism, Color.white, 0.5f);
                     if (presence != null) presence.intensity = presenceBase * 2.6f;
@@ -869,7 +892,7 @@ namespace Quintessence.Feel
                     shieldCage.rotation = Quaternion.Euler(Time.time * 35f, Time.time * 80f, 0);
                     // escudo que so a Quintessencia quebra gira pelas cores; o comum fica cor de aco
                     var sc = shieldNeedsQuint ? Color.Lerp(Color.HSVToRGB(Mathf.Repeat(Time.time * 0.5f, 1f), 0.45f, 1f), Steel, 0.35f) : Steel;
-                    shieldMat.color = new Color(sc.r, sc.g, sc.b, 0.75f);
+                    TintRing(shieldMat, sc);
                 }
             }
 
@@ -889,6 +912,43 @@ namespace Quintessence.Feel
                 var off = Random.insideUnitCircle * z.zone.Radius;
                 Burst(z.zone.Point + new Vector3(off.x, 0.15f, off.y), Vector3.up, 20f, 3, 1.5f, 3.5f, 0.3f, 0.7f, 0.5f, ElementColors.Of(z.zone.Element));
             }
+        }
+
+        /// Gomos de anel com secao em trapezio (chanfro dos dois lados) e normais por face: o pack e todo facetado.
+        static Mesh BuildRuneRing(int pieces, float inner, float outer, float height, float gapDeg)
+        {
+            const int steps = 3; // cada gomo e um arco de 3 trechos retos
+            float bevel = (outer - inner) * 0.3f;
+            var prof = new[] { new Vector2(inner, 0f), new Vector2(inner + bevel, height), new Vector2(outer - bevel, height), new Vector2(outer, 0f) };
+            var verts = new System.Collections.Generic.List<Vector3>();
+            var tris = new System.Collections.Generic.List<int>();
+            void Quad(Vector3 a, Vector3 b, Vector3 c, Vector3 d)
+            {
+                int i = verts.Count;
+                verts.Add(a); verts.Add(b); verts.Add(c); verts.Add(d);
+                // ordem horaria vista de fora (a face de cima e vista de cima)
+                tris.Add(i); tris.Add(i + 2); tris.Add(i + 1); tris.Add(i); tris.Add(i + 3); tris.Add(i + 2);
+            }
+            Vector3 P(Vector2 p, float ang) => new Vector3(Mathf.Cos(ang) * p.x, p.y, Mathf.Sin(ang) * p.x);
+            float span = Mathf.PI * 2f / pieces, gap = gapDeg * Mathf.Deg2Rad;
+            for (int k = 0; k < pieces; k++)
+            {
+                float a0 = k * span + gap * 0.5f, a1 = (k + 1) * span - gap * 0.5f;
+                for (int s = 0; s < steps; s++)
+                {
+                    float u0 = Mathf.Lerp(a0, a1, (float)s / steps), u1 = Mathf.Lerp(a0, a1, (float)(s + 1) / steps);
+                    for (int f = 0; f < 3; f++) Quad(P(prof[f], u0), P(prof[f + 1], u0), P(prof[f + 1], u1), P(prof[f], u1));
+                }
+                // tampas das pontas do gomo
+                Quad(P(prof[0], a0), P(prof[3], a0), P(prof[2], a0), P(prof[1], a0));
+                Quad(P(prof[0], a1), P(prof[1], a1), P(prof[2], a1), P(prof[3], a1));
+            }
+            var m = new Mesh { name = "RuneRing" };
+            m.SetVertices(verts);
+            m.SetTriangles(tris, 0);
+            m.RecalculateNormals();
+            m.RecalculateBounds();
+            return m;
         }
 
         static Mesh BuildRing(float inner, float outer, int segments)
