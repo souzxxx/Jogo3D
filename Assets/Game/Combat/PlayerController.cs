@@ -169,6 +169,7 @@ namespace Quintessence.Combat
 
         void Start()
         {
+            Silhouette.MarkHero(gameObject);
             foreach (var e in loadout.Awakened) GameEvents.RaiseElementAwakened(e);
             GameEvents.RaiseElementSwitched(ElementType.None, Element);
             GameEvents.RaiseQuintessenceMeter(0f);

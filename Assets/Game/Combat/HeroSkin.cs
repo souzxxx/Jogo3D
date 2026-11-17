@@ -35,6 +35,7 @@ namespace Quintessence.Combat
             if (index < 0 || index >= models.Length || models[index] == null) return;
             for (int i = 0; i < models.Length; i++) if (models[i] != null) models[i].SetActive(i == index);
             Shown = hero;
+            Silhouette.MarkHero(models[index]); // atras de parede o heroi aparece como silhueta
             var anim = models[index].GetComponent<Animator>();
             if (heroAnimator != null && anim != null) heroAnimator.Bind(controller, anim);
 
