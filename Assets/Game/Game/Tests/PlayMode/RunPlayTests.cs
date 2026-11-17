@@ -2097,6 +2097,9 @@ namespace Quintessence.Game.PlayTests
                 Assert.AreEqual(b, director.CurrentBiome);
                 if (b != Biome.Ashes) Assert.AreEqual(Biomes.Name(b).ToUpperInvariant(), hud.LastBanner);
                 for (int k = 0; k < 15; k++) yield return null;
+                var motes = Object.FindFirstObjectByType<BiomeDresser>().Motes;
+                Assert.IsNotNull(motes, "a sala tem particulas no ar");
+                Assert.IsTrue(motes.isPlaying && motes.particleCount > 20, $"particulas de ar vivas no trecho {b}: {motes.particleCount}");
                 Shot(cam, $"docs/img/bioma_{(int)b + 1}.png");
             }
             GameFlow.Layers = 8; GameFlow.Shrines = 3;

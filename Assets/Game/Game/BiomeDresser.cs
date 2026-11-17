@@ -78,6 +78,66 @@ namespace Quintessence.Game
                 else if (p.name == "EmberSparks") sparks.Add(p);
             }
             block = new MaterialPropertyBlock();
+            BuildMotes();
+        }
+
+        ParticleSystem motes;
+        /// Particulas de ar da sala (para os testes).
+        public ParticleSystem Motes => motes;
+
+        /// Particulas miudas soltas no ar da sala inteira: cinza caindo nos Saloes, nevoa subindo na Cripta, polen no Jardim
+        /// e brasas subindo no Coracao. Poucas, pequenas e foscas: so para o ar nao parecer parado.
+        void BuildMotes()
+        {
+            Material mat = null;
+            foreach (var p in sparks) if (p != null) { mat = p.GetComponent<ParticleSystemRenderer>().sharedMaterial; break; }
+            if (mat == null) return; // cena sem as fagulhas do chao (cenas de teste): sem particulas de ar
+            var go = new GameObject("AirMotes");
+            go.transform.SetParent(transform, false);
+            go.transform.SetPositionAndRotation(new Vector3(0f, 2.2f, 0f), Quaternion.identity);
+            motes = go.AddComponent<ParticleSystem>();
+            motes.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+            var main = motes.main;
+            main.loop = true; main.prewarm = true; main.playOnAwake = true;
+            main.startLifetime = new ParticleSystem.MinMaxCurve(6f, 9f);
+            main.startSpeed = 0f;
+            main.startSize = new ParticleSystem.MinMaxCurve(0.12f, 0.22f); // a camera fica a 24 m: menor que isso some
+            main.maxParticles = 260;
+            main.simulationSpace = ParticleSystemSimulationSpace.World;
+            var em = motes.emission; em.rateOverTime = 32f;
+            var sh = motes.shape; sh.shapeType = ParticleSystemShapeType.Box;
+            var noise = motes.noise; noise.enabled = true; noise.strength = 0.25f; noise.frequency = 0.25f; noise.scrollSpeed = 0.1f;
+            var col = motes.colorOverLifetime; col.enabled = true;
+            var g = new Gradient();
+            g.SetKeys(new[] { new GradientColorKey(Color.white, 0), new GradientColorKey(Color.white, 1) },
+                new[] { new GradientAlphaKey(0, 0), new GradientAlphaKey(1, 0.2f), new GradientAlphaKey(1, 0.75f), new GradientAlphaKey(0, 1) });
+            col.color = g;
+            var r = go.GetComponent<ParticleSystemRenderer>();
+            r.sharedMaterial = mat;
+            r.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            r.receiveShadows = false;
+        }
+
+        void DressMotes(Biome biome)
+        {
+            if (motes == null) return;
+            var sh = motes.shape;
+            sh.scale = new Vector3(Quintessence.Core.Arena.HalfX * 2f, 3.6f, Quintessence.Core.Arena.HalfZ * 2f);
+            var main = motes.main;
+            var vel = motes.velocityOverLifetime; vel.enabled = true; vel.space = ParticleSystemSimulationSpace.World;
+            (Color color, float alpha, float rise) = biome switch
+            {
+                Biome.Crypt => (new Color(0.62f, 0.78f, 0.86f), 0.35f, 0.08f), // nevoa fina subindo da agua parada
+                Biome.Garden => (new Color(0.86f, 0.88f, 0.6f), 0.45f, 0.03f),  // polen quase parado
+                Biome.Heart => (new Color(1f, 0.5f, 0.2f), 0.6f, 0.25f),       // brasas subindo
+                _ => (new Color(0.72f, 0.66f, 0.62f), 0.4f, -0.12f),           // cinza caindo devagar
+            };
+            color.a = alpha;
+            main.startColor = color;
+            vel.x = new ParticleSystem.MinMaxCurve(-0.05f, 0.05f);
+            vel.y = new ParticleSystem.MinMaxCurve(rise * 0.6f, rise * 1.4f);
+            vel.z = new ParticleSystem.MinMaxCurve(-0.05f, 0.05f);
+            if (!motes.isPlaying) motes.Play();
         }
 
         public void Apply(Biome biome)
@@ -105,6 +165,7 @@ namespace Quintessence.Game
             StoneCount = stones.Count;
             foreach (var p in flames) if (p != null) { var m = p.main; m.startColor = Color.Lerp(k.Torch, new Color(1f, 0.45f, 0.08f), biome == Biome.Crypt ? 0.25f : 0.8f); }
             foreach (var p in sparks) if (p != null) { var m = p.main; m.startColor = k.Crack; }
+            DressMotes(biome);
         }
 
         void Tint(List<Renderer> list, Color baseColor, Color emission)
