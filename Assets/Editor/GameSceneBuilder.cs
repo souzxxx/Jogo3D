@@ -168,9 +168,18 @@ public static class GameSceneBuilder
         var ctrl = CombatDevSceneBuilder.Controller(fbx, dir + "Merchant.controller", ("Idle", "Idle", 0f),
             ("Greet", "Interact|Cheer", 1.1f), ("Thanks", "Cheer", 1.1f), ("Refuse", "Hit_A|Hit_B", 0.6f));
         var cloth = LookDevBuilder.Mat("Merchant", CombatDevSceneBuilder.KK + "Adventurers/Props/rogue_texture.png", Color.white, Color.black, 0f);
-        var who = LookDevBuilder.Spawn("Adventurers/Characters/Mage.fbx", new Vector3(-6.2f * SX, 0, 0.75f * SZ), 180, cloth);
+        // pecas proprias do Blender (ArtSource/Merchant): chapeu de aba larga, mochila de mascate e bolsa de moedas.
+        // Presas aos ossos com o modelo na origem e em repouso; so depois ele vai para tras do balcao
+        AssetDatabase.Refresh();
+        HeroBuilder.MatteParts("Assets/Art/Merchant");
+        var who = LookDevBuilder.Spawn("Adventurers/Characters/Mage.fbx", Vector3.zero, 0, cloth);
+        who.transform.SetParent(null, false);
+        who.transform.SetPositionAndRotation(Vector3.zero, Quaternion.identity);
         who.name = "Merchant";
-        LookDevBuilder.Hide(who, "1H_Wand", "2H_Staff", "Spellbook_open");
+        LookDevBuilder.Hide(who, "1H_Wand", "2H_Staff", "Spellbook_open", "Mage_Hat", "Mage_Cape");
+        foreach (var (file, bone) in new[] { ("merchant_hat", "head"), ("merchant_pack", "chest"), ("merchant_pouch", "hips") })
+            HeroBuilder.Attach(who, "Assets/Art/Merchant/" + file + ".fbx", bone);
+        who.transform.SetPositionAndRotation(new Vector3(-6.2f * SX, 0, 0.75f * SZ), Quaternion.Euler(0, 180, 0));
         who.transform.SetParent(root.transform, true);
         CombatDevSceneBuilder.Animator(who, ctrl);
         who.AddComponent<Merchant>();
