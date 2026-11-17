@@ -1100,10 +1100,26 @@ namespace Quintessence.Game
                 + (NewFeats.Count > 0 ? $"\nFeito{(NewFeats.Count > 1 ? "s" : "")}: {string.Join(", ", NewFeats.ConvertAll(Feats.Name))} (+{NewFeats.Count * Feats.Reward} Fragmentos)" : "")
                 + (NewAscension > 0 ? $"\nAscensão {NewAscension} liberada: escolha no título para enfrentar inimigos mais fortes" : "");
             Sfx.Play(victory ? "victory" : "defeat");
-            hud.ShowResult(victory, header, tiles, details, GameFlow.RestartRun, GameFlow.ToTitle);
+            hud.ShowResult(victory, header, tiles, details, GameFlow.RestartRun, GameFlow.ToTitle, Epilogue(victory));
             // feito novo: um sino depois do som do resultado
             // os do meio da run ja tocaram na hora
             if (endFeats.Count > 0) { yield return new WaitForSecondsRealtime(0.9f); Sfx.Play("feat"); }
+        }
+
+        /// Frase de fechamento do resultado: na vitoria, o chefe final que caiu; na derrota, o trecho onde a run terminou.
+        public string Epilogue(bool victory)
+        {
+            if (victory)
+                return WeaverRun ? "Os fios da Tecelã se desfazem em cinza. Os quatro elementos se calam, e o quinto responde."
+                    : QueenRun ? "A Rainha Afogada volta às águas paradas, e o Coração das Cinzas bate de novo."
+                    : "O Guardião tomba sobre as próprias cinzas. A Quintessência desperta em você.";
+            return lastBiome switch
+            {
+                Biome.Crypt => "A Cripta Afogada fecha as águas sobre mais um herói.",
+                Biome.Garden => "O Jardim de Pedra ganha mais uma estátua.",
+                Biome.Heart => "Tão perto do Coração. Na próxima descida, ele é seu.",
+                _ => "Os Salões de Cinza guardam mais um nome. O Refúgio guarda o que você aprendeu.",
+            };
         }
 
         // ---------- trechos da run ----------

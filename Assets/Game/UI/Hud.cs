@@ -240,7 +240,7 @@ namespace Quintessence.UI
             mapPanel = Overlay("Map", new Color(0.03f, 0.02f, 0.06f, 0.94f)); // mais fechado: o heroi e as faixas coloridas se misturavam
             UiKit.Text(UiKit.Rect("Title", mapPanel, new Vector2(0.5f, 1), new Vector2(0, -80), new Vector2(800, 70)), "MAPA", 56, UiKit.Cream);
             mapContent = UiKit.Rect("Content", mapPanel, center, new Vector2(0, -20), new Vector2(1500, 600));
-            resultPanel = Overlay("Result", new Color(0.03f, 0.02f, 0.06f, 0.9f));
+            resultPanel = Overlay("Result", new Color(0.03f, 0.02f, 0.06f, 0.96f)); // textos flutuantes da sala (ONDA 1/2) apareciam atras do resultado
             pausePanel = Overlay("Pause", new Color(0.03f, 0.02f, 0.06f, 0.86f));
 
             fade = UiKit.Image(UiKit.Stretch("Fade", root), null, new Color(0, 0, 0, 0));
@@ -992,8 +992,12 @@ namespace Quintessence.UI
 
         /// Fim de run: titulo, uma linha de quem jogou, quatro numeros grandes (salas, inimigos, tempo, nivel)
         /// e, embaixo, a build e o que a run rendeu no Refugio.
-        public void ShowResult(bool victory, string header, (string value, string label)[] tiles, string details, Action again, Action menu)
+        public string LastEpilogue { get; private set; } = "";
+
+        /// epilogue: uma frase de fechamento sob o titulo (quem caiu, onde a run terminou). Vazia = sem frase.
+        public void ShowResult(bool victory, string header, (string value, string label)[] tiles, string details, Action again, Action menu, string epilogue = "")
         {
+            LastEpilogue = epilogue ?? "";
             if (tipRoot != null) tipRoot.gameObject.SetActive(false);
             ClearChapter(); // morreu durante o cartao de capitulo: o titulo do trecho nao fica por cima do resultado
             queuedBanner = null; tipSuspended = false;
@@ -1001,10 +1005,14 @@ namespace Quintessence.UI
             foreach (Transform child in resultPanel) Destroy(child.gameObject);
             var center = new Vector2(0.5f, 0.5f);
             var accent = victory ? new Color(0.9f, 0.76f, 0.42f) : new Color(0.78f, 0.3f, 0.28f);
-            var title = UiKit.Text(UiKit.Rect("Title", resultPanel, center, new Vector2(0, 330), new Vector2(1400, 120)),
+            bool hasEpilogue = !string.IsNullOrEmpty(epilogue);
+            var title = UiKit.Text(UiKit.Rect("Title", resultPanel, center, new Vector2(0, hasEpilogue ? 352 : 330), new Vector2(1400, 120)),
                 victory ? "VITÓRIA" : "VOCÊ CAIU", 104, accent);
             title.font = GameFonts.Title;
-            var head = UiKit.Text(UiKit.Rect("Header", resultPanel, center, new Vector2(0, 238), new Vector2(1500, 40)), header, 28, UiKit.Cream);
+            if (hasEpilogue)
+                UiKit.Fit(UiKit.Text(UiKit.Rect("Epilogue", resultPanel, center, new Vector2(0, 278), new Vector2(1400, 36)), epilogue, 26,
+                    Color.Lerp(accent, UiKit.Cream, 0.55f), TextAnchor.MiddleCenter, false), 18, 26);
+            var head = UiKit.Text(UiKit.Rect("Header", resultPanel, center, new Vector2(0, hasEpilogue ? 232 : 238), new Vector2(1500, 40)), header, 28, UiKit.Cream);
             UiKit.Fit(head, 18, 28);
             int n = tiles?.Length ?? 0;
             for (int i = 0; i < n; i++)

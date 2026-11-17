@@ -171,7 +171,8 @@ namespace Quintessence.Game.PlayTests
                 + "\nBuild: Sintonia de Terra II · 6 Fusões · 31 Cadências · 4 esquivas perfeitas · Pele de Pedra"
                 + "\n+42 Fragmentos para o Refúgio (total: 188)   ·   Brann +60 de maestria"
                 + "\nMaestria 3 de Brann: começa a run com um talento à escolha"
-                + "\nFeitos: Mestre das Fusões, Intocável (+20 Fragmentos)", () => { }, () => { });
+                + "\nFeitos: Mestre das Fusões, Intocável (+20 Fragmentos)", () => { }, () => { },
+                "Tão perto do Coração. Na próxima descida, ele é seu.");
             for (int i = 0; i < 40; i++) yield return null;
             foreach (var s in sizes) yield return Shoot(Camera.main, $"Logs/aspect/p_resultado_{s.x}x{s.y}.png", s);
             yield return Shoot(Camera.main, "docs/img/s6_resultado.png", new Vector2Int(1280, 720));

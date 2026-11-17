@@ -398,6 +398,7 @@ namespace Quintessence.Game.PlayTests
             Assert.IsTrue(director.Finished, "a run nao terminou no tempo limite");
             Assert.IsTrue(director.Victory, $"o heroi caiu na sala {director.Run.Depth + 1} ({director.Run.Current.Type})");
             Assert.Contains(Feat.FirstWin, director.NewFeats, "a primeira vitoria cumpre o feito");
+            StringAssert.Contains(director.WeaverRun ? "Tecelã" : director.QueenRun ? "Rainha" : "Guardião", director.Epilogue(true), "a vitoria fala do chefe que caiu");
             Assert.IsTrue(MetaStore.Current.Has(Feat.FirstWin));
             var build = director.BuildLine();
             Assert.IsTrue(build.Length == 0 || build.StartsWith("\nBuild: "), "linha de build no resultado: " + build);

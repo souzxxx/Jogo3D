@@ -108,6 +108,8 @@ namespace Quintessence.Game.PlayTests
             hero.TakeDamage(new DamageInfo(99999f, ElementType.None, Team.Enemy));
             yield return WaitFor(() => hud.ResultVisible, 8f, "morrer durante a troca de sala deveria levar ao resultado");
             Assert.IsTrue(director.Finished);
+            Assert.AreEqual(director.Epilogue(false), hud.LastEpilogue, "o resultado fecha com a frase do trecho onde a run terminou");
+            Assert.IsNotEmpty(hud.LastEpilogue);
             Assert.IsNull(RunSaveStore.Load(), "run encerrada nao deixa Continuar para tras");
 
             // 2) Menu principal no resultado: o titulo abre, sem Continuar, e escolher um heroi comeca uma run nova
