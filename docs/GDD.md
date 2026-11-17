@@ -175,7 +175,7 @@ Os tipos entram aos poucos: Ceifador na segunda sala, Cinzentos na terceira, Arr
 ### Visual
 
 - **Low-poly fosco** com os packs KayKit (CC0). O que criamos por código segue o pack: cor contida, sem neon.
-- Cena fria e escura; a cor vem dos elementos e das tochas. Câmera fixa de cima, inclinada, seguindo o herói. Pilar ou caixote que fica entre a câmera e o herói some enquanto atrapalha (fica a sombra), e a câmera para de seguir antes de mostrar o lado de fora da sala.
+- Cena fria e escura; a cor vem dos elementos e das tochas. Câmera fixa de cima, inclinada, seguindo o herói. O cenário nunca some: herói ou inimigo atrás de pilar, caixote ou parede aparece como silhueta (herói em tom de pergaminho, inimigos em tijolo apagado, com a borda um pouco mais clara), e a câmera para de seguir antes de mostrar o lado de fora da sala.
 - **Emblemas dos elementos** modelados pelo grupo (chama, gota, cristais âmbar e redemoinho) giram sobre as colunas do título e os totens do Santuário. Os totens de escolha (Pacto, Tesouro, Mestre, Loja, portas) têm medalhões de pedra com aro aceso na cor da sala.
 - **Cores dos elementos:** Fogo laranja-avermelhado, Água azul, Terra ocre, Ar verde-água claro, Quintessência branco.
 

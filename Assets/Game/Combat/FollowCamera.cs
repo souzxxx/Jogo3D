@@ -1,10 +1,9 @@
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Rendering;
 
 namespace Quintessence.Combat
 {
     /// Camera top-down 3/4 fixa que segue o alvo com suavizacao e olha um pouco na direcao da mira.
+    /// O cenario nunca some: heroi e inimigos atras de uma peca aparecem como silhueta (Core.Silhouette).
     public class FollowCamera : MonoBehaviour
     {
         [SerializeField] Transform target;
@@ -33,54 +32,6 @@ namespace Quintessence.Combat
             if (player != null) want += player.AimDirection * lookAhead;
             focus = Vector3.SmoothDamp(focus, want, ref velocity, smoothTime);
             Apply();
-            HideOccluders();
-        }
-
-        // ---------- pecas na frente do heroi ----------
-        // Pilar, caixote ou escombro entre a camera e o heroi some enquanto atrapalha; a sombra fica no chao,
-        // entao o jogador continua sabendo que a peca esta ali. Inimigos nunca somem.
-        readonly Dictionary<Renderer, ShadowCastingMode> hidden = new();
-        readonly HashSet<Renderer> blocking = new();
-        readonly List<Renderer> restore = new();
-        readonly RaycastHit[] hits = new RaycastHit[24];
-
-        /// Quantas pecas estao escondidas agora (para os testes).
-        public int HiddenCount => hidden.Count;
-        public bool IsHidden(Renderer r) => hidden.ContainsKey(r);
-
-        void HideOccluders()
-        {
-            blocking.Clear();
-            var chest = target.position + Vector3.up;
-            var from = transform.position;
-            var d = chest - from;
-            float len = d.magnitude - 0.9f;
-            if (len > 0.1f)
-            {
-                int n = Physics.SphereCastNonAlloc(from, 0.45f, d / d.magnitude, hits, len, ~0, QueryTriggerInteraction.Ignore);
-                for (int i = 0; i < n; i++) Collect(hits[i].collider);
-            }
-            foreach (var r in blocking)
-                if (!hidden.ContainsKey(r)) { hidden[r] = r.shadowCastingMode; r.shadowCastingMode = ShadowCastingMode.ShadowsOnly; }
-            restore.Clear();
-            foreach (var kv in hidden) if (!blocking.Contains(kv.Key)) restore.Add(kv.Key);
-            foreach (var r in restore) { if (r != null) r.shadowCastingMode = hidden[r]; hidden.Remove(r); }
-        }
-
-        void Collect(Collider c)
-        {
-            if (c == null || c.GetComponentInParent<PlayerController>() != null || c.GetComponentInParent<UnityEngine.AI.NavMeshAgent>() != null) return;
-            var rs = c.GetComponentsInChildren<Renderer>();
-            // colisor sem malha propria (peca em L): a malha e irma dele, no mesmo pai; barreira invisivel (pai e a cena toda) nao tem o que esconder
-            if (rs.Length == 0 && c.transform.parent != null && c.transform.parent.parent != null && c.transform.parent.childCount <= 8)
-                rs = c.transform.parent.GetComponentsInChildren<Renderer>();
-            foreach (var r in rs) if (r is MeshRenderer || r is SkinnedMeshRenderer) blocking.Add(r);
-        }
-
-        void OnDisable()
-        {
-            foreach (var kv in hidden) if (kv.Key != null) kv.Key.shadowCastingMode = kv.Value;
-            hidden.Clear();
         }
 
         Camera cam;

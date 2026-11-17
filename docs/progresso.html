@@ -35,6 +35,25 @@
   <h1>Quintessence 3D — Progresso</h1>
   <p class="sub">Entrega mais recente no topo. Escopo em <a href="ESCOPO.md">ESCOPO.md</a> · kanban em <a href="https://github.com/users/souzxxx/projects/4">GitHub Projects</a>. · <b>resumo da noite por tema em <a href="novidades.html">novidades.html</a></b>.</p>
 
+  <section id="s6-silhueta">
+    <h2>17/11 — silhueta atrás do cenário no lugar de esconder a peça</h2>
+    <div class="meta"><span class="tag who">Miguel</span><span class="tag who">Leonardo</span><span class="tag ok">teste novo comparando os pixels com e sem a silhueta</span></div>
+    <p>O professor sugeriu manter a peça na frente e mostrar o personagem por trás dela, em vez de fazer o pilar sumir. O teste que ele deixou no Unity (um <code>RenderObjects</code> que desenhava a camada 6 por cima de tudo e um shader de teste vazio) foi desfeito, e no lugar entrou uma silhueta completa:</p>
+    <ul>
+      <li><b>Herói e inimigos</b> ganharam as camadas <code>Hero</code> e <code>Enemy</code> (só o modelo animado; anéis, auras e colisores ficam de fora). Inimigo morto sai da camada, então corpo caído não vira silhueta.</li>
+      <li><b>Quatro passadas no renderer</b> (<code>Assets/Settings/PC_Renderer.asset</code>, criadas por <code>SilhouetteSetup.Run</code>): primeiro uma máscara marca no stencil o que do personagem está à vista, depois a silhueta pinta só o que ficou atrás de alguma coisa. Por isso o braço atrás do próprio corpo não vira silhueta, e a silhueta do inimigo nunca passa por cima do herói.</li>
+      <li><b>Cor fosca, no estilo do pack:</b> herói em tom de pergaminho, inimigos em tijolo apagado, preenchimento meio transparente e a borda um pouco mais clara. Nada de brilho.</li>
+      <li>A câmera parou de esconder pilares, caixotes e escombros. O cenário fica sempre inteiro.</li>
+    </ul>
+    <p><b>Teste:</b> o herói é posto atrás das peças de quatro arranjos, e o quadro é desenhado com e sem a camada da silhueta. Atrás da peça, o peito do herói tem que mudar de cor; num ponto livre, nenhum pixel pode mudar.</p>
+    <div class="cols">
+      <div><h3>Sem silhueta</h3><img src="img/s6_silhueta_pilar_sem.png" alt="O pilar na frente esconde o herói, só o anel aparece em volta"></div>
+      <div><h3>Com silhueta</h3><img src="img/s6_silhueta_pilar.png" alt="O pilar continua lá e o herói aparece atrás dele como silhueta cor de pergaminho"></div>
+    </div>
+    <h3>Inimigo atrás do pilar</h3>
+    <img src="img/s6_silhueta_inimigo.png" alt="Esqueleto atrás de um pilar aparece como silhueta cor de tijolo, o herói à vista no meio da sala">
+  </section>
+
   <section id="resumo-madrugada-17">
     <h2>Resumo da madrugada 16→17/11 (para ler primeiro)</h2>
     <div class="meta"><span class="tag who">Leonardo</span><span class="tag who">Miguel</span><span class="tag who">Enzo</span><span class="tag ok">549 testes de regra + 42 jogando, todos passando · builds Windows e WebGL de 0h05</span></div>
@@ -163,7 +182,7 @@
   <section id="s6-camera-colisao">
     <h2>16/11, segunda leva — câmera que não perde o herói, colisões testadas em todas as salas e Grimório legível</h2>
     <div class="meta"><span class="tag who">Leonardo</span><span class="tag who">Enzo</span><span class="tag who">Miguel</span><span class="tag ok">teste de colisão: 1101 aproximações, nenhum problema</span></div>
-    <p><b>Câmera (Leonardo, rubrica 1).</b> Medi em todos os arranjos quantas posições deixam uma peça entre a câmera e o herói: pilares, caixotes e escombros tapavam o herói em até 25% dos pontos de algumas salas (Pilares, Clareira, Arsenal, Bosque de Pedra). Agora a peça da frente some enquanto atrapalha, e a sombra dela fica no chão, então o jogador continua sabendo que ela está ali. Inimigos nunca somem. Perto das paredes laterais a câmera para de seguir antes de mostrar o vazio preto de fora da sala.</p>
+    <p><b>Câmera (Leonardo, rubrica 1).</b> <i>(Em 17/11 isto foi trocado pela silhueta, veja acima.)</i> Medi em todos os arranjos quantas posições deixam uma peça entre a câmera e o herói: pilares, caixotes e escombros tapavam o herói em até 25% dos pontos de algumas salas (Pilares, Clareira, Arsenal, Bosque de Pedra). Agora a peça da frente some enquanto atrapalha, e a sombra dela fica no chão, então o jogador continua sabendo que ela está ali. Inimigos nunca somem. Perto das paredes laterais a câmera para de seguir antes de mostrar o vazio preto de fora da sala.</p>
     <p><b>Colisões (Enzo, rubrica 2).</b> Um teste novo joga o herói contra cada peça sólida dos 31 arranjos, contra as paredes e contra as quinas, em 8 direções: dash contra a peça, um segundo empurrando e depois a tentativa de sair andando. São 1101 aproximações, 826 com contato de verdade. Em nenhuma o dash atravessou, o herói ficou preso, tremeu, subiu na peça ou entrou nela. Registro em <code>Logs/colisoes.txt</code> a cada execução.</p>
     <p><b>Grimório e painéis (Miguel).</b> Fotografei talentos, pausa, resultado, Opções, Grimório, Feitos, Refúgio e Créditos em 16:9, 4:3 e janela larga. Só o Grimório tinha problema: o nome de cada inimigo encostava no texto do de cima, e a linha de teclas do rodapé passava por cima do painel. Corrigido.</p>
     <p><b>Textos no mundo (Miguel).</b> Palavras que saem juntas ("OBSIDIANA", "CADÊNCIA", "FEITO") escreviam uma por cima da outra: o texto novo nascia embaixo e subia mais rápido que o antigo. Agora ele nasce acima dos que ainda estão no ar. O letreiro do trecho subiu para o alto da tela, longe do herói. Builds Windows e WebGL refeitas com tudo desta leva.</p>

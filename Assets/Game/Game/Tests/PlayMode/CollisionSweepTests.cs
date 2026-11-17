@@ -126,9 +126,11 @@ namespace Quintessence.Game.PlayTests
             File.WriteAllText("Logs/oclusao.txt", string.Join("\n", lines));
         }
 
-        /// Rubrica 1 (visibilidade): com o heroi atras de um pilar, a camera esconde a peca da frente e devolve quando ele sai.
+        /// Rubrica 1 (visibilidade): o cenario nunca some; com o heroi atras de um pilar, o que fica tapado aparece como silhueta
+        /// (Core.Silhouette + passadas RenderObjects do renderer). Compara o quadro desenhado com e sem a camada do heroi:
+        /// atras da peca o peito do heroi muda de cor; com o heroi a vista, nenhum pixel muda (o corpo nao vira silhueta de si mesmo).
         [UnityTest, Timeout(600000)]
-        public IEnumerator Pieces_In_Front_Of_The_Hero_Are_Hidden()
+        public IEnumerator Hero_Behind_A_Piece_Shows_As_A_Silhouette()
         {
             GameEvents.Clear();
             Time.captureFramerate = 30;
@@ -142,9 +144,12 @@ namespace Quintessence.Game.PlayTests
             hero.GetComponent<Health>().Pool.Invulnerable = true;
             body = hero.GetComponent<CharacterController>();
             var cam = Camera.main;
-            var follow = cam.GetComponent<FollowCamera>();
-            Assert.IsNotNull(follow);
-            int tested = 0, open = 0, hid = 0;
+            var model = hero.GetComponent<HeroSkin>().Model;
+            int heroLayer = LayerMask.NameToLayer(Silhouette.HeroLayer);
+            Assert.GreaterOrEqual(heroLayer, 0, "falta a camada Hero (SilhouetteSetup.Run)");
+            Assert.IsTrue(model.GetComponentsInChildren<Renderer>().All(r => r.gameObject.layer == heroLayer), "o modelo do heroi deveria estar na camada da silhueta");
+
+            int tested = 0, shown = 0;
             bool shot = false;
             foreach (var name in new[] { "Pilares", "Clareira", "Arsenal", "Bosque de Pedra" })
             {
@@ -157,36 +162,113 @@ namespace Quintessence.Game.PlayTests
                     var p = new Vector3(c.bounds.center.x, 0.05f, c.bounds.max.z + body.radius + 0.4f);
                     if (!Free(p)) continue;
                     hero.Teleport(p, Vector3.forward);
-                    for (int k = 0; k < 30; k++) yield return null;
-                    var chest = hero.transform.position + Vector3.up;
+                    for (int k = 0; k < 20; k++) yield return null;
+                    var chest = hero.transform.position + Vector3.up * 0.9f;
                     var from = cam.transform.position;
-                    var visible = Physics.RaycastAll(from, (chest - from).normalized, Vector3.Distance(from, chest) - 0.9f, ~0, QueryTriggerInteraction.Ignore)
-                        .Select(h => h.collider).Where(x => x.GetComponentInParent<PlayerController>() == null)
-                        .SelectMany(x => x.GetComponentsInChildren<Renderer>()).Where(r => r.enabled && r.shadowCastingMode != UnityEngine.Rendering.ShadowCastingMode.ShadowsOnly).ToList();
+                    bool covered = Physics.RaycastAll(from, (chest - from).normalized, Vector3.Distance(from, chest) - 0.9f, ~0, QueryTriggerInteraction.Ignore)
+                        .Any(h => h.collider.GetComponentInParent<PlayerController>() == null);
+                    if (!covered) continue;
                     tested++;
-                    if (visible.Count > 0) open++;
-                    if (follow.HiddenCount > 0)
+                    var (with, without, _) = Compare(cam, model, heroLayer, chest);
+                    if (Diff(with, without) > 0.06f) shown++;
+                    Assert.IsTrue(c.GetComponentsInChildren<Renderer>().All(r => r.enabled && r.shadowCastingMode != UnityEngine.Rendering.ShadowCastingMode.ShadowsOnly), "a peca da frente nao some mais");
+                    if (!shot && name == "Pilares")
                     {
-                        hid++;
-                        if (!shot && name == "Pilares")
-                        {
-                            shot = true;
-                            yield return AspectShots.Shoot(cam, "docs/img/s6_camera_pilar_depois.png", new Vector2Int(960, 540));
-                            follow.enabled = false; // devolve as pecas: o mesmo quadro sem o recurso
-                            yield return AspectShots.Shoot(cam, "docs/img/s6_camera_pilar_antes.png", new Vector2Int(960, 540));
-                            follow.enabled = true;
-                        }
+                        shot = true;
+                        yield return AspectShots.Shoot(cam, "docs/img/s6_silhueta_pilar.png", new Vector2Int(960, 540));
+                        Silhouette.Clear(model);
+                        yield return AspectShots.Shoot(cam, "docs/img/s6_silhueta_pilar_sem.png", new Vector2Int(960, 540));
+                        Silhouette.MarkHero(model);
                     }
                 }
-                // longe de tudo, nada fica escondido
-                hero.Teleport(new Vector3(0, 0.05f, -Arena.HalfZ + 2.2f), Vector3.forward);
-                for (int k = 0; k < 30; k++) yield return null;
             }
+            // a vista, sem nada entre a camera e os pes, o peito e a cabeca: o heroi desenhado com e sem a silhueta e identico
+            director.ApplyLayout(director.LayoutIndex("Clareira"));
+            for (int k = 0; k < 3; k++) yield return null;
+            bool open = false;
+            for (float z = 0f; z < Arena.HalfZ - 3f && !open; z += 1f)
+            {
+                hero.Teleport(new Vector3(0, 0.05f, z), Vector3.forward);
+                for (int k = 0; k < 20; k++) yield return null;
+                open = new[] { 0.1f, 0.9f, 1.8f }.All(hgt =>
+                {
+                    var at = hero.transform.position + Vector3.up * hgt;
+                    var from = cam.transform.position;
+                    return !Physics.SphereCastAll(from, 0.5f, (at - from).normalized, Vector3.Distance(from, at), ~0, QueryTriggerInteraction.Ignore)
+                        .Any(h => h.collider.GetComponentInParent<PlayerController>() == null && h.collider.bounds.max.y > 0.15f);
+                });
+            }
+            Assert.IsTrue(open, "nenhum ponto livre na Clareira");
+            var (_, _, changed) = Compare(cam, model, heroLayer, hero.transform.position + Vector3.up * 0.9f);
+
+            // inimigo atras de um pilar tambem aparece (tijolo apagado); o heroi fica longe, a vista
+            director.ApplyLayout(director.LayoutIndex("Pilares"));
+            Object.FindFirstObjectByType<WaveSpawner>().enabled = true;
+            director.StartEncounter(RoomType.Combat, 1, EliteModifier.None);
+            EnemyBrain foe = null;
+            for (int k = 0; k < 300 && foe == null; k++) { yield return null; foe = Object.FindFirstObjectByType<EnemyBrain>(); }
+            Assert.IsNotNull(foe, "nenhum inimigo apareceu");
+            for (int k = 0; k < 30; k++) yield return null;
+            var foeModel = foe.GetComponentInChildren<Animator>().gameObject;
+            int enemyLayer = LayerMask.NameToLayer(Silhouette.EnemyLayer);
+            Assert.IsTrue(foeModel.GetComponentsInChildren<SkinnedMeshRenderer>().All(r => r.gameObject.layer == enemyLayer), "o modelo do inimigo deveria estar na camada da silhueta");
+            foreach (var other in Object.FindObjectsByType<EnemyBrain>(FindObjectsSortMode.None)) other.enabled = false;
+            foe.GetComponent<UnityEngine.AI.NavMeshAgent>().enabled = false;
+            var pillar = GameObject.Find("Layout").GetComponentsInChildren<Collider>().Where(c => !c.isTrigger)
+                .First(c => Free(new Vector3(c.bounds.center.x, 0.05f, c.bounds.max.z + 0.9f)));
+            foe.transform.position = new Vector3(pillar.bounds.center.x, 0f, pillar.bounds.max.z + 0.9f);
+            hero.Teleport(new Vector3(pillar.bounds.center.x + 6f, 0.05f, pillar.bounds.center.z - 4f), Vector3.forward);
+            for (int k = 0; k < 10; k++) yield return null;
+            var foeChest = foe.transform.position + Vector3.up * 0.9f;
+            var (fa, fb, _) = CompareModel(cam, foeModel, () => Silhouette.MarkEnemy(foe.gameObject), foeChest);
+            yield return AspectShots.Shoot(cam, "docs/img/s6_silhueta_inimigo.png", new Vector2Int(960, 540));
+            Assert.Greater(Diff(fa, fb), 0.04f, "o inimigo atras do pilar deveria aparecer como silhueta");
+
             Time.captureFramerate = 0;
-            Assert.Greater(tested, 6, "poucos pontos atras de pecas para testar");
-            Assert.Greater(hid, tested / 2, "nesses pontos a peca deveria estar na frente do heroi e ser escondida");
-            Assert.AreEqual(0, open, $"em {open} de {tested} pontos uma peca ainda tapava o heroi");
+            Assert.Greater(tested, 4, "poucos pontos com o heroi atras de uma peca para testar");
+            Assert.GreaterOrEqual(shown, tested * 0.8f, $"so {shown} de {tested} pontos tapados mostraram a silhueta");
+            Assert.Less(changed, 40, $"com o heroi a vista, {changed} pixels mudaram: o corpo esta virando silhueta de si mesmo");
         }
+
+        /// Desenha o quadro com o modelo na camada da silhueta e sem ela; devolve a cor media em volta do ponto nos dois e quantos pixels mudaram no quadro todo.
+        static (Color, Color, int) Compare(Camera cam, GameObject model, int heroLayer, Vector3 point)
+            => CompareModel(cam, model, () => Silhouette.MarkHero(model), point);
+
+        static (Color, Color, int) CompareModel(Camera cam, GameObject model, System.Action mark, Vector3 point)
+        {
+            const int W = 480, H = 270;
+            var rt = new RenderTexture(W, H, 24, RenderTextureFormat.ARGB32);
+            Color32[] Draw()
+            {
+                cam.targetTexture = rt; cam.Render();
+                var tex = new Texture2D(W, H, TextureFormat.RGBA32, false);
+                RenderTexture.active = rt; tex.ReadPixels(new Rect(0, 0, W, H), 0, 0); RenderTexture.active = null;
+                var px = tex.GetPixels32(); Object.Destroy(tex);
+                return px;
+            }
+            cam.targetTexture = rt;
+            var sp = cam.WorldToScreenPoint(point);
+            var a = Draw();
+            Silhouette.Clear(model);
+            var b = Draw();
+            mark();
+            cam.targetTexture = null;
+            rt.Release(); Object.Destroy(rt);
+            Color Around(Color32[] px)
+            {
+                Color sum = Color.clear; int n = 0;
+                for (int y = (int)sp.y - 3; y <= (int)sp.y + 3; y++)
+                for (int x = (int)sp.x - 3; x <= (int)sp.x + 3; x++)
+                    if (x >= 0 && y >= 0 && x < W && y < H) { sum += (Color)px[y * W + x]; n++; }
+                return n > 0 ? sum / n : Color.clear;
+            }
+            int changed = 0;
+            for (int i = 0; i < a.Length; i++)
+                if (Mathf.Abs(a[i].r - b[i].r) + Mathf.Abs(a[i].g - b[i].g) + Mathf.Abs(a[i].b - b[i].b) > 24) changed++;
+            return (Around(a), Around(b), changed);
+        }
+
+        static float Diff(Color a, Color b) => Mathf.Abs(a.r - b.r) + Mathf.Abs(a.g - b.g) + Mathf.Abs(a.b - b.b);
 
         static IEnumerable<Vector3> Directions()
         {
