@@ -287,6 +287,11 @@ public static class GameSceneBuilder
         light.transform.position = CampfireAt + Vector3.up * 1.3f;
         light.type = LightType.Point; light.color = new Color(1f, 0.62f, 0.32f); light.intensity = 3f; light.range = 7f; light.shadows = LightShadows.None;
         light.gameObject.AddComponent<Quintessence.Feel.FireFlicker>();
+        // estalo da lenha (tools/gen_audio.py campfire), no volume de efeitos
+        var crackle = fire.AddComponent<AudioSource>();
+        crackle.clip = AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/Resources/Audio/campfire.wav");
+        crackle.loop = true; crackle.playOnAwake = false;
+        fire.AddComponent<Quintessence.Feel.AmbientLoop>();
     }
 
     /// Um cenario por tipo de sala (na ordem do enum RoomType); nulo = sala sem cenario proprio.

@@ -2060,6 +2060,8 @@ namespace Quintessence.Game.PlayTests
             Assert.AreEqual("RestDecor", director.CurrentDecor);
             Assert.IsNotNull(GameObject.Find("bed_decorated"), "o Descanso tem camas");
             Assert.IsNotNull(GameObject.Find("rest_campfire"), "e uma fogueira no meio");
+            var crackle = GameObject.Find("CampfireFlame").GetComponent<AudioSource>();
+            Assert.IsTrue(crackle.clip != null && crackle.loop, "a fogueira estala em loop");
             Shot(cam, "docs/img/sala_descanso.png");
             // Descanso: dormir (cura) ou afiar a arma (golpe basico), um dos dois
             var rests = director.Interactables.Where(i => i.Prompt == "dormir junto ao fogo" || i.Prompt == "afiar a arma").ToList();

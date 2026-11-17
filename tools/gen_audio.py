@@ -57,6 +57,9 @@ S["wave"] = ([tone(thump(120, 50, 20, 9, 0.9) + "+" + f"0.9*sin({P}*(50*(t-0.2)+
 S["door"] = ([noise(0.6, "brown", "bandpass=f=300:w=300," + env("sin(PI*t/0.6)*2.5")), tone(f"0.8*sin({P}*(60*(t-0.42)+60*(1-exp(-25*(t-0.42)))/25))*exp(-12*(t-0.42))*gt(t,0.42)", 0.8)], "")
 S["pickup"] = ([tone(bell(784, 0, 6, 0.3) + "+" + bell(1174.7, 0.1, 5, 0.3), 0.8)], ECHO)
 S["heal"] = ([tone(bell(440, 0, 5, 0.25) + "+" + bell(554.4, 0.12, 5, 0.25) + "+" + bell(659.3, 0.24, 4, 0.25), 1.0)], ECHO)
+# fogueira do Descanso (loop de 6 s): ronco grave da chama e estalos curtos e espalhados da lenha
+S["campfire"] = ([noise(6, "brown", "lowpass=f=420,highpass=f=60," + env("0.55+0.12*sin(2*PI*0.5*t)+0.08*sin(2*PI*1.3*t)")),
+    tone("0.9*gt(random(1),0.99965)*(random(2)-0.5)*2", 6) + ",highpass=f=1200,lowpass=f=5000,aecho=0.6:0.3:7:0.4"], "")
 S["ui_click"] = ([tone(f"0.3*sin({P}*900*t)*exp(-60*t)", 0.06)], "")
 S["boss_spawn"] = ([tone(f"0.5*sin({P}*55*t)*(1+0.5*sin({P}*6*t))*min(t/0.3,1)*exp(-1.2*max(t-1,0))", 2.2), noise(2.2, "brown", "lowpass=f=200," + env("min(t/0.3,1)*exp(-1.5*max(t-0.8,0))*2")), tone(f"0.22*(sin({P}*110*t)+0.5*sin({P}*220*t)+0.33*sin({P}*330*t))*min(t/0.4,1)*exp(-1.5*max(t-1.2,0))", 2.2)], ECHO)
 S["boss_phase"] = ([tone(thump(180, 32, 6, 3, 1.0), 1.3), tone(f"0.2*(sin({P}*98*t)+0.5*sin({P}*196*t)+0.33*sin({P}*294*t))*exp(-2.5*t)", 1.3)], ECHO)
