@@ -978,6 +978,7 @@ namespace Quintessence.Game
             Run.AddEssence(Mathf.RoundToInt(essence * player.Modifiers.EssenceMult));
             hud.SetEssence(Run.Essence);
             if (node.Type == RoomType.Boss) { StartCoroutine(Finish(true)); return; }
+            hud.ShowFlash("SALA LIMPA!", new Color(0.97f, 0.88f, 0.58f));
             if (node.Reward == RewardType.Boon && SetupBoons()) return; // as portas abrem depois de escolher
             OpenDoors();
         }
@@ -1375,7 +1376,9 @@ namespace Quintessence.Game
                 var banner = Instantiate(bannerByRoom[t], root.transform);
                 banner.transform.localPosition = new Vector3(0, 3.55f, -0.42f);
             }
-            Label(root.transform, new Vector3(0, 1.9f, -1.5f), label, Cream, 0.62f);
+            // medalhao do tipo da sala no lintel (o estandarte la em cima fica fora do quadro da camera)
+            Medal(root.transform, new Vector3(0, 2.75f, -0.7f), RoomInfo.Icon(type), RoomInfo.Color(type), 1.05f);
+            Label(root.transform, new Vector3(0, 1.45f, -1.5f), label, Cream, 0.62f);
             Glow(root.transform, new Vector3(0, 2.2f, -1.4f), new Color(1f, 0.82f, 0.6f), 1.5f);
             return root;
         }

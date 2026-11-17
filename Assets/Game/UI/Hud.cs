@@ -310,6 +310,7 @@ namespace Quintessence.UI
         void LateUpdate()
         {
             TickBanner();
+            TickFlash();
             TickTip();
             if (hero == null || (hero as UnityEngine.Object) == null)
             {
@@ -463,6 +464,36 @@ namespace Quintessence.UI
         }
 
         bool chapterMode;
+
+        Text flashText;
+        float flashLeft, flashTotal;
+        public string LastFlash { get; private set; } = "";
+
+        /// Aviso curto e grande entre o heroi e as portas ("SALA LIMPA!"): abaixo do heroi fica a dica, no alto as portas.
+        public void ShowFlash(string text, Color color, float seconds = 1.4f)
+        {
+            if (flashText == null)
+            {
+                flashText = UiKit.Text(UiKit.Rect("Flash", canvas.transform, new Vector2(0.5f, 0.5f), new Vector2(0, 165), new Vector2(1400, 90)), "", 66, color);
+                flashText.font = GameFonts.Title;
+                flashText.transform.SetSiblingIndex(0);
+            }
+            LastFlash = text;
+            flashText.text = text;
+            flashText.color = color;
+            flashLeft = flashTotal = seconds;
+            flashText.gameObject.SetActive(true);
+        }
+
+        void TickFlash()
+        {
+            if (flashText == null || !flashText.gameObject.activeSelf) return;
+            flashLeft -= Time.captureFramerate > 0 ? 1f / Time.captureFramerate : Time.unscaledDeltaTime;
+            float k = 1f - flashLeft / flashTotal;
+            var c = flashText.color; c.a = Mathf.Clamp01(k / 0.08f) * Mathf.Clamp01(flashLeft / 0.5f); flashText.color = c;
+            flashText.transform.localScale = Vector3.one * Mathf.Lerp(1.15f, 1f, Mathf.Clamp01(k / 0.15f));
+            if (flashLeft <= 0f) flashText.gameObject.SetActive(false);
+        }
 
         /// Nome do trecho novo como cartao de capitulo: no meio da tela, por cima do preto da troca de sala.
         public void ShowChapter(string title, string sub, Color color, float seconds)

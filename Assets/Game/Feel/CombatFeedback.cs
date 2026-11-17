@@ -566,7 +566,7 @@ namespace Quintessence.Feel
         {
             FindPlayer();
             if (player == null) return;
-            DamageNumber.Spawn(player.position + Vector3.up * 4.2f, "SALA LIMPA!", new Color(1f, 0.9f, 0.5f), 1.5f, 1.8f);
+            // o "SALA LIMPA!" agora e do HUD, abaixo do heroi: no mundo ele nascia sobre os rotulos das portas
             Ring(player.position + Vector3.up * 0.4f, 60, 10f, 0.4f, 0.8f, 0.6f, new Color(1f, 0.85f, 0.4f));
         }
 
