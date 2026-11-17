@@ -195,6 +195,10 @@ public static class GameSceneBuilder
 
     /// Cenario proprio de uma sala sem luta, so com pecas do pack. pieces: (modelo, x, z, rotacao, escala, y, solido).
     static GameObject Decor(string name, Color lightColor, Vector3 lightPos, params (string model, float x, float z, float rot, float scale, float y, bool solid)[] pieces)
+        => DecorWith(name, lightColor, lightPos, null, pieces);
+
+    /// Como Decor, com um passo a mais antes de salvar (pecas feitas no Blender, fogo, luz extra).
+    static GameObject DecorWith(string name, Color lightColor, Vector3 lightPos, System.Action<GameObject> extra, params (string model, float x, float z, float rot, float scale, float y, bool solid)[] pieces)
     {
         const string dir = "Assets/Game/Game/Prefabs/";
         var mat = LookDevBuilder.Mat("DungeonProp", CombatDevSceneBuilder.KK + "Dungeon/dungeon_texture.png", Color.white, Color.black, 0f);
@@ -215,9 +219,65 @@ public static class GameSceneBuilder
         lamp.transform.SetParent(root.transform, false);
         lamp.transform.position = new Vector3(lightPos.x * SX, lightPos.y, lightPos.z * SZ);
         lamp.type = LightType.Point; lamp.color = lightColor; lamp.intensity = 2.2f; lamp.range = 8f;
+        extra?.Invoke(root);
         var prefab = PrefabUtility.SaveAsPrefabAsset(root, dir + name + ".prefab");
         Object.DestroyImmediate(root);
         return prefab;
+    }
+
+    static Vector3 CampfireAt => RunDirector.CampfireAt;
+
+    /// Fogueira do Descanso: pedras e lenha do Blender, chama de particulas baixa e luz quente que oscila.
+    static void Campfire(GameObject root)
+    {
+        HeroBuilder.MatteParts("Assets/Art/Biomes/Rest");
+        void Piece(string file, Vector3 pos, float rot, float scale, bool solid)
+        {
+            var asset = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Art/Biomes/Rest/" + file + ".fbx");
+            if (asset == null) { Debug.LogWarning("sem " + file); return; }
+            var go = (GameObject)PrefabUtility.InstantiatePrefab(asset);
+            go.name = file;
+            go.transform.SetParent(root.transform, false);
+            go.transform.SetPositionAndRotation(pos, Quaternion.Euler(0, rot, 0));
+            go.transform.localScale = Vector3.one * scale;
+            if (!solid) return;
+            var rs = go.GetComponentsInChildren<Renderer>();
+            var b = rs[0].bounds; foreach (var r in rs) b.Encapsulate(r.bounds);
+            var col = go.AddComponent<BoxCollider>();
+            col.center = go.transform.InverseTransformPoint(b.center); col.size = new Vector3(b.size.x * 0.8f, b.size.y, b.size.z * 0.8f) / scale;
+            var carve = go.AddComponent<UnityEngine.AI.NavMeshObstacle>();
+            carve.shape = UnityEngine.AI.NavMeshObstacleShape.Box; carve.center = col.center; carve.size = col.size; carve.carving = true;
+        }
+        Piece("rest_campfire", CampfireAt, 15f, 1.75f, true);
+        Piece("rest_log", CampfireAt + new Vector3(-1.7f, 0f, 1.9f), 28f, 1.3f, false);
+        Piece("rest_log", CampfireAt + new Vector3(1.7f, 0f, 1.9f), -28f, 1.3f, false);
+        // chama: poucas particulas grandes e lentas, laranja fosco, que sobem e somem (sem faisca neon)
+        var fire = new GameObject("CampfireFlame");
+        fire.transform.SetParent(root.transform, false);
+        fire.transform.SetPositionAndRotation(CampfireAt + Vector3.up * 0.45f, Quaternion.Euler(-90, 0, 0));
+        var ps = fire.AddComponent<ParticleSystem>();
+        var main = ps.main;
+        main.startColor = new ParticleSystem.MinMaxGradient(new Color(1f, 0.5f, 0.18f, 1f), new Color(1f, 0.72f, 0.32f, 1f));
+        main.startLifetime = new ParticleSystem.MinMaxCurve(0.5f, 0.9f);
+        main.startSpeed = new ParticleSystem.MinMaxCurve(0.8f, 1.6f);
+        main.startSize = new ParticleSystem.MinMaxCurve(0.6f, 1.1f);
+        main.simulationSpace = ParticleSystemSimulationSpace.World;
+        main.maxParticles = 80;
+        var em = ps.emission; em.rateOverTime = 34f;
+        var sh = ps.shape; sh.shapeType = ParticleSystemShapeType.Cone; sh.radius = 0.4f; sh.angle = 8f;
+        var col2 = ps.colorOverLifetime; col2.enabled = true;
+        var g = new Gradient();
+        g.SetKeys(new[] { new GradientColorKey(new Color(1f, 0.75f, 0.35f), 0), new GradientColorKey(new Color(0.8f, 0.28f, 0.1f), 1) },
+            new[] { new GradientAlphaKey(0, 0), new GradientAlphaKey(1f, 0.2f), new GradientAlphaKey(0, 1) });
+        col2.color = g;
+        var sol = ps.sizeOverLifetime; sol.enabled = true;
+        sol.size = new ParticleSystem.MinMaxCurve(1, AnimationCurve.Linear(0, 1, 1, 0.15f));
+        fire.GetComponent<ParticleSystemRenderer>().sharedMaterial = LookDevBuilder.Additive();
+        var light = new GameObject("CampfireLight").AddComponent<Light>();
+        light.transform.SetParent(root.transform, false);
+        light.transform.position = CampfireAt + Vector3.up * 1.3f;
+        light.type = LightType.Point; light.color = new Color(1f, 0.62f, 0.32f); light.intensity = 3f; light.range = 7f; light.shadows = LightShadows.None;
+        light.gameObject.AddComponent<Quintessence.Feel.FireFlicker>();
     }
 
     /// Um cenario por tipo de sala (na ordem do enum RoomType); nulo = sala sem cenario proprio.
@@ -225,12 +285,12 @@ public static class GameSceneBuilder
     {
         var warm = new Color(1f, 0.74f, 0.45f);
         var list = new GameObject[11];
-        // Descanso: acampamento com camas, mesa posta e barril
-        list[3] = Decor("RestDecor", warm, new Vector3(0, 2.6f, 1f),
+        // Descanso: acampamento com camas, mesa posta e barril, em volta de uma fogueira (feita no Blender, ArtSource/Rest)
+        list[3] = DecorWith("RestDecor", warm, new Vector3(0, 2.6f, 1f), Campfire,
             ("bed_decorated", -7.6f, 2.6f, 90, 1f, 0f, true), ("bed_floor", -7.6f, -0.6f, 90, 1f, 0f, false), ("bed_floor", -7.6f, -2.6f, 80, 1f, 0f, false),
             ("table_medium_decorated_A", 6.6f, 1.6f, 0, 1f, 0f, true), ("stool", 5.2f, 1.2f, 20, 1f, 0f, false), ("stool", 6.9f, 0.1f, -30, 1f, 0f, false),
             ("keg_decorated", 8.4f, -2.2f, -60, 1f, 0f, true), ("barrel_small_stack", 8.3f, 3.8f, 10, 1f, 0f, true),
-            ("candle_triple", -8.6f, 0.8f, 0, 1f, 0f, false), ("candle_lit", 0.9f, 1.4f, 0, 1f, 0f, false), ("candle_lit", -0.9f, 1.4f, 0, 1f, 0f, false),
+            ("candle_triple", -8.6f, 0.8f, 0, 1f, 0f, false),
             ("box_small_decorated", -5.8f, 3.9f, 25, 1f, 0f, false), ("banner_green", -7.6f, 3.9f, 0, 1f, 1.6f, false));
         // Mestre: sala de estudo, com estantes, colunas e velas
         list[5] = Decor("MasterDecor", new Color(1f, 0.82f, 0.5f), new Vector3(0, 3f, 2.4f),
