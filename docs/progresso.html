@@ -35,6 +35,19 @@
   <h1>Quintessence 3D — Progresso</h1>
   <p class="sub">Entrega mais recente no topo. Escopo em <a href="ESCOPO.md">ESCOPO.md</a> · kanban em <a href="https://github.com/users/souzxxx/projects/4">GitHub Projects</a>. · <b>resumo da noite por tema em <a href="novidades.html">novidades.html</a></b>.</p>
 
+  <section id="s6-revisao">
+    <h2>Madrugada, segunda leva — portas com medalhão, áreas de chefe no estilo dos anéis, sonda com reação humana e revisão de bugs</h2>
+    <div class="meta"><span class="tag who">Miguel</span><span class="tag who">Leonardo</span><span class="tag who">Enzo</span><span class="tag ok">549 testes de regra + 40 jogando, todos passando</span></div>
+    <ul>
+      <li><b>Portas (Miguel).</b> O estandarte do tipo da sala ficava acima do quadro da câmera. Agora cada porta tem o medalhão 3D do tipo de sala no lintel, e o rótulo desceu. "SALA LIMPA!" virou aviso do HUD entre o herói e as portas, sem escrever sobre os rótulos nem sobre a dica.</li>
+      <li><b>Áreas que continuam com círculo (Miguel).</b> Chefes, bomba, explosão e Espectro ainda precisam mostrar o tamanho da área. O contorno virou o anel de gomos de pedra aceso em vermelho-tijolo, e o preenchimento ficou escuro e contido.</li>
+      <li><b>Dificuldade sem o círculo do corpo a corpo (Leonardo).</b> A sonda agora reage 0,25 s depois do aviso e só esquiva metade dos golpes de perto, como alguém que lê a animação. Resultado: 7 de 12 (58%), a mesma faixa de antes. Não foi preciso alongar a preparação dos golpes.</li>
+      <li><b>Revisão de bugs (agente separado, só leitura).</b> Corrigido: inimigo morto no meio do golpe ficava com a animação de morte acelerada ou lenta e o corpo inclinado (Enzo, com teste); na sala do chefe o nome dele apagava o cartão de capítulo no meio, e num Cerco ou Provação que abre trecho o cartão apagava o letreiro do objetivo (agora o letreiro espera o cartão acabar); as ondas começavam durante a tela escura (agora só depois do cartão). Também: o mapa, a pausa e o inventário escondem o cartão e a dica ao abrir (Leonardo).</li>
+      <li><b>Teste da Provação.</b> Falhava às vezes na bateria inteira: esperava 30 quadros entre golpes, mas a pausa de impacto desacelera o relógio. Agora espera tempo de jogo.</li>
+    </ul>
+    <img src="img/s6_area_chefe.png" alt="Rainha Afogada com áreas de ataque vermelho-escuro contornadas por gomos de pedra">
+  </section>
+
   <section id="s6-totens">
     <h2>Madrugada 16→17/11 — anéis de pedra, emblemas dos elementos e totens com volume</h2>
     <div class="meta"><span class="tag who">Miguel</span><span class="tag who">Leonardo</span><span class="tag ok">549 testes de regra + 39 jogando</span></div>
