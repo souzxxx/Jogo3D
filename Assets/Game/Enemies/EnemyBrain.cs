@@ -175,6 +175,11 @@ namespace Quintessence.Enemies
             if (fsm.Kill()) GameEvents.RaiseTelegraphCancelled(gameObject);
             if (agent.enabled) agent.enabled = false;
             if (body != null) body.enabled = false;
+            // morto no meio do golpe: o Update para de rodar, entao a animacao e a inclinacao voltam ao normal aqui
+            if (animator != null) animator.speed = 1f;
+            lean = 0f;
+            if (leanRoot != null) leanRoot.localRotation = Quaternion.identity;
+            syncWindup = false;
             Play("Death", 0.05f);
             // ajudante que cai junto com o chefe (o chefe mata os dele) nao explode nem se divide
             // (o fim do Cerco tambem: a fonte e o spawner)

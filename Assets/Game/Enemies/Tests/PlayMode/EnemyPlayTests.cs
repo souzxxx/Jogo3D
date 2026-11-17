@@ -226,6 +226,17 @@ namespace Quintessence.Enemies.PlayTests
                 Object.Destroy(brain.gameObject);
                 yield return null;
             }
+            // morto no meio da preparacao: a animacao volta a velocidade normal e o corpo endireita (revisao de 16/11)
+            {
+                var brain = Object.Instantiate(Load("Rastejante"), player.transform.position + new Vector3(0, 0, 1.8f), Quaternion.Euler(0, 180, 0)).GetComponent<EnemyBrain>();
+                var animator = brain.GetComponentInChildren<Animator>();
+                for (float t = 8f; t > 0f && brain.Phase != EnemyPhase.Windup; t -= Time.deltaTime) yield return null;
+                for (int k = 0; k < 8; k++) yield return null;
+                brain.GetComponent<Health>().TakeDamage(new DamageInfo(9999f, ElementType.None, Team.Player));
+                yield return null;
+                Assert.AreEqual(1f, animator.speed, 0.001f, "morto no meio do golpe, a animacao de morte deveria tocar na velocidade normal");
+                Assert.AreEqual(0f, brain.CurrentLean, 0.001f, "e o corpo deveria endireitar");
+            }
             Debug.Log("CONTATO: " + string.Join(" | ", report));
             Time.captureFramerate = 0;
         }
