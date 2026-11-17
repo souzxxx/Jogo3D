@@ -237,7 +237,7 @@ namespace Quintessence.UI
             promptText = UiKit.Text(UiKit.Rect("Text", promptBox, center, new Vector2(24, 0), new Vector2(420, 40)), "", 28, UiKit.Cream);
             promptBox.gameObject.SetActive(false);
 
-            mapPanel = Overlay("Map", new Color(0.03f, 0.02f, 0.06f, 0.86f));
+            mapPanel = Overlay("Map", new Color(0.03f, 0.02f, 0.06f, 0.94f)); // mais fechado: o heroi e as faixas coloridas se misturavam
             UiKit.Text(UiKit.Rect("Title", mapPanel, new Vector2(0.5f, 1), new Vector2(0, -80), new Vector2(800, 70)), "MAPA", 56, UiKit.Cream);
             mapContent = UiKit.Rect("Content", mapPanel, center, new Vector2(0, -20), new Vector2(1500, 600));
             resultPanel = Overlay("Result", new Color(0.03f, 0.02f, 0.06f, 0.9f));
@@ -852,9 +852,10 @@ namespace Quintessence.UI
                 UiKit.Image(UiKit.Rect("Icon", disc, center, Vector2.zero, new Vector2(42, 42)), UiKit.Icon(has ? SkillIcon[i + 1] : "lock"), has ? UiKit.Cream : new Color(1, 1, 1, 0.3f));
                 UiKit.Text(UiKit.Rect("Name", row, new Vector2(0, 0.5f), new Vector2(94, 20), new Vector2(470, 34)),
                     $"{i + 1}  ·  {SkillName[i + 1]}" + (has && run != null && run.SkillRank[i + 1] > 1 ? " " + RunState.Roman(run.SkillRank[i + 1]) : ""), 28, has ? UiKit.Cream : UiKit.Dim, TextAnchor.MiddleLeft);
-                var note = UiKit.Text(UiKit.Rect("Role", row, new Vector2(0, 0.5f), new Vector2(94, -18), new Vector2(470, 44)),
+                var note = UiKit.Text(UiKit.Rect("Role", row, new Vector2(0, 0.5f), new Vector2(94, -19), new Vector2(470, 48)),
                     has ? role[i + 1] : "Desperte este elemento num Santuário.", 20, has ? UiKit.Paper : UiKit.Dim, TextAnchor.MiddleLeft, false);
-                note.horizontalOverflow = HorizontalWrapMode.Wrap;
+                note.lineSpacing = 0.9f;
+                UiKit.Fit(note, 15, 20); // duas linhas cabiam so com folga: a de Agua vazava pela borda do cartao
             }
             // as seis reacoes: claras as que o heroi ja pode detonar (tem os dois elementos)
             UiKit.Text(UiKit.Rect("ReactH", box, new Vector2(0, 1), new Vector2(60, -590), new Vector2(580, 28)),
@@ -872,7 +873,7 @@ namespace Quintessence.UI
                 if (hero != null) foreach (var x in hero.AwakenedElements) { if (x == ra) known = true; if (x == rb) knownB = true; }
                 bool can = known && knownB;
                 var pos = new Vector2(60 + (i % 3) * 196, -624 - (i / 3) * 30);
-                UiKit.Image(UiKit.Rect("Dot" + i, box, new Vector2(0, 1), pos + new Vector2(6, -2), new Vector2(10, 10)), UiKit.Circle,
+                UiKit.Image(UiKit.Rect("Dot" + i, box, new Vector2(0, 1), pos + new Vector2(6, -8), new Vector2(10, 10)), UiKit.Circle, // no meio da linha de texto (antes ficava acima)
                     can ? Color.Lerp(ElementColors.Of(ra), ElementColors.Of(rb), 0.5f) : new Color(1, 1, 1, 0.15f));
                 UiKit.Text(UiKit.Rect("React" + i, box, new Vector2(0, 1), pos + new Vector2(18, 0), new Vector2(180, 26)),
                     $"{rname} · {short1[(int)ra]}+{short1[(int)rb]}", 17, can ? UiKit.Cream : UiKit.Dim, TextAnchor.MiddleLeft, false);
