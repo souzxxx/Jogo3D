@@ -38,6 +38,8 @@ namespace Quintessence.Game
         [Tooltip("Estandarte por tipo de sala, na ordem do enum RoomType.")]
         [SerializeField] GameObject[] bannerByRoom = new GameObject[0];
         [SerializeField] GameObject shrinePrefab;
+        /// Emblemas modelados de Fogo, Agua, Terra e Ar (nessa ordem) que ficam sobre os totens no lugar das esferas.
+        [SerializeField] GameObject[] emblems;
         [SerializeField] GameObject chestPrefab;
         [SerializeField] GameObject tablePrefab;
         [SerializeField] GameObject bottlePrefab;
@@ -178,6 +180,21 @@ namespace Quintessence.Game
         }
 
         public void BindBoons(BoonCatalog catalog) => boonCatalog = catalog;
+        public void BindEmblems(GameObject[] list) => emblems = list;
+
+        /// Emblema do elemento sobre um totem; sem os modelos (cena antiga), a pedra fosca de antes.
+        GameObject Emblem(Transform parent, ElementType e, Vector3 at, float scale = 1f)
+        {
+            int i = (int)e - 1;
+            if (emblems != null && i >= 0 && i < emblems.Length && emblems[i] != null)
+            {
+                var go = Instantiate(emblems[i], parent);
+                go.transform.localPosition = at;
+                go.transform.localScale = Vector3.one * scale;
+                return go;
+            }
+            return Matte(GameObject.CreatePrimitive(PrimitiveType.Sphere), parent, at + Vector3.up * 0.35f, Vector3.one * 0.7f, ElementColors.Of(e)).gameObject;
+        }
         public void BindBoss(GameObject boss) => bossPrefab = boss;
 
         public void BindProps(GameObject door, GameObject[] banners, GameObject shrine, GameObject chest, Material matte)
@@ -769,9 +786,14 @@ namespace Quintessence.Game
 
         // ---------- salas ----------
 
+        // nome do trecho novo guardado durante a troca de sala: aparece na tela escura, antes da sala, e some com ela
+        bool entering;
+        (string title, string sub, Color color)? chapter;
+
         IEnumerator EnterRoom(MapNode node, bool first = false)
         {
             Busy = true;
+            entering = true;
             hud.HidePrompt();
             if (!first)
             {
@@ -850,9 +872,20 @@ namespace Quintessence.Game
                     StartEncounter(node.Type, Run.Depth, node.Type == RoomType.Elite ? DifficultyCurve.PickElite(GameFlow.Seed, node.Id) : EliteModifier.None);
                     break;
             }
+            entering = false;
+            if (chapter.HasValue)
+            {
+                // cartao de capitulo: o nome do trecho sobre o preto, sem nada da sala por baixo para ele cobrir
+                var c = chapter.Value; chapter = null;
+                hud.SetFade(1f);
+                hud.ShowChapter(c.title, c.sub, c.color, ChapterHold + 0.35f);
+                for (float t = 0f; t < ChapterHold; t += Time.captureFramerate > 0 ? 1f / Time.captureFramerate : Time.unscaledDeltaTime) yield return null;
+            }
             yield return Fade(1f, 0f, 0.35f);
             Busy = false;
         }
+
+        const float ChapterHold = 1.3f;
 
         /// Comeca as ondas de uma sala com a dificuldade da profundidade e, em Elite, o traco. Publico para os testes e as capturas.
         public void StartEncounter(RoomType type, int depth, EliteModifier trait)
@@ -1051,7 +1084,9 @@ namespace Quintessence.Game
             lastBiome = biome;
             if (!announce) return;
             string sub = biome == Biome.Heart ? "O fim da descida" : "Ato " + Biomes.Roman(Biomes.Act(biome));
-            hud.ShowBanner(Biomes.Name(biome).ToUpperInvariant(), sub, Color.Lerp(dresser != null ? dresser.CrackColor : Cream, Cream, 0.55f));
+            var color = Color.Lerp(dresser != null ? dresser.CrackColor : Cream, Cream, 0.55f);
+            if (entering) chapter = (Biomes.Name(biome).ToUpperInvariant(), sub, color);
+            else hud.ShowBanner(Biomes.Name(biome).ToUpperInvariant(), sub, color);
         }
 
         // ---------- tesouro e pacto ----------
@@ -1379,7 +1414,7 @@ namespace Quintessence.Game
                 root.transform.position = new Vector3((missing.Count + d - (total - 1) / 2f) * 4.3f, 0, 0f);
                 float top = 1.25f;
                 if (shrinePrefab != null) Instantiate(shrinePrefab, root.transform).transform.localPosition = Vector3.zero;
-                Medal(root.transform, new Vector3(0, top + 0.75f, 0), "skill_" + e.ToString().ToLowerInvariant(), c, 1.05f);
+                Emblem(root.transform, e, new Vector3(0, top + 0.12f, 0), 1.3f);
                 Label(root.transform, new Vector3(0, top + 2.35f, 0), skills[(int)e] + " " + RunState.Roman(next), Cream, 0.72f);
                 Label(root.transform, new Vector3(0, top + 1.75f, 0), next == RunState.MaxSkillRank ? "+30% de dano e " + RunState.Signature(e) : "+30% de dano\nrecarga 10% menor", new Color(0.8f, 0.76f, 0.7f), 0.5f);
                 Glow(root.transform, new Vector3(0, top + 0.7f, -0.7f), c, 1.4f);
@@ -1408,7 +1443,7 @@ namespace Quintessence.Game
                 if (shrinePrefab != null) Instantiate(shrinePrefab, root.transform).transform.localPosition = Vector3.zero;
                 else Matte(GameObject.CreatePrimitive(PrimitiveType.Cube), root.transform, new Vector3(0, 0.6f, 0), new Vector3(1f, 1.2f, 1f), new Color(0.4f, 0.4f, 0.45f));
                 // o elemento aparece como uma pedra fosca sobre o pedestal e na luz que ela joga em volta
-                Matte(GameObject.CreatePrimitive(PrimitiveType.Sphere), root.transform, new Vector3(0, top + 0.45f, 0), Vector3.one * 0.7f, c);
+                Emblem(root.transform, e, new Vector3(0, top + 0.12f, 0), 1.4f);
                 Label(root.transform, new Vector3(0, top + 1.7f, 0), names[(int)e], Cream, 0.8f);
                 Glow(root.transform, new Vector3(0, top + 0.7f, -0.7f), c, 2.2f);
                 interactables.Add(new Interactable
@@ -1632,6 +1667,8 @@ namespace Quintessence.Game
         }
 
         /// Medalhao com o icone do efeito, virado para a camera: disco escuro, aro e desenho na cor do mestre.
+        Feel.CombatFeedback feedback;
+
         void Medal(Transform parent, Vector3 localPos, string icon, Color color, float size = 0.95f)
         {
             var root = new GameObject("Medal").transform;
@@ -1644,6 +1681,28 @@ namespace Quintessence.Game
                 sr.transform.SetParent(root, false);
                 sr.sprite = sprite; sr.color = tint; sr.sortingOrder = order;
                 sr.transform.localScale = Vector3.one * (width / sprite.bounds.size.x);
+            }
+            // medalhao de verdade: disco de pedra com espessura, aro de gomos aceso na cor da sala e o icone na face
+            // (antes eram tres figuras chapadas viradas para a camera, que liam como adesivo de interface)
+            feedback ??= FindFirstObjectByType<Feel.CombatFeedback>();
+            if (feedback != null && Feel.CombatFeedback.RuneRingMesh != null)
+            {
+                var disc = Matte(GameObject.CreatePrimitive(PrimitiveType.Cylinder), root, new Vector3(0, 0, 0.06f), new Vector3(size, 0.05f, size), new Color(0.15f, 0.13f, 0.17f));
+                disc.localRotation = Quaternion.Euler(90f, 0f, 0f);
+                var rim = new GameObject("Rim").transform;
+                rim.SetParent(root, false);
+                rim.localPosition = new Vector3(0, 0, -0.01f);
+                rim.localRotation = Quaternion.Euler(-90f, 0f, 0f);
+                rim.localScale = Vector3.one * (size * 0.52f);
+                rim.gameObject.AddComponent<MeshFilter>().sharedMesh = Feel.CombatFeedback.RuneRingMesh;
+                rim.gameObject.AddComponent<MeshRenderer>().sharedMaterial = feedback.RingMaterial(color);
+                var ic = new GameObject("Icon").AddComponent<SpriteRenderer>();
+                ic.transform.SetParent(root, false);
+                ic.transform.localPosition = new Vector3(0, 0, -0.05f);
+                var sprite = UI.UiKit.Icon(icon);
+                ic.sprite = sprite; ic.color = Color.Lerp(color, Cream, 0.55f);
+                ic.transform.localScale = Vector3.one * (size * 0.62f / sprite.bounds.size.x);
+                return;
             }
             Layer(UI.UiKit.Circle, new Color(0.1f, 0.09f, 0.13f), size, 0);
             Layer(UI.UiKit.Ring, Color.Lerp(color, Cream, 0.2f), size, 1);

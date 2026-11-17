@@ -448,6 +448,13 @@ namespace Quintessence.UI
                 bannerTitle.font = GameFonts.Title;
                 bannerRoot.SetSiblingIndex(0);
             }
+            // letreiro comum (chefe, Cerco, Provacao): no alto, atras dos paineis, com a faixa escura
+            bannerRoot.anchorMin = bannerRoot.anchorMax = bannerRoot.pivot = new Vector2(0.5f, 1);
+            bannerRoot.anchoredPosition = new Vector2(0, -112);
+            bannerRoot.SetSiblingIndex(0);
+            chapterMode = false;
+            bannerTitle.fontSize = 64; bannerSub.fontSize = 26;
+            bannerTitle.rectTransform.anchoredPosition = new Vector2(0, -36);
             LastBanner = title;
             bannerTitle.text = title; bannerSub.text = sub;
             bannerTitle.color = color;
@@ -455,14 +462,30 @@ namespace Quintessence.UI
             bannerRoot.gameObject.SetActive(true);
         }
 
+        bool chapterMode;
+
+        /// Nome do trecho novo como cartao de capitulo: no meio da tela, por cima do preto da troca de sala.
+        public void ShowChapter(string title, string sub, Color color, float seconds)
+        {
+            ShowBanner(title, sub, color, seconds);
+            chapterMode = true;
+            bannerRoot.anchorMin = bannerRoot.anchorMax = bannerRoot.pivot = new Vector2(0.5f, 0.5f);
+            bannerRoot.anchoredPosition = new Vector2(0, 40);
+            bannerRoot.SetAsLastSibling();
+            bannerTitle.fontSize = 96; bannerSub.fontSize = 34;
+            bannerTitle.rectTransform.anchoredPosition = new Vector2(0, -52);
+            if (bannerBack != null) bannerBack.color = Color.clear;
+        }
+
         void TickBanner()
         {
             if (bannerRoot == null || !bannerRoot.gameObject.activeSelf) return;
-            bannerLeft -= Time.unscaledDeltaTime;
+            // mesmo relogio da troca de sala: gravando quadro a quadro (testes), o letreiro some no mesmo passo do escuro
+            bannerLeft -= Time.captureFramerate > 0 ? 1f / Time.captureFramerate : Time.unscaledDeltaTime;
             float a = Mathf.Clamp01(bannerLeft / 0.8f);
             var c = bannerTitle.color; c.a = a; bannerTitle.color = c;
             var d = bannerSub.color; d.a = a; bannerSub.color = d;
-            if (bannerBack != null) bannerBack.color = new Color(0.02f, 0.02f, 0.04f, BannerShade * a);
+            if (bannerBack != null) bannerBack.color = chapterMode ? Color.clear : new Color(0.02f, 0.02f, 0.04f, BannerShade * a);
             if (bannerLeft <= 0f) bannerRoot.gameObject.SetActive(false);
         }
 
