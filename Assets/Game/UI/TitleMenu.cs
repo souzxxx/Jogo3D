@@ -165,8 +165,8 @@ namespace Quintessence.UI
 
         public void ShowOptions()
         {
-            var box = OpenSheet("OPÇÕES", 640);
-            UiOptions.Build(box, new Vector2(0, 10));
+            var box = OpenSheet("OPÇÕES", 700);
+            UiOptions.Build(box, new Vector2(0, 20));
         }
 
         /// Grimorio: herois, inimigos (e como lidar com cada um) e as seis reacoes.
