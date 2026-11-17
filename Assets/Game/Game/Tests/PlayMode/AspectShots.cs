@@ -127,6 +127,36 @@ namespace Quintessence.Game.PlayTests
             MetaStore.UseKey(MetaStore.DefaultKey);
         }
 
+        /// Golpe no heroi acende a borda vermelho-escura; com pouca vida ela fica pulsando. Foto para a pagina.
+        [UnityTest, Timeout(300000)]
+        public IEnumerator Hurt_Edge_Flashes_On_Hit_And_Pulses_On_Low_Health()
+        {
+            PlayerPrefs.DeleteKey("quintessence.meta.test");
+            MetaStore.UseKey("quintessence.meta.test");
+            GameEvents.Clear();
+            GameFlow.Seed = 7; GameFlow.StartElement = ElementType.Earth;
+            yield return EditorSceneManager.LoadSceneAsyncInPlayMode("Assets/Scenes/Run.unity", new LoadSceneParameters(LoadSceneMode.Single));
+            var director = Object.FindFirstObjectByType<RunDirector>();
+            for (float t = 0; t < 10f && director.Busy; t += Time.unscaledDeltaTime) yield return null;
+            Object.FindFirstObjectByType<Quintessence.Enemies.WaveSpawner>().enabled = false;
+            var hud = Object.FindFirstObjectByType<Hud>();
+            hud.UseCamera(Camera.main);
+            var hp = Object.FindFirstObjectByType<Quintessence.Combat.PlayerController>().GetComponent<Health>();
+            for (int k = 0; k < 5; k++) yield return null;
+            Assert.Less(hud.HurtEdgeAlpha, 0.01f, "sem dano, a borda fica apagada");
+            hp.TakeDamage(new DamageInfo(hp.Max * 0.15f, ElementType.None, Team.Enemy));
+            yield return null; yield return null;
+            Assert.Greater(hud.HurtEdgeAlpha, 0.2f, "o golpe acende a borda");
+            for (float t = 0; t < 1.5f; t += Time.unscaledDeltaTime) yield return null;
+            Assert.Less(hud.HurtEdgeAlpha, 0.05f, "e ela apaga logo");
+            hp.TakeDamage(new DamageInfo(hp.Current - hp.Max * 0.12f, ElementType.None, Team.Enemy));
+            for (float t = 0; t < 1.5f; t += Time.unscaledDeltaTime) yield return null;
+            Assert.Greater(hud.HurtEdgeAlpha, 0.05f, "com pouca vida a borda continua acesa");
+            Directory.CreateDirectory("Logs/aspect");
+            yield return Shoot(Camera.main, "docs/img/s6_vida_baixa.png", new Vector2Int(960, 540));
+            MetaStore.UseKey(MetaStore.DefaultKey);
+        }
+
         public static IEnumerator Shoot(Camera c, string path, Vector2Int s)
         {
             var rt = new RenderTexture(s.x, s.y, 24, RenderTextureFormat.ARGB32, RenderTextureReadWrite.sRGB);

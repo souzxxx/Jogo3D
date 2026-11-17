@@ -35,6 +35,28 @@ namespace Quintessence.UI
                 return vignette = Sprite.Create(tex, new Rect(0, 0, 1, h), new Vector2(0.5f, 0.5f), 100f);
             }
         }
+        static Sprite edges;
+
+        /// Borda escura nas quatro beiradas, transparente no meio (aviso de dano e de vida baixa).
+        public static Sprite EdgeVignette
+        {
+            get
+            {
+                if (edges != null) return edges;
+                const int n = 96;
+                var tex = new Texture2D(n, n, TextureFormat.RGBA32, false) { wrapMode = TextureWrapMode.Clamp };
+                for (int y = 0; y < n; y++)
+                for (int x = 0; x < n; x++)
+                {
+                    float u = Mathf.Abs(x / (n - 1f) * 2f - 1f), v = Mathf.Abs(y / (n - 1f) * 2f - 1f);
+                    float d = Mathf.Max(u, v * 1.05f);                 // quase retangular: acompanha a tela
+                    tex.SetPixel(x, y, new Color(1, 1, 1, Mathf.SmoothStep(0f, 1f, Mathf.InverseLerp(0.62f, 1f, d))));
+                }
+                tex.Apply();
+                return edges = Sprite.Create(tex, new Rect(0, 0, n, n), new Vector2(0.5f, 0.5f), 100f);
+            }
+        }
+
         static readonly System.Collections.Generic.Dictionary<string, Sprite> icons = new();
 
         /// Painel de cantos arredondados (9-slice) e o contorno dele.

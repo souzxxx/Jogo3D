@@ -141,6 +141,7 @@ namespace Quintessence.UI
             GameEvents.BossSpawned += OnBoss;
             GameEvents.BossPhaseChanged += OnBossPhase;
             GameEvents.BossShieldChanged += OnBossShield;
+            GameEvents.DamageDealt += OnHeroHurt;
         }
 
         void OnDisable()
@@ -148,6 +149,7 @@ namespace Quintessence.UI
             GameEvents.BossSpawned -= OnBoss;
             GameEvents.BossPhaseChanged -= OnBossPhase;
             GameEvents.BossShieldChanged -= OnBossShield;
+            GameEvents.DamageDealt -= OnHeroHurt;
         }
 
         void OnBoss(Health b, string name) { boss = b; bossTitle = name; bossPhase = 1; bossShield = false; }
@@ -307,6 +309,39 @@ namespace Quintessence.UI
 
         // ---------- atualizacao ----------
 
+        // ---------- dano no heroi ----------
+        // borda vermelho-escura: pisca no golpe (mais forte quanto maior o dano) e pulsa devagar com menos de 25% de vida
+        static readonly Color HurtTint = new(0.42f, 0.05f, 0.04f);
+        Image hurtEdge;
+        float hurtFlash;
+        public float HurtEdgeAlpha => hurtEdge != null ? hurtEdge.color.a : 0f;
+
+        void OnHeroHurt(Health target, DamageInfo info, float applied)
+        {
+            if (applied <= 0f || target == null || hero == null || target != hero.Health) return;
+            hurtFlash = Mathf.Max(hurtFlash, Mathf.Clamp(applied / Mathf.Max(1f, target.Max) * 4f, 0.25f, 0.7f));
+        }
+
+        void TickHurt()
+        {
+            if (hurtEdge == null)
+            {
+                hurtEdge = UiKit.Image(UiKit.Stretch("HurtEdge", canvas.transform), UiKit.EdgeVignette, new Color(HurtTint.r, HurtTint.g, HurtTint.b, 0f));
+                hurtEdge.raycastTarget = false;
+                hurtEdge.transform.SetSiblingIndex(0); // atras de todo o HUD
+            }
+            float dt = Time.unscaledDeltaTime;
+            hurtFlash = Mathf.MoveTowards(hurtFlash, 0f, dt * 1.6f);
+            float low = 0f;
+            if (hero != null && hero.Health != null && !hero.Health.IsDead && !GameClock.Paused)
+            {
+                float frac = hero.Health.Current / Mathf.Max(1f, hero.Health.Max);
+                if (frac < 0.25f) low = (0.18f + 0.12f * Mathf.Sin(Time.unscaledTime * 3.2f)) * Mathf.InverseLerp(0.25f, 0.1f, frac) + 0.06f;
+            }
+            if (ResultVisible) { hurtFlash = 0f; low = 0f; }
+            hurtEdge.color = new Color(HurtTint.r, HurtTint.g, HurtTint.b, Mathf.Max(hurtFlash, low));
+        }
+
         void LateUpdate()
         {
             TickBanner();
@@ -318,6 +353,7 @@ namespace Quintessence.UI
                 hero = go != null ? go.GetComponent<IHeroStatus>() : null;
                 if (hero == null) return;
             }
+            TickHurt();
 
             bool showBoss = boss != null && !boss.IsDead;
             if (bossBox.gameObject.activeSelf != showBoss) bossBox.gameObject.SetActive(showBoss);
