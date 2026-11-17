@@ -138,7 +138,10 @@ namespace Quintessence.Enemies.PlayTests
                 var prefab = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Game/Enemies/Prefabs/Explosivo.prefab");
                 float keepDamage = hp.Pool.ExtraDamageTakenMultiplier;
                 hp.Pool.ExtraDamageTakenMultiplier = 0.02f;
-                Object.Instantiate(prefab, player.transform.position + new Vector3(3f, 0, 0), Quaternion.identity);
+                // heroi parado de verdade (o roteiro ainda segurava o ataque) e o Explosivo sem morrer de queimadura ou area deixada antes
+                input.AttackHeld = false; input.Move = Vector2.zero;
+                var bomber = Object.Instantiate(prefab, player.transform.position + new Vector3(3f, 0, 0), Quaternion.identity);
+                bomber.GetComponent<Health>().Pool.Invulnerable = true;
                 for (float t = 10f; t > 0f && !sawExplosion; t -= Time.deltaTime) yield return Step();
                 hp.Pool.ExtraDamageTakenMultiplier = keepDamage;
             }

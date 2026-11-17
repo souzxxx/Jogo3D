@@ -45,6 +45,7 @@ namespace Quintessence.Game.PlayTests
             GameFlow.Resume = null;
             // o teste termina passando pelo treino: os outros testes abrem a cena de run direto e herdariam o modo treino
             GameFlow.Tutorial = false;
+            GameFlow.Seed = 1; GameFlow.Layers = 10; GameFlow.Shrines = 3; // os padroes do jogo, mesmo se o teste parar no meio
             GameFlow.StartElement = ElementType.Fire;
             GameFlow.Ascension = 0;
             GameFlow.AutoPickTalents = false;
@@ -128,7 +129,6 @@ namespace Quintessence.Game.PlayTests
             yield return WaitFor(() => Find<TitleMenu>() != null, 8f, "do treino deveria dar para voltar ao titulo");
             Assert.IsFalse(GameClock.Paused);
             Assert.IsNotNull(GameObject.Find("Continue"), "o treino nao apaga a run salva");
-            GameFlow.Layers = 8; GameFlow.Shrines = 3;
         }
     }
 }

@@ -321,7 +321,7 @@ namespace Quintessence.Game
             dresser = gameObject.AddComponent<BiomeDresser>();
         }
 
-        void OnDestroy() => Arena.ResetSize();
+        void OnDestroy() { Arena.ResetSize(); GameClock.Holding = false; }
 
         void OnEnable()
         {
@@ -794,6 +794,7 @@ namespace Quintessence.Game
         {
             Busy = true;
             entering = true;
+            GameClock.Holding = true;
             hud.HidePrompt();
             if (!first)
             {
@@ -826,6 +827,8 @@ namespace Quintessence.Game
                 hud.ShowChapter(c.title, c.sub, c.color, ChapterHold + 0.35f);
                 for (float t = 0f; t < ChapterHold; t += Time.captureFramerate > 0 ? 1f / Time.captureFramerate : Time.unscaledDeltaTime) yield return null;
             }
+            // morreu na tela escura (queimadura que veio da sala anterior): a sala nao abre por tras do resultado
+            if (Finished) { GameClock.Holding = false; Busy = false; yield break; }
 
             if (first && Run.Depth == 0) Tip("start");
             if (node.Type == RoomType.Shrine) Tip("shrine");
@@ -882,6 +885,7 @@ namespace Quintessence.Game
                     StartEncounter(node.Type, Run.Depth, node.Type == RoomType.Elite ? DifficultyCurve.PickElite(GameFlow.Seed, node.Id) : EliteModifier.None);
                     break;
             }
+            GameClock.Holding = false; // o heroi volta a andar enquanto a sala clareia
             yield return Fade(1f, 0f, 0.35f);
             Busy = false;
         }
@@ -1693,13 +1697,16 @@ namespace Quintessence.Game
             {
                 var disc = Matte(GameObject.CreatePrimitive(PrimitiveType.Cylinder), root, new Vector3(0, 0, 0.06f), new Vector3(size, 0.05f, size), new Color(0.15f, 0.13f, 0.17f));
                 disc.localRotation = Quaternion.Euler(90f, 0f, 0f);
+                OwnedMaterials.Add(root.gameObject, disc.GetComponent<Renderer>().sharedMaterial);
                 var rim = new GameObject("Rim").transform;
                 rim.SetParent(root, false);
                 rim.localPosition = new Vector3(0, 0, -0.01f);
                 rim.localRotation = Quaternion.Euler(-90f, 0f, 0f);
                 rim.localScale = Vector3.one * (size * 0.52f);
                 rim.gameObject.AddComponent<MeshFilter>().sharedMesh = Feel.CombatFeedback.RuneRingMesh;
-                rim.gameObject.AddComponent<MeshRenderer>().sharedMaterial = feedback.RingMaterial(color);
+                var rimMat = feedback.RingMaterial(color);
+                rim.gameObject.AddComponent<MeshRenderer>().sharedMaterial = rimMat;
+                OwnedMaterials.Add(root.gameObject, rimMat);
                 var ic = new GameObject("Icon").AddComponent<SpriteRenderer>();
                 ic.transform.SetParent(root, false);
                 ic.transform.localPosition = new Vector3(0, 0, -0.05f);
