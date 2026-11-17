@@ -1597,7 +1597,7 @@ namespace Quintessence.Game
             if (withMaster && masterPrefab != null)
             {
                 if (layoutRoot == null) layoutRoot = new GameObject("Layout").transform;
-                var m = Instantiate(masterPrefab, new Vector3(-6.8f * layoutSpread.x, 0, -2.6f * layoutSpread.y), Quaternion.Euler(0, 120, 0), layoutRoot);
+                var m = Instantiate(masterPrefab, new Vector3(-5.4f * layoutSpread.x, 0, -3.6f * layoutSpread.y), Quaternion.Euler(0, 120, 0), layoutRoot);
                 m.name = "Mestre";
                 Label(m.transform, new Vector3(0, 3.2f, 0), "MESTRE", new Color(0.88f, 0.74f, 0.42f), 0.7f);
                 masterNpc = m.GetComponent<Merchant>();

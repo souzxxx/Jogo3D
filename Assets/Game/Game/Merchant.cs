@@ -39,14 +39,50 @@ namespace Quintessence.Game
             hold = seconds;
         }
 
+        float speaking;
+        Transform nameTag;
+
         void Say(string line)
         {
             LastLine = line;
-            Feel.DamageNumber.Spawn(transform.position + Vector3.up * 3.9f, line, Voice, 0.8f, 1.6f);
+            // a fala ocupa o lugar do nome enquanto dura (os dois na mesma altura se sobrepunham)
+            if (nameTag == null) nameTag = transform.Find("Label");
+            if (nameTag != null) nameTag.gameObject.SetActive(false);
+            speaking = 1.7f;
+            // perto da parede a frase centrada no personagem passava da borda da tela: entra na sala o quanto precisar
+            var at = transform.position + Vector3.up * 3.1f; // rente ao chapeu: mais alto, a fala subia na tela ate os rotulos dos baus
+            // frase longa em duas linhas: fica estreita, junto do personagem, sem cobrir os rotulos vizinhos
+            string shown = line;
+            if (line.Length > 18)
+            {
+                int mid = line.Length / 2, cut = -1;
+                for (int d = 0; d < mid && cut < 0; d++)
+                {
+                    if (mid + d < line.Length && line[mid + d] == ' ') cut = mid + d;
+                    else if (line[mid - d] == ' ') cut = mid - d;
+                }
+                if (cut > 0) shown = line.Substring(0, cut) + "\n" + line.Substring(cut + 1);
+            }
+            int widest = 0;
+            foreach (var part in shown.Split('\n')) widest = Mathf.Max(widest, part.Length);
+            float half = widest * 0.12f; // meia largura aproximada da linha mais longa no tamanho 0,8
+            float limit = Mathf.Max(0f, Quintessence.Core.Arena.HalfX - half - 0.6f);
+            at.x = Mathf.Clamp(at.x, -limit, limit);
+            // e dentro do que a camera mostra (a sala e mais larga que a tela quando o heroi esta no meio)
+            var cam = Camera.main;
+            if (cam != null)
+            {
+                float l = cam.WorldToViewportPoint(at - Vector3.right * half).x, r = cam.WorldToViewportPoint(at + Vector3.right * half).x;
+                float perView = r > l + 0.001f ? 2f * half / (r - l) : 0f;
+                if (l < 0.03f) at.x += (0.03f - l) * perView;
+                else if (r > 0.97f) at.x -= (r - 0.97f) * perView;
+            }
+            Feel.DamageNumber.Spawn(at, shown, Voice, 0.8f, 1.6f);
         }
 
         void Update()
         {
+            if (speaking > 0f && (speaking -= Time.deltaTime) <= 0f && nameTag != null) nameTag.gameObject.SetActive(true);
             if (customer == null) return;
             var to = customer.position - transform.position; to.y = 0f;
             if (to.sqrMagnitude > 0.05f)
