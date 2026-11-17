@@ -98,7 +98,10 @@ namespace Quintessence.UI
             }
             UiKit.Text(UiKit.Rect("Tip", box, center, new Vector2(0, -292), new Vector2(1160, 34)),
                 "Uma skill marca o inimigo com o elemento dela; a skill de outro elemento detona a reação.", 22, UiKit.Dim, TextAnchor.MiddleCenter, false);
-            UiKit.Focus(UiKit.Button(box, "Voltar", center, new Vector2(0, -340), new Vector2(300, 60), UiKit.Primary, () => { Object.Destroy(sheet.gameObject); if (returnFocus != null) UiKit.Focus(returnFocus); }).gameObject);
+            var back = UiKit.Button(box, "Voltar", center, new Vector2(0, -340), new Vector2(300, 60), UiKit.Primary, () => { Object.Destroy(sheet.gameObject); if (returnFocus != null) UiKit.Focus(returnFocus); });
+            // no controle, o direcional nao pode levar o foco para os botoes escondidos atras da tabela
+            back.navigation = new UnityEngine.UI.Navigation { mode = UnityEngine.UI.Navigation.Mode.None };
+            UiKit.Focus(back.gameObject);
         }
 
         static string DifficultyLabel() => GamePrefs.Relaxed ? "Dificuldade: Tranquila (você recebe 35% menos dano)" : "Dificuldade: Normal";
