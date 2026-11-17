@@ -19,7 +19,7 @@ Você começa a run com uma skill elemental, desperta as outras três pelo camin
 
 1. **Os elementos são a build.** Combinar as skills elementais para detonar reações é a habilidade central; bênçãos, inimigos e chefe existem para alimentar isso.
 2. **Toda run conta o arco da maestria.** Começa com um elemento e termina com quatro. A ordem em que você desperta muda a run.
-3. **Combate curto e legível.** Todo golpe inimigo avisa antes; toda reação mostra o nome e o efeito.
+3. **Combate curto e legível.** Todo golpe inimigo avisa antes (o corpo a corpo pela animação, o resto por um círculo no chão); toda reação mostra o nome e o efeito.
 
 ---
 
@@ -129,9 +129,9 @@ Uma skill deixa no inimigo a **marca** do elemento dela. Acertar esse inimigo co
 
 | Inimigo | Papel | Como lidar |
 |---|---|---|
-| Rastejante | Corpo a corpo, vem em grupo | Área e reações |
+| Rastejante | Corpo a corpo com lâmina, vem em grupo | Área e reações; desviar quando a lâmina desce |
 | Atirador | Projétil em linha, recua se você chega perto | Dash para fechar a distância |
-| Bruto | Armadura: leva metade do dano | O Pilar de Pedra quebra a armadura |
+| Bruto | Machado, armadura: leva metade do dano | O Pilar de Pedra quebra a armadura; desviar quando o machado desce |
 | Explosivo | Corre, avisa um círculo e explode | Sair do círculo; a explosão também fere os outros inimigos |
 | Ceifador | Avisa uma linha larga e atravessa a sala por ela | Sair da linha e bater enquanto ele se recupera |
 | Arremessador | Joga uma bomba onde o herói está | Sair do círculo avisado |
@@ -166,13 +166,17 @@ Os tipos entram aos poucos: Ceifador na segunda sala, Cinzentos na terceira, Arr
 - Nenhuma sala prende o jogador: Santuário sem elemento para despertar e Mestre sem bênção sobrando abrem as portas; a Loja já entra com as portas abertas.
 - Inimigo que sai da sala volta sozinho; luta parada por 25 segundos traz os inimigos para perto do herói.
 - Save vazio ou corrompido vira progresso zerado, sem erro na tela.
+- Durante a tela escura da troca de sala o herói não anda nem ataca, e as ondas só começam depois dela. Morrer nessa hora leva ao resultado normalmente.
+- Abrir mapa, pausa ou inventário guarda a dica de primeira vez e o letreiro do chefe, que voltam ao fechar.
+- Na build de PC, o título tem o botão Sair.
 
 ## 1.3 Interface (o que o jogador vê e ouve)
 
 ### Visual
 
 - **Low-poly fosco** com os packs KayKit (CC0). O que criamos por código segue o pack: cor contida, sem neon.
-- Cena fria e escura; a cor vem dos elementos e das tochas. Câmera fixa de cima, inclinada, seguindo o herói.
+- Cena fria e escura; a cor vem dos elementos e das tochas. Câmera fixa de cima, inclinada, seguindo o herói. Pilar ou caixote que fica entre a câmera e o herói some enquanto atrapalha (fica a sombra), e a câmera para de seguir antes de mostrar o lado de fora da sala.
+- **Emblemas dos elementos** modelados pelo grupo (chama, gota, cristais âmbar e redemoinho) giram sobre as colunas do título e os totens do Santuário. Os totens de escolha (Pacto, Tesouro, Mestre, Loja, portas) têm medalhões de pedra com aro aceso na cor da sala.
 - **Cores dos elementos:** Fogo laranja-avermelhado, Água azul, Terra ocre, Ar verde-água claro, Quintessência branco.
 
 ### HUD
@@ -181,11 +185,14 @@ Os tipos entram aos poucos: Ceifador na segunda sala, Cinzentos na terceira, Arr
 - Inventário no I: skills despertas com o papel de cada uma, atributos da run e bênçãos.
 - Vida à esquerda, sala atual e Essência no topo, medalhas das bênçãos com o ícone do efeito.
 - Barra do chefe com as fases. Mapa da run no Tab.
+- Ao entrar num trecho novo, o nome dele aparece como cartão de capítulo na tela escura da troca de sala, antes de a sala começar. "SALA LIMPA!" aparece logo abaixo dos pés do herói.
 
 ### Feedback de combate
 
 - Inimigo pisca branco ao levar dano, número de dano sobe e empilha, pausa curta de impacto nos golpes fortes, tremor de câmera.
-- Aviso no chão antes de todo golpe inimigo: círculo para área, linha para projétil.
+- **Golpe corpo a corpo se lê pela animação** (Rastejante, Bruto, Escudeiro, Cinzentos, Brasa Viva): o esqueleto inclina o corpo para trás enquanto ergue a arma e cai para a frente no golpe; a animação é acelerada ou freada para a arma descer exatamente no instante do dano, e um brilho curto na arma marca quem vai bater. Não há círculo no chão para esses golpes: desviar é olhar o inimigo.
+- **Aviso no chão** para o que a animação não mostra: círculo para área (chefes, bomba, explosão, Espectro), com contorno de gomos de pedra em vermelho-tijolo e preenchimento escuro; linha para projétil e investida.
+- **Anéis no chão** (herói, marca nos inimigos, armadura, aura do Porta-Estandarte, mira): gomos de pedra low-poly iluminados, com a cor do elemento como acento. Uma seta curta nos pés do herói e um anel pequeno no chão mostram para onde ele mira.
 - Reação mostra o nome por cima do inimigo, com anel e luz na cor do par.
 
 ### Som
