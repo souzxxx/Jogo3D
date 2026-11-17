@@ -748,7 +748,7 @@ namespace Quintessence.UI
         /// Resumo da run mostrado na pausa (heroi, nivel, sala...).
         public string PauseSummary { get; set; } = "";
 
-        public void ShowPause(bool show, Action resume = null, Action menu = null)
+        public void ShowPause(bool show, Action resume = null, Action menu = null, Action restart = null)
         {
             if (show) { ClearChapter(); SuspendTip(); } // a dica e o cartao ficariam por cima do painel
             else PanelClosed();
@@ -758,25 +758,41 @@ namespace Quintessence.UI
             var center = new Vector2(0.5f, 0.5f);
             bool hasBoons = boons != null && boons.Count > 0;
             // com bencaos, o painel sobe um pouco para a lista caber embaixo
-            float top = hasBoons ? 110f : 30f;
-            UiKit.Box("Box", pausePanel, center, new Vector2(0, top - 20), new Vector2(780, 680), 0.94f);
-            var title = UiKit.Text(UiKit.Rect("Title", pausePanel, center, new Vector2(0, top + 262), new Vector2(700, 80)), "PAUSADO", 64, UiKit.Cream);
+            float top = hasBoons ? 110f : 20f;
+            UiKit.Box("Box", pausePanel, center, new Vector2(0, top), new Vector2(780, 730), 0.94f);
+            var title = UiKit.Text(UiKit.Rect("Title", pausePanel, center, new Vector2(0, top + 310), new Vector2(700, 80)), "PAUSADO", 64, UiKit.Cream);
             title.font = GameFonts.Title;
             if (!string.IsNullOrEmpty(PauseSummary))
-                UiKit.Text(UiKit.Rect("Summary", pausePanel, center, new Vector2(0, top + 206), new Vector2(760, 28)), PauseSummary, 21, UiKit.Dim, TextAnchor.MiddleCenter, false);
-            UiKit.Focus(UiKit.Button(pausePanel, "Continuar", center, new Vector2(0, top + 150), new Vector2(640, 70), UiKit.Primary, resume).gameObject);
-            UiOptions.Build(pausePanel, new Vector2(0, top - 20));
-            UiKit.Button(pausePanel, "Menu principal", center, new Vector2(0, top - 262), new Vector2(640, 64), UiKit.Secondary, menu);
+                UiKit.Text(UiKit.Rect("Summary", pausePanel, center, new Vector2(0, top + 254), new Vector2(760, 28)), PauseSummary, 21, UiKit.Dim, TextAnchor.MiddleCenter, false);
+            UiKit.Focus(UiKit.Button(pausePanel, "Continuar", center, new Vector2(0, top + 196), new Vector2(640, 70), UiKit.Primary, resume).gameObject);
+            UiOptions.Build(pausePanel, new Vector2(0, top + 30));
+            if (restart != null)
+            {
+                // recomecar perde a run atual: o primeiro clique so pede confirmacao
+                Text restartLabel = null;
+                bool armed = false;
+                var r = UiKit.Button(pausePanel, "Recomeçar run", center, new Vector2(-165, top - 292), new Vector2(310, 64), UiKit.Secondary, () =>
+                {
+                    if (armed) { restart(); return; }
+                    armed = true;
+                    restartLabel.text = "Perder esta run?";
+                    restartLabel.color = new Color(0.95f, 0.62f, 0.55f);
+                });
+                r.name = "Restart";
+                restartLabel = r.transform.Find("Label").GetComponent<Text>();
+                UiKit.Button(pausePanel, "Menu principal", center, new Vector2(165, top - 292), new Vector2(310, 64), UiKit.Secondary, menu);
+            }
+            else UiKit.Button(pausePanel, "Menu principal", center, new Vector2(0, top - 292), new Vector2(640, 64), UiKit.Secondary, menu);
             if (hasBoons)
             {
-                UiKit.Text(UiKit.Rect("BoonsTitle", pausePanel, center, new Vector2(0, top - 372), new Vector2(900, 36)), "BÊNÇÃOS", 26, UiKit.Dim);
+                UiKit.Text(UiKit.Rect("BoonsTitle", pausePanel, center, new Vector2(0, top - 400), new Vector2(900, 36)), "BÊNÇÃOS", 26, UiKit.Dim);
                 bool two = boons.Count > 4;
                 int rows = two ? (boons.Count + 1) / 2 : boons.Count;
                 for (int i = 0; i < boons.Count; i++)
                 {
                     float x = two ? (i < rows ? -430f : 430f) : 0f;
                     int row = two && i >= rows ? i - rows : i;
-                    UiKit.Text(UiKit.Rect("Boon" + i, pausePanel, center, new Vector2(x, top - 408 - row * 30), new Vector2(840, 30)),
+                    UiKit.Text(UiKit.Rect("Boon" + i, pausePanel, center, new Vector2(x, top - 436 - row * 30), new Vector2(840, 30)),
                         boons[i].name + " — " + boons[i].description, 22, UiKit.Cream, TextAnchor.MiddleCenter, false);
                 }
             }
@@ -972,7 +988,9 @@ namespace Quintessence.UI
             UiKit.Button(resultPanel, "Menu principal", center, new Vector2(0, -150), new Vector2(380, 70), UiKit.Secondary, menu);
         }
 
-        public void ShowResult(bool victory, string stats, Action again, Action menu)
+        /// Fim de run: titulo, uma linha de quem jogou, quatro numeros grandes (salas, inimigos, tempo, nivel)
+        /// e, embaixo, a build e o que a run rendeu no Refugio.
+        public void ShowResult(bool victory, string header, (string value, string label)[] tiles, string details, Action again, Action menu)
         {
             if (tipRoot != null) tipRoot.gameObject.SetActive(false);
             ClearChapter(); // morreu durante o cartao de capitulo: o titulo do trecho nao fica por cima do resultado
@@ -980,14 +998,25 @@ namespace Quintessence.UI
             resultPanel.gameObject.SetActive(true);
             foreach (Transform child in resultPanel) Destroy(child.gameObject);
             var center = new Vector2(0.5f, 0.5f);
-            var title = UiKit.Text(UiKit.Rect("Title", resultPanel, center, new Vector2(0, 270), new Vector2(1400, 120)),
-                victory ? "VITÓRIA" : "VOCÊ CAIU", 104, victory ? new Color(0.9f, 0.76f, 0.42f) : new Color(0.78f, 0.3f, 0.28f));
+            var accent = victory ? new Color(0.9f, 0.76f, 0.42f) : new Color(0.78f, 0.3f, 0.28f);
+            var title = UiKit.Text(UiKit.Rect("Title", resultPanel, center, new Vector2(0, 330), new Vector2(1400, 120)),
+                victory ? "VITÓRIA" : "VOCÊ CAIU", 104, accent);
             title.font = GameFonts.Title;
-            var statsText = UiKit.Text(UiKit.Rect("Stats", resultPanel, center, new Vector2(0, 75), new Vector2(1500, 230)), stats, 28, UiKit.Cream, TextAnchor.MiddleCenter, false);
-            // com subida de maestria e Ascensao nova o texto passa de cinco linhas: encolhe em vez de vazar
-            UiKit.Fit(statsText, 18, 28);
-            UiKit.Focus(UiKit.Button(resultPanel, "Jogar de novo", center, new Vector2(0, -130), new Vector2(380, 70), UiKit.Primary, again).gameObject);
-            UiKit.Button(resultPanel, "Menu principal", center, new Vector2(0, -215), new Vector2(380, 70), UiKit.Secondary, menu);
+            var head = UiKit.Text(UiKit.Rect("Header", resultPanel, center, new Vector2(0, 238), new Vector2(1500, 40)), header, 28, UiKit.Cream);
+            UiKit.Fit(head, 18, 28);
+            int n = tiles?.Length ?? 0;
+            for (int i = 0; i < n; i++)
+            {
+                float x = (i - (n - 1) / 2f) * 270f;
+                var box = UiKit.Box("Tile" + i, resultPanel, center, new Vector2(x, 120), new Vector2(240, 140), 0.85f);
+                UiKit.Text(UiKit.Rect("Value", box, center, new Vector2(0, 18), new Vector2(230, 70)), tiles[i].value, 56, i == 0 ? accent : UiKit.Cream).font = GameFonts.Title;
+                UiKit.Text(UiKit.Rect("Label", box, center, new Vector2(0, -42), new Vector2(230, 30)), tiles[i].label, 22, UiKit.Dim);
+            }
+            var statsText = UiKit.Text(UiKit.Rect("Stats", resultPanel, center, new Vector2(0, -55), new Vector2(1400, 170)), details, 25, UiKit.Cream, TextAnchor.MiddleCenter, false);
+            // com subida de maestria, feito e Ascensao nova o texto passa de cinco linhas: encolhe em vez de vazar
+            UiKit.Fit(statsText, 16, 25);
+            UiKit.Focus(UiKit.Button(resultPanel, "Jogar de novo", center, new Vector2(-200, -210), new Vector2(380, 70), UiKit.Primary, again).gameObject);
+            UiKit.Button(resultPanel, "Menu principal", center, new Vector2(200, -210), new Vector2(380, 70), UiKit.Secondary, menu);
         }
     }
 }

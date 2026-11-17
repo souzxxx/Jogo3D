@@ -783,7 +783,7 @@ namespace Quintessence.Game
             if (paused && Run != null)
                 hud.PauseSummary = $"{HeroPassives.HeroName(GameFlow.StartElement)}  ·  nível {Run.Progress.Level}  ·  sala {Run.Depth + 1}/{Run.Map.LayerCount}  ·  {Biomes.Name(Biomes.For(Run.Depth, Run.Map.LayerCount))}"
                     + $"  ·  {Plural(Run.Talents.Count, "talento", "talentos")}" + (GameFlow.Ascension > 0 ? $"  ·  Ascensão {GameFlow.Ascension}" : "");
-            hud.ShowPause(paused, () => SetPaused(false), () => { SyncSavedHealth(); GameFlow.ToTitle(); });
+            hud.ShowPause(paused, () => SetPaused(false), () => { SyncSavedHealth(); GameFlow.ToTitle(); }, GameFlow.RestartRun);
             if (paused) hud.ShowMap(Run, false);
         }
 
@@ -1066,16 +1066,24 @@ namespace Quintessence.Game
             ShardsEarned = shards;
             // o resultado ja esta gravado: fechar a aba durante a pausa abaixo nao perde a run
             yield return new WaitForSecondsRealtime(victory ? 1.6f : 1.2f);
-            string stats = (GamePrefs.Relaxed ? "Tranquila   ·   " : "") + (GameFlow.Ascension > 0 ? $"Ascensão {GameFlow.Ascension}   ·   " : "") + $"{HeroPassives.HeroName(GameFlow.StartElement)}   ·   Nível {Run.Progress.Level}   ·   {Plural(Run.Kills, "inimigo derrotado", "inimigos derrotados")}   ·   {Plural(Run.Talents.Count, "talento", "talentos")} e {Plural(Run.Boons.Count, "bênção", "bênçãos")}"
-                + (!victory && KilledBy.Length > 0 ? $"\nDerrubado por: {KilledBy}" : "")
-                + $"\nSalas vencidas: {Run.RoomsCleared}   ·   Essência: {Run.Essence}   ·   Elementos: {player.Loadout.Awakened.Count}/4   ·   Tempo: {seconds / 60}:{seconds % 60:00}"
+            string hero = HeroPassives.HeroName(GameFlow.StartElement);
+            string header = hero + (GameFlow.Ascension > 0 ? $"   ·   Ascensão {GameFlow.Ascension}" : "") + (GamePrefs.Relaxed ? "   ·   dificuldade Tranquila" : "")
+                + (!victory && KilledBy.Length > 0 ? $"   ·   derrubado por {KilledBy}" : "");
+            var tiles = new[]
+            {
+                ($"{Run.RoomsCleared}/{Run.Map.LayerCount}", "salas vencidas"),
+                (Run.Kills.ToString(), Run.Kills == 1 ? "inimigo derrotado" : "inimigos derrotados"),
+                ($"{seconds / 60}:{seconds % 60:00}", "tempo"),
+                (Run.Progress.Level.ToString(), "nível"),
+            };
+            string details = $"{Plural(Run.Talents.Count, "talento", "talentos")}, {Plural(Run.Boons.Count, "bênção", "bênçãos")}, {player.Loadout.Awakened.Count} de 4 elementos, {Run.Essence} de Essência"
                 + BuildLine()
-                + $"\n+{shards} Fragmentos para o Refúgio (total: {MetaStore.Current.Shards})   ·   {HeroPassives.HeroName(GameFlow.StartElement)} +{MasteryGained} de maestria"
-                + (MasteryLevelsUp > 0 ? $"\nMaestria {MetaStore.Current.MasteryLevel(GameFlow.StartElement)} de {HeroPassives.HeroName(GameFlow.StartElement)}: {Mastery.Perk(MetaStore.Current.MasteryLevel(GameFlow.StartElement))}" : "")
+                + $"\n+{shards} Fragmentos para o Refúgio (total: {MetaStore.Current.Shards})   ·   {hero} +{MasteryGained} de maestria"
+                + (MasteryLevelsUp > 0 ? $"\nMaestria {MetaStore.Current.MasteryLevel(GameFlow.StartElement)} de {hero}: {Mastery.Perk(MetaStore.Current.MasteryLevel(GameFlow.StartElement))}" : "")
                 + (NewFeats.Count > 0 ? $"\nFeito{(NewFeats.Count > 1 ? "s" : "")}: {string.Join(", ", NewFeats.ConvertAll(Feats.Name))} (+{NewFeats.Count * Feats.Reward} Fragmentos)" : "")
                 + (NewAscension > 0 ? $"\nAscensão {NewAscension} liberada: escolha no título para enfrentar inimigos mais fortes" : "");
             Sfx.Play(victory ? "victory" : "defeat");
-            hud.ShowResult(victory, stats, GameFlow.RestartRun, GameFlow.ToTitle);
+            hud.ShowResult(victory, header, tiles, details, GameFlow.RestartRun, GameFlow.ToTitle);
             // feito novo: um sino depois do som do resultado
             // os do meio da run ja tocaram na hora
             if (endFeats.Count > 0) { yield return new WaitForSecondsRealtime(0.9f); Sfx.Play("feat"); }

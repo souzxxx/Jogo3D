@@ -56,6 +56,29 @@ namespace Quintessence.Game.PlayTests
             Time.captureFramerate = 0;
         }
 
+        /// Opcoes: "Graficos: leves" troca para o perfil Mobile (sem oclusao de ambiente, 80% da resolucao) e volta.
+        [UnityTest]
+        public IEnumerator Light_Graphics_Switch_The_Quality_Profile()
+        {
+            int was = QualitySettings.GetQualityLevel();
+            bool keep = GfxPrefs.Light;
+            try
+            {
+                GfxPrefs.Light = true;
+                yield return null;
+                Assert.AreEqual("Mobile", QualitySettings.names[QualitySettings.GetQualityLevel()]);
+                Assert.Less(UnityEngine.Rendering.Universal.UniversalRenderPipeline.asset.renderScale, 1f, "os leves desenham em resolucao menor");
+                GfxPrefs.Light = false;
+                yield return null;
+                Assert.AreEqual("PC", QualitySettings.names[QualitySettings.GetQualityLevel()]);
+            }
+            finally
+            {
+                GfxPrefs.Light = keep;
+                QualitySettings.SetQualityLevel(was, true);
+            }
+        }
+
         static IEnumerator WaitFor(System.Func<bool> done, float seconds, string what)
         {
             // tempo real: o resultado e as trocas de cena esperam em tempo real, e gravando quadro a quadro o jogo anda mais rapido que ele
@@ -121,7 +144,23 @@ namespace Quintessence.Game.PlayTests
             Assert.AreEqual(1f, Time.timeScale);
             Assert.IsFalse(Find<PlayerController>().GetComponent<Health>().IsDead);
 
-            // 4) treino e volta ao titulo
+            // 4) pausa e "Recomecar run": o primeiro clique so pede confirmacao, o segundo abre uma run nova na primeira sala
+            director.SetPaused(true);
+            yield return null;
+            var restart = GameObject.Find("Restart")?.GetComponent<UnityEngine.UI.Button>();
+            Assert.IsNotNull(restart, "a pausa da run deveria oferecer Recomeçar run");
+            restart.onClick.Invoke();
+            yield return null;
+            Assert.IsTrue(director != null && GameClock.Paused, "o primeiro clique so pede confirmacao");
+            restart.onClick.Invoke();
+            yield return WaitFor(() => Find<RunDirector>() != null && Find<RunDirector>() != director && !Find<RunDirector>().Busy, 12f, "recomeçar deveria abrir uma run nova");
+            director = Find<RunDirector>();
+            Assert.AreEqual(0, director.Run.Depth, "a run nova comeca na primeira sala");
+            Assert.IsFalse(GameClock.Paused);
+            Assert.AreEqual(1f, Time.timeScale);
+            Assert.AreEqual(ElementType.Water, GameFlow.StartElement, "recomeçar mantem o heroi");
+
+            // 5) treino e volta ao titulo
             GameFlow.StartTutorial(ElementType.Earth);
             yield return WaitFor(() => Find<TutorialDirector>() != null, 12f, "o treino deveria abrir");
             for (int k = 0; k < 10; k++) yield return null;
