@@ -12,7 +12,8 @@ namespace Quintessence.Feel
         float t;
         Color baseColor;
 
-        public static TelegraphVisual Create(TelegraphEvent e, Material flat, Mesh ring, Mesh disc)
+        /// lit: material aceso para o contorno de circulo (gomos de pedra, como os aneis do heroi); sem ele, contorno plano.
+        public static TelegraphVisual Create(TelegraphEvent e, Material flat, Mesh ring, Mesh disc, Material lit = null)
         {
             var go = new GameObject("Telegraph");
             var v = go.AddComponent<TelegraphVisual>();
@@ -20,6 +21,7 @@ namespace Quintessence.Feel
             // vermelho-tijolo fosco: le como perigo sem brilhar mais que o cenario
             v.baseColor = e.Friendly ? new Color(0.3f, 0.55f, 0.36f) : new Color(0.66f, 0.16f, 0.12f);
             v.outlineMat = new Material(flat) { color = new Color(v.baseColor.r, v.baseColor.g, v.baseColor.b, e.IsLine ? 0.2f : 0.6f) };
+            if (lit != null && !e.IsLine) v.outlineMat = lit;
             v.fillMat = new Material(flat) { color = new Color(v.baseColor.r, v.baseColor.g, v.baseColor.b, e.Friendly ? 0.16f : 0.3f) };
             var dir = e.Direction.sqrMagnitude > 0.01f ? e.Direction.normalized : Vector3.forward;
             if (e.IsLine)
@@ -32,7 +34,8 @@ namespace Quintessence.Feel
             else
             {
                 go.transform.position = e.Point + Vector3.up * 0.08f;
-                Part(go.transform, "Outline", ring, v.outlineMat, false).localScale = Vector3.one * e.Radius;
+                // contorno baixo e largo, como meio-fio de pedra: a altura do gomo nao cresce com o raio
+                Part(go.transform, "Outline", ring, v.outlineMat, false).localScale = lit != null ? new Vector3(e.Radius, 1.2f, e.Radius) : Vector3.one * e.Radius;
                 v.fill = Part(go.transform, "Fill", disc, v.fillMat, false);
             }
             v.Apply(0f);
@@ -83,8 +86,10 @@ namespace Quintessence.Feel
             }
             // pisca claro no instante do golpe
             float flash = Mathf.InverseLerp(0.9f, 1f, k);
-            var rest = new Color(baseColor.r, baseColor.g, baseColor.b, data.Friendly ? 0.16f : 0.3f);
-            fillMat.color = Color.Lerp(rest, data.Friendly ? new Color(0.45f, 0.72f, 0.5f, 0.22f) : new Color(0.85f, 0.4f, 0.28f, 0.5f), flash);
+            // preenchimento escuro, puxado para a pedra; o clarao do golpe e contido (nada de disco laranja aceso)
+            var dim = Color.Lerp(baseColor, new Color(0.16f, 0.13f, 0.12f), 0.35f);
+            var rest = new Color(dim.r, dim.g, dim.b, data.Friendly ? 0.16f : 0.26f);
+            fillMat.color = Color.Lerp(rest, data.Friendly ? new Color(0.45f, 0.72f, 0.5f, 0.22f) : new Color(0.72f, 0.3f, 0.2f, 0.4f), flash);
         }
 
         void OnDestroy()

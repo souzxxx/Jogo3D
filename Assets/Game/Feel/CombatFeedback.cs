@@ -309,7 +309,9 @@ namespace Quintessence.Feel
                 }
                 return;
             }
-            var v = TelegraphVisual.Create(e, flatMaterial, RingMesh, DiscMesh);
+            // circulos que sobraram (chefe, bomba, explosao, Espectro): contorno de gomos acesos em vermelho-tijolo (verde na cura)
+            var tint = e.Friendly ? new Color(0.3f, 0.55f, 0.36f) : new Color(0.66f, 0.18f, 0.12f);
+            var v = TelegraphVisual.Create(e, flatMaterial, litMaterial != null ? RuneRingMesh : RingMesh, DiscMesh, litMaterial != null && !e.IsLine ? RingMaterial(tint) : null);
             v.transform.SetParent(transform, true);
             if (e.Source != null) telegraphs[e.Source] = v;
             // a bomba some junto com o aviso se o arremessador for interrompido
