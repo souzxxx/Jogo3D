@@ -213,6 +213,7 @@ Sprints sem data até confirmar a entrega. S0 é de todos e destrava o resto.
 - [x] Build Windows (`BuildTools.BuildWindows`) — **Enzo**
 - [x] Teste de colisão em todos os arranjos (1101 aproximações: nada atravessa, prende ou treme) — **Enzo**
 - [x] Câmera esconde a peça que fica entre ela e o herói e não mostra o vazio fora da sala — **Leonardo**
+- [x] Mira no chão (seta nos pés e anel no ponto mirado) e câmera que não mostra o chão de fora na porta sul — **Leonardo** e **Miguel**
 - [x] Grimório legível e painéis do título por cima da linha de teclas — **Miguel**
 - [x] ESCOPO, GDD e página de progresso com a rubrica final e as plataformas — **Miguel**
 - [ ] Subir as builds Windows e WebGL na jam do itch.io, com como jogar, prints e vídeo — **Leonardo**
