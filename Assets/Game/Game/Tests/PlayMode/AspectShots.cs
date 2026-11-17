@@ -24,6 +24,7 @@ namespace Quintessence.Game.PlayTests
             GameFlow.Seed = 1; GameFlow.StartElement = ElementType.Fire;
             InputMode.Gamepad = false;
             Tips.UseKey(Tips.DefaultKey);
+            HealthPool.ForceEvade = null;
         }
 
         /// Jogando de controle, o HUD e as dicas mostram os botoes do controle no lugar das teclas.
@@ -82,7 +83,9 @@ namespace Quintessence.Game.PlayTests
             GameEvents.Clear();
             GameFlow.Seed = 7; GameFlow.StartElement = ElementType.Water;
             yield return EditorSceneManager.LoadSceneAsyncInPlayMode("Assets/Scenes/Run.unity", new LoadSceneParameters(LoadSceneMode.Single));
-            for (int i = 0; i < 90; i++) yield return null;
+            yield return null;
+            for (float t = 0; t < 10f && Object.FindFirstObjectByType<RunDirector>().Busy; t += Time.unscaledDeltaTime) yield return null; // cartao de capitulo: tela preta
+            for (int i = 0; i < 20; i++) yield return null;
             var hud = Object.FindFirstObjectByType<Hud>();
             var director = Object.FindFirstObjectByType<RunDirector>();
             hud.UseCamera(Camera.main);
@@ -142,7 +145,9 @@ namespace Quintessence.Game.PlayTests
 
             GameFlow.Seed = 7; GameFlow.StartElement = ElementType.Earth;
             yield return EditorSceneManager.LoadSceneAsyncInPlayMode("Assets/Scenes/Run.unity", new LoadSceneParameters(LoadSceneMode.Single));
-            for (int i = 0; i < 30; i++) yield return null;
+            yield return null;
+            for (float t = 0; t < 10f && Object.FindFirstObjectByType<RunDirector>().Busy; t += Time.unscaledDeltaTime) yield return null; // cartao de capitulo: tela preta
+            for (int i = 0; i < 20; i++) yield return null;
             var hud = Object.FindFirstObjectByType<Hud>();
             var director = Object.FindFirstObjectByType<RunDirector>();
             hud.UseCamera(Camera.main);
@@ -151,18 +156,25 @@ namespace Quintessence.Game.PlayTests
             hud.ShowLevelUp(3, offer, _ => { }, 2, () => { });
             foreach (var s in sizes) yield return Shoot(Camera.main, $"Logs/aspect/p_talentos_{s.x}x{s.y}.png", s);
             hud.ShowLevelUp(0, null, null);
-            hud.ShowPause(true, () => { }, () => { });
+            hud.ShowPause(true, () => { }, () => { }, () => { });
             foreach (var s in sizes) yield return Shoot(Camera.main, $"Logs/aspect/p_pausa_{s.x}x{s.y}.png", s);
+            yield return Shoot(Camera.main, "docs/img/s6_pausa.png", new Vector2Int(1280, 720));
+            GameObject.Find("Controls").GetComponent<UnityEngine.UI.Button>().onClick.Invoke();
+            yield return null;
+            Assert.IsNotNull(GameObject.Find("ControlsSheet"), "o botao Controles abre a tabela");
+            foreach (var s in sizes) yield return Shoot(Camera.main, $"Logs/aspect/p_controles_{s.x}x{s.y}.png", s);
+            yield return Shoot(Camera.main, "docs/img/s6_controles.png", new Vector2Int(1280, 720));
             hud.ShowPause(false);
-            string stats = "Ascensão 2   ·   Brann   ·   Nível 9   ·   84 inimigos derrotados   ·   12 talentos e 7 bênçãos\nDerrubado por: Rainha Afogada (golpe de maré)"
-                + "\nSalas vencidas: 9   ·   Essência: 140   ·   Elementos: 4/4   ·   Tempo: 14:32"
-                + "\nBuild: Sintonia de Terra 2 · Fusões 6 · Cadências 31 · esquivas perfeitas 4 · Pele de Pedra"
+            hud.ShowResult(false, "Brann   ·   Ascensão 2   ·   derrubado por Rainha Afogada (golpe de maré)",
+                new[] { ("9/10", "salas vencidas"), ("84", "inimigos derrotados"), ("14:32", "tempo"), ("9", "nível") },
+                "12 talentos, 7 bênçãos, 4 de 4 elementos, 140 de Essência"
+                + "\nBuild: Sintonia de Terra II · 6 Fusões · 31 Cadências · 4 esquivas perfeitas · Pele de Pedra"
                 + "\n+42 Fragmentos para o Refúgio (total: 188)   ·   Brann +60 de maestria"
                 + "\nMaestria 3 de Brann: começa a run com um talento à escolha"
-                + "\nFeitos: Mestre das Fusões, Intocável (+20 Fragmentos)";
-            hud.ShowResult(false, stats, () => { }, () => { });
+                + "\nFeitos: Mestre das Fusões, Intocável (+20 Fragmentos)", () => { }, () => { });
             for (int i = 0; i < 40; i++) yield return null;
             foreach (var s in sizes) yield return Shoot(Camera.main, $"Logs/aspect/p_resultado_{s.x}x{s.y}.png", s);
+            yield return Shoot(Camera.main, "docs/img/s6_resultado.png", new Vector2Int(1280, 720));
             MetaStore.UseKey(MetaStore.DefaultKey);
         }
 
@@ -183,9 +195,13 @@ namespace Quintessence.Game.PlayTests
             var hp = Object.FindFirstObjectByType<Quintessence.Combat.PlayerController>().GetComponent<Health>();
             for (int k = 0; k < 5; k++) yield return null;
             Assert.Less(hud.HurtEdgeAlpha, 0.01f, "sem dano, a borda fica apagada");
+            HealthPool.ForceEvade = false; // sem esquiva sorteada: o golpe tem que entrar
+            float before = hp.Current;
             hp.TakeDamage(new DamageInfo(hp.Max * 0.15f, ElementType.None, Team.Enemy));
-            yield return null; yield return null;
-            Assert.Greater(hud.HurtEdgeAlpha, 0.2f, "o golpe acende a borda");
+            Assert.Less(hp.Current, before, "o golpe deveria tirar vida");
+            float peak = 0f;
+            for (int k = 0; k < 4; k++) { yield return null; peak = Mathf.Max(peak, hud.HurtEdgeAlpha); }
+            Assert.Greater(peak, 0.2f, "o golpe acende a borda");
             for (float t = 0; t < 1.5f; t += Time.unscaledDeltaTime) yield return null;
             Assert.Less(hud.HurtEdgeAlpha, 0.05f, "e ela apaga logo");
             hp.TakeDamage(new DamageInfo(hp.Current - hp.Max * 0.12f, ElementType.None, Team.Enemy));
@@ -193,6 +209,7 @@ namespace Quintessence.Game.PlayTests
             Assert.Greater(hud.HurtEdgeAlpha, 0.05f, "com pouca vida a borda continua acesa");
             Directory.CreateDirectory("Logs/aspect");
             yield return Shoot(Camera.main, "docs/img/s6_vida_baixa.png", new Vector2Int(960, 540));
+            HealthPool.ForceEvade = null;
             MetaStore.UseKey(MetaStore.DefaultKey);
         }
 
