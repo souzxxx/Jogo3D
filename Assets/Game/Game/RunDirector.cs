@@ -816,6 +816,16 @@ namespace Quintessence.Game
             player.Teleport(entryPoint, Vector3.forward);
             hud.SetRoom($"Sala {Run.Depth + 1}/{Run.Map.LayerCount} · {RoomInfo.Name(node.Type)}", node.Type);
             yield return null;
+            entering = false;
+            if (chapter.HasValue)
+            {
+                // cartao de capitulo: o nome do trecho sobre o preto, antes de a sala comecar (ondas, chefe e letreiros
+                // de objetivo vem depois dele, entao nada age nem se sobrepoe com a tela escura)
+                var c = chapter.Value; chapter = null;
+                hud.SetFade(1f);
+                hud.ShowChapter(c.title, c.sub, c.color, ChapterHold + 0.35f);
+                for (float t = 0f; t < ChapterHold; t += Time.captureFramerate > 0 ? 1f / Time.captureFramerate : Time.unscaledDeltaTime) yield return null;
+            }
 
             if (first && Run.Depth == 0) Tip("start");
             if (node.Type == RoomType.Shrine) Tip("shrine");
@@ -871,15 +881,6 @@ namespace Quintessence.Game
                 default:
                     StartEncounter(node.Type, Run.Depth, node.Type == RoomType.Elite ? DifficultyCurve.PickElite(GameFlow.Seed, node.Id) : EliteModifier.None);
                     break;
-            }
-            entering = false;
-            if (chapter.HasValue)
-            {
-                // cartao de capitulo: o nome do trecho sobre o preto, sem nada da sala por baixo para ele cobrir
-                var c = chapter.Value; chapter = null;
-                hud.SetFade(1f);
-                hud.ShowChapter(c.title, c.sub, c.color, ChapterHold + 0.35f);
-                for (float t = 0f; t < ChapterHold; t += Time.captureFramerate > 0 ? 1f / Time.captureFramerate : Time.unscaledDeltaTime) yield return null;
             }
             yield return Fade(1f, 0f, 0.35f);
             Busy = false;

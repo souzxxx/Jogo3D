@@ -437,7 +437,21 @@ namespace Quintessence.UI
         /// Faixa escura atras do letreiro: quase opaca, para os rotulos do mundo (pedestais, portas) nao aparecerem por baixo do titulo.
         const float BannerShade = 0.9f;
 
+        (string title, string sub, Color color, float seconds)? queuedBanner;
+
         public void ShowBanner(string title, string sub, Color color, float seconds = 3.2f)
+        {
+            // durante o cartao de capitulo, o letreiro (chefe, Cerco, Provacao) espera o cartao acabar em vez de apaga-lo
+            if (chapterMode && bannerRoot != null && bannerRoot.gameObject.activeSelf)
+            {
+                queuedBanner = (title, sub, color, seconds);
+                LastBanner = title;
+                return;
+            }
+            ShowBannerNow(title, sub, color, seconds);
+        }
+
+        void ShowBannerNow(string title, string sub, Color color, float seconds)
         {
             if (bannerRoot == null)
             {
@@ -498,7 +512,7 @@ namespace Quintessence.UI
         /// Nome do trecho novo como cartao de capitulo: no meio da tela, por cima do preto da troca de sala.
         public void ShowChapter(string title, string sub, Color color, float seconds)
         {
-            ShowBanner(title, sub, color, seconds);
+            ShowBannerNow(title, sub, color, seconds);
             chapterMode = true;
             bannerRoot.anchorMin = bannerRoot.anchorMax = bannerRoot.pivot = new Vector2(0.5f, 0.5f);
             bannerRoot.anchoredPosition = new Vector2(0, 40);
@@ -506,6 +520,23 @@ namespace Quintessence.UI
             bannerTitle.fontSize = 96; bannerSub.fontSize = 34;
             bannerTitle.rectTransform.anchoredPosition = new Vector2(0, -52);
             if (bannerBack != null) bannerBack.color = Color.clear;
+        }
+
+        /// Painel aberto durante o cartao de capitulo: o cartao sai, para nao ficar por cima do mapa, da pausa ou do inventario.
+        void ClearChapter()
+        {
+            if (!chapterMode || bannerRoot == null) return;
+            bannerRoot.gameObject.SetActive(false);
+            bannerRoot.SetSiblingIndex(0);
+            chapterMode = false;
+            ShowQueuedBanner();
+        }
+
+        void ShowQueuedBanner()
+        {
+            if (!queuedBanner.HasValue) return;
+            var q = queuedBanner.Value; queuedBanner = null;
+            ShowBannerNow(q.title, q.sub, q.color, q.seconds);
         }
 
         void TickBanner()
@@ -517,7 +548,7 @@ namespace Quintessence.UI
             var c = bannerTitle.color; c.a = a; bannerTitle.color = c;
             var d = bannerSub.color; d.a = a; bannerSub.color = d;
             if (bannerBack != null) bannerBack.color = chapterMode ? Color.clear : new Color(0.02f, 0.02f, 0.04f, BannerShade * a);
-            if (bannerLeft <= 0f) bannerRoot.gameObject.SetActive(false);
+            if (bannerLeft <= 0f) { bannerRoot.gameObject.SetActive(false); if (chapterMode) { bannerRoot.SetSiblingIndex(0); chapterMode = false; ShowQueuedBanner(); } }
         }
 
 
@@ -561,6 +592,7 @@ namespace Quintessence.UI
 
         public void ShowMap(RunState run, bool show)
         {
+            if (show) { ClearChapter(); HideTip(); } // a dica e o cartao ficariam por cima do painel
             if (show == mapPanel.gameObject.activeSelf) return;
             mapPanel.gameObject.SetActive(show);
             if (!show) return;
@@ -632,6 +664,7 @@ namespace Quintessence.UI
 
         public void ShowPause(bool show, Action resume = null, Action menu = null)
         {
+            if (show) { ClearChapter(); HideTip(); } // a dica e o cartao ficariam por cima do painel
             pausePanel.gameObject.SetActive(show);
             if (!show) return;
             foreach (Transform child in pausePanel) Destroy(child.gameObject);
@@ -673,6 +706,7 @@ namespace Quintessence.UI
         /// Inventario (tecla I): skills despertas, atributos somados na run, bencaos e Essencia.
         public void ShowInventory(bool show, RunState run = null)
         {
+            if (show) { ClearChapter(); HideTip(); } // a dica e o cartao ficariam por cima do painel
             if (inventoryPanel == null)
             {
                 if (!show) return;

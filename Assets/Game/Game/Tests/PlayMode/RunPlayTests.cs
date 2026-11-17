@@ -948,9 +948,10 @@ namespace Quintessence.Game.PlayTests
             hp.TakeDamage(new DamageInfo(4f, ElementType.None, Team.Enemy));
             hp.TakeDamage(new DamageInfo(4f, ElementType.None, Team.Enemy));
             Assert.AreEqual(1, director.TrialHits, "dois golpes no mesmo instante contam um");
-            for (int k = 0; k < 30; k++) yield return null;
+            // espera em tempo de jogo: a pausa de impacto de cada golpe desacelera o relogio, e 30 quadros podiam ficar dentro da janela
+            for (float t = 0f; t < Trials.HitWindow + 0.3f; t += Time.deltaTime) yield return null;
             hp.TakeDamage(new DamageInfo(4f, ElementType.None, Team.Enemy));
-            for (int k = 0; k < 30; k++) yield return null;
+            for (float t = 0f; t < Trials.HitWindow + 0.3f; t += Time.deltaTime) yield return null;
             hp.TakeDamage(new DamageInfo(4f, ElementType.None, Team.Enemy));
             Assert.AreEqual(3, director.TrialHits);
             int talents = director.Run.Talents.Count, essence = director.Run.Essence;
