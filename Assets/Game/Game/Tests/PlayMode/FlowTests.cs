@@ -43,6 +43,10 @@ namespace Quintessence.Game.PlayTests
             Tips.ResetAll();
             Tips.UseKey(Tips.DefaultKey);
             GameFlow.Resume = null;
+            // o teste termina passando pelo treino: os outros testes abrem a cena de run direto e herdariam o modo treino
+            GameFlow.Tutorial = false;
+            GameFlow.StartElement = ElementType.Fire;
+            GameFlow.Ascension = 0;
             GameFlow.AutoPickTalents = false;
             HealthPool.ForceEvade = null;
             GamePrefs.Force = null;
