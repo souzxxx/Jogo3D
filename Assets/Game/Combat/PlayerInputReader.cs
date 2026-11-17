@@ -22,7 +22,11 @@ namespace Quintessence.Combat
         {
             // quem mexeu por ultimo manda na mira
             var pad = Gamepad.current;
-            if (pad != null && (pad.leftStick.ReadValue().sqrMagnitude > 0.1f || pad.rightStick.ReadValue().sqrMagnitude > 0.1f || pad.buttonSouth.isPressed))
+            // qualquer botao conta (Start e Select abrem pausa e inventario antes de mexer num analogico: os textos ja saem do controle)
+            if (pad != null && (pad.leftStick.ReadValue().sqrMagnitude > 0.1f || pad.rightStick.ReadValue().sqrMagnitude > 0.1f
+                || pad.buttonSouth.isPressed || pad.buttonNorth.isPressed || pad.buttonEast.isPressed || pad.buttonWest.isPressed
+                || pad.startButton.isPressed || pad.selectButton.isPressed || pad.dpad.ReadValue().sqrMagnitude > 0.1f
+                || pad.leftTrigger.ReadValue() > 0.3f || pad.rightTrigger.ReadValue() > 0.3f))
                 usingPad = true;
             var m = Mouse.current;
             if (m != null)
