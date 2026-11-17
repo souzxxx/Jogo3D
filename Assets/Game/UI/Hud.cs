@@ -118,11 +118,11 @@ namespace Quintessence.UI
                     rankText.horizontalOverflow = HorizontalWrapMode.Wrap; rankText.verticalOverflow = VerticalWrapMode.Truncate;
                     UiKit.Fit(rankText, 12, 18);
                 }
-                var b = UiKit.Button(card, $"Escolher  [{i + 1}]", new Vector2(0.5f, 0), new Vector2(0, 26), new Vector2(300, 60), UiKit.Primary, () => pick(index));
+                var b = UiKit.Button(card, Pad ? "Escolher" : $"Escolher  [{i + 1}]", new Vector2(0.5f, 0), new Vector2(0, 26), new Vector2(300, 60), UiKit.Primary, () => pick(index));
                 if (i == 0) UiKit.Focus(b.gameObject);
             }
             if (rerolls > 0 && reroll != null)
-                UiKit.Button(levelPanel, $"Trocar as opções  [T]  ·  restam {rerolls}", center, new Vector2(0, -330), new Vector2(520, 56), UiKit.Secondary, reroll);
+                UiKit.Button(levelPanel, $"Trocar as opções  [{(Pad ? "Y" : "T")}]  ·  restam {rerolls}", center, new Vector2(0, -330), new Vector2(520, 56), UiKit.Secondary, reroll);
         }
 
         class Tile { public RectTransform Root; public Image Back, Icon, Cooldown, Ring; public Text Key; }

@@ -1371,6 +1371,7 @@ namespace Quintessence.Game
             if (talentOffer.Count == 0) { while (Run.Progress.ConsumePick()) { } masteryPicks = 0; return; }
             if (GameFlow.AutoPickTalents) { PickTalent(0); return; }
             levelUpOpen = true;
+            levelUpOpenedAt = Time.unscaledTime;
             GameClock.SetPaused(true);
             hud.ShowMap(Run, false);
             ShowLevelUpPanel();
@@ -1399,10 +1400,17 @@ namespace Quintessence.Game
             else hud.ShowLevelUp(Run.Progress.Level - Run.Progress.PendingPicks + 1, talentOffer, PickTalent, Run.Rerolls, RerollTalents);
         }
 
+        float levelUpOpenedAt;
+
         void LevelUpKeys()
         {
+            if (talentOffer == null) return;
+            // no controle: o direcional anda entre as cartas e A escolhe (pelo foco da interface); Y troca as opcoes
+            var pad = Gamepad.current;
+            // (meio segundo de carencia: o Y da Quintessencia apertado na hora em que o painel abre nao gasta a troca)
+            if (pad != null && pad.buttonNorth.wasPressedThisFrame && Time.unscaledTime - levelUpOpenedAt > 0.5f) { RerollTalents(); return; }
             var kb = Keyboard.current;
-            if (kb == null || talentOffer == null) return;
+            if (kb == null) return;
             if (kb.digit1Key.wasPressedThisFrame || kb.numpad1Key.wasPressedThisFrame) PickTalent(0);
             else if (kb.digit2Key.wasPressedThisFrame || kb.numpad2Key.wasPressedThisFrame) PickTalent(1);
             else if (kb.digit3Key.wasPressedThisFrame || kb.numpad3Key.wasPressedThisFrame) PickTalent(2);
