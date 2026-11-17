@@ -35,6 +35,29 @@
   <h1>Quintessence 3D — Progresso</h1>
   <p class="sub">Entrega mais recente no topo. Escopo em <a href="ESCOPO.md">ESCOPO.md</a> · kanban em <a href="https://github.com/users/souzxxx/projects/4">GitHub Projects</a>. · <b>resumo da noite por tema em <a href="novidades.html">novidades.html</a></b>.</p>
 
+  <section id="s6-golpe">
+    <h2>16/11, quarta leva — sem círculo no golpe dos esqueletos: desvia quem lê a animação</h2>
+    <div class="meta"><span class="tag who">Enzo</span><span class="tag who">Miguel</span><span class="tag who">Leonardo</span><span class="tag ok">teste: o dano sai a até 0,05 s do golpe da animação nos cinco</span></div>
+    <p>Pedido do Leonardo: "essa bola de ataque dos esqueletos tá horrível, o cara tem que desviar vendo a animação". Rastejante, Bruto, Escudeiro, Cinzento e Brasa Viva não desenham mais círculo no chão. O aviso agora é o corpo do esqueleto.</p>
+    <ul>
+      <li><b>A animação bate com o dano (Enzo).</b> Medi em cada clipe de ataque do pack o instante em que a arma desce mais rápido (machadada a 55% do clipe, estocada a 24%, golpe de escudo a 40%). Durante a preparação, a animação anda na velocidade exata para esse instante cair junto com o dano: o teste mede a diferença nos cinco e ela fica em até 0,05 s.</li>
+      <li><b>Carregar e soltar (Enzo).</b> Na preparação o esqueleto inclina o corpo para trás aos poucos; no golpe ele cai para a frente de uma vez. Lê de cima, com a câmera longe, melhor que só o braço.</li>
+      <li><b>Arma na mão (Enzo).</b> Rastejante e Bruto lutavam de mãos vazias. Agora seguram a lâmina e o machado do pack de esqueletos.</li>
+      <li><b>Brilho da arma (Miguel).</b> No começo da preparação sai um brilho curto e fosco na altura da arma, para achar quem vai bater no meio do bando.</li>
+      <li><b>Dica (Leonardo).</b> Na primeira arma erguida: "o golpe sai quando ela desce; desvie com Espaço nessa hora".</li>
+    </ul>
+    <p>O círculo continua onde a animação não basta para saber onde dói: bomba do Arremessador, explosão do Explosivo e do barril, Espectro, investida em linha do Ceifador e as áreas dos chefes e mini-chefes.</p>
+    <div class="cols">
+      <div><h3>Preparação (0,3 s)</h3><img src="img/s6_golpe_preparo.png" alt="Bruto com o machado na mão, começando a inclinar para trás"></div>
+      <div><h3>Golpe</h3><img src="img/s6_golpe_impacto.png" alt="Bruto caído para a frente com o machado, sem nenhum círculo no chão"></div>
+    </div>
+    <h3>Limites</h3>
+    <ul>
+      <li>Sem o círculo, desviar de perto ficou mais difícil para gente. A sonda de balanceamento lê os avisos pelos eventos e não percebe a diferença; vale jogar e, se pesar, alongar a preparação dos corpo a corpo</li>
+      <li>Medi no WebGL (Chrome, M3 Pro): cerca de 360 FPS no título e em combate, 99% dos quadros em até 5 ms, nenhum erro</li>
+    </ul>
+  </section>
+
   <section id="s6-mira">
     <h2>16/11, terceira leva — mira no chão e enquadramento na entrada da sala</h2>
     <div class="meta"><span class="tag who">Leonardo</span><span class="tag who">Miguel</span></div>
