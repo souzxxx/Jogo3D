@@ -30,12 +30,15 @@ Shader "Quintessence/Silhouette"
             half _RimPower;
         CBUFFER_END
 
-        struct Attributes { float4 positionOS : POSITION; float3 normalOS : NORMAL; };
+        // instancia: pecas fixas nos ossos (armas, cabecas) sao MeshRenderer e, no perfil PC, vao pelo GPU Resident Drawer.
+        // Sem a variante DOTS_INSTANCING o Unity troca o shader pelo de erro e a arma aparece magenta.
+        struct Attributes { float4 positionOS : POSITION; float3 normalOS : NORMAL; UNITY_VERTEX_INPUT_INSTANCE_ID };
         struct Varyings { float4 positionCS : SV_POSITION; float3 normalWS : TEXCOORD0; float3 viewWS : TEXCOORD1; };
 
         Varyings Vert(Attributes v)
         {
             Varyings o;
+            UNITY_SETUP_INSTANCE_ID(v);
             float3 positionWS = TransformObjectToWorld(v.positionOS.xyz);
             o.positionCS = TransformWorldToHClip(positionWS);
             o.normalWS = TransformObjectToWorldNormal(v.normalOS);
@@ -62,6 +65,8 @@ Shader "Quintessence/Silhouette"
             HLSLPROGRAM
             #pragma vertex Vert
             #pragma fragment Frag
+            #pragma multi_compile_instancing
+            #include_with_pragmas "Packages/com.unity.render-pipelines.universal/ShaderLibrary/DOTS.hlsl"
             half4 Frag(Varyings i) : SV_Target { return 0; }
             ENDHLSL
         }
@@ -85,6 +90,8 @@ Shader "Quintessence/Silhouette"
             HLSLPROGRAM
             #pragma vertex Vert
             #pragma fragment Frag
+            #pragma multi_compile_instancing
+            #include_with_pragmas "Packages/com.unity.render-pipelines.universal/ShaderLibrary/DOTS.hlsl"
             half4 Frag(Varyings i) : SV_Target
             {
                 half facing = saturate(dot(normalize(i.normalWS), normalize(i.viewWS)));
