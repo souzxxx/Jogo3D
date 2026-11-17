@@ -827,7 +827,9 @@ namespace Quintessence.Feel
         IEnumerator StopRoutine(float seconds)
         {
             Time.timeScale = 0.05f;
-            while (seconds > 0f) { seconds -= Time.unscaledDeltaTime; yield return null; }
+            // gravando quadro a quadro (testes), o relogio real corre diferente a cada maquina: a pausa de impacto segue o passo da captura,
+            // senao o numero de quadros lentos (e o que cabe num combo) mudava de uma execucao para outra
+            while (seconds > 0f) { seconds -= Time.captureFramerate > 0 ? 1f / Time.captureFramerate : Time.unscaledDeltaTime; yield return null; }
             Time.timeScale = GameClock.Paused ? 0f : 1f;
             stop = null;
         }
