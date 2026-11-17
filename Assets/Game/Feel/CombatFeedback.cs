@@ -91,6 +91,7 @@ namespace Quintessence.Feel
             go.GetComponent<ParticleSystemRenderer>().sharedMaterial = particleMaterial;
             fx.Play();
             if (particleMaterial != null) accents = new ElementAccents(transform, particleMaterial);
+            BuildMotes();
         }
 
         void OnEnable()
@@ -239,8 +240,75 @@ namespace Quintessence.Feel
             if (target.GetComponent<UnityEngine.AI.NavMeshAgent>() != null)
             {
                 LastBonesDropped = BonePile.Scatter(target.gameObject, info.Direction);
+                SpawnMotes(target.transform.position + Vector3.up * 1.1f, 4);
                 accents?.Emit(ElementType.Earth, target.transform.position + Vector3.up * 0.8f, Vector3.forward, 180f, 16, 4f, new Color(0.8f, 0.76f, 0.68f));
             }
+        }
+
+        // ---------- Essencia que sobe dos inimigos mortos ----------
+        // Pontinhos dourados que saltam do inimigo caido e voam ate o heroi (so visual: a Essencia em si entra ao limpar a sala)
+        ParticleSystem motes;
+        ParticleSystem.Particle[] moteBuffer = new ParticleSystem.Particle[256];
+        static readonly Color MoteColor = new(0.95f, 0.78f, 0.4f);
+        /// Quantos pontinhos ja chegaram no heroi (para os testes).
+        public int MotesAbsorbed { get; private set; }
+        public int MotesAlive => motes != null ? motes.particleCount : 0;
+
+        void BuildMotes()
+        {
+            var go = new GameObject("EssenceMotes");
+            go.transform.SetParent(transform, false);
+            motes = go.AddComponent<ParticleSystem>();
+            motes.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+            var main = motes.main;
+            main.simulationSpace = ParticleSystemSimulationSpace.World;
+            main.maxParticles = 256; main.playOnAwake = false; main.loop = false;
+            var em = motes.emission; em.enabled = false;
+            var sh = motes.shape; sh.enabled = false;
+            var col = motes.colorOverLifetime; col.enabled = true;
+            var g = new Gradient();
+            g.SetKeys(new[] { new GradientColorKey(Color.white, 0), new GradientColorKey(Color.white, 1) },
+                new[] { new GradientAlphaKey(0.95f, 0), new GradientAlphaKey(0.95f, 0.85f), new GradientAlphaKey(0, 1) });
+            col.color = g;
+            go.GetComponent<ParticleSystemRenderer>().sharedMaterial = particleMaterial;
+            motes.Play();
+        }
+
+        void SpawnMotes(Vector3 at, int count)
+        {
+            if (motes == null) return;
+            var p = new ParticleSystem.EmitParams();
+            for (int i = 0; i < count; i++)
+            {
+                var d = Quaternion.Euler(0f, Random.Range(0f, 360f), 0f) * new Vector3(1f, 2.2f, 0f).normalized;
+                p.position = at + Random.insideUnitSphere * 0.2f;
+                p.velocity = d * Random.Range(3f, 4.5f);
+                p.startSize = Random.Range(0.2f, 0.28f);
+                p.startLifetime = 2.2f;
+                p.startColor = Color.Lerp(MoteColor, Color.white, Random.Range(0f, 0.2f));
+                motes.Emit(p, 1);
+            }
+        }
+
+        /// Depois do salto, cada pontinho curva para o peito do heroi e some ao chegar.
+        void HomeMotes(float dt)
+        {
+            if (motes == null || player == null || motes.particleCount == 0) return;
+            int n = motes.GetParticles(moteBuffer);
+            var target = player.position + Vector3.up * 1.2f;
+            for (int i = 0; i < n; i++)
+            {
+                var q = moteBuffer[i];
+                float age = q.startLifetime - q.remainingLifetime;
+                if (age < 0.3f) { q.velocity += Vector3.down * 6f * dt; moteBuffer[i] = q; continue; }
+                var to = target - q.position;
+                float dist = to.magnitude;
+                if (dist < 0.45f) { q.remainingLifetime = 0f; MotesAbsorbed++; moteBuffer[i] = q; continue; }
+                float speed = 6f + (age - 0.3f) * 18f;
+                q.velocity = Vector3.Lerp(q.velocity, to / dist * speed, Mathf.Clamp01(dt * 7f));
+                moteBuffer[i] = q;
+            }
+            motes.SetParticles(moteBuffer, n);
         }
 
         /// Quantas pecas o ultimo inimigo morto soltou (para os testes).
@@ -839,6 +907,7 @@ namespace Quintessence.Feel
             float dt = Time.deltaTime;
             // o heroi aparece na cena antes do primeiro evento de combate: o anel e a mira ja valem desde a entrada
             if (player == null && Time.frameCount % 15 == 0) FindPlayer();
+            HomeMotes(dt);
             for (int i = flashes.Count - 1; i >= 0; i--)
             {
                 var f = flashes[i];
