@@ -233,7 +233,7 @@ namespace Quintessence.UI
 
             // aviso de interacao: tecla + texto
             promptBox = UiKit.Box("Prompt", root, new Vector2(0.5f, 0), new Vector2(0, 250), new Vector2(520, 60));
-            KeyCap(promptBox, new Vector2(-220, 0), "E");
+            promptKey = KeyCap(promptBox, new Vector2(-220, 0), "E");
             promptText = UiKit.Text(UiKit.Rect("Text", promptBox, center, new Vector2(24, 0), new Vector2(420, 40)), "", 28, UiKit.Cream);
             promptBox.gameObject.SetActive(false);
 
@@ -273,13 +273,18 @@ namespace Quintessence.UI
             return img;
         }
 
-        static void KeyCap(RectTransform parent, Vector2 pos, string key)
+        static Text KeyCap(RectTransform parent, Vector2 pos, string key)
         {
             var rt = UiKit.Rect("Key" + key, parent, new Vector2(0.5f, 0.5f), pos, new Vector2(40, 40));
             var bg = UiKit.Image(rt, UiKit.Panel, new Color(0.85f, 0.8f, 0.7f, 0.16f));
             bg.type = Image.Type.Sliced;
-            UiKit.Text(UiKit.Stretch("T", rt), key, 22, UiKit.Cream);
+            return UiKit.Text(UiKit.Stretch("T", rt), key, 22, UiKit.Cream);
         }
+
+        Text promptKey;
+        /// Rotulo do direcional para cada skill no controle (Fogo cima, Agua direita, Terra baixo, Ar esquerda).
+        static readonly string[] PadSkill = { "", "CIMA", "DIREITA", "BAIXO", "ESQUERDA" };
+        static bool Pad => InputMode.Gamepad;
 
         static Image Bar(RectTransform parent, Color color)
         {
@@ -397,7 +402,8 @@ namespace Quintessence.UI
                 t.Ring.color = usable ? Color.Lerp(c, UiKit.Cream, 0.35f) : new Color(1, 1, 1, 0.15f);
                 t.Key.color = has ? UiKit.Cream : UiKit.Dim;
                 int rank = ranks != null && i + 1 < ranks.Length ? ranks[i + 1] : 1;
-                t.Key.text = rank > 1 ? $"{i + 1} · {RunState.Roman(rank)}" : (i + 1).ToString();
+                string key = Pad ? PadSkill[i + 1] : (i + 1).ToString();
+                t.Key.text = rank > 1 ? $"{key} · {RunState.Roman(rank)}" : key;
                 // acabou de usar: mostra o nome da skill por um instante
                 if (has && cd > lastCd[i] + 0.5f) { skillLabel.text = SkillName[i + 1]; skillLabel.color = Color.Lerp(c, UiKit.Cream, 0.4f); skillLabelLeft = 1.4f; }
                 lastCd[i] = cd;
@@ -424,9 +430,11 @@ namespace Quintessence.UI
             quintTile.Cooldown.fillAmount = !all ? 0f : on ? 1f - hero.Quintessence01 : ready ? 0f : 1f - hero.Quintessence01;
             quintTile.Ring.color = on || ready ? prism : new Color(1, 1, 1, 0.15f);
             quintTile.Root.localScale = Vector3.one * (ready ? 1f + 0.06f * Mathf.Sin(Time.unscaledTime * 6f) : 1f);
-            quintLabel.text = on ? "QUINTESSÊNCIA" : ready ? "Quintessência pronta — aperte R" : "";
+            quintLabel.text = on ? "QUINTESSÊNCIA" : ready ? (Pad ? "Quintessência pronta — aperte Y" : "Quintessência pronta — aperte R") : "";
             quintLabel.color = prism;
-            quintTile.Key.text = all ? "R" : $"{awakened.Count}/4 ELEMENTOS";
+            quintTile.Key.text = all ? (Pad ? "Y" : "R") : $"{awakened.Count}/4 ELEMENTOS";
+            dashTile.Key.text = Pad ? "A" : "ESPAÇO";
+            if (promptKey != null) promptKey.text = Pad ? "B" : "E";
         }
 
         // ---------- API usada pela run ----------
