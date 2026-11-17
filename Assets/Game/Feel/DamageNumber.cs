@@ -29,7 +29,8 @@ namespace Quintessence.Feel
                 foreach (var other in live)
                 {
                     var o = other.transform.position;
-                    float gap = 0.62f * (other.baseSize + size) * 0.5f + 0.1f;
+                    // altura de uma linha no tamanho 1 (com o salto inicial de 1,25): ~0,72; a folga considera os dois tamanhos
+                    float gap = 0.8f * (other.baseSize + size) * 0.5f + 0.12f;
                     if (Mathf.Abs(o.x - spot.x) < 1.8f * Mathf.Max(size, other.baseSize) && Mathf.Abs(o.z - spot.z) < 1.6f && o.y - spot.y < gap + CatchUp && spot.y - o.y < gap)
                     { spot.y = o.y + gap; moved = true; }
                 }

@@ -483,12 +483,16 @@ namespace Quintessence.UI
         float flashLeft, flashTotal;
         public string LastFlash { get; private set; } = "";
 
-        /// Aviso curto e grande entre o heroi e as portas ("SALA LIMPA!"): abaixo do heroi fica a dica, no alto as portas.
-        public void ShowFlash(string text, Color color, float seconds = 1.4f)
+        /// Aviso curto e grande logo abaixo dos pes do heroi ("SALA LIMPA!"): acima dele sobem os textos do mundo (nivel, talento),
+        /// no alto ficam as portas e mais abaixo a dica.
+        Transform flashAnchor;
+
+        public void ShowFlash(string text, Color color, float seconds = 1.4f, Transform anchor = null)
         {
+            flashAnchor = anchor;
             if (flashText == null)
             {
-                flashText = UiKit.Text(UiKit.Rect("Flash", canvas.transform, new Vector2(0.5f, 0.5f), new Vector2(0, 165), new Vector2(1400, 90)), "", 66, color);
+                flashText = UiKit.Text(UiKit.Rect("Flash", canvas.transform, new Vector2(0.5f, 0.5f), new Vector2(0, -122), new Vector2(1400, 84)), "", 62, color);
                 flashText.font = GameFonts.Title;
                 flashText.transform.SetSiblingIndex(0);
             }
@@ -499,6 +503,22 @@ namespace Quintessence.UI
             flashText.gameObject.SetActive(true);
         }
 
+        /// Logo abaixo dos pes do heroi, onde o chao esta livre (os textos do mundo sobem acima dele), sem descer ate a dica.
+        void PlaceFlash()
+        {
+            var cam = Camera.main;
+            if (flashAnchor == null || cam == null) return;
+            var rect = (RectTransform)canvas.transform;
+            var screen = cam.WorldToScreenPoint(flashAnchor.position);
+            if (screen.z <= 0f) return;
+            var uiCam = canvas.renderMode == RenderMode.ScreenSpaceOverlay ? null : canvas.worldCamera;
+            if (!RectTransformUtility.ScreenPointToLocalPointInRectangle(rect, screen, uiCam, out var local)) return;
+            float bottom = -rect.rect.height * 0.5f;
+            float y = Mathf.Max(local.y - 105f, bottom + TipHigh + 100f);
+            float halfW = rect.rect.width * 0.5f - 360f;
+            ((RectTransform)flashText.transform).anchoredPosition = new Vector2(Mathf.Clamp(local.x, -halfW, halfW), y);
+        }
+
         void TickFlash()
         {
             if (flashText == null || !flashText.gameObject.activeSelf) return;
@@ -506,6 +526,7 @@ namespace Quintessence.UI
             float k = 1f - flashLeft / flashTotal;
             var c = flashText.color; c.a = Mathf.Clamp01(k / 0.08f) * Mathf.Clamp01(flashLeft / 0.5f); flashText.color = c;
             flashText.transform.localScale = Vector3.one * Mathf.Lerp(1.15f, 1f, Mathf.Clamp01(k / 0.15f));
+            PlaceFlash();
             if (flashLeft <= 0f) flashText.gameObject.SetActive(false);
         }
 

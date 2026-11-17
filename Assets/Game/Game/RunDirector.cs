@@ -983,7 +983,7 @@ namespace Quintessence.Game
             Run.AddEssence(Mathf.RoundToInt(essence * player.Modifiers.EssenceMult));
             hud.SetEssence(Run.Essence);
             if (node.Type == RoomType.Boss) { StartCoroutine(Finish(true)); return; }
-            hud.ShowFlash("SALA LIMPA!", new Color(0.97f, 0.88f, 0.58f));
+            hud.ShowFlash("SALA LIMPA!", new Color(0.97f, 0.88f, 0.58f), 1.4f, player != null ? player.transform : null);
             if (node.Reward == RewardType.Boon && SetupBoons()) return; // as portas abrem depois de escolher
             OpenDoors();
         }
