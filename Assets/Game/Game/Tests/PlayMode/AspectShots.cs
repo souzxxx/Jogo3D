@@ -14,6 +14,14 @@ namespace Quintessence.Game.PlayTests
     /// Fotografa o titulo em varias proporcoes de tela (a aba Game do editor raramente fica em 16:9).
     public class AspectShots
     {
+        [TearDown]
+        public void Restore()
+        {
+            PlayerPrefs.DeleteKey("quintessence.meta.test");
+            MetaStore.UseKey(MetaStore.DefaultKey);
+            GameFlow.Seed = 1; GameFlow.StartElement = ElementType.Fire;
+        }
+
         public static readonly Vector2Int[] Sizes =
         {
             new(1280, 720), new(1280, 800), new(1024, 768), new(1600, 680), new(1720, 720), new(900, 700), new(1280, 1024),

@@ -19,6 +19,16 @@ namespace Quintessence.Game.PlayTests
     /// com o heroi soltando skills no meio do bando. Roda no editor, entao e o pior caso (o player e mais leve). Grava Logs/perf.txt.
     public class PerfProbe
     {
+        [TearDown]
+        public void Restore()
+        {
+            PlayerPrefs.DeleteKey("quintessence.meta.perf");
+            MetaStore.UseKey(MetaStore.DefaultKey);
+            RunSaveStore.UseKey(RunSaveStore.DefaultKey);
+            GameFlow.AutoPickTalents = false;
+            GameFlow.Seed = 1; GameFlow.Layers = 10; GameFlow.Shrines = 3;
+        }
+
         [UnityTest, Explicit, Timeout(900000)]
         public IEnumerator Heaviest_Rooms_Frame_Times()
         {
@@ -75,6 +85,7 @@ namespace Quintessence.Game.PlayTests
                     frames.Add(Time.unscaledDeltaTime * 1000f + render);
                 }
                 rt.Release();
+                Object.Destroy(rt);
                 input.AttackHeld = false;
                 frames.Sort();
                 float avg = frames.Average(), p99 = frames[(int)(frames.Count * 0.99f)], worst = frames[frames.Count - 1];
