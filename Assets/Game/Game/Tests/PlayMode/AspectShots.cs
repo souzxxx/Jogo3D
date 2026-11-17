@@ -223,7 +223,7 @@ namespace Quintessence.Game.PlayTests
             {
                 director.ShowRoom(type);
                 pc.Teleport(director.EntryPoint + new Vector3(0f, 0f, 2.5f), Vector3.forward);
-                for (float t = 0; t < 1.6f; t += Time.deltaTime) yield return null;
+                for (float t = 0; t < 1.6f; t += Time.unscaledDeltaTime) yield return null;
                 yield return Shoot(Camera.main, $"Logs/aspect/sala_{type}.png", new Vector2Int(1280, 720));
             }
             MetaStore.UseKey(MetaStore.DefaultKey);

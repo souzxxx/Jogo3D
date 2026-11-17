@@ -89,7 +89,7 @@ namespace Quintessence.Run
                     else
                     {
                         int roll = rng.Next(100);
-                        if (roll < 20 && !restUsed && lane > 0) { n.Type = RoomType.Rest; n.Reward = RewardType.Health; restUsed = true; }
+                        if (roll < 20 && !restUsed && lane > 0) { n.Type = RoomType.Rest; n.Reward = RewardType.None; restUsed = true; } // a cura e uma das duas escolhas junto ao fogo
                         else if (roll < 40 && layer >= 3) { n.Type = RoomType.Elite; n.Reward = RewardType.Boon; }
                         else if (roll >= 40 && roll < 58 && !masterUsed) { n.Type = RoomType.Master; n.Reward = RewardType.Boon; masterUsed = true; }
                         else if (roll >= 58 && roll < 72 && !shopUsed && layer >= 2) { n.Type = RoomType.Shop; n.Reward = RewardType.None; shopUsed = true; }
