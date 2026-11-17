@@ -196,6 +196,38 @@ namespace Quintessence.Game.PlayTests
             MetaStore.UseKey(MetaStore.DefaultKey);
         }
 
+        /// Volta pelas salas sem luta (Loja, Santuario, Mestre, Tesouro, Pacto, Descanso) e pela sala do chefe: uma foto de cada
+        /// em Logs/aspect/sala_*.png, para revisar o visual de cada uma.
+        [UnityTest, Explicit, Timeout(300000)]
+        public IEnumerator Room_Tour()
+        {
+            PlayerPrefs.DeleteKey("quintessence.meta.test");
+            MetaStore.UseKey("quintessence.meta.test");
+            Tips.UseKey("quintessence.meta.test.tips");
+            GameEvents.Clear();
+            GameFlow.Seed = 7; GameFlow.StartElement = ElementType.Fire;
+            yield return EditorSceneManager.LoadSceneAsyncInPlayMode("Assets/Scenes/Run.unity", new LoadSceneParameters(LoadSceneMode.Single));
+            yield return null;
+            var director = Object.FindFirstObjectByType<RunDirector>();
+            for (float t = 0; t < 10f && director.Busy; t += Time.unscaledDeltaTime) yield return null;
+            Object.FindFirstObjectByType<Quintessence.Enemies.WaveSpawner>().enabled = false;
+            foreach (var e in Object.FindObjectsByType<Quintessence.Enemies.EnemyBrain>(FindObjectsSortMode.None)) Object.Destroy(e.gameObject);
+            var hud = Object.FindFirstObjectByType<Hud>();
+            hud.UseCamera(Camera.main);
+            var pc = Object.FindFirstObjectByType<Quintessence.Combat.PlayerController>();
+            pc.GetComponent<Health>().Pool.ExtraDamageTakenMultiplier = 0f;
+            Directory.CreateDirectory("Logs/aspect");
+            director.Run.AddEssence(60);
+            foreach (var type in new[] { RoomType.Shop, RoomType.Shrine, RoomType.Master, RoomType.Treasure, RoomType.Pact, RoomType.Rest })
+            {
+                director.ShowRoom(type);
+                pc.Teleport(director.EntryPoint + new Vector3(0f, 0f, 2.5f), Vector3.forward);
+                for (float t = 0; t < 1.6f; t += Time.deltaTime) yield return null;
+                yield return Shoot(Camera.main, $"Logs/aspect/sala_{type}.png", new Vector2Int(1280, 720));
+            }
+            MetaStore.UseKey(MetaStore.DefaultKey);
+        }
+
         /// Golpe no heroi acende a borda vermelho-escura; com pouca vida ela fica pulsando. Foto para a pagina.
         [UnityTest, Timeout(300000)]
         public IEnumerator Hurt_Edge_Flashes_On_Hit_And_Pulses_On_Low_Health()

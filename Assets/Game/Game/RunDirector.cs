@@ -283,6 +283,24 @@ namespace Quintessence.Game
         }
         public string CurrentLayout { get; private set; } = "";
 
+        /// Monta uma sala sem luta (Loja, Santuario, Mestre, Tesouro, Pacto, Descanso) com o cenario dela, sem passar pelo mapa.
+        /// Para as capturas da volta pelas salas.
+        public void ShowRoom(RoomType type)
+        {
+            Cleanup();
+            ApplyLayout(-1);
+            Dress(type);
+            hud.SetRoom($"Sala {Run.Depth + 1}/{Run.Map.LayerCount} · {RoomInfo.Name(type)}", type);
+            switch (type)
+            {
+                case RoomType.Shop: SetupShop(); break;
+                case RoomType.Shrine: SetupShrine(); break;
+                case RoomType.Master: SetupBoons(true); break;
+                case RoomType.Treasure: SetupTreasure(); break;
+                case RoomType.Pact: SetupPact(false); break;
+            }
+        }
+
         /// Layout da sala: a primeira sala da run so sorteia entre os sem perigo (so cobertura e barris).
         /// Arranjo da sala: os do trecho pesam o triplo, os de outro trecho ficam de fora; a primeira sala nao tem perigo.
         int PickLayout(MapNode node)
@@ -1212,9 +1230,8 @@ namespace Quintessence.Game
                 root.transform.position = new Vector3((i - (offers.Length - 1) / 2f) * 5.4f, 0, 0.2f);
                 if (shrinePrefab != null) Instantiate(shrinePrefab, root.transform).transform.localPosition = Vector3.zero;
                 Medal(root.transform, new Vector3(0, 2.25f, 0), o.icon, wine, 1.1f);
-                Label(root.transform, new Vector3(0, 4.35f, 0), o.name, Cream, 0.8f);
-                Label(root.transform, new Vector3(0, 3.7f, 0), Wrap(o.gain, 22), new Color(0.62f, 0.82f, 0.6f), 0.55f);
-                Label(root.transform, new Vector3(0, 3.15f, 0), Wrap(o.cost, 24), new Color(0.85f, 0.45f, 0.4f), 0.55f);
+                Stack(root.transform, new Vector3(0, 2.85f, 0), (o.name, Cream, 0.8f),
+                    (Wrap(o.gain, 22), new Color(0.62f, 0.82f, 0.6f), 0.55f), (Wrap(o.cost, 24), new Color(0.85f, 0.45f, 0.4f), 0.55f));
                 Glow(root.transform, new Vector3(0, 2f, -0.8f), wine, 1.8f);
                 interactables.Add(new Interactable
                 {
@@ -1434,8 +1451,8 @@ namespace Quintessence.Game
                 float top = 1.25f;
                 if (shrinePrefab != null) Instantiate(shrinePrefab, root.transform).transform.localPosition = Vector3.zero;
                 Emblem(root.transform, e, new Vector3(0, top + 0.12f, 0), 1.3f);
-                Label(root.transform, new Vector3(0, top + 2.35f, 0), skills[(int)e] + " " + RunState.Roman(next), Cream, 0.72f);
-                Label(root.transform, new Vector3(0, top + 1.75f, 0), next == RunState.MaxSkillRank ? "+30% de dano e " + RunState.Signature(e) : "+30% de dano\nrecarga 10% menor", new Color(0.8f, 0.76f, 0.7f), 0.5f);
+                Stack(root.transform, new Vector3(0, top + 1.46f, 0), (skills[(int)e] + " " + RunState.Roman(next), Cream, 0.72f),
+                    (next == RunState.MaxSkillRank ? Wrap("+30% de dano e " + RunState.Signature(e), 22) : "+30% de dano\nrecarga 10% menor", new Color(0.8f, 0.76f, 0.7f), 0.5f));
                 Glow(root.transform, new Vector3(0, top + 0.7f, -0.7f), c, 1.4f);
                 later.Add(new Interactable
                 {
@@ -1538,9 +1555,9 @@ namespace Quintessence.Game
                     var flask = item.Kind == ShopItemKind.MaxHealth && elixirPrefab != null ? elixirPrefab : bottlePrefab;
                     if (flask != null) Instantiate(flask, root.transform).transform.localPosition = new Vector3(0, top, 0);
                 }
-                Label(root.transform, new Vector3(0, top + 2.8f, 0), Wrap(item.Name, 13), Cream, 0.72f);
-                Label(root.transform, new Vector3(0, top + 2.1f, 0), Wrap(item.Description, 16), new Color(0.8f, 0.76f, 0.7f), 0.5f);
-                priceTags.Add((Label(root.transform, new Vector3(0, top + 1.6f, 0), item.Price + " de Essência", CanPay, 0.62f), item.Price));
+                var tags = Stack(root.transform, new Vector3(0, top + 1.42f, 0),
+                    (Wrap(item.Name, 13), Cream, 0.72f), (Wrap(item.Description, 16), new Color(0.8f, 0.76f, 0.7f), 0.5f), (item.Price + " de Essência", CanPay, 0.62f));
+                priceTags.Add((tags[2], item.Price));
                 Glow(root.transform, new Vector3(0, top + 0.8f, -0.7f), c, 1.1f);
                 Interactable entry = null;
                 entry = new Interactable
@@ -1633,8 +1650,7 @@ namespace Quintessence.Game
                     chest.localRotation = Quaternion.Euler(0, 180, 0);
                 }
                 Medal(root.transform, new Vector3(0, 1.8f, 0), BoonEffects.Icon(boon.stat), c, 1.15f);
-                Label(root.transform, new Vector3(0, 3.5f, 0), boon.name, Cream, 0.9f);
-                Label(root.transform, new Vector3(0, 2.7f, 0), Wrap(boon.description, 20), new Color(0.8f, 0.76f, 0.7f), 0.6f);
+                Stack(root.transform, new Vector3(0, 2.55f, 0), (boon.name, Cream, 0.9f), (Wrap(boon.description, 22), new Color(0.8f, 0.76f, 0.7f), 0.6f));
                 Glow(root.transform, new Vector3(0, 1.9f, -0.7f), c, 1.8f);
                 interactables.Add(new Interactable
                 {
@@ -1748,6 +1764,28 @@ namespace Quintessence.Game
             l.transform.SetParent(parent, false);
             l.transform.localPosition = localPos;
             l.type = LightType.Point; l.color = color; l.intensity = intensity; l.range = 5.5f;
+        }
+
+        /// Altura de uma linha de Label por unidade de escala (fonte de titulo, tamanho 80, characterSize 0,075).
+        const float LabelLine = 0.58f;
+
+        /// Placa de textos empilhados de baixo para cima a partir de baseLocal (a borda de baixo da ultima linha).
+        /// Cada texto ocupa a altura das linhas que tem: descricao que quebra em duas empurra o nome para cima
+        /// em vez de cair por cima do preco ou do icone. Devolve os textos na ordem dada (de cima para baixo).
+        TextMesh[] Stack(Transform parent, Vector3 baseLocal, params (string text, Color color, float scale)[] rows)
+        {
+            var made = new TextMesh[rows.Length];
+            float y = baseLocal.y;
+            for (int i = rows.Length - 1; i >= 0; i--)
+            {
+                var r = rows[i];
+                int lines = 1;
+                foreach (char ch in r.text) if (ch == '\n') lines++;
+                float h = lines * LabelLine * r.scale;
+                made[i] = Label(parent, new Vector3(baseLocal.x, y + h * 0.5f, baseLocal.z), r.text, r.color, r.scale);
+                y += h + 0.08f;
+            }
+            return made;
         }
 
         TextMesh Label(Transform parent, Vector3 localPos, string text, Color color, float scale = 1f)
