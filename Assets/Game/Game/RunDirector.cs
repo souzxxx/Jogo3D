@@ -298,6 +298,7 @@ namespace Quintessence.Game
                 case RoomType.Master: SetupBoons(true); break;
                 case RoomType.Treasure: SetupTreasure(); break;
                 case RoomType.Pact: SetupPact(false); break;
+                case RoomType.Rest: SetupRest(); break;
             }
         }
 
@@ -886,9 +887,7 @@ namespace Quintessence.Game
                     OpenDoors();
                     break;
                 case RoomType.Rest:
-                    playerHealth.Heal(playerHealth.Max * 0.3f);
-                    Sfx.Play("heal");
-                    Feel.DamageNumber.Spawn(player.transform.position + Vector3.up * 3.5f, "DESCANSO: +30% DE VIDA", new Color(0.5f, 1f, 0.55f), 1.1f, 1.8f);
+                    SetupRest();
                     Run.RoomCleared();
                     OpenDoors();
                     break;
@@ -1131,7 +1130,60 @@ namespace Quintessence.Game
         /// Monta a sala de Pacto sem passar pelo mapa. Para os testes e as capturas.
         public void ShowPact() { Cleanup(); ApplyLayout(-1); Dress(RoomType.Pact); SetupPact(false); }
         /// Monta a sala de Descanso (so o cenario). Para as capturas.
-        public void ShowRest() { Cleanup(); ApplyLayout(-1); Dress(RoomType.Rest); }
+        public void ShowRest() { Cleanup(); ApplyLayout(-1); Dress(RoomType.Rest); SetupRest(); }
+
+        /// Onde fica a fogueira do Descanso (o GameSceneBuilder poe a fogueira aqui; as duas escolhas ficam dos lados dela).
+        public static readonly Vector3 CampfireAt = new(0f, 0f, 0.4f);
+        public const float RestHeal = 0.4f, RestSharpen = 0.1f;
+        /// O que o heroi escolheu no ultimo Descanso ("" = ainda nada). Para os testes.
+        public string RestChoice { get; private set; } = "";
+
+        /// Descanso: dormir junto ao fogo (cura) ou afiar a arma (golpe basico mais forte pelo resto da run). Um dos dois.
+        void SetupRest()
+        {
+            RestChoice = "";
+            var warm = new Color(0.95f, 0.66f, 0.38f);
+            var picks = new List<Interactable>();
+            var options = new (string name, string text, string icon, Color color, float x, System.Action take)[]
+            {
+                ("Dormir", $"Cura {Mathf.RoundToInt(RestHeal * 100)}% da vida", "boon_rest", new Color(0.5f, 0.8f, 0.55f), -2.9f, () =>
+                {
+                    playerHealth.Heal(playerHealth.Max * RestHeal);
+                    Sfx.Play("heal");
+                    Feel.DamageNumber.Spawn(player.transform.position + Vector3.up * 3.5f, $"+{Mathf.RoundToInt(RestHeal * 100)}% DE VIDA", new Color(0.5f, 1f, 0.55f), 1.1f, 1.8f);
+                    RestChoice = "Dormir";
+                }),
+                ("Afiar a arma", $"+{Mathf.RoundToInt(RestSharpen * 100)}% de dano no golpe básico", "boon_damage", warm, 2.9f, () =>
+                {
+                    player.Modifiers.BasicDamageMult += RestSharpen;
+                    Sfx.Play("pickup");
+                    Feel.DamageNumber.Spawn(player.transform.position + Vector3.up * 3.5f, "ARMA AFIADA", warm, 1.1f, 1.8f);
+                    RestChoice = "Afiar a arma";
+                }),
+            };
+            foreach (var o in options)
+            {
+                var root = new GameObject("Rest_" + o.name);
+                root.transform.position = CampfireAt + new Vector3(o.x, 0f, -1.3f);
+                Medal(root.transform, new Vector3(0, 1.1f, 0), o.icon, o.color, 1.05f);
+                Stack(root.transform, new Vector3(0, 1.75f, 0), (o.name, Cream, 0.8f), (Wrap(o.text, 18), new Color(0.8f, 0.76f, 0.7f), 0.55f));
+                Glow(root.transform, new Vector3(0, 1.2f, -0.6f), o.color, 1.2f);
+                Interactable entry = null;
+                var take = o.take;
+                entry = new Interactable
+                {
+                    Object = root, Prompt = (o.name == "Dormir" ? "dormir junto ao fogo" : "afiar a arma"),
+                    Use = () =>
+                    {
+                        take();
+                        // um ou outro: as duas escolhas somem
+                        foreach (var p in picks) { interactables.Remove(p); if (p.Object != null) Destroy(p.Object); }
+                    },
+                };
+                picks.Add(entry);
+                interactables.Add(entry);
+            }
+        }
         /// Monta a sala do Mestre sem passar pelo mapa. Para as capturas.
         public void ShowMaster() { Cleanup(); ApplyLayout(-1); Dress(RoomType.Master); SetupBoons(true); }
 

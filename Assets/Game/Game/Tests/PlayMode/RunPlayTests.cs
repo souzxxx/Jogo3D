@@ -2054,11 +2054,20 @@ namespace Quintessence.Game.PlayTests
 
             // salas sem luta tem cenario proprio
             director.ShowRest();
-            hero.Teleport(new Vector3(0, 0.05f, -2f), Vector3.forward);
+            hero.Teleport(new Vector3(0, 0.05f, -3.6f), Vector3.forward); // diante da fogueira, entre as duas escolhas
             for (int k = 0; k < 20; k++) yield return null;
             Assert.AreEqual("RestDecor", director.CurrentDecor);
             Assert.IsNotNull(GameObject.Find("bed_decorated"), "o Descanso tem camas");
+            Assert.IsNotNull(GameObject.Find("rest_campfire"), "e uma fogueira no meio");
             Shot(cam, "docs/img/sala_descanso.png");
+            // Descanso: dormir (cura) ou afiar a arma (golpe basico), um dos dois
+            var rests = director.Interactables.Where(i => i.Prompt == "dormir junto ao fogo" || i.Prompt == "afiar a arma").ToList();
+            Assert.AreEqual(2, rests.Count, "duas escolhas junto ao fogo");
+            float basicBefore = hero.Modifiers.BasicDamageMult;
+            rests.First(i => i.Prompt == "afiar a arma").Use();
+            Assert.AreEqual(basicBefore + RunDirector.RestSharpen, hero.Modifiers.BasicDamageMult, 1e-4f, "afiar fortalece o golpe basico");
+            Assert.AreEqual("Afiar a arma", director.RestChoice);
+            Assert.IsFalse(director.Interactables.Any(i => i.Prompt == "dormir junto ao fogo"), "e a outra escolha some");
             director.ShowMaster();
             for (int k = 0; k < 20; k++) yield return null;
             Assert.AreEqual("MasterDecor", director.CurrentDecor);
