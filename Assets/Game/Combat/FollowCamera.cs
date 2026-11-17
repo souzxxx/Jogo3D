@@ -48,7 +48,7 @@ namespace Quintessence.Combat
         }
 
         /// Quanto do chao alem da borda sul pode aparecer: o bastante para o heroi na porta nao ficar embaixo da barra de skills.
-        const float SouthMargin = 3.5f;
+        const float SouthMargin = 2.0f;
 
         /// Na borda sul (onde toda sala comeca) a metade de baixo da tela mostrava o chao de fora da sala: a camera para antes.
         float ClampSouth(float z)
