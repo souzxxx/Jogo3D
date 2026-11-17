@@ -312,7 +312,7 @@ namespace Quintessence.Combat
             if (health.IsDead || Input == null) return;
             // pausado (menu, inventario, escolha de talento) ou no quadro em que a pausa saiu: nenhum comando vira acao
             ElementMark.SpreadRadius = mods.MarkSpread; // Contagio: as marcas dos inimigos leem daqui
-            if (GameClock.Paused || Time.frameCount == GameClock.ResumedFrame) { dashBuffer = skillBuffer = 0f; return; }
+            if (GameClock.Paused || GameClock.Holding || Time.frameCount == GameClock.ResumedFrame) { dashBuffer = skillBuffer = 0f; return; }
             float dt = Time.deltaTime;
             for (int i = 0; i < skillCd.Length; i++) if (skillCd[i] > 0f) skillCd[i] -= dt;
             if (armorLeft > 0f && (armorLeft -= dt) <= 0f) health.Pool.Blocks = 0;

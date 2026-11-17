@@ -25,6 +25,8 @@ namespace Quintessence.Core
     public static class GameClock
     {
         public static bool Paused { get; private set; }
+        /// Troca de sala com a tela escura: o heroi nao anda nem ataca as cegas (o jogo continua rodando por baixo).
+        public static bool Holding;
         /// Quadro em que a pausa terminou: a tecla ou o botao que fechou o menu nao pode virar comando de jogo.
         public static int ResumedFrame { get; private set; } = -1;
 
