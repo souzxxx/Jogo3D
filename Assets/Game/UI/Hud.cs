@@ -330,6 +330,8 @@ namespace Quintessence.UI
                 hurtEdge.raycastTarget = false;
                 hurtEdge.transform.SetSiblingIndex(0); // atras de todo o HUD
             }
+            // letreiro, aviso e cartao do treino tambem vao para o fundo quando nascem: a borda volta para tras deles
+            if (hurtEdge.transform.GetSiblingIndex() != 0) hurtEdge.transform.SetSiblingIndex(0);
             float dt = Time.unscaledDeltaTime;
             hurtFlash = Mathf.MoveTowards(hurtFlash, 0f, dt * 1.6f);
             float low = 0f;
