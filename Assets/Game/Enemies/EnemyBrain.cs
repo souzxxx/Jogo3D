@@ -76,6 +76,7 @@ namespace Quintessence.Enemies
             var p = GameObject.FindGameObjectWithTag("Player");
             if (p != null) target = p.GetComponent<Health>();
             Play("Spawn", 0f);
+            Silhouette.MarkEnemy(gameObject);
             GameEvents.RaiseEnemySpawned(health);
             if (definition.armored)
             {
@@ -180,6 +181,7 @@ namespace Quintessence.Enemies
             lean = 0f;
             if (leanRoot != null) leanRoot.localRotation = Quaternion.identity;
             syncWindup = false;
+            Silhouette.Clear(gameObject);
             Play("Death", 0.05f);
             // ajudante que cai junto com o chefe (o chefe mata os dele) nao explode nem se divide
             // (o fim do Cerco tambem: a fonte e o spawner)

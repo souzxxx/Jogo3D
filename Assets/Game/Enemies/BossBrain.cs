@@ -65,6 +65,7 @@ namespace Quintessence.Enemies
             if (p != null) { target = p.GetComponent<Health>(); hero = p.GetComponent<IHeroStatus>(); }
             if (hero != null) quintessence = hero.QuintessenceActive;
             Play("Spawn", 0f);
+            Silhouette.MarkEnemy(gameObject);
             GameEvents.RaiseEnemySpawned(health);
             GameEvents.RaiseBossSpawned(health, definition.displayName);
             GameEvents.RaiseBossPhase(1, BossRules.Phases);
@@ -94,6 +95,7 @@ namespace Quintessence.Enemies
         void OnDied(DamageInfo info)
         {
             strikes.Clear();
+            Silhouette.Clear(gameObject);
             chargeWait = chargeLeft = blinkWait = 0f;
             if (agent.enabled) agent.enabled = false;
             if (TryGetComponent(out Collider c)) c.enabled = false;
