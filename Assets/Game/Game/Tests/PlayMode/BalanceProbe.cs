@@ -34,7 +34,7 @@ namespace Quintessence.Game.PlayTests
         public IEnumerator Probe_Full_Runs()
         {
             var log = new System.Text.StringBuilder();
-            log.AppendLine($"# sonda: dano levado {ProbeTaken:0.##}, desvia de {ProbeDodge:P0} dos avisos, {ProbeSeeds} sementes por heroi{(ProbeRelaxed ? ", dificuldade Tranquila" : "")}{(ProbeAscension > 0 ? $", Ascensao {ProbeAscension}" : "")}");
+            log.AppendLine($"# sonda: dano levado {ProbeTaken:0.##}, desvia de {ProbeDodge:P0} dos avisos ({ProbeMeleeDodge:P0} no corpo a corpo, reacao {ProbeReaction:0.00} s), {ProbeSeeds} sementes por heroi{(ProbeRelaxed ? ", dificuldade Tranquila" : "")}{(ProbeAscension > 0 ? $", Ascensao {ProbeAscension}" : "")}");
             // o roteiro desvia de todo aviso com reflexo perfeito, mas joga sem estrategia: dano cheio por padrao
             float taken = ProbeTaken;
             GameFlow.AutoPickTalents = true;
@@ -103,6 +103,8 @@ namespace Quintessence.Game.PlayTests
                         input.AttackHeld = false;
                         // o escurecimento da troca de sala corre em tempo real e a sonda em tempo de jogo: o roteiro luta mesmo durante ele
                         var inPool = Object.FindObjectsByType<CorruptionPool>(FindObjectsSortMode.None).FirstOrDefault(pl => pl.Contains(player.transform.position));
+                        // reacao humana: o dash sai um pouco depois de o aviso aparecer
+                        if (pendingDodge > 0f && (pendingDodge -= dt) <= 0f) { dodgeLeft = 0.4f; input.PressDash(); }
                         if (dodgeLeft > 0f) { dodgeLeft -= dt; input.Move = new Vector2(dodgeDir.x, dodgeDir.z); }
                         else if (inPool != null)
                         {
@@ -169,6 +171,11 @@ namespace Quintessence.Game.PlayTests
         public static float ProbeTaken = 1f;
         /// Chance de o roteiro desviar de cada aviso que o ameaca. 1 = reflexo perfeito; 0,65 = alguem que joga razoavelmente.
         public static float ProbeDodge = 0.65f;
+        /// Chance para golpe corpo a corpo, que nao desenha circulo (16/11): o jogador le a animacao.
+        public static float ProbeMeleeDodge = 0.5f;
+        /// Tempo de reacao antes do dash (s). 0 = no instante do aviso, como a sonda fazia ate 16/11.
+        public static float ProbeReaction = 0.25f;
+        float pendingDodge;
         /// Joga na dificuldade Tranquila (para medir se ela ajuda quem joga mal).
         public static bool ProbeRelaxed = false;
         /// Nivel de Ascensao das runs da sonda (0 = sem).
@@ -262,10 +269,11 @@ namespace Quintessence.Game.PlayTests
             }
             else threatened = Vector3.Distance(p, e.Point) < e.Radius + 1.2f;
             if (!threatened) return;
-            if (dodgeRng.NextDouble() > ProbeDodge) return; // nem todo aviso e visto a tempo
+            // corpo a corpo nao tem circulo: le-se pela animacao, o que pega menos golpes a tempo
+            if (dodgeRng.NextDouble() > (e.Melee ? ProbeMeleeDodge : ProbeDodge)) return; // nem todo aviso e visto a tempo
             dodgeDir = Vector3.Dot(side, -p) >= 0f ? side : -side;
-            dodgeLeft = 0.4f;
-            input.PressDash();
+            if (ProbeReaction <= 0f) { dodgeLeft = 0.4f; input.PressDash(); }
+            else pendingDodge = Mathf.Min(ProbeReaction, Mathf.Max(0.05f, e.Duration - 0.15f));
         }
 
         Health Nearest()
