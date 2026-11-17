@@ -208,9 +208,11 @@ namespace Quintessence.Game.PlayTests
             EnemyBrain foe = null;
             for (int k = 0; k < 300 && foe == null; k++) { yield return null; foe = Object.FindFirstObjectByType<EnemyBrain>(); }
             Assert.IsNotNull(foe, "nenhum inimigo apareceu");
-            for (int k = 0; k < 30; k++) yield return null;
             var foeModel = foe.GetComponentInChildren<Animator>().gameObject;
             int enemyLayer = LayerMask.NameToLayer(Silhouette.EnemyLayer);
+            // so entra na silhueta depois de sair do chao (o corpo sobe atravessando o piso)
+            Assert.AreNotEqual(enemyLayer, foeModel.GetComponentInChildren<SkinnedMeshRenderer>().gameObject.layer, "nascendo, ainda sem silhueta");
+            for (float t = 0; t < 3f && foeModel.GetComponentInChildren<SkinnedMeshRenderer>().gameObject.layer != enemyLayer; t += Time.deltaTime) yield return null;
             Assert.IsTrue(foeModel.GetComponentsInChildren<SkinnedMeshRenderer>().All(r => r.gameObject.layer == enemyLayer), "o modelo do inimigo deveria estar na camada da silhueta");
             foreach (var other in Object.FindObjectsByType<EnemyBrain>(FindObjectsSortMode.None)) other.enabled = false;
             foe.GetComponent<UnityEngine.AI.NavMeshAgent>().enabled = false;

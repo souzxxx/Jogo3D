@@ -65,7 +65,7 @@ namespace Quintessence.Enemies
             if (p != null) { target = p.GetComponent<Health>(); hero = p.GetComponent<IHeroStatus>(); }
             if (hero != null) quintessence = hero.QuintessenceActive;
             Play("Spawn", 0f);
-            Silhouette.MarkEnemy(gameObject);
+            Invoke(nameof(MarkSilhouette), SpawnRise); // o corpo sobe do chao: silhueta antes disso desenharia ele atravessando o piso
             GameEvents.RaiseEnemySpawned(health);
             GameEvents.RaiseBossSpawned(health, definition.displayName);
             GameEvents.RaiseBossPhase(1, BossRules.Phases);
@@ -91,6 +91,9 @@ namespace Quintessence.Enemies
             GameEvents.RaiseArmorChanged(health, false);
             GameEvents.RaiseBossShield(false, false);
         }
+
+        const float SpawnRise = 1.2f;
+        void MarkSilhouette() { if (!health.IsDead) Silhouette.MarkEnemy(gameObject); }
 
         void OnDied(DamageInfo info)
         {

@@ -76,7 +76,7 @@ namespace Quintessence.Enemies
             var p = GameObject.FindGameObjectWithTag("Player");
             if (p != null) target = p.GetComponent<Health>();
             Play("Spawn", 0f);
-            Silhouette.MarkEnemy(gameObject);
+            Invoke(nameof(MarkSilhouette), SpawnRise); // o corpo sobe do chao: silhueta antes disso desenharia ele atravessando o piso
             GameEvents.RaiseEnemySpawned(health);
             if (definition.armored)
             {
@@ -170,6 +170,9 @@ namespace Quintessence.Enemies
         }
 
         float hitHold;
+
+        const float SpawnRise = 1.2f;
+        void MarkSilhouette() { if (!health.IsDead) Silhouette.MarkEnemy(gameObject); }
 
         void OnDied(DamageInfo info)
         {
