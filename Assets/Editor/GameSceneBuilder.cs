@@ -407,7 +407,12 @@ public static class GameSceneBuilder
         var who = LookDevBuilder.Spawn("Adventurers/Characters/Mage.fbx", Vector3.zero, 0, robe);
         who.name = "Mestre";
         who.transform.SetParent(null, false);
+        who.transform.SetPositionAndRotation(Vector3.zero, Quaternion.identity);
         LookDevBuilder.Hide(who, "1H_Wand", "Spellbook_open");
+        // barba longa de sabio, bigode e sobrancelhas (ArtSource/Master), presos a cabeca em repouso
+        AssetDatabase.Refresh();
+        HeroBuilder.MatteParts("Assets/Art/Master");
+        HeroBuilder.Attach(who, "Assets/Art/Master/master_beard.fbx", "head");
         if (ctrl != null) CombatDevSceneBuilder.Animator(who, ctrl);
         var npc = who.AddComponent<Merchant>();
         npc.SetLines("Escolha uma bênção, aprendiz.", "Que ela te sirva bem.", "");
