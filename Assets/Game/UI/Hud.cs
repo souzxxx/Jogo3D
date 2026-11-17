@@ -529,6 +529,24 @@ namespace Quintessence.UI
             bannerRoot.gameObject.SetActive(false);
             bannerRoot.SetSiblingIndex(0);
             chapterMode = false;
+        }
+
+        bool tipSuspended;
+
+        /// Painel aberto: a dica sai da frente sem perder o tempo que faltava (dica de primeira vez nao volta a aparecer depois).
+        void SuspendTip()
+        {
+            if (tipRoot == null || !tipRoot.gameObject.activeSelf) return;
+            tipRoot.gameObject.SetActive(false);
+            tipSuspended = true;
+        }
+
+        /// Painel fechado: a dica volta com o tempo que faltava e o letreiro guardado (chefe, Cerco) aparece agora, nao por tras do painel.
+        void PanelClosed()
+        {
+            if ((pausePanel != null && pausePanel.gameObject.activeSelf) || ResultVisible) return;
+            if (tipSuspended && tipRoot != null && tipLeft > 0f) tipRoot.gameObject.SetActive(true);
+            tipSuspended = false;
             ShowQueuedBanner();
         }
 
@@ -592,7 +610,8 @@ namespace Quintessence.UI
 
         public void ShowMap(RunState run, bool show)
         {
-            if (show) { ClearChapter(); HideTip(); } // a dica e o cartao ficariam por cima do painel
+            if (show) { ClearChapter(); SuspendTip(); } // a dica e o cartao ficariam por cima do painel
+            else PanelClosed();
             if (show == mapPanel.gameObject.activeSelf) return;
             mapPanel.gameObject.SetActive(show);
             if (!show) return;
@@ -664,7 +683,8 @@ namespace Quintessence.UI
 
         public void ShowPause(bool show, Action resume = null, Action menu = null)
         {
-            if (show) { ClearChapter(); HideTip(); } // a dica e o cartao ficariam por cima do painel
+            if (show) { ClearChapter(); SuspendTip(); } // a dica e o cartao ficariam por cima do painel
+            else PanelClosed();
             pausePanel.gameObject.SetActive(show);
             if (!show) return;
             foreach (Transform child in pausePanel) Destroy(child.gameObject);
@@ -706,7 +726,8 @@ namespace Quintessence.UI
         /// Inventario (tecla I): skills despertas, atributos somados na run, bencaos e Essencia.
         public void ShowInventory(bool show, RunState run = null)
         {
-            if (show) { ClearChapter(); HideTip(); } // a dica e o cartao ficariam por cima do painel
+            if (show) { ClearChapter(); SuspendTip(); } // a dica e o cartao ficariam por cima do painel
+            else PanelClosed();
             if (inventoryPanel == null)
             {
                 if (!show) return;
@@ -887,6 +908,8 @@ namespace Quintessence.UI
         public void ShowResult(bool victory, string stats, Action again, Action menu)
         {
             if (tipRoot != null) tipRoot.gameObject.SetActive(false);
+            ClearChapter(); // morreu durante o cartao de capitulo: o titulo do trecho nao fica por cima do resultado
+            queuedBanner = null; tipSuspended = false;
             resultPanel.gameObject.SetActive(true);
             foreach (Transform child in resultPanel) Destroy(child.gameObject);
             var center = new Vector2(0.5f, 0.5f);

@@ -20,8 +20,7 @@ namespace Quintessence.Feel
             v.data = e;
             // vermelho-tijolo fosco: le como perigo sem brilhar mais que o cenario
             v.baseColor = e.Friendly ? new Color(0.3f, 0.55f, 0.36f) : new Color(0.66f, 0.16f, 0.12f);
-            v.outlineMat = new Material(flat) { color = new Color(v.baseColor.r, v.baseColor.g, v.baseColor.b, e.IsLine ? 0.2f : 0.6f) };
-            if (lit != null && !e.IsLine) v.outlineMat = lit;
+            v.outlineMat = lit != null && !e.IsLine ? lit : new Material(flat) { color = new Color(v.baseColor.r, v.baseColor.g, v.baseColor.b, e.IsLine ? 0.2f : 0.6f) };
             v.fillMat = new Material(flat) { color = new Color(v.baseColor.r, v.baseColor.g, v.baseColor.b, e.Friendly ? 0.16f : 0.3f) };
             var dir = e.Direction.sqrMagnitude > 0.01f ? e.Direction.normalized : Vector3.forward;
             if (e.IsLine)
