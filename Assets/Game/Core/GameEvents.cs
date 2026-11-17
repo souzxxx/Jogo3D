@@ -44,6 +44,8 @@ namespace Quintessence.Core
         public bool Lobbed;
         /// Nao e ataque no heroi (cura do Xama): desenha em verde.
         public bool Friendly;
+        /// Golpe corpo a corpo: sem circulo no chao. O aviso e a propria animacao (o machado desce no instante do dano).
+        public bool Melee;
         public GameObject Source;
         /// Elemento do que e arremessado (Agua = orbe do Afogado). None = bomba comum.
         public ElementType Element;

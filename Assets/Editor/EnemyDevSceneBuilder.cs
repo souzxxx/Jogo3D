@@ -491,7 +491,8 @@ public static class EnemyDevSceneBuilder
         });
         if (rangedDef.projectilePrefab == null) { rangedDef.projectilePrefab = shot; EditorUtility.SetDirty(rangedDef); }
 
-        melee = EnemyPrefab("Rastejante", "Skeletons/Characters/Skeleton_Minion.fbx", meleeDef, meleeCtrl, skel);
+        // arma na mao: sem circulo no chao, o jogador desvia olhando a lamina e o machado descerem
+        melee = EnemyPrefab("Rastejante", "Skeletons/Characters/Skeleton_Minion.fbx", meleeDef, meleeCtrl, skel, 1f, "Skeleton_Blade", "handslot.r");
         ranged = EnemyPrefab("Atirador", "Skeletons/Characters/Skeleton_Mage.fbx", rangedDef, rangedCtrl, skel);
 
         const string warriorFbx = KK + "Skeletons/Characters/Skeleton_Warrior.fbx";
@@ -520,7 +521,7 @@ public static class EnemyDevSceneBuilder
             d.strikeOffset = 0f; d.strikeRadius = 2.7f; d.element = ElementType.Fire;
         });
         var hot = LookDevBuilder.Mat("SkeletonExplosive2", KK + "Skeletons/Characters/skeleton_texture.png", new Color(1.1f, 0.72f, 0.5f), Color.black, 0f);
-        brute = EnemyPrefab("Bruto", "Skeletons/Characters/Skeleton_Warrior.fbx", bruteDef, bruteCtrl, skel, 1.3f);
+        brute = EnemyPrefab("Bruto", "Skeletons/Characters/Skeleton_Warrior.fbx", bruteDef, bruteCtrl, skel, 1.3f, "Skeleton_Axe", "handslot.r");
         bomber = EnemyPrefab("Explosivo", "Skeletons/Characters/Skeleton_Rogue.fbx", bomberDef, bomberCtrl, hot, 0.9f);
     }
 

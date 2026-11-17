@@ -240,8 +240,10 @@ namespace Quintessence.Enemies
                         Radius = charge ? definition.chargeWidth : line ? 0.35f : kind == EnemyAttackKind.Heal ? definition.healRadius : definition.strikeRadius,
                         Length = charge ? ClearDistance(strikeDir, definition.chargeDistance) : line ? ClearDistance(strikeDir, definition.projectileRange) : 0f,
                         Duration = definition.telegraphTime, IsLine = line, Friendly = kind == EnemyAttackKind.Heal, Lobbed = kind == EnemyAttackKind.Lob, Source = gameObject, Element = definition.element,
+                        Melee = kind == EnemyAttackKind.Melee,
                     });
                     Play("Attack", 0.08f);
+                    syncWindup = true;
                     break;
                 case EnemyAction.Strike:
                     Strike(miss);
@@ -263,6 +265,9 @@ namespace Quintessence.Enemies
             var face = fsm.Phase == EnemyPhase.Windup || fsm.Phase == EnemyPhase.Recover ? strikeDir : toDir;
             if (canAct && face.sqrMagnitude > 0.01f)
                 transform.rotation = Quaternion.RotateTowards(transform.rotation, Quaternion.LookRotation(face), definition.turnSpeed * dt);
+
+            SyncAttackAnimation();
+            Lean(dt);
 
             if (hitHold > 0f) hitHold -= dt;
             else if (fsm.Phase == EnemyPhase.Chase)
@@ -436,6 +441,75 @@ namespace Quintessence.Enemies
                 if (rayHits[i].distance < best) best = rayHits[i].distance;
             }
             return best;
+        }
+
+        // ---------- a animacao e o aviso ----------
+        // Fracao de cada clipe de ataque do pack em que a arma desce mais rapido (medido por AnimContactProbe, Logs/contato.txt).
+        static readonly System.Collections.Generic.Dictionary<string, float> Contact = new()
+        {
+            ["1H_Melee_Attack_Chop"] = 0.55f, ["1H_Melee_Attack_Jump_Chop"] = 0.54f, ["2H_Melee_Attack_Chop"] = 0.44f,
+            ["1H_Melee_Attack_Slice_Diagonal"] = 0.39f, ["2H_Melee_Attack_Slice"] = 0.35f, ["Spellcast_Shoot"] = 0.19f, ["Spellcast_Long"] = 0.84f,
+            ["Block_Attack"] = 0.4f, ["1H_Melee_Attack_Stab"] = 0.24f, ["Throw"] = 0.53f,
+        };
+        bool syncWindup;
+
+        /// Corpo a corpo: o esqueleto carrega inclinando para tras durante a preparacao e cai para a frente no golpe.
+        /// De cima, com a camera longe, o machado subindo le pouco; o corpo indo e voltando le de qualquer angulo.
+        const float LeanBack = 16f, LeanForward = 12f;
+        float lean;
+        Transform leanRoot;
+
+        /// Inclinacao atual do corpo em graus (negativo = para tras). Para os testes.
+        public float CurrentLean => lean;
+
+        void Lean(float dt)
+        {
+            if (animator == null || definition.attack != EnemyAttackKind.Melee) return;
+            if (leanRoot == null) leanRoot = animator.transform;
+            float want = 0f;
+            if (fsm.Phase == EnemyPhase.Windup && definition.telegraphTime > 0f)
+            {
+                float k = Mathf.Clamp01(1f - fsm.PhaseLeft / definition.telegraphTime);
+                want = -LeanBack * Mathf.SmoothStep(0f, 1f, k);
+            }
+            else if (fsm.Phase == EnemyPhase.Recover)
+            {
+                float since = definition.recoverTime - fsm.PhaseLeft;
+                want = since < 0.12f ? LeanForward : LeanForward * Mathf.Clamp01(1f - (since - 0.12f) / 0.25f);
+            }
+            // o golpe estala para a frente; o resto anda suave
+            float rate = fsm.Phase == EnemyPhase.Recover && lean < 0f ? 60f : 12f;
+            lean = Mathf.Lerp(lean, want, 1f - Mathf.Exp(-rate * dt));
+            if (health.IsDead) lean = 0f;
+            leanRoot.localRotation = Quaternion.Euler(lean, 0f, 0f);
+        }
+
+        /// Fracao do clipe em que a arma desce (-1 se o clipe nao e de ataque conhecido).
+        public static float ContactOf(string clip) => Contact.TryGetValue(clip, out float f) ? f : -1f;
+
+        /// Durante a preparacao, acelera ou freia a animacao de ataque para o golpe do clipe cair no instante do dano:
+        /// quem olha o machado subir e descer sabe quando desviar. Fora da preparacao a velocidade volta ao normal.
+        void SyncAttackAnimation()
+        {
+            if (animator == null) return;
+            if (fsm.Phase != EnemyPhase.Windup || health.IsDead)
+            {
+                if (animator.speed != 1f) animator.speed = 1f;
+                syncWindup = false;
+                return;
+            }
+            if (!syncWindup) return;
+            bool fading = animator.IsInTransition(0);
+            var clips = fading ? animator.GetNextAnimatorClipInfo(0) : animator.GetCurrentAnimatorClipInfo(0);
+            var state = fading ? animator.GetNextAnimatorStateInfo(0) : animator.GetCurrentAnimatorStateInfo(0);
+            if (clips.Length == 0 || !state.IsName("Attack")) return;
+            var clip = clips[0].clip;
+            if (!Contact.TryGetValue(clip.name, out float frac)) { syncWindup = false; return; }
+            float stateSpeed = Mathf.Max(0.05f, Mathf.Abs(state.speed));
+            float elapsed = state.normalizedTime * clip.length / stateSpeed;     // segundos de animacao ja tocados na velocidade normal
+            float toContact = frac * clip.length / stateSpeed - elapsed;         // quanto falta ate o golpe do clipe
+            float left = Mathf.Max(0.05f, fsm.PhaseLeft);                        // quanto falta ate o dano
+            animator.speed = toContact > 0.02f ? Mathf.Clamp(toContact / left, 0.35f, 2.5f) : 1f;
         }
 
         void Play(string state, float fade)

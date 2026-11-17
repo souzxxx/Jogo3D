@@ -151,6 +151,85 @@ namespace Quintessence.Enemies.PlayTests
             Time.timeScale = 1f;
         }
 
+        /// Pedido do Leonardo (16/11): corpo a corpo sem circulo no chao; o jogador desvia olhando a animacao.
+        /// Entao o machado tem de descer no instante do dano, para cada esqueleto que bate de perto.
+        [UnityTest, Timeout(300000)]
+        public IEnumerator Melee_Has_No_Ground_Circle_And_The_Axe_Falls_On_The_Hit()
+        {
+            Time.timeScale = 1f;
+            Time.captureFramerate = 30;
+            GameEvents.Clear();
+            yield return EditorSceneManager.LoadSceneAsyncInPlayMode(Scene, new LoadSceneParameters(LoadSceneMode.Single));
+            yield return null;
+            player = Object.FindFirstObjectByType<PlayerController>();
+            hp = player.GetComponent<Health>();
+            player.GetComponent<PlayerInputReader>().enabled = false;
+            input = player.gameObject.AddComponent<ScriptedInput>();
+            player.Input = input;
+            Object.FindFirstObjectByType<WaveSpawner>().enabled = false;
+            foreach (var e in Object.FindObjectsByType<EnemyBrain>(FindObjectsSortMode.None)) Object.Destroy(e.gameObject);
+            player.Teleport(new Vector3(0, 0.05f, -1f), Vector3.forward);
+            hp.Pool.Invulnerable = true;
+            GameObject Load(string name) => UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Game/Enemies/Prefabs/" + name + ".prefab");
+            TelegraphEvent last = default;
+            GameEvents.TelegraphStarted += e => last = e;
+            cam = Camera.main;
+            // de lado, entre o heroi e quem ataca, para o machado subir e descer no quadro
+            var mid = player.transform.position + new Vector3(0f, 1.1f, 0.9f);
+            cam.transform.position = mid + new Vector3(6.5f, 1.6f, -1.2f);
+            cam.transform.LookAt(mid);
+            var follow = cam.GetComponent<FollowCamera>();
+            if (follow != null) follow.enabled = false;
+            var shotRt = new RenderTexture(960, 540, 24, RenderTextureFormat.ARGB32, RenderTextureReadWrite.sRGB);
+            var shotTex = new Texture2D(960, 540, TextureFormat.RGB24, false);
+            void Snap(string path)
+            {
+                cam.targetTexture = shotRt; cam.Render(); cam.targetTexture = null;
+                RenderTexture.active = shotRt; shotTex.ReadPixels(new Rect(0, 0, 960, 540), 0, 0); RenderTexture.active = null;
+                File.WriteAllBytes(path, shotTex.EncodeToPNG());
+            }
+            var report = new System.Collections.Generic.List<string>();
+            foreach (var name in new[] { "Rastejante", "Bruto", "Escudeiro", "Cinzento", "BrasaViva" })
+            {
+                var brain = Object.Instantiate(Load(name), player.transform.position + new Vector3(0, 0, 1.8f), Quaternion.Euler(0, 180, 0)).GetComponent<EnemyBrain>();
+                var animator = brain.GetComponentInChildren<Animator>();
+                bool sawCircle = false;
+                for (float t = 8f; t > 0f && brain.Phase != EnemyPhase.Windup; t -= Time.deltaTime) yield return null;
+                Assert.AreEqual(EnemyPhase.Windup, brain.Phase, name + " nao chegou a preparar o golpe");
+                Assert.IsTrue(last.Melee, name + ": o aviso deveria vir marcado como corpo a corpo");
+                float clipTime = -1f, contact = -1f, since = 0f, deepest = 0f;
+                bool midShot = false;
+                while (brain.Phase == EnemyPhase.Windup)
+                {
+                    since += Time.deltaTime;
+                    if (name == "Bruto" && !midShot && since > 0.3f) { midShot = true; Snap("docs/img/s6_golpe_preparo.png"); }
+                    sawCircle |= GameObject.Find("Telegraph") != null;
+                    deepest = Mathf.Min(deepest, brain.CurrentLean);
+                    var info = animator.GetCurrentAnimatorClipInfo(0);
+                    var st = animator.GetCurrentAnimatorStateInfo(0);
+                    if (info.Length > 0 && st.IsName("Attack"))
+                    {
+                        clipTime = Mathf.Repeat(st.normalizedTime, 1f) * info[0].clip.length;
+                        contact = EnemyBrain.ContactOf(info[0].clip.name) * info[0].clip.length;
+                    }
+                    yield return null;
+                }
+                for (int k = 0; k < 3; k++) yield return null; // o corpo cai para a frente logo depois do dano
+                if (name == "Bruto") Snap("docs/img/s6_golpe_impacto.png");
+                Assert.Less(deepest, -10f, name + ": o corpo deveria inclinar para tras na preparacao");
+                Assert.Greater(brain.CurrentLean, 3f, name + ": no golpe o corpo deveria cair para a frente");
+                Assert.IsFalse(sawCircle, name + ": corpo a corpo nao deveria desenhar circulo no chao");
+                Assert.Greater(contact, 0f, name + ": clipe de ataque sem ponto de golpe medido");
+                report.Add($"{name}: dano com a animacao em {clipTime:0.00} s, golpe do clipe em {contact:0.00} s");
+                // um quadro de folga (o animador avalia depois do roteiro) e um pouco de transicao
+                Assert.AreEqual(contact, clipTime, 0.15f, $"{name}: o dano saiu com a animacao em {clipTime:0.00} s, mas o machado desce em {contact:0.00} s");
+                Object.Destroy(brain.gameObject);
+                yield return null;
+            }
+            Debug.Log("CONTATO: " + string.Join(" | ", report));
+            Time.captureFramerate = 0;
+        }
+
         [UnityTest, Timeout(300000)]
         public IEnumerator New_Enemies_Charge_Lob_And_Heal()
         {

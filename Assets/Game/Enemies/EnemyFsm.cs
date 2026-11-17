@@ -19,6 +19,9 @@ namespace Quintessence.Enemies
 
         public bool CanMove => Phase == EnemyPhase.Chase;
 
+        /// Segundos ate o fim da fase atual (na preparacao: ate o golpe sair).
+        public float PhaseLeft => Phase == EnemyPhase.Windup ? windupTime - t : Phase == EnemyPhase.Recover ? recoverTime - t : 0f;
+
         /// distance: ate o heroi. canAct: falso se Atordoado ou Congelado. hasTarget: heroi vivo e visivel.
         public EnemyAction Tick(float dt, float distance, bool canAct, bool hasTarget = true)
         {
