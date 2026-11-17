@@ -36,7 +36,7 @@ Roguelite de ação em 3D com câmera de cima. Uma run leva de 10 a 15 minutos.
 - Água + Ar = **Nevasca** (congela; o próximo golpe estilhaça)
 - Terra + Ar = **Estilhaços** (área grande que empurra)
 
-**Ler o inimigo:** esqueleto de arma erguida bate quando a arma desce; desvie com Espaço nessa hora. Bombas, explosões e golpes de chefe avisam um círculo vermelho no chão: saia dele.
+**Ler o inimigo:** esqueleto de arma erguida bate quando a arma desce; desvie com Espaço nessa hora. Bombas, explosões e golpes de chefe avisam um círculo vermelho no chão: saia dele. Atrás de pilar ou parede, herói e inimigos aparecem como silhueta.
 
 ### Os heróis
 
@@ -57,6 +57,7 @@ Roguelite de ação em 3D com câmera de cima. Uma run leva de 10 a 15 minutos.
 - **Maestria:** cada herói sobe até o nível 5 e começa as runs com vantagens próprias.
 - **Treino:** no título, ensina tudo com o herói da última carta em foco.
 - Achou difícil? **Opções → dificuldade Tranquila** (35% menos dano recebido).
+- PC fraco? **Opções → Gráficos: leves**. A tabela completa de teclas e botões está em **Opções → Controles**.
 
 A run é salva a cada sala: fechou o jogo, aparece **Continuar** no título.
 
@@ -77,6 +78,8 @@ Projeto 3D de Jogos Digitais e Interação, Insper, 2026.2.
 ---
 
 ## Imagens sugeridas (em `docs/img/`)
+
+Ícone/miniatura do jogo: `icone.png` (o mesmo do .exe).
 
 1. `s6_titulo_emblemas.png`: título com os quatro heróis (capa)
 2. `run_noite_capa.jpg` ou um quadro de combate com reação

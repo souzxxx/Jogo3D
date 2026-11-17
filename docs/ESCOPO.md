@@ -126,7 +126,7 @@ A tabela de 7 rubricas com pesos que propusemos antes ficou obsoleta. A rubrica 
 | 1. Controles, câmera e sensação 3D | Controles responsivos e claros; câmera que acompanha sem desorientar; entender profundidade, direção e distância | Leonardo | WASD + mouse e controle; câmera 3/4 fixa que segue o herói, mostra a silhueta do herói e dos inimigos atrás de pilares e paredes (o cenário não some) e não mostra o vazio fora da sala; avisos de ataque no chão. Leonardo jogou 3 runs em 16/11: nada travou e a câmera não prendeu |
 | 2. Desempenho, fluidez e colisões | Sem travamentos nem quedas de FPS; não prender em quina, não atravessar, não tremer | Enzo | cerca de 360 FPS no WebGL em combate (Chrome, M3 Pro, 99% dos quadros em até 5 ms); no editor (pior caso), Cerco fundo, Elite Divisores e chefe final ficam em 115-119 FPS com 99% dos quadros em até 14 ms (`PerfProbe`); NavMesh nos inimigos; peças em L com um colisor por braço; teste de colisão em todos os arranjos (1101 aproximações, nada atravessa, prende ou treme). Falta medir no Windows |
 | 3. Modelos 3D, materiais e texturas | Assets bem importados, escala e orientação certas, materiais coerentes, visual polido | Miguel | Pack KayKit (CC0) e peças próprias modeladas no Blender sobre os corpos do pack. 16/11: anéis, avisos, rachaduras e bloom foscos (estavam com cara de neon) |
-| 4. Gerenciamento de estados e erros | Começar, perder, vencer e reiniciar sem ficar preso; recuperação justa | Leonardo | Título, run salva a cada sala (Continuar), pausa com voltar ao título, telas de vitória e derrota com "de novo" e "título", save inválido vira run nova |
+| 4. Gerenciamento de estados e erros | Começar, perder, vencer e reiniciar sem ficar preso; recuperação justa | Leonardo | Título, run salva a cada sala (Continuar), pausa com recomeçar (pede confirmação) e voltar ao título, telas de vitória e derrota com "de novo" e "título", save inválido vira run nova; teste de idas e voltas cobre morrer durante a troca de sala, Continuar, recomeçar e treino |
 
 **Interface em qualquer tela (16/11):** a interface se adapta à proporção da janela (`CanvasScaler` em Expand, referência 1920x1080) e os textos longos encolhem para caber na caixa (`UiKit.Fit`). Antes disso, na aba Game do editor, baixa e larga, os textos se sobrepunham.
 
@@ -217,6 +217,9 @@ Sprints sem data até confirmar a entrega. S0 é de todos e destrava o resto.
 - [x] Golpe corpo a corpo sem círculo no chão: animação sincronizada com o dano, corpo que carrega e solta, arma na mão do Rastejante e do Bruto — **Enzo**, **Miguel** e **Leonardo**
 - [x] Grimório legível e painéis do título por cima da linha de teclas — **Miguel**
 - [x] ESCOPO, GDD e página de progresso com a rubrica final e as plataformas — **Miguel**
+- [x] Pausa com Recomeçar run (com confirmação) e resultado em blocos — **Leonardo**
+- [x] Opções com Gráficos leves para PC fraco e tabela de Controles — **Enzo**
+- [x] Ícone do jogo no .exe, na janela e no navegador — **Miguel**
 - [ ] Subir as builds Windows e WebGL na jam do itch.io, com como jogar, prints e vídeo — **Leonardo**
 - [ ] Rodar a build Windows num PC com Windows e medir FPS numa sala cheia e no chefe — **Enzo**
 - [ ] Colar o GDD no Milanote e aprovar a lore marcada como [proposta] — **Nicolas**
