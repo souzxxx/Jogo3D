@@ -35,6 +35,18 @@
   <h1>Quintessence 3D — Progresso</h1>
   <p class="sub">Entrega mais recente no topo. Escopo em <a href="ESCOPO.md">ESCOPO.md</a> · kanban em <a href="https://github.com/users/souzxxx/projects/4">GitHub Projects</a>. · <b>resumo da noite por tema em <a href="novidades.html">novidades.html</a></b>.</p>
 
+  <section id="s6-revisao2">
+    <h2>Madrugada, terceira leva — idas e voltas testadas, fala dos NPCs na tela, testes estáveis e segunda revisão</h2>
+    <div class="meta"><span class="tag who">Leonardo</span><span class="tag who">Miguel</span><span class="tag who">Enzo</span><span class="tag ok">549 testes de regra + 41 jogando, todos passando</span></div>
+    <ul>
+      <li><b>Becos sem saída (Leonardo, rubrica 4).</b> Teste novo de idas e voltas: morrer enquanto a sala abre leva ao resultado; resultado → título → run nova; pausa → título → Continuar na mesma sala com o tempo andando; treino → título sem perder a run salva.</li>
+      <li><b>Fala do Mestre e do Mercador (Miguel).</b> "Escolha uma bênção, aprendiz." saía cortada na borda da tela e por cima dos rótulos. Agora quebra em duas linhas, fica dentro do que a câmera mostra e ocupa o lugar do nome enquanto dura.</li>
+      <li><b>Testes estáveis.</b> O teste do combo e o da Provação falhavam às vezes porque a pausa de impacto contava tempo real; agora segue o relógio da gravação (no jogo nada muda). O teste das ondas soltava o Explosivo de reserva com o herói ainda atacando.</li>
+      <li><b>Segunda revisão de bugs (agente separado).</b> Corrigidos: o herói andava às cegas na tela escura da troca de sala (agora fica parado até a sala clarear); abrir o mapa ou a pausa apagava para sempre a dica de primeira vez (agora ela volta); o letreiro do chefe podia sumir atrás da pausa; morrer na tela escura deixava a sala abrir por trás do resultado e o cartão de capítulo por cima dele; cada aviso no chão e cada medalhão deixava um material para trás na memória.</li>
+      <li><b>Builds das 23h12</b> conferidas no Chrome: emblemas e anéis certos, cerca de 360 FPS, nenhum erro.</li>
+    </ul>
+  </section>
+
   <section id="s6-revisao">
     <h2>Madrugada, segunda leva — portas com medalhão, áreas de chefe no estilo dos anéis, sonda com reação humana e revisão de bugs</h2>
     <div class="meta"><span class="tag who">Miguel</span><span class="tag who">Leonardo</span><span class="tag who">Enzo</span><span class="tag ok">549 testes de regra + 40 jogando, todos passando</span></div>
