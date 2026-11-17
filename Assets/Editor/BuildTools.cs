@@ -23,7 +23,20 @@ public static class BuildTools
         PlayerSettings.defaultScreenHeight = 900;
         PlayerSettings.runInBackground = false;
         PlayerSettings.SetScriptingBackend(UnityEditor.Build.NamedBuildTarget.Standalone, ScriptingImplementation.Mono2x);
+        SetIcon();
         Build(BuildTarget.StandaloneWindows64, "Builds/Windows/Quintessence.exe");
+    }
+
+    /// Icone do .exe e da janela: Quintessencia no centro e os quatro elementos em volta (ArtSource/Icon/make_icon.py).
+    const string IconPath = "Assets/Art/Icon/QuintessenceIcon.png";
+
+    [MenuItem("Quintessence/Aplicar icone do jogo")]
+    public static void SetIcon()
+    {
+        var icon = AssetDatabase.LoadAssetAtPath<Texture2D>(IconPath);
+        if (icon == null) { Debug.LogWarning("sem icone em " + IconPath); return; }
+        PlayerSettings.SetIcons(UnityEditor.Build.NamedBuildTarget.Unknown, new[] { icon }, IconKind.Any);
+        AssetDatabase.SaveAssets();
     }
 
     static void Build(BuildTarget target, string output)
@@ -50,6 +63,7 @@ public static class BuildTools
         PlayerSettings.runInBackground = true;
         // pagina de carregamento propria (fundo do titulo, barra nas cores do jogo, sem a marca da Unity)
         PlayerSettings.WebGL.template = "PROJECT:Quintessence";
+        SetIcon();
         // sem a tela "Made with Unity" na abertura (opcional no Unity 6): o jogo abre direto no titulo
         PlayerSettings.SplashScreen.show = false;
 
