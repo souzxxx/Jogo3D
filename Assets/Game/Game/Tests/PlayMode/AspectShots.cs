@@ -1,8 +1,10 @@
 #if UNITY_EDITOR
 using System.Collections;
 using System.IO;
+using System.Linq;
 using NUnit.Framework;
 using Quintessence.Core;
+using Quintessence.Run;
 using Quintessence.UI;
 using UnityEditor.SceneManagement;
 using UnityEngine;
@@ -20,6 +22,35 @@ namespace Quintessence.Game.PlayTests
             PlayerPrefs.DeleteKey("quintessence.meta.test");
             MetaStore.UseKey(MetaStore.DefaultKey);
             GameFlow.Seed = 1; GameFlow.StartElement = ElementType.Fire;
+            InputMode.Gamepad = false;
+            Tips.UseKey(Tips.DefaultKey);
+        }
+
+        /// Jogando de controle, o HUD e as dicas mostram os botoes do controle no lugar das teclas.
+        [UnityTest, Timeout(300000)]
+        public IEnumerator Gamepad_Shows_Pad_Buttons()
+        {
+            PlayerPrefs.DeleteKey("quintessence.meta.test");
+            MetaStore.UseKey("quintessence.meta.test");
+            Tips.UseKey("quintessence.meta.test.tips");
+            Tips.ResetAll();
+            GameEvents.Clear();
+            GameFlow.Seed = 7; GameFlow.StartElement = ElementType.Water;
+            yield return EditorSceneManager.LoadSceneAsyncInPlayMode("Assets/Scenes/Run.unity", new LoadSceneParameters(LoadSceneMode.Single));
+            yield return null;
+            Object.FindFirstObjectByType<Quintessence.Combat.PlayerInputReader>().enabled = false; // sem ele, ninguem desliga o modo controle
+            InputMode.Gamepad = true;
+            var director = Object.FindFirstObjectByType<RunDirector>();
+            for (float t = 0; t < 10f && director.Busy; t += Time.unscaledDeltaTime) yield return null;
+            for (int k = 0; k < 5; k++) yield return null;
+            var hud = Object.FindFirstObjectByType<Hud>();
+            hud.UseCamera(Camera.main);
+            var labels = hud.GetComponentsInChildren<UnityEngine.UI.Text>(true).Select(t => t.text).ToList();
+            Assert.Contains("A", labels, "o dash mostra o botao A");
+            Assert.Contains("DIREITA", labels, "a skill de Agua mostra o direcional");
+            StringAssert.Contains("direcional para a direita", hud.LastTip, "a dica inicial fala do controle");
+            yield return Shoot(Camera.main, "docs/img/s6_controle.png", new Vector2Int(960, 540));
+            Tips.ResetAll();
         }
 
         public static readonly Vector2Int[] Sizes =

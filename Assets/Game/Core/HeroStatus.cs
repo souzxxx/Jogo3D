@@ -21,6 +21,12 @@ namespace Quintessence.Core
         UnityEngine.Vector3 AimPoint { get; }
     }
 
+    /// Quem o jogador usou por ultimo: teclado e mouse ou controle. O HUD e as dicas mostram as teclas certas.
+    public static class InputMode
+    {
+        public static bool Gamepad;
+    }
+
     /// Pausa do jogo. Quem mexe em Time.timeScale (pausa de impacto) consulta aqui antes de devolver o tempo.
     public static class GameClock
     {

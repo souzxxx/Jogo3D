@@ -33,6 +33,7 @@ namespace Quintessence.Combat
             }
             var k = Keyboard.current;
             if (k != null && k.anyKey.isPressed) usingPad = false;
+            Quintessence.Core.InputMode.Gamepad = usingPad;
         }
 
         public Vector2 Move

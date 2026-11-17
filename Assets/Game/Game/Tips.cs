@@ -28,6 +28,22 @@ namespace Quintessence.Game
 
         public static void ResetAll() { PlayerPrefs.DeleteKey(key); seen = null; }
 
+        /// Texto da dica para quem joga de controle: troca so as que falam de tecla.
+        public static string Text(string id, bool gamepad) => gamepad && id switch
+        {
+            "melee" or "start" or "level" or "quint" => true,
+            _ => false,
+        } ? PadText(id) : Text(id);
+
+        static string PadText(string id) => id switch
+        {
+            "melee" => "Esqueleto de arma erguida: o golpe sai quando ela desce. Desvie com A nessa hora.",
+            "start" => "RT ataca. O direcional solta as skills dos elementos. A desvia.",
+            "level" => "Subiu de nível: escolha um talento com o direcional e confirme com A.",
+            "quint" => "Quatro elementos despertos: cause reações para encher a Quintessência e aperte Y.",
+            _ => Text(id),
+        };
+
         public static string Text(string id) => id switch
         {
             "melee" => "Esqueleto de arma erguida: o golpe sai quando ela desce. Desvie com Espaço nessa hora.",

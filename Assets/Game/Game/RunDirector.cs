@@ -560,10 +560,13 @@ namespace Quintessence.Game
                 // a skill inicial fica na tecla do elemento do heroi (Liora no 2, Brann no 3, Vey no 4)
                 string[] skill = { "", "Labareda", "Maré", "Pilar de Pedra", "Vendaval" };
                 int k = (int)GameFlow.StartElement;
-                hud.ShowTip($"Clique esquerdo ataca. Sua skill, {skill[k]}, está na tecla {k} (ou clique direito). Espaço desvia.", 9f);
+                string[] pad = { "", "para cima", "para a direita", "para baixo", "para a esquerda" };
+                hud.ShowTip(InputMode.Gamepad
+                    ? $"RT ataca. Sua skill, {skill[k]}, sai no direcional {pad[k]} (ou LT). A desvia."
+                    : $"Clique esquerdo ataca. Sua skill, {skill[k]}, está na tecla {k} (ou clique direito). Espaço desvia.", 9f);
                 return;
             }
-            hud.ShowTip(Tips.Text(id));
+            hud.ShowTip(Tips.Text(id, InputMode.Gamepad));
         }
 
         /// O chefe nao passa pela escala das salas: a Ascensao entra aqui.
