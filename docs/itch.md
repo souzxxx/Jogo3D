@@ -1,4 +1,6 @@
-# Página do itch.io — texto pronto para colar
+# Página do itch.io
+
+> **No ar desde 17/11:** https://souzxxx.itch.io/quintessence (embed 1280 × 758 com tela cheia, zip do Windows para baixar, capa `docs/img/capa_itch.png`, declaração de IA: código e texto). Falta inscrever na jam.
 
 > Rascunho da página do jogo na jam https://itch.io/jam/projeto-jogo-3d-insper-20262 (entrega até 25/11/2026).
 > A rubrica pede: como jogar, teclas diferentes, segredos, imagens e vídeo. Tudo abaixo existe no jogo de 17/11.

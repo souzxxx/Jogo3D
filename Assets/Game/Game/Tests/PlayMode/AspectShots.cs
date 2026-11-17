@@ -178,6 +178,24 @@ namespace Quintessence.Game.PlayTests
             MetaStore.UseKey(MetaStore.DefaultKey);
         }
 
+        /// Capa da pagina do itch.io: titulo sem run salva, desenhado em 1260 x 1000 em Logs/; docs/img/capa_itch.png e ela reduzida para 630 x 500.
+        [UnityTest, Explicit, Timeout(300000)]
+        public IEnumerator Itch_Cover()
+        {
+            PlayerPrefs.DeleteKey("quintessence.meta.test");
+            MetaStore.UseKey("quintessence.meta.test");
+            RunSaveStore.UseKey("quintessence.meta.test.run");
+            RunSaveStore.Clear();
+            yield return EditorSceneManager.LoadSceneAsyncInPlayMode("Assets/Scenes/Title.unity", new LoadSceneParameters(LoadSceneMode.Single));
+            yield return null; yield return null;
+            var menu = Object.FindFirstObjectByType<TitleMenu>();
+            menu.UseCamera(Camera.main);
+            for (float t = 0; t < 2.5f; t += Time.deltaTime) yield return null;
+            yield return Shoot(Camera.main, "Logs/capa_itch_grande.png", new Vector2Int(1260, 1000));
+            RunSaveStore.UseKey(RunSaveStore.DefaultKey);
+            MetaStore.UseKey(MetaStore.DefaultKey);
+        }
+
         /// Golpe no heroi acende a borda vermelho-escura; com pouca vida ela fica pulsando. Foto para a pagina.
         [UnityTest, Timeout(300000)]
         public IEnumerator Hurt_Edge_Flashes_On_Hit_And_Pulses_On_Low_Health()

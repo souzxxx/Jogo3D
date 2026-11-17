@@ -220,7 +220,8 @@ Sprints sem data até confirmar a entrega. S0 é de todos e destrava o resto.
 - [x] Pausa com Recomeçar run (com confirmação) e resultado em blocos — **Leonardo**
 - [x] Opções com Gráficos leves para PC fraco e tabela de Controles — **Enzo**
 - [x] Ícone do jogo no .exe, na janela e no navegador — **Miguel**
-- [ ] Subir as builds Windows e WebGL na jam do itch.io, com como jogar, prints e vídeo — **Leonardo**
+- [x] Página do jogo no itch.io com as builds Windows e WebGL, texto, capa e capturas: https://souzxxx.itch.io/quintessence — **Leonardo**
+- [ ] Inscrever o jogo na jam do itch.io, com como jogar, prints e vídeo — **Leonardo**
 - [ ] Rodar a build Windows num PC com Windows e medir FPS numa sala cheia e no chefe — **Enzo**
 - [ ] Colar o GDD no Milanote e aprovar a lore marcada como [proposta] — **Nicolas**
 
