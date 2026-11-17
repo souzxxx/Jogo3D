@@ -127,8 +127,31 @@ namespace Quintessence.UI
         void Start() => FocusFirstCard();
         void FocusFirstCard() { if (cards[0] != null) UiKit.Focus(cards[0].gameObject); }
 
+        UnityEngine.UI.Text keysText;
+        bool keysPad;
+
+        /// Linha de comandos no pe do titulo: a do teclado ou a do controle, conforme o que o jogador usou por ultimo.
+        public static string KeysLine(bool gamepad) => gamepad
+            ? "analógico esquerdo move · direito mira · RT ataca · direcional skills · A dash · Y Quintessência · B interagir · Select inventário"
+            : "WASD mover · mouse mira · clique ataca · 1 2 3 4 skills · Espaço dash · R Quintessência · E interagir · I inventário  —  também funciona com controle";
+
+        /// No titulo nao existe o leitor de controles do heroi: quem mexeu por ultimo (controle ou teclado e mouse) decide os textos.
+        void TrackInputMode()
+        {
+            var pad = UnityEngine.InputSystem.Gamepad.current;
+            if (pad != null && (pad.leftStick.ReadValue().sqrMagnitude > 0.1f || pad.rightStick.ReadValue().sqrMagnitude > 0.1f
+                || pad.dpad.ReadValue().sqrMagnitude > 0.1f || pad.buttonSouth.isPressed || pad.buttonEast.isPressed || pad.startButton.isPressed))
+                InputMode.Gamepad = true;
+            var m = UnityEngine.InputSystem.Mouse.current;
+            if (m != null && (m.delta.ReadValue().sqrMagnitude > 4f || m.leftButton.isPressed)) InputMode.Gamepad = false;
+            var k = UnityEngine.InputSystem.Keyboard.current;
+            if (k != null && k.anyKey.isPressed) InputMode.Gamepad = false;
+            if (keysText != null && keysPad != InputMode.Gamepad) { keysPad = InputMode.Gamepad; keysText.text = KeysLine(keysPad); }
+        }
+
         void Update()
         {
+            TrackInputMode();
             // Esc (ou B/Start no controle) fecha o painel aberto e volta para as cartas
             bool back = (UnityEngine.InputSystem.Keyboard.current != null && UnityEngine.InputSystem.Keyboard.current.escapeKey.wasPressedThisFrame)
                 || (UnityEngine.InputSystem.Gamepad.current != null && (UnityEngine.InputSystem.Gamepad.current.buttonEast.wasPressedThisFrame || UnityEngine.InputSystem.Gamepad.current.startButton.wasPressedThisFrame));
@@ -422,8 +445,8 @@ namespace Quintessence.UI
             sheet = UiKit.Stretch("Sheet", root);
             sheet.gameObject.SetActive(false);
             UpdateRefugeLabel();
-            UiKit.Text(UiKit.Rect("Keys", root, new Vector2(0.5f, 0), new Vector2(0, 24), new Vector2(1600, 30)),
-                "WASD mover · mouse mira · clique ataca · 1 2 3 4 skills · Espaço dash · R Quintessência · E interagir · I inventário  —  também funciona com controle", 22, UiKit.Dim, TextAnchor.MiddleCenter, false);
+            keysText = UiKit.Text(UiKit.Rect("Keys", root, new Vector2(0.5f, 0), new Vector2(0, 24), new Vector2(1600, 30)), KeysLine(InputMode.Gamepad), 22, UiKit.Dim, TextAnchor.MiddleCenter, false);
+            keysPad = InputMode.Gamepad;
         }
 
         public void UseCamera(Camera cam)
