@@ -1002,7 +1002,16 @@ namespace Quintessence.Game
             FinishTrial();
             Run.AddEssence(Mathf.RoundToInt(essence * player.Modifiers.EssenceMult));
             hud.SetEssence(Run.Essence);
-            if (node.Type == RoomType.Boss) { StartCoroutine(Finish(true)); return; }
+            if (node.Type == RoomType.Boss)
+            {
+                // o heroi para e comemora enquanto o resultado nao aparece
+                GameClock.Holding = true;
+                var anim = player.GetComponentInChildren<PlayerAnimator>();
+                if (anim != null) anim.Celebrate();
+                hud.ShowFlash("VITÓRIA!", new Color(0.97f, 0.88f, 0.58f), 1.5f, player.transform);
+                StartCoroutine(Finish(true));
+                return;
+            }
             hud.ShowFlash("SALA LIMPA!", new Color(0.97f, 0.88f, 0.58f), 1.4f, player != null ? player.transform : null);
             if (node.Reward == RewardType.Boon && SetupBoons()) return; // as portas abrem depois de escolher
             OpenDoors();

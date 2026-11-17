@@ -75,6 +75,16 @@ namespace Quintessence.Combat
             Play("Death", 0.05f, true);
         }
 
+        /// Chefe final caiu: o heroi comemora (a mesma animacao da Quintessencia) e fica parado ate o resultado.
+        public bool Celebrating { get; private set; }
+        public void Celebrate()
+        {
+            if (dead) return;
+            Celebrating = true;
+            Play("Quint", 0.08f, true);
+            hold = 99f;
+        }
+
         void OnQuintessence(bool active)
         {
             if (!active || dead) return;
