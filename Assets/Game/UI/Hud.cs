@@ -433,13 +433,16 @@ namespace Quintessence.UI
         public string LastBanner { get; private set; } = "";
 
         /// Letreiro grande no alto da tela que some sozinho (novo trecho da run).
+        /// Faixa escura atras do letreiro: quase opaca, para os rotulos do mundo (pedestais, portas) nao aparecerem por baixo do titulo.
+        const float BannerShade = 0.9f;
+
         public void ShowBanner(string title, string sub, Color color, float seconds = 3.2f)
         {
             if (bannerRoot == null)
             {
                 // no alto, abaixo da barra do chefe: no meio da tela o letreiro cobria o heroi e os inimigos na entrada da sala
                 bannerRoot = UiKit.Rect("Banner", canvas.transform, new Vector2(0.5f, 1), new Vector2(0, -112), new Vector2(1400, 150));
-                bannerBack = UiKit.Image(UiKit.Rect("Back", bannerRoot, new Vector2(0.5f, 1), new Vector2(0, 14), new Vector2(1900, 170)), UiKit.VerticalVignette, new Color(0.02f, 0.02f, 0.04f, 0.7f));
+                bannerBack = UiKit.Image(UiKit.Rect("Back", bannerRoot, new Vector2(0.5f, 1), new Vector2(0, 14), new Vector2(1900, 170)), UiKit.VerticalVignette, new Color(0.02f, 0.02f, 0.04f, BannerShade));
                 bannerSub = UiKit.Text(UiKit.Rect("Sub", bannerRoot, new Vector2(0.5f, 1), new Vector2(0, 0), new Vector2(1400, 36)), "", 26, UiKit.Dim);
                 bannerTitle = UiKit.Text(UiKit.Rect("Title", bannerRoot, new Vector2(0.5f, 1), new Vector2(0, -36), new Vector2(1400, 84)), "", 64, UiKit.Cream);
                 bannerTitle.font = GameFonts.Title;
@@ -459,7 +462,7 @@ namespace Quintessence.UI
             float a = Mathf.Clamp01(bannerLeft / 0.8f);
             var c = bannerTitle.color; c.a = a; bannerTitle.color = c;
             var d = bannerSub.color; d.a = a; bannerSub.color = d;
-            if (bannerBack != null) bannerBack.color = new Color(0.02f, 0.02f, 0.04f, 0.7f * a);
+            if (bannerBack != null) bannerBack.color = new Color(0.02f, 0.02f, 0.04f, BannerShade * a);
             if (bannerLeft <= 0f) bannerRoot.gameObject.SetActive(false);
         }
 

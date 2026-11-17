@@ -58,7 +58,12 @@ namespace Quintessence.Game.PlayTests
                 hud.ShowMap(director.Run, false);
             }
             // combate parado: os inimigos chegam e avisam o golpe (aneis, avisos e rachaduras no quadro)
-            var hp = Object.FindFirstObjectByType<Quintessence.Combat.PlayerController>().GetComponent<Health>();
+            var pc = Object.FindFirstObjectByType<Quintessence.Combat.PlayerController>();
+            pc.GetComponent<Quintessence.Combat.PlayerInputReader>().enabled = false;
+            var scripted = pc.gameObject.AddComponent<Quintessence.Combat.ScriptedInput>();
+            pc.Input = scripted;
+            scripted.AimPoint = pc.transform.position + new Vector3(5f, 0f, -2f); // mira de lado: seta e anel no chao
+            var hp = pc.GetComponent<Health>();
             hp.Pool.ExtraDamageTakenMultiplier = 0f;
             for (int k = 0; k < 4; k++)
             {

@@ -677,6 +677,56 @@ namespace Quintessence.Feel
             playerRingMat = new Material(flatMaterial);
             r.AddComponent<MeshRenderer>().sharedMaterial = playerRingMat;
             playerRing = r.transform;
+            heroStatus = go.GetComponent<IHeroStatus>();
+            // mira: anel pequeno no ponto do chao mirado e uma seta curta nos pes do heroi.
+            // Na camera inclinada o cursor da tela nem sempre parece estar onde o golpe vai; no chao fica claro
+            aimMat = new Material(flatMaterial) { color = Muted(new Color(0.95f, 0.88f, 0.72f), 0.4f) };
+            aimRing = Part("AimRing", RingMesh, aimMat);
+            aimArrow = Part("AimArrow", ArrowMesh(), aimMat);
+        }
+
+        IHeroStatus heroStatus;
+        Material aimMat;
+        Transform aimRing, aimArrow;
+        /// Mira mais longe que isso fica presa nessa distancia (o golpe nao alcanca alem, e o anel nao sai da tela).
+        const float AimReach = 9f;
+
+        Transform Part(string name, Mesh mesh, Material mat)
+        {
+            var go = new GameObject(name);
+            go.transform.SetParent(transform, false);
+            go.AddComponent<MeshFilter>().sharedMesh = mesh;
+            go.AddComponent<MeshRenderer>().sharedMaterial = mat;
+            return go.transform;
+        }
+
+        /// Ponta de seta achatada no chao, apontando para +z.
+        static Mesh ArrowMesh()
+        {
+            var m = new Mesh { name = "AimArrow" };
+            m.vertices = new[] { new Vector3(0f, 0f, 0.42f), new Vector3(-0.3f, 0f, 0f), new Vector3(0f, 0f, 0.12f), new Vector3(0.3f, 0f, 0f) };
+            m.triangles = new[] { 0, 2, 1, 0, 3, 2 };
+            m.RecalculateNormals();
+            return m;
+        }
+
+        void UpdateAim()
+        {
+            bool show = heroStatus != null && heroStatus.Health != null && !heroStatus.Health.IsDead && !GameClock.Paused;
+            if (aimRing != null) aimRing.gameObject.SetActive(show);
+            if (aimArrow != null) aimArrow.gameObject.SetActive(show);
+            if (!show) return;
+            var flat = heroStatus.AimPoint - player.position; flat.y = 0f;
+            if (flat.sqrMagnitude < 0.01f) flat = player.forward;
+            var dir = flat.normalized;
+            float dist = Mathf.Min(flat.magnitude, AimReach);
+            // o anel so aparece quando a mira esta longe o bastante para nao cobrir o heroi
+            aimRing.gameObject.SetActive(dist > 2.2f);
+            aimRing.SetPositionAndRotation(player.position + dir * dist + Vector3.up * 0.05f, Quaternion.identity);
+            aimRing.localScale = Vector3.one * 0.38f;
+            // a 1,6 m: mais perto, com o heroi de costas para a camera, a seta ficava atras do corpo dele
+            aimArrow.SetPositionAndRotation(player.position + dir * 1.6f + Vector3.up * 0.05f, Quaternion.LookRotation(dir));
+            aimArrow.localScale = Vector3.one * 1.3f;
         }
 
         /// Solta particulas num cone em volta de dir.
@@ -749,6 +799,8 @@ namespace Quintessence.Feel
         void LateUpdate()
         {
             float dt = Time.deltaTime;
+            // o heroi aparece na cena antes do primeiro evento de combate: o anel e a mira ja valem desde a entrada
+            if (player == null && Time.frameCount % 15 == 0) FindPlayer();
             for (int i = flashes.Count - 1; i >= 0; i--)
             {
                 var f = flashes[i];
@@ -760,6 +812,7 @@ namespace Quintessence.Feel
 
             if (player != null)
             {
+                UpdateAim();
                 if (playerRing != null)
                 {
                     playerRing.SetPositionAndRotation(player.position + Vector3.up * 0.05f, Quaternion.Euler(0, -Time.time * 60f, 0));
