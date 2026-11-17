@@ -275,6 +275,17 @@ namespace Quintessence.Feel
         void OnTelegraph(TelegraphEvent e)
         {
             if (e.Source != null && telegraphs.TryGetValue(e.Source, out var old) && old != null) Destroy(old.gameObject);
+            // corpo a corpo: sem circulo no chao (pedido do Leonardo: desviar vendo a animacao). So um brilho curto e fosco
+            // na altura da arma erguida, para achar quem vai bater no meio do bando
+            if (e.Melee)
+            {
+                if (e.Source != null)
+                {
+                    var s = e.Source.transform;
+                    Burst(s.position + Vector3.up * 1.9f + s.forward * 0.3f, Vector3.up, 40f, 7, 0.4f, 1.1f, 0.14f, 0.26f, 0.32f, new Color(0.9f, 0.84f, 0.7f));
+                }
+                return;
+            }
             var v = TelegraphVisual.Create(e, flatMaterial, RingMesh, DiscMesh);
             v.transform.SetParent(transform, true);
             if (e.Source != null) telegraphs[e.Source] = v;
