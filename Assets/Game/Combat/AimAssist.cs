@@ -33,13 +33,26 @@ namespace Quintessence.Combat
 
         static readonly List<Vector3> buffer = new();
 
-        /// Inimigos vivos na cena (posicoes), para o Pick.
-        public static List<Vector3> EnemyPositions()
+        /// Inimigos vivos que o heroi em from enxerga (posicoes), para o Pick. So criaturas: barril, cristal e pilar tambem
+        /// tem vida do time inimigo, mas a mira nao deve preferi-los (o boneco do treino entra, para o treino ensinar a mira).
+        /// Inimigo atras de parede ou pilar fica de fora.
+        public static List<Vector3> EnemyPositions(Vector3 from)
         {
             buffer.Clear();
+            var eye = from + Vector3.up * 1.1f;
             foreach (var h in Health.Active)
-                if (h != null && h.Team == Team.Enemy && !h.IsDead) buffer.Add(h.transform.position);
+            {
+                if (h == null || h.Team != Team.Enemy || h.IsDead || !IsCreature(h)) continue;
+                var p = h.transform.position;
+                if ((p - from).sqrMagnitude > MaxDistance * MaxDistance) continue;
+                if (Physics.Linecast(eye, p + Vector3.up * 1.1f, out var hit, ~0, QueryTriggerInteraction.Ignore)
+                    && hit.collider.GetComponentInParent<Health>() != h && hit.collider.GetComponentInParent<PlayerController>() == null) continue;
+                buffer.Add(p);
+            }
             return buffer;
         }
+
+        static bool IsCreature(Health h) =>
+            h.GetComponent<UnityEngine.AI.NavMeshAgent>() != null || h.GetComponent("BossBrain") != null || h.GetComponent<DummyTarget>() != null;
     }
 }

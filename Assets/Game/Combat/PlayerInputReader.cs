@@ -14,6 +14,7 @@ namespace Quintessence.Combat
         Vector3 aim;
         Vector2 lastMouse;
         bool usingPad, leftTriggerWas;
+        Vector3 padAimDir = Vector3.forward;
 
         /// O jogador esta no controle (o HUD troca as dicas de tecla).
         public bool UsingGamepad => usingPad;
@@ -81,9 +82,14 @@ namespace Quintessence.Combat
                     {
                         var dir = new Vector3(stick.x, 0f, stick.y).normalized;
                         // ajuda de mira: um inimigo perto da direcao do analogico vira o alvo
-                        var target = AimAssist.Pick(transform.position, dir, AimAssist.EnemyPositions());
+                        var target = AimAssist.Pick(transform.position, dir, AimAssist.EnemyPositions(transform.position));
                         aim = target ?? transform.position + dir * 6f;
+                        var flat = aim - transform.position; flat.y = 0f;
+                        if (flat.sqrMagnitude > 0.01f) padAimDir = flat.normalized;
+                        return aim;
                     }
+                    // analogicos soltos: guarda a direcao, nao o ponto (um ponto perto ficaria para tras depois de um dash)
+                    aim = transform.position + padAimDir * 6f;
                     return aim;
                 }
                 if (cam == null) cam = Camera.main;
