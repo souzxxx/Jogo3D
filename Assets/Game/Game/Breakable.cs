@@ -63,7 +63,15 @@ namespace Quintessence.Game
             if (IsBroken) return;
             if (hero == null) { var go = GameObject.FindGameObjectWithTag("Player"); if (go == null) return; hero = go.transform; }
             var d = hero.position - transform.position; d.y = 0f;
-            if (d.sqrMagnitude < (radius + 0.3f) * (radius + 0.3f)) Break(-d.normalized);
+            if (d.sqrMagnitude < (radius + 0.3f) * (radius + 0.3f)) { Break(-d.normalized); return; }
+            // inimigo passando por cima (ou empurrado para cima) tambem quebra; nao da dano nem credito a ninguem
+            if (Time.frameCount % 3 != 0) return;
+            foreach (var h in Health.Active)
+            {
+                if (h == null || h.IsDead || h.Team != Team.Enemy || h.GetComponent<UnityEngine.AI.NavMeshAgent>() == null) continue;
+                var e = h.transform.position - transform.position; e.y = 0f;
+                if (e.sqrMagnitude < (radius + 0.35f) * (radius + 0.35f)) { Break(-e.normalized); return; }
+            }
         }
 
         public void Break(Vector3 push)

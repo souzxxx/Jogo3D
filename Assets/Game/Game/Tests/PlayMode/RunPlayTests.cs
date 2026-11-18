@@ -858,6 +858,24 @@ namespace Quintessence.Game.PlayTests
             hero.Teleport(other.transform.position + Vector3.up * 0.05f, Vector3.forward);
             for (int k = 0; k < 5; k++) yield return null;
             Assert.AreEqual(before + 2, Breakable.Broken, "o heroi passando por cima quebra o caixote");
+            // inimigo por cima tambem quebra (sem dano nem credito)
+            var foePrefab = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Game/Enemies/Prefabs/Rastejante.prefab");
+            var third = Breakable.Active[0];
+            var foe = Object.Instantiate(foePrefab, third.transform.position, Quaternion.identity);
+            foe.GetComponent<EnemyBrain>().enabled = false;
+            for (int k = 0; k < 8; k++) yield return null;
+            Assert.AreEqual(before + 3, Breakable.Broken, "inimigo passando por cima quebra o caixote");
+            Object.Destroy(foe);
+            // golpe na parede: faisca e "tec"
+            var feedback = Object.FindFirstObjectByType<Quintessence.Feel.CombatFeedback>();
+            int wallBefore = feedback.WallHits;
+            hero.Teleport(new Vector3(Arena.HalfX - 2.4f, 0.05f, 0f), Vector3.right);
+            for (int k = 0; k < 3; k++) yield return null;
+            scripted.AimPoint = hero.transform.position + Vector3.right * 5f;
+            scripted.AttackHeld = true;
+            for (int k = 0; k < 30 && feedback.WallHits == wallBefore; k++) yield return null;
+            scripted.AttackHeld = false;
+            Assert.Greater(feedback.WallHits, wallBefore, "golpe na parede solta faisca");
             Time.captureFramerate = 0;
         }
 
@@ -2094,6 +2112,8 @@ namespace Quintessence.Game.PlayTests
             director.Interactables.First(i => i.Prompt.StartsWith("abrir")).Use();
             Assert.Greater(director.Run.Essence, essence + 20);
             Assert.IsFalse(director.Interactables.Any(i => i.Prompt.StartsWith("abrir")), "o bau so abre uma vez");
+            Assert.AreEqual(1, director.ChestsOpened, "e a tampa abre antes de o bau sumir");
+            for (int k = 0; k < 50; k++) yield return null; // a tampa abre e o bau some antes da proxima sala de teste
 
             // pacto: ganho e custo de verdade, e so um por sala
             director.ShowPact();
