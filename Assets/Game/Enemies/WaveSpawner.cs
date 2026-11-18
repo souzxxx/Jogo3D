@@ -65,7 +65,8 @@ namespace Quintessence.Enemies
         }
 
         /// Troca as ondas e comeca a sala (usado pela run a cada sala de combate).
-        public void Run(List<Wave> newWaves)
+        /// extraDelay: espera a mais antes da primeira onda (a primeira sala da run da tempo de ler a dica de controles).
+        public void Run(List<Wave> newWaves, float extraDelay = 0f)
         {
             CancelInvoke();
             foreach (Transform child in transform) Destroy(child.gameObject);
@@ -74,7 +75,7 @@ namespace Quintessence.Enemies
             for (int i = 0; i < sizes.Length; i++) sizes[i] = waves[i].Size;
             State = new WaveState(sizes, delayBetweenWaves);
             announcedClear = false;
-            Invoke(nameof(Begin), startDelay);
+            Invoke(nameof(Begin), startDelay + Mathf.Max(0f, extraDelay));
         }
 
         public void SetAutoStart(bool value) => autoStart = value;
