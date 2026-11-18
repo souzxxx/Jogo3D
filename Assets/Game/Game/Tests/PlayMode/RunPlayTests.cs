@@ -1321,6 +1321,29 @@ namespace Quintessence.Game.PlayTests
             Time.captureFramerate = 0;
         }
 
+        /// Rodada 27: luta abaixo de 30 fps sugere os graficos leves, uma vez; acima disso, nada.
+        [UnityTest, Timeout(300000)]
+        public IEnumerator A_Slow_Fight_Suggests_Light_Graphics_Once()
+        {
+            GameEvents.Clear();
+            Time.timeScale = 1f;
+            Tips.UseKey("quintessence.tips.test.slow");
+            PlayerPrefs.DeleteKey("quintessence.tips.test.slow");
+            yield return EditorSceneManager.LoadSceneAsyncInPlayMode("Assets/Scenes/Run.unity", new LoadSceneParameters(LoadSceneMode.Single));
+            yield return null;
+            yield return null;
+            var director = Object.FindFirstObjectByType<RunDirector>();
+            var hud = Object.FindFirstObjectByType<Hud>();
+            for (int k = 0; k < 2000 && director.Busy; k++) yield return null;
+            director.ReportFrameRate(55f);
+            Assert.IsFalse(director.SlowWarned, "rodando bem, nenhum aviso");
+            director.ReportFrameRate(22f);
+            Assert.IsTrue(director.SlowWarned, "lento na luta: avisa");
+            for (int k = 0; k < 600 && !hud.LastTip.Contains("leves"); k++) yield return null;
+            StringAssert.Contains("Gráficos: leves", hud.LastTip, "a dica aponta a opcao");
+            Tips.UseKey(Tips.DefaultKey);
+        }
+
         [UnityTest, Timeout(300000)]
         public IEnumerator Escudeiro_Blocks_From_The_Front_But_Not_From_Behind()
         {

@@ -646,8 +646,32 @@ namespace Quintessence.Game
             if (label != hud.RoomLabel && hud.RoomLabel.StartsWith(roomBase)) hud.SetRoom(label);
         }
 
+        // ---- aviso de jogo lento (rodada 27): na luta, media abaixo de SlowFps por 4 s seguidos sugere os graficos leves
+        // (uma vez por jogador, pela fila de dicas; nao muda nada sozinho)
+        public const float SlowFps = 30f, SlowWindow = 4f;
+        float slowTime; int slowFrames;
+        public bool SlowWarned { get; private set; }
+
+        void TickSlowCheck()
+        {
+            if (SlowWarned || Busy || Finished || GameClock.Paused || GfxPrefs.Light || Time.captureFramerate > 0 || RoomQuiet) { slowTime = 0f; slowFrames = 0; return; }
+            slowTime += Time.unscaledDeltaTime; slowFrames++;
+            if (slowTime < SlowWindow) return;
+            ReportFrameRate(slowFrames / slowTime);
+            slowTime = 0f; slowFrames = 0;
+        }
+
+        /// Decide o aviso a partir da media de quadros de uma janela (separado para o teste nao depender da maquina).
+        public void ReportFrameRate(float fps)
+        {
+            if (SlowWarned || fps >= SlowFps) return;
+            SlowWarned = true;
+            Tip("slow");
+        }
+
         void TickTips()
         {
+            TickSlowCheck();
             if (tipQueue.Count > 0 && !hud.TipVisible && !Busy && !GameClock.Paused && !Finished) ShowTipNow(tipQueue.Dequeue());
         }
 
