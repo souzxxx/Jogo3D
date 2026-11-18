@@ -433,9 +433,22 @@ namespace Quintessence.Feel
         float lastImmune = -10f;
         Health boss;
 
+        Transform bossRing;
+        /// O chefe tem o anel claro no chao (para os testes).
+        public bool BossRingShown => bossRing != null && bossRing.gameObject.activeSelf;
+
         void OnBoss(Health b, string name)
         {
             boss = b;
+            // anel creme fosco sob o chefe: o Guardiao escuro sumia no chao escuro (sem luz nova, so a peca)
+            if (bossRing == null && HeroRingMesh != null)
+            {
+                bossRing = new GameObject("BossRing").transform;
+                bossRing.SetParent(transform, false);
+                bossRing.gameObject.AddComponent<MeshFilter>().sharedMesh = HeroRingMesh;
+                bossRing.gameObject.AddComponent<MeshRenderer>().sharedMaterial = RingMaterial(new Color(0.86f, 0.8f, 0.68f));
+            }
+            if (bossRing != null) bossRing.gameObject.SetActive(true);
             var p = b.transform.position + Vector3.up * 2f;
             var bc = BossElement == ElementType.Fire ? new Color(1f, 0.45f, 0.1f) : ElementColors.Of(BossElement);
             Ring(p, 90, 14f, 0.6f, 1.4f, 0.7f, bc);
@@ -479,7 +492,9 @@ namespace Quintessence.Feel
             Ring(p, 100, 16f, 0.7f, 1.5f, 0.6f, pc);
             Burst(p, Vector3.up, 180f, 120, 4f, 14f, 0.4f, 1.2f, 0.7f, pc);
             LightFlash(p, pc, 18f, 20f, 0.6f);
-            DamageNumber.Spawn(boss.transform.position + Vector3.up * 6.5f, $"FASE {phase}", new Color(1f, 0.6f, 0.25f), 1.6f, 1.8f);
+            // a fase nova pulsa na barra do chefe (Hud); sobre ele fica um aviso menor e mais baixo (o enorme cobria a luta,
+            // mas quem esta no corpo a corpo nao olha a barra)
+            DamageNumber.Spawn(boss.transform.position + Vector3.up * 4.2f, $"FASE {phase}", new Color(1f, 0.66f, 0.3f), 0.95f, 1.1f);
             CameraShake.Add(0.9f);
             Stop(0.15f);
             accents?.Emit(BossElement, p, Vector3.forward, 180f, 110, 7f);
@@ -955,6 +970,16 @@ namespace Quintessence.Feel
             // o heroi aparece na cena antes do primeiro evento de combate: o anel e a mira ja valem desde a entrada
             if (player == null && Time.frameCount % 15 == 0) FindPlayer();
             HomeMotes(dt);
+            if (bossRing != null && bossRing.gameObject.activeSelf)
+            {
+                if (boss == null || boss.IsDead) bossRing.gameObject.SetActive(false);
+                else
+                {
+                    bossRing.position = boss.transform.position + Vector3.up * 0.04f;
+                    float r = 2.1f * Mathf.Max(1f, boss.transform.lossyScale.x);
+                    bossRing.localScale = new Vector3(r, 0.6f, r);
+                }
+            }
             for (int i = flashes.Count - 1; i >= 0; i--)
             {
                 var f = flashes[i];
