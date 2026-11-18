@@ -1468,7 +1468,7 @@ namespace Quintessence.Game
             {
                 var o = offers[i];
                 var root = new GameObject("Pact_" + i);
-                root.transform.position = new Vector3((i - (offers.Length - 1) / 2f) * 5.4f, 0, 0.2f);
+                root.transform.position = new Vector3((i - (offers.Length - 1) / 2f) * 5.4f, 0, PactZ);
                 var altar = pactAltarPrefab != null ? pactAltarPrefab : shrinePrefab;
                 if (altar != null) Instantiate(altar, root.transform).transform.localPosition = Vector3.zero;
                 Medal(root.transform, new Vector3(0, 2.25f, 0), o.icon, wine, 1.1f);
@@ -1898,7 +1898,7 @@ namespace Quintessence.Game
                 var c = item.Kind == ShopItemKind.Boon && item.Boon.patron != ElementType.None ? ElementColors.Of(item.Boon.patron)
                     : item.Kind == ShopItemKind.Boon ? new Color(0.85f, 0.72f, 0.4f) : new Color(0.45f, 0.7f, 0.45f);
                 var root = new GameObject("Shop_" + item.Name);
-                root.transform.position = new Vector3(2.7f + (i - (stock.Count - 1) / 2f) * 3.1f, 0, -1.4f);
+                root.transform.position = new Vector3(2.7f + (i - (stock.Count - 1) / 2f) * 3.1f, 0, WareZ);
                 float top = 0.9f;
                 if (tablePrefab != null)
                 {
@@ -1980,6 +1980,13 @@ namespace Quintessence.Game
         /// O Mestre da sala atual, se houver (para os testes).
         public Merchant MasterNpc => masterNpc;
 
+        /// Baus das bencaos 1 m mais perto da entrada (como os pedestais do Santuario): na entrada o nome do bau da esquerda
+        /// ficava por baixo do chip da sala no alto da tela.
+        public const float BoonZ = -1.5f;
+        /// Altares do Pacto e mercadorias da loja tambem descem: o titulo do pacto de tres linhas saia pelo alto da tela
+        /// e o ultimo item da loja ficava por baixo do contador de Essencia.
+        public const float PactZ = -1.8f, WareZ = -2.2f;
+
         /// withMaster: sala do Mestre, com ele atras dos baus. Recompensa de Elite vem so com os baus.
         bool SetupBoons(bool withMaster = false)
         {
@@ -2001,7 +2008,7 @@ namespace Quintessence.Game
                 var boon = offer[i];
                 var c = boon.patron == ElementType.None ? new Color(1f, 0.85f, 0.4f) : ElementColors.Of(boon.patron);
                 var root = new GameObject("Boon_" + boon.id);
-                root.transform.position = new Vector3((i - (offer.Count - 1) / 2f) * 5.6f, 0, -0.5f);
+                root.transform.position = new Vector3((i - (offer.Count - 1) / 2f) * 5.6f, 0, BoonZ);
                 // bau do pack com uma pedra fosca na cor do mestre que oferece
                 if (chestPrefab != null)
                 {
@@ -2145,9 +2152,15 @@ namespace Quintessence.Game
                 foreach (char ch in r.text) if (ch == '\n') lines++;
                 float h = lines * LabelLine * r.scale;
                 made[i] = Label(parent, new Vector3(baseLocal.x, y + h * 0.5f, baseLocal.z), r.text, r.color, r.scale);
-                // texto de varias linhas ocupa mais que LabelLine por linha (o espaco entre linhas da fonte): sem essa folga
-                // o nome do Santuario ("Fogo") invadia a primeira linha da descricao
-                y += h + (lines > 1 ? 0.2f : 0.1f);
+                // a altura de verdade do texto (a fonte tem mais espaco entre linhas que LabelLine): com a estimativa, a
+                // 2a linha de uma descricao caia em cima do medalhao e o nome do Santuario invadia a descricao
+                var real = made[i].GetComponent<MeshRenderer>().bounds.size.y / Mathf.Max(0.01f, parent.lossyScale.y);
+                if (real > 0.05f && real > h)
+                {
+                    h = real;
+                    made[i].transform.localPosition = new Vector3(baseLocal.x, y + h * 0.5f, baseLocal.z);
+                }
+                y += h + 0.1f;
             }
             return made;
         }
