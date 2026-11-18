@@ -35,6 +35,17 @@
   <h1>Quintessence 3D — Progresso</h1>
   <p class="sub">Entrega mais recente no topo. Escopo em <a href="ESCOPO.md">ESCOPO.md</a> · kanban em <a href="https://github.com/users/souzxxx/projects/4">GitHub Projects</a>. · <b>resumo da noite por tema em <a href="novidades.html">novidades.html</a></b>.</p>
 
+  <section id="s13-rodada20">
+    <h2>Rodada 20: som da esquiva perfeita e da armadura quebrando</h2>
+    <div class="meta"><span class="tag who">Enzo</span><span class="tag who">Leonardo</span><span class="tag who">Miguel</span><span class="tag ok">auditoria de cobertura de som votada pelos três críticos</span></div>
+    <p>Uma auditoria cruzou os eventos do jogo com os sons: todo nome tocado tem arquivo, e o básico (acerto, dano, morte, dash, skills, reação, Quintessência, portas, baús, nível, ondas, chefe, vitória e derrota) já soava.</p>
+    <ul>
+      <li><b>Esquiva perfeita:</b> tocava o mesmo som do dash, e como o dash comum sai no mesmo quadro, o filtro que evita som repetido em 50 ms engolia o segundo: na prática ela era muda. Agora é o próprio dash mais agudo, com chave própria.</li>
+      <li><b>Armadura quebrando:</b> quando o Pilar de Pedra quebra a armadura do Bruto ou do Escudeiro, toca um estalo seco de pedra (sintetizado como os outros sons, em <code>tools/gen_audio.py</code>). Nascer armado não estala.</li>
+    </ul>
+    <p><b>Descartados:</b> sino próprio para o talento (com sinergia empilharia três sons), tique ao passar o mouse nos botões e "whoosh" ao pausar ou abrir mapa e inventário (abrir e fechar toda hora vira poluição sonora).</p>
+  </section>
+
   <section id="s12-rodada19">
     <h2>Rodada 19: quem cai cedo fica sabendo da dificuldade Tranquila</h2>
     <div class="meta"><span class="tag who">Enzo</span><span class="tag who">Leonardo</span><span class="tag who">Miguel</span><span class="tag ok">votada pelos três críticos</span></div>
