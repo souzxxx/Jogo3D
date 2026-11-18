@@ -1793,7 +1793,7 @@ namespace Quintessence.Game
             bool Has(ElementType x, ElementType y) => (a == x && b == y) || (a == y && b == x);
             if (Has(ElementType.Fire, ElementType.Water)) return "Vapor (inimigos erram)";
             if (Has(ElementType.Fire, ElementType.Earth)) return "Magma (poça de lava)";
-            if (Has(ElementType.Fire, ElementType.Air)) return "Tempestade (explosão)";
+            if (Has(ElementType.Fire, ElementType.Air)) return "Tempestade de Fogo (explosão)";
             if (Has(ElementType.Water, ElementType.Earth)) return "Lama (prende)";
             if (Has(ElementType.Water, ElementType.Air)) return "Nevasca (congela)";
             if (Has(ElementType.Earth, ElementType.Air)) return "Estilhaços (empurra)";

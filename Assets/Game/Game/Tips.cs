@@ -65,7 +65,7 @@ namespace Quintessence.Game
             "crystal" => "Cristal de Ressonância: bata nele e ele marca os inimigos em volta com o elemento do trecho. Detone com outra skill.",
             "trial" => "Provação: cumpra o desafio do letreiro e ganhe um talento extra. Falhar só perde o prêmio.",
             "fusion" => "Três elementos: lance a skill do terceiro na lava do Magma, na nuvem do Vapor ou no lamaçal da Lama. É uma Fusão.",
-            "affinity" => "Elementais resistem ao próprio elemento e são fracos a outro: Água vence Fogo, Ar vence Pedra.",
+            "affinity" => "Elementais resistem ao próprio elemento e são fracos a outro: Água vence Fogo, Ar vence Terra.",
             "quint" => "Quatro elementos despertos: cause reações para encher a Quintessência e aperte R.",
             "map" => "Portas abertas: cada uma leva a um tipo de sala. Segure Tab para ver o mapa inteiro e planejar o caminho.",
             _ => "",

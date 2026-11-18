@@ -977,7 +977,7 @@ namespace Quintessence.UI
             // fusoes: a skill de um terceiro elemento sobre a area de Magma ou de Vapor
             int awakenedCount = hero != null ? hero.AwakenedElements.Count : 0;
             var fusionLine = UiKit.Text(UiKit.Rect("Fusions", box, new Vector2(0, 1), new Vector2(60, -688), new Vector2(1200, 26)),
-                "FUSÕES (3 elementos): Obsidiana · Magma + Água   Incêndio · Magma + Ar   Ciclone · Vapor + Ar   Gêiser · Vapor + Terra   Barro Cozido · Lama + Fogo   Poeira · Lama + Ar",
+                "FUSÕES (3 elementos): Obsidiana · Magma + Água   Incêndio · Magma + Ar   Ciclone · Vapor + Ar   Gêiser · Vapor + Terra   Barro Cozido · Lama + Fogo   Tempestade de Poeira · Lama + Ar",
                 17, awakenedCount >= 3 ? UiKit.Cream : UiKit.Dim, TextAnchor.MiddleLeft, false);
             fusionLine.horizontalOverflow = HorizontalWrapMode.Wrap; fusionLine.verticalOverflow = VerticalWrapMode.Truncate;
             UiKit.Fit(fusionLine, 11, 17);
