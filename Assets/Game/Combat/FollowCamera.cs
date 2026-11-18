@@ -42,7 +42,7 @@ namespace Quintessence.Combat
         {
             if (target == null) return;
             var want = target.position;
-            if (player != null) want += player.AimDirection * lookAhead;
+            if (player != null) want += player.AimDirection * LookAhead();
             if (peekLeft > 0f && peek != null)
             {
                 peekLeft -= Time.unscaledDeltaTime;
@@ -52,6 +52,17 @@ namespace Quintessence.Combat
             }
             focus = Vector3.SmoothDamp(focus, want, ref velocity, smoothTime);
             Apply();
+        }
+
+        /// Com o mouse, a camera adianta mais quanto mais longe do heroi esta o cursor (ate 2,6 m): da para ver o que vem
+        /// na direcao em que se mira. No controle o adiantamento e fixo (o analogico nao diz distancia).
+        public const float FarLookAhead = 2.6f;
+
+        float LookAhead()
+        {
+            if (Quintessence.Core.InputMode.Gamepad) return lookAhead;
+            var to = player.AimPoint - player.transform.position; to.y = 0f;
+            return Mathf.Lerp(lookAhead, FarLookAhead, Mathf.InverseLerp(2.5f, 9f, to.magnitude));
         }
 
         Camera cam;
