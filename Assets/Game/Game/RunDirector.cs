@@ -1336,10 +1336,49 @@ namespace Quintessence.Game
                     playerHealth.Heal(playerHealth.Max * 0.15f);
                     Feel.DamageNumber.Spawn(player.transform.position + Vector3.up * 3.6f, $"+{amount} DE ESSÊNCIA", gold, 1.2f, 1.6f);
                     interactables.Remove(entry);
-                    Destroy(root);
+                    OpenChest(root, gold);
                 },
             };
             interactables.Add(entry);
+        }
+
+        /// Quantos baus abriram a tampa (para os testes).
+        public int ChestsOpened { get; private set; }
+
+        /// O bau escolhido abre: placa, medalha e luz somem na hora (a recompensa ja foi dada), a tampa (peca separada do
+        /// modelo do pack) gira na dobradica de tras, sai um punhado de faiscas douradas foscas e so entao o bau some.
+        void OpenChest(GameObject root, Color color)
+        {
+            if (root == null) return;
+            Transform lid = null;
+            foreach (var t in root.GetComponentsInChildren<Transform>(true)) if (t.name.EndsWith("_lid")) { lid = t; break; }
+            if (lid == null) { Destroy(root); return; }
+            foreach (Transform child in root.transform) if (!lid.IsChildOf(child)) child.gameObject.SetActive(false);
+            StartCoroutine(OpenLid(root, lid, color));
+        }
+
+        IEnumerator OpenLid(GameObject root, Transform lid, Color color)
+        {
+            ChestsOpened++;
+            var r = lid.GetComponentInChildren<Renderer>();
+            if (r == null) { Destroy(root); yield break; }
+            var b = r.bounds;
+            var hinge = new Vector3(b.center.x, b.min.y, b.max.z);
+            const float Open = 105f, Seconds = 0.35f;
+            float done = 0f;
+            for (float t = 0f; t < Seconds; t += Time.deltaTime)
+            {
+                if (lid == null) yield break;
+                float k = 1f - Mathf.Pow(1f - Mathf.Clamp01(t / Seconds), 3f);
+                lid.RotateAround(hinge, Vector3.right, Open * k - done);
+                done = Open * k;
+                yield return null;
+            }
+            if (lid != null) lid.RotateAround(hinge, Vector3.right, Open - done);
+            var fx = FindFirstObjectByType<Feel.CombatFeedback>();
+            if (fx != null) fx.Burst(b.center + Vector3.up * 0.4f, Vector3.up, 35f, 26, 3f, 6.5f, 0.12f, 0.24f, 0.7f, Color.Lerp(color, Cream, 0.3f));
+            for (float t = 0f; t < 0.9f; t += Time.deltaTime) yield return null;
+            if (root != null) Destroy(root);
         }
 
         public int PactsTaken { get; private set; }
@@ -1927,7 +1966,8 @@ namespace Quintessence.Game
                         if (masterNpc != null) masterNpc.Thank();
                         GrantBoon(boon);
                         Feel.DamageNumber.Spawn(player.transform.position + Vector3.up * 3.6f, boon.name.ToUpperInvariant() + "!", c, 1.2f, 1.6f);
-                        foreach (var it in interactables) if (it.Object != null) Destroy(it.Object);
+                        // o bau da bencao escolhida abre; os outros somem
+                        foreach (var it in interactables) if (it.Object != null) { if (it.Object == root) OpenChest(root, c); else Destroy(it.Object); }
                         interactables.Clear();
                         if (Run.Current.Type == RoomType.Master) Run.RoomCleared();
                         OpenDoors();
