@@ -41,6 +41,7 @@ namespace Quintessence.Enemies
             if (definition.guardArc > 0f) (guard = GetComponent<FrontGuard>() ?? gameObject.AddComponent<FrontGuard>()).Configure(definition.guardArc, definition.guardDamageTaken);
             if (definition.auraRadius > 0f) (GetComponent<RallyAura>() ?? gameObject.AddComponent<RallyAura>()).Configure(definition.auraRadius, definition.auraDamageMult, definition.auraSpeedMult);
             fsm = new EnemyFsm(definition.telegraphTime, definition.recoverTime, definition.cooldown * Scaling.Cooldown, definition.attackRange);
+            circleSign = Random.value < 0.5f ? -1f : 1f; // metade rodeia para cada lado
             agent.speed = definition.moveSpeed * Scaling.Speed;
             agent.updateRotation = false;
             agent.acceleration = 40f;
@@ -313,6 +314,17 @@ namespace Quintessence.Enemies
                 if (distance < definition.keepDistance) goal = transform.position - toDir * 4f;   // recua
                 else if (distance <= definition.attackRange * 0.9f) stop = true;                 // ja esta em posicao
             }
+            else if (WaitingTurn(distance))
+            {
+                // esperando a vez (ja ha tres atacando): rodeia o heroi devagar, um pouco fora do alcance, em vez de ficar
+                // parado ao lado dele com cara de travado
+                var away = transform.position - target.transform.position; away.y = 0f;
+                if (away.sqrMagnitude < 0.01f) away = -toDir;
+                var side = Quaternion.Euler(0f, circleSign * 40f, 0f) * away.normalized;
+                goal = target.transform.position + side * (definition.attackRange * 1.15f);
+                agent.speed *= 0.5f;
+                Circling++;
+            }
             else if (distance <= Mathf.Min(definition.attackRange * 0.8f, definition.attack == EnemyAttackKind.Charge ? 3.5f : 999f)) stop = true;
 
             agent.isStopped = stop;
@@ -321,6 +333,13 @@ namespace Quintessence.Enemies
             repath = 0.15f;
             agent.SetDestination(goal);
         }
+
+        /// Corpo a corpo perto do heroi sem a vez de atacar (MeleeTokens cheio).
+        bool WaitingTurn(float distance) => definition.attack == EnemyAttackKind.Melee && distance <= definition.attackRange * 1.4f
+            && !MeleeTokens.Has(this) && MeleeTokens.Held >= MeleeTokens.Max;
+        /// Quadros rodeando o heroi a espera da vez (para os testes).
+        public int Circling { get; private set; }
+        float circleSign = 1f;
 
         void Strike(float missChance)
         {

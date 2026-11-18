@@ -1312,6 +1312,8 @@ namespace Quintessence.Game.PlayTests
             }
             Assert.LessOrEqual(maxWinding, MeleeTokens.Max, "no maximo tres erguendo a arma ao mesmo tempo");
             Assert.Greater(MeleeTokens.Waits, waitsBefore, "com seis em volta, alguem esperou a vez");
+            int circling = 0; foreach (var e in crowd) if (e != null) circling += e.Circling;
+            Assert.Greater(circling, 0, "quem espera a vez rodeia o heroi (nao fica parado com cara de travado)");
             Assert.Greater(strikes, 6, "e os golpes continuam saindo (a vez volta depois de cada golpe)");
             foreach (var e in crowd) if (e != null) e.GetComponent<Health>().TakeDamage(new DamageInfo(99999f, ElementType.None, Team.Player, hero.gameObject));
             yield return null;
