@@ -51,6 +51,13 @@ namespace Quintessence.Game.PlayTests
             Assert.Contains("DIREITA", labels, "a skill de Agua mostra o direcional");
             StringAssert.Contains("direcional para a direita", hud.LastTip, "a dica inicial fala do controle");
             yield return Shoot(Camera.main, "docs/img/s6_controle.png", new Vector2Int(960, 540));
+            // no controle, levar golpe vibra forte e curto
+            var pc = Object.FindFirstObjectByType<Quintessence.Combat.PlayerController>();
+            var rumble = pc.GetComponent<Quintessence.Combat.PadRumble>();
+            Assert.IsNotNull(rumble, "o heroi tem a vibracao do controle");
+            HealthPool.ForceEvade = false;
+            pc.GetComponent<Health>().TakeDamage(new DamageInfo(5f, ElementType.None, Team.Enemy));
+            Assert.Greater(rumble.Last.x, 0.4f, "golpe no heroi pede vibracao forte");
             Tips.ResetAll();
         }
 

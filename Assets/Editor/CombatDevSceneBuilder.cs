@@ -91,6 +91,7 @@ public static class CombatDevSceneBuilder
         player.AddComponent<Health>().Configure(100, Team.Player);
         var pc = player.AddComponent<PlayerController>();
         player.AddComponent<PlayerInputReader>();
+        player.AddComponent<PadRumble>();
         var pso = new SerializedObject(pc);
         var arr = pso.FindProperty("elements");
         arr.arraySize = defs.Length;
