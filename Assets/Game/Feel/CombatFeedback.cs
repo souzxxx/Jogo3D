@@ -131,6 +131,7 @@ namespace Quintessence.Feel
             GameEvents.Evaded += OnEvaded;
             GameEvents.RoomCleared += OnRoomCleared;
             GameEvents.Shattered += OnShattered;
+            GameEvents.PowderDoused += OnPowderDoused;
             GameEvents.QuintessenceActiveChanged += OnQuintessence;
         }
 
@@ -166,7 +167,7 @@ namespace Quintessence.Feel
             GameEvents.ChampionSpawned -= OnChampion;
             GameEvents.Evaded -= OnEvaded;
             GameEvents.RoomCleared -= OnRoomCleared;
-            GameEvents.Shattered -= OnShattered;
+            GameEvents.Shattered -= OnShattered; GameEvents.PowderDoused -= OnPowderDoused;
             GameEvents.QuintessenceActiveChanged -= OnQuintessence;
             if (!GameClock.Paused) Time.timeScale = 1f;
         }
@@ -725,6 +726,22 @@ namespace Quintessence.Feel
             if (enemy) lastImmune = Time.time;
             DamageNumber.Spawn(target.transform.position + Vector3.up * (enemy ? 5f : 3.2f), enemy ? "IMUNE" : "BLOQUEOU",
                 enemy ? new Color(0.7f, 0.8f, 1f) : Color.Lerp(c, Color.white, 0.4f), enemy ? 1.1f : 0.8f, 0.7f);
+        }
+
+        /// Barril de polvora molhado (gotas e "MOLHADO") ou quebrado molhado (vapor cinza e lascas, sem explosao).
+        void OnPowderDoused(Vector3 point, bool fizzled)
+        {
+            var water = ElementColors.Of(ElementType.Water);
+            var p = point + Vector3.up * 0.9f;
+            if (!fizzled)
+            {
+                Burst(p, Vector3.up, 160f, 22, 1.5f, 4f, 0.12f, 0.26f, 0.5f, water);
+                if (!DamageNumber.Recently("MOLHADO", 0.35f))
+                    DamageNumber.Spawn(point + Vector3.up * 2.4f, "MOLHADO", Color.Lerp(water, Color.white, 0.35f), 0.62f, 0.9f);
+                return;
+            }
+            Burst(p, Vector3.up, 50f, 34, 1.2f, 3.2f, 0.45f, 0.9f, 0.9f, new Color(0.78f, 0.8f, 0.84f));
+            Burst(p, Vector3.up, 180f, 18, 2f, 6f, 0.12f, 0.24f, 0.45f, new Color(0.45f, 0.3f, 0.2f));
         }
 
         void OnShattered(Health target)

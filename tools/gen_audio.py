@@ -76,6 +76,9 @@ S["crate"] = ([noise(0.35, "pink", "bandpass=f=1400:w=1800," + env("min(t*120,1)
 # armadura quebrando (Bruto, Escudeiro): estalo de pedra seco, grave por baixo e lascas agudas
 S["crack"] = ([noise(0.35, "brown", "lowpass=f=2500," + env("min(t*500,1)*exp(-18*t)*1.8")), tone(thump(420, 120, 35, 14, 0.6), 0.35),
               noise(0.2, "white", "bandpass=f=3800:w=2500," + env("min(t*800,1)*exp(-40*t)*0.9"))], "")
+# polvora molhada: chiado curto de agua em brasa (ruido agudo filtrado, sobe e cai), sem estrondo
+S["fizz"] = ([noise(0.6, "white", "highpass=f=2200,lowpass=f=7000," + env("min(t*40,1)*exp(-6*t)*0.9")),
+             noise(0.4, "pink", "bandpass=f=900:w=700," + env("min(t*60,1)*exp(-10*t)*0.5"))], "")
 S["clink"] = ([noise(0.12, "white", "bandpass=f=2600:w=2200," + env("min(t*400,1)*exp(-45*t)*1.3")), tone(f"0.25*sin({P}*1450*t)*exp(-60*t)", 0.1)], "")
 S["ui_click"] = ([tone(f"0.3*sin({P}*900*t)*exp(-60*t)", 0.06)], "")
 S["boss_spawn"] = ([tone(f"0.5*sin({P}*55*t)*(1+0.5*sin({P}*6*t))*min(t/0.3,1)*exp(-1.2*max(t-1,0))", 2.2), noise(2.2, "brown", "lowpass=f=200," + env("min(t/0.3,1)*exp(-1.5*max(t-0.8,0))*2")), tone(f"0.22*(sin({P}*110*t)+0.5*sin({P}*220*t)+0.33*sin({P}*330*t))*min(t/0.4,1)*exp(-1.5*max(t-1.2,0))", 2.2)], ECHO)

@@ -2600,6 +2600,42 @@ namespace Quintessence.Game.PlayTests
             Assert.AreEqual(heroBefore, heroHp.Current, "heroi longe nao leva nada");
             for (int k = 0; k < 5; k++) yield return null;
             Assert.IsTrue(b1 == null && b2 == null, "barris estourados somem");
+
+            // Agua molha a polvora: azulado e sem a faixa do alcance; o golpe seguinte so quebra (sem explodir nem acender o vizinho)
+            var wetGo = Object.Instantiate(barrelPrefab, new Vector3(3f, 0, 1f), Quaternion.identity);
+            var dryGo = Object.Instantiate(barrelPrefab, new Vector3(5.2f, 0, 1f), Quaternion.identity);
+            yield return null;
+            int soakedBefore = ExplosiveBarrel.Soaked, fizzledBefore = ExplosiveBarrel.Fizzled, blastsBefore = blasts;
+            var audio = Object.FindFirstObjectByType<Quintessence.Feel.AudioDirector>();
+            int fizzes = audio != null ? audio.PowderFizzes : 0;
+            wetGo.GetComponent<Health>().TakeDamage(new DamageInfo(30, ElementType.Water, Team.Player, hero.gameObject));
+            var wetBarrel = wetGo.GetComponent<ExplosiveBarrel>();
+            Assert.IsTrue(wetBarrel.Wet, "Agua molha o barril");
+            Assert.IsFalse(wetBarrel.Lit, "e ele nao acende");
+            Assert.IsFalse(wetGo.GetComponent<Health>().IsDead);
+            Assert.AreEqual(soakedBefore + 1, ExplosiveBarrel.Soaked);
+            Assert.IsFalse(wetGo.transform.Find("Scorch").gameObject.activeSelf, "molhado, a faixa do alcance some");
+            hero.Teleport(new Vector3(1.2f, 0.05f, -1.4f), Vector3.forward); // perto para o print (molhado nao explode)
+            for (int k = 0; k < 30; k++) yield return null;
+            Shot(cam, "Logs/barril_molhado.png");
+            hero.Teleport(new Vector3(-7f, 0.05f, -5f), Vector3.forward);
+            wetGo.GetComponent<Health>().TakeDamage(new DamageInfo(30, ElementType.Fire, Team.Player, hero.gameObject));
+            for (int k = 0; k < 12; k++) yield return null;
+            Assert.IsTrue(wetGo == null, "molhado, o golpe quebra o barril");
+            Assert.AreEqual(fizzledBefore + 1, ExplosiveBarrel.Fizzled);
+            Assert.AreEqual(blastsBefore, blasts, "sem explosao");
+            Assert.IsFalse(dryGo.GetComponent<ExplosiveBarrel>().Lit, "e o vizinho nao acende");
+            if (audio != null) Assert.Greater(audio.PowderFizzes, fizzes, "chiado ao molhar e ao quebrar");
+            // seca depois de WetSeconds e volta a explodir
+            dryGo.GetComponent<Health>().TakeDamage(new DamageInfo(30, ElementType.Water, Team.Player, hero.gameObject));
+            Assert.IsTrue(dryGo.GetComponent<ExplosiveBarrel>().Wet);
+            for (float t = ExplosiveBarrel.WetSeconds + 0.3f; t > 0f; t -= Time.deltaTime) yield return null;
+            Assert.IsFalse(dryGo.GetComponent<ExplosiveBarrel>().Wet, "a polvora seca");
+            Assert.IsTrue(dryGo.transform.Find("Scorch").gameObject.activeSelf, "e a faixa volta");
+            dryGo.GetComponent<Health>().TakeDamage(new DamageInfo(30, ElementType.None, Team.Player, hero.gameObject));
+            Assert.IsTrue(dryGo.GetComponent<ExplosiveBarrel>().Lit, "seco, o golpe acende de novo");
+            for (float t = 2f; t > 0f && blasts == blastsBefore; t -= Time.deltaTime) yield return null;
+            Assert.AreEqual(blastsBefore + 1, blasts);
             foreach (var e in Object.FindObjectsByType<EnemyBrain>(FindObjectsSortMode.None)) Object.Destroy(e.gameObject);
 
             // armadilha de espinhos: avisa e fura quem esta em cima

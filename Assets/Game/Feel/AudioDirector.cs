@@ -15,7 +15,7 @@ namespace Quintessence.Feel
             "cast_fire", "cast_water", "cast_earth", "cast_air", "skill_fire", "skill_water", "skill_earth", "skill_air",
             "hit", "hit_heavy", "hurt", "enemy_die", "dash", "switch", "reaction", "telegraph", "explode", "block", "shield",
             "shatter", "quint_on", "quint_off", "room_clear", "wave", "door", "pickup", "heal", "ui_click",
-            "boss_spawn", "boss_phase", "victory", "defeat", "level_up", "champion", "quint_burst", "feat", "split", "heartbeat", "step", "crate", "clink", "crack",
+            "boss_spawn", "boss_phase", "victory", "defeat", "level_up", "champion", "quint_burst", "feat", "split", "heartbeat", "step", "crate", "clink", "crack", "fizz",
         };
         public const string AmbientMusic = "music_ambient", BossMusic = "music_boss";
         /// Ambiente de cada trecho, pelo indice do GameEvents.AmbientChanged.
@@ -117,6 +117,7 @@ namespace Quintessence.Feel
             GameEvents.ElementAwakened += OnAwakened;
             GameEvents.PerfectDodge += OnPerfectDodge;
             GameEvents.ArmorChanged += OnArmor;
+            GameEvents.PowderDoused += OnPowder;
         }
 
         void Unsubscribe()
@@ -142,6 +143,7 @@ namespace Quintessence.Feel
             GameEvents.ElementAwakened -= OnAwakened;
             GameEvents.PerfectDodge -= OnPerfectDodge;
             GameEvents.ArmorChanged -= OnArmor;
+            GameEvents.PowderDoused -= OnPowder;
         }
 
         static string Suffix(ElementType e) => e switch
@@ -193,6 +195,15 @@ namespace Quintessence.Feel
         void OnPerfectDodge(Vector3 at) { PerfectDodgeSounds++; Play("dash_perfect", 1f, 0f, 1.5f); }
         // so quando a armadura cai (Pilar de Pedra), nao quando o inimigo nasce armado
         void OnArmor(Health enemy, bool armored) { if (!armored) { ArmorCracks++; Play("crack", 0.9f, 0.06f); } }
+
+        /// Polvora molhada: chiado ao molhar; ao quebrar molhado, madeira e chiado (o barril nao explode).
+        public int PowderFizzes { get; private set; }
+        void OnPowder(Vector3 point, bool fizzled)
+        {
+            PowderFizzes++;
+            Play("fizz", fizzled ? 0.8f : 0.65f, 0.08f, fizzled ? 0.85f : 1.15f);
+            if (fizzled) Play("crate", 0.8f, 0.06f);
+        }
 
         void Play(string id) => Play(id, id == "heartbeat" ? 0.5f : id == "step" ? 0.28f : 1f, id == "step" ? 0.12f : 0f);
 
