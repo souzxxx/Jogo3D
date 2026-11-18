@@ -56,6 +56,9 @@ Previews: `Ash/preview_top.png` (de cima a 55°) e `Ash/preview_front.png` (3/4)
 
 Cores base: Stone #57524f, StoneDark #3a3635, Glow #d9632a, Crystal #cf7c2b
 
+| Altar partido, laje rachada com fenda acesa (segunda leva, `_blender/heart2.py`) | `heart_altar.fbx` | 324 | 2.31 × 1.39 × 0.79 | -1.149, -0.733, -0.026 | 1.164, 0.658, 0.76 | Stone, StoneDark, Glow, Crystal |
+| Respiradouro de brasa: anel de pedras em volta de um poço aceso (segunda leva) | `heart_vent.fbx` | 350 | 1.80 × 1.94 × 0.91 | -0.914, -1.138, -0.095 | 0.886, 0.797, 0.815 | Stone, StoneDark, Glow, Crystal |
+
 Previews: `Heart/preview_top.png` (de cima a 55°) e `Heart/preview_front.png` (3/4), com o Mage do pack (~2,2 m) para escala.
 
 ## Regerar

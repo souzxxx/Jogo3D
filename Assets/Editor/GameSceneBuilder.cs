@@ -366,7 +366,7 @@ public static class GameSceneBuilder
             new[] { "Ash/ash_brazier", "Ash/ash_beams", "Ash/ash_anvil", "Ash/ash_cage" },
             new[] { "Crypt/crypt_sarcophagus", "Crypt/crypt_urns", "Crypt/crypt_statue", "Crypt/crypt_pool", "Crypt/crypt_stalagmites" },
             new[] { "Garden/garden_tree", "Garden/garden_mushrooms", "Garden/garden_roots", "Garden/garden_planter", "Garden/garden_statue" },
-            new[] { "Heart/heart_spire", "Heart/heart_crystals" },
+            new[] { "Heart/heart_spire", "Heart/heart_crystals", "Heart/heart_altar", "Heart/heart_vent" },
         };
         var sets = new RunDirector.BiomeProps[files.Length];
         for (int b = 0; b < files.Length; b++)
