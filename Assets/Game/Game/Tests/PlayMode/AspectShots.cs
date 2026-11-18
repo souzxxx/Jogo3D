@@ -56,7 +56,13 @@ namespace Quintessence.Game.PlayTests
             var rumble = pc.GetComponent<Quintessence.Combat.PadRumble>();
             Assert.IsNotNull(rumble, "o heroi tem a vibracao do controle");
             HealthPool.ForceEvade = false;
+            bool shake = FxPrefs.ScreenShake;
+            FxPrefs.ScreenShake = false;
             pc.GetComponent<Health>().TakeDamage(new DamageInfo(5f, ElementType.None, Team.Enemy));
+            Assert.AreEqual(0f, rumble.Last.x, "com Tremor e vibracao desligado, nada vibra");
+            FxPrefs.ScreenShake = true;
+            pc.GetComponent<Health>().TakeDamage(new DamageInfo(5f, ElementType.None, Team.Enemy));
+            FxPrefs.ScreenShake = shake;
             Assert.Greater(rumble.Last.x, 0.4f, "golpe no heroi pede vibracao forte");
             Tips.ResetAll();
         }

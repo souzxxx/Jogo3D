@@ -22,7 +22,7 @@ namespace Quintessence.UI
                 shakeLabel.text = ShakeLabel();
             });
             shakeLabel = s.transform.Find("Label").GetComponent<UnityEngine.UI.Text>();
-            shakeLabel.fontSize = 24;
+            shakeLabel.fontSize = 22;
             var b = UiKit.Button(parent, FullscreenLabel(), new Vector2(0.5f, 0.5f), pos + new Vector2(-165, -85), new Vector2(310, 60), UiKit.Secondary, () =>
             {
                 Screen.fullScreen = !Screen.fullScreen;
@@ -106,7 +106,7 @@ namespace Quintessence.UI
 
         static string DifficultyLabel() => GamePrefs.Relaxed ? "Dificuldade: Tranquila (você recebe 35% menos dano)" : "Dificuldade: Normal";
 
-        static string ShakeLabel() => FxPrefs.ScreenShake ? "Tremor de tela: sim" : "Tremor de tela: não";
+        static string ShakeLabel() => FxPrefs.ScreenShake ? "Tremor e vibração: sim" : "Tremor e vibração: não";
 
         static string FullscreenLabel() => Screen.fullScreen ? "Tela cheia: sim" : "Tela cheia: não";
 

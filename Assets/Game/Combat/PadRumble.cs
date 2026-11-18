@@ -53,7 +53,7 @@ namespace Quintessence.Combat
         /// Soma o pedido ao que ja esta vibrando (fica o mais forte e o mais longo).
         public void Pulse(float lowMotor, float highMotor, float seconds)
         {
-            if (!InputMode.Gamepad) return;
+            if (!InputMode.Gamepad || !FxPrefs.ScreenShake) return; // a mesma opcao do tremor de tela (Tremor e vibracao)
             low = Mathf.Max(low, lowMotor); high = Mathf.Max(high, highMotor); left = Mathf.Max(left, seconds);
             Last = new Vector3(lowMotor, highMotor, seconds);
         }
@@ -62,7 +62,7 @@ namespace Quintessence.Combat
         {
             var pad = Gamepad.current;
             if (pad == null) return;
-            if (GameClock.Paused || !InputMode.Gamepad || left <= 0f) { Stop(); return; }
+            if (GameClock.Paused || !InputMode.Gamepad || !FxPrefs.ScreenShake || left <= 0f) { Stop(); return; }
             left -= Time.unscaledDeltaTime;
             pad.SetMotorSpeeds(low, high);
             running = true;
