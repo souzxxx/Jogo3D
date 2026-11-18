@@ -904,6 +904,7 @@ namespace Quintessence.Game
             }
             Cleanup();
             tipThisRoom = false;
+            tipQueue.Clear(); // dica da sala anterior nao aparece fora de contexto (na proxima vez ela volta)
             SaveRun();
             ApplyLayout(LayoutPicker.UsesLayout(node.Type) ? PickLayout(node) : -1);
             Dress(node.Type);
@@ -1059,8 +1060,12 @@ namespace Quintessence.Game
             return waves;
         }
 
+        readonly List<GameObject> openingChests = new();
+
         void Cleanup()
         {
+            foreach (var c in openingChests) if (c != null) Destroy(c);
+            openingChests.Clear();
             foreach (var i in interactables) if (i.Object != null) Destroy(i.Object);
             interactables.Clear();
             foreach (var z in FindObjectsByType<DamageZone>(FindObjectsSortMode.None)) Destroy(z.gameObject);
@@ -1355,6 +1360,7 @@ namespace Quintessence.Game
             foreach (var t in root.GetComponentsInChildren<Transform>(true)) if (t.name.EndsWith("_lid")) { lid = t; break; }
             if (lid == null) { Destroy(root); return; }
             foreach (Transform child in root.transform) if (!lid.IsChildOf(child)) child.gameObject.SetActive(false);
+            openingChests.Add(root); // trocou de sala antes de a tampa terminar: o Cleanup leva junto
             StartCoroutine(OpenLid(root, lid, color));
         }
 
@@ -1622,7 +1628,7 @@ namespace Quintessence.Game
             Tip("map");
             var choices = Run.Choices;
             // a camera da uma espiada nas portas (ficavam coladas na borda de cima com o valor cortado), sem tirar o controle
-            if (choices.Count > 0 && Camera.main != null && Camera.main.TryGetComponent(out FollowCamera follow))
+            if (choices.Count > 0 && !Busy && Camera.main != null && Camera.main.TryGetComponent(out FollowCamera follow))
             {
                 if (doorPeek == null) doorPeek = new GameObject("DoorPeek").transform;
                 doorPeek.position = new Vector3(0f, 0f, doorLine - 1.5f);
