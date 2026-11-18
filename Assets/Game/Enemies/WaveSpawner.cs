@@ -116,7 +116,8 @@ namespace Quintessence.Enemies
             foreach (var entry in waves[index].entries)
                 for (int i = 0; i < entry.count; i++)
                 {
-                    var pos = PickPoint(offset + 360f * k++ / Mathf.Max(1, total));
+                    // primeira onda da sala: o heroi ainda esta saindo da tela escura na porta; nasce mais longe
+                    var pos = PickPoint(offset + 360f * k++ / Mathf.Max(1, total), index == 0 && (State == null || State.Spawned <= 1) ? FirstWaveDistance : minDistanceFromPlayer);
                     bool champion = Champion && index == waves.Count - 1 && k == 1;
                     var keep = Scaling;
                     if (champion) Scaling = new EnemyScaling { Health = keep.Health * 1.7f, Damage = keep.Damage * 1.15f, Speed = keep.Speed, Cooldown = keep.Cooldown, Size = keep.Size * 1.3f };
@@ -175,16 +176,24 @@ namespace Quintessence.Enemies
             Scaling = keep;
         }
 
-        Vector3 PickPoint(float angle)
+        public const float FirstWaveDistance = 8f;
+
+        Vector3 PickPoint(float angle, float minDistance)
         {
+            // guarda o ponto valido mais longe do heroi: se nenhum passar do minimo, nasce o mais longe possivel
+            // (antes a reserva era o centro do gerador, sem olhar onde o heroi estava)
+            Vector3? farthest = null;
+            float far = -1f;
             for (int attempt = 0; attempt < 12; attempt++)
             {
                 var dir = Quaternion.Euler(0, angle + attempt * 31f, 0) * Vector3.forward;
                 var p = transform.position + dir * (spawnRadius * UnityEngine.Random.Range(0.7f, 1f));
                 if (!NavMesh.SamplePosition(p, out var hit, 2.5f, NavMesh.AllAreas)) continue;
-                if (player != null && Vector3.Distance(hit.position, player.position) < minDistanceFromPlayer) continue;
-                return hit.position;
+                float d = player != null ? Vector3.Distance(hit.position, player.position) : float.MaxValue;
+                if (d >= minDistance) return hit.position;
+                if (d > far) { far = d; farthest = hit.position; }
             }
+            if (farthest.HasValue) return farthest.Value;
             return NavMesh.SamplePosition(transform.position, out var center, 5f, NavMesh.AllAreas) ? center.position : transform.position;
         }
     }
