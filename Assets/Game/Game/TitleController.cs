@@ -15,7 +15,9 @@ namespace Quintessence.Game
         Vector3 camHome;
         readonly Animator[] heroes = new Animator[4];
         int lastHovered = -1;
-        float cheerLeft;
+        float cheerLeft, idleCheerIn = 4f;
+        /// Quantas vezes um heroi comemorou sozinho no titulo (para os testes).
+        public int IdleCheers { get; private set; }
         /// Heroi que esta comemorando agora (para os testes).
         public int Cheering { get; private set; } = -1;
         /// Heroi da ultima carta que esteve em foco: o Treino usa ele.
@@ -60,6 +62,8 @@ namespace Quintessence.Game
             if (hovered != lastHovered)
             {
                 if (lastHovered >= 0 && heroes[lastHovered] != null) heroes[lastHovered].CrossFadeInFixedTime("Idle", 0.2f);
+                // quem comemorava sozinho volta a esperar quando o jogador poe o mouse em outra carta
+                if (Cheering >= 0 && Cheering != lastHovered && Cheering != hovered && heroes[Cheering] != null) heroes[Cheering].CrossFadeInFixedTime("Idle", 0.2f);
                 if (hovered >= 0 && heroes[hovered] != null) { heroes[hovered].CrossFadeInFixedTime("Cheer", 0.15f); cheerLeft = 1.6f; }
                 Cheering = hovered;
                 lastHovered = hovered;
@@ -67,6 +71,13 @@ namespace Quintessence.Game
             }
             if (cheerLeft > 0f && (cheerLeft -= dt) <= 0f && Cheering >= 0 && heroes[Cheering] != null)
                 heroes[Cheering].CrossFadeInFixedTime("Idle", 0.25f);
+            // sem carta em foco, um heroi de cada vez comemora sozinho a cada 5 a 9 s: o titulo nao fica parado
+            if (hovered < 0 && cheerLeft <= 0f && (idleCheerIn -= dt) <= 0f)
+            {
+                idleCheerIn = Random.Range(5f, 9f);
+                int pick = Random.Range(0, 4);
+                if (heroes[pick] != null) { heroes[pick].CrossFadeInFixedTime("Cheer", 0.2f); Cheering = pick; cheerLeft = 1.6f; IdleCheers++; }
+            }
             for (int i = 0; i < 4; i++)
                 if (lights[i] != null) lights[i].intensity = Mathf.Lerp(lights[i].intensity, i == hovered ? Lit : Dim, 1f - Mathf.Exp(-8f * dt));
             // o quinto respira sozinho: e o que ainda falta alcancar

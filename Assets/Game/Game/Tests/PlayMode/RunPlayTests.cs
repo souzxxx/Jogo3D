@@ -94,6 +94,9 @@ namespace Quintessence.Game.PlayTests
             Assert.Less(title.LightOf(1), before + 1f, "os outros ficam como estavam");
             Shot(Camera.main, "docs/img/titulo_fogo.png");
             GameObject.Find("Card_Rax").GetComponent<UiHover>().OnPointerExit(null);
+            // sem carta em foco, os herois comemoram sozinhos de tempos em tempos
+            for (float t = 0; t < 10f && title.IdleCheers == 0; t += Time.unscaledDeltaTime) yield return null;
+            Assert.Greater(title.IdleCheers, 0, "o titulo nao fica parado: um heroi comemora sozinho");
 
             menu.ShowOptions();
             yield return null; yield return null;
