@@ -373,6 +373,7 @@ namespace Quintessence.Game
             hud = FindFirstObjectByType<Hud>();
             if (hud == null) hud = new GameObject("Hud").AddComponent<Hud>();
             dresser = gameObject.AddComponent<BiomeDresser>();
+            gameObject.AddComponent<TorchReact>(); // tochas de parede apagam com Agua e reacendem com Fogo
         }
 
         void OnDestroy() { Arena.ResetSize(); GameClock.Holding = false; }

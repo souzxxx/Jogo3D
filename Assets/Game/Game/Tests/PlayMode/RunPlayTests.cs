@@ -890,6 +890,37 @@ namespace Quintessence.Game.PlayTests
             Time.captureFramerate = 0;
         }
 
+        /// Tochas de parede: Agua perto apaga (luz a zero), Fogo reacende; so visual.
+        [UnityTest, Timeout(300000)]
+        public IEnumerator Torches_Go_Out_With_Water_And_Relight_With_Fire()
+        {
+            GameEvents.Clear();
+            Time.timeScale = 1f;
+            Time.captureFramerate = 30;
+            GameFlow.StartElement = ElementType.Water;
+            GameFlow.Seed = 3; GameFlow.Layers = 5; GameFlow.Shrines = 1;
+            yield return EditorSceneManager.LoadSceneAsyncInPlayMode("Assets/Scenes/Run.unity", new LoadSceneParameters(LoadSceneMode.Single));
+            yield return null;
+            yield return null;
+            var director = Object.FindFirstObjectByType<RunDirector>();
+            Object.FindFirstObjectByType<WaveSpawner>().enabled = false;
+            for (int k = 0; k < 2000 && director.Busy; k++) yield return null;
+            var torches = Object.FindFirstObjectByType<TorchReact>();
+            Assert.IsNotNull(torches);
+            Assert.Greater(torches.Count, 0, "a sala tem tochas");
+            var light = Object.FindObjectsByType<Light>(FindObjectsSortMode.None).First(l => l.name == "TorchLight");
+            float lit = light.intensity;
+            Assert.Greater(lit, 0.1f);
+            torches.Touch(light.transform.position, 1f, false);
+            for (int k = 0; k < 15; k++) yield return null;
+            Assert.Greater(torches.Doused, 0, "Agua apaga a tocha");
+            Assert.Less(light.intensity, 0.05f, "e a luz dela cai a zero");
+            torches.Touch(light.transform.position, 1f, true);
+            for (int k = 0; k < 15; k++) yield return null;
+            Assert.Greater(light.intensity, lit * 0.9f, "Fogo reacende");
+            Time.captureFramerate = 0;
+        }
+
         [UnityTest, Timeout(300000)]
         public IEnumerator Escudeiro_Blocks_From_The_Front_But_Not_From_Behind()
         {
