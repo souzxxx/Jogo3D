@@ -93,7 +93,7 @@ Projeto 3D de Jogos Digitais e Interação, Insper, 2026.2.
 5. `chefe_rainha.png`: chefe final
 6. `mapa.png`: mapa ramificado
 
-Vídeo: `docs/img/run_noite.mp4` (run curta gravada pelo teste, visual de 16/11). Um vídeo jogado por gente, de 30 a 60 s, rende mais na página.
+Vídeo: `docs/img/run_rodadas.mp4` (31 s, run curta até o chefe gravada pelo teste, com o visual de 18/11 de madrugada; o antigo `run_noite.mp4` é de 16/11). Um vídeo jogado por gente, de 30 a 60 s, rende mais na página.
 
 
 ## Prints para a página (18/11)
