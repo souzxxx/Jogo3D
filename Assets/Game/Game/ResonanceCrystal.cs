@@ -90,7 +90,34 @@ namespace Quintessence.Game
                 GameEvents.RaiseMarkApplied(element, h);
                 Marked++;
             }
+            Shatter(center);
             Destroy(gameObject, 0.05f);
+        }
+
+        /// Quantas lascas o ultimo estouro soltou (para os testes).
+        public int Shards { get; private set; }
+
+        /// O cristal se parte: lascas finas na cor dele saltam e caem (mesma fisica dos ossos), fora do objeto que some.
+        void Shatter(Vector3 center)
+        {
+            Material mat = null;
+            foreach (var r in GetComponentsInChildren<MeshRenderer>()) if (r.sharedMaterial != null) { mat = r.sharedMaterial; break; }
+            if (mat == null) return;
+            for (int i = 0; i < 7; i++)
+            {
+                var shard = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                Destroy(shard.GetComponent<Collider>());
+                shard.name = "CrystalShard";
+                float s = Random.Range(0.1f, 0.2f);
+                shard.transform.SetPositionAndRotation(center + Vector3.up * Random.Range(0.4f, 1.3f) + Random.insideUnitSphere * 0.25f, Random.rotation);
+                shard.transform.localScale = new Vector3(s * 0.6f, s * Random.Range(1.6f, 3f), s * 0.6f);
+                var r = shard.GetComponent<Renderer>();
+                r.sharedMaterial = mat;
+                r.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+                var v = Random.insideUnitSphere * Random.Range(2.5f, 5f) + Vector3.up * Random.Range(3f, 6f);
+                shard.AddComponent<Quintessence.Feel.BonePiece>().Launch(v, Random.insideUnitSphere * 700f, Random.Range(1.1f, 1.6f), s * 0.3f);
+            }
+            Shards = 7;
         }
     }
 }
