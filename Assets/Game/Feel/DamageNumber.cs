@@ -72,8 +72,25 @@ namespace Quintessence.Feel
             if (life <= 0f) { Destroy(gameObject); return; }
             transform.position += velocity * dt;
             velocity.y = Mathf.Max(0.4f, velocity.y - 5f * dt);
+            KeepOnScreen();
             Apply();
         }
+
+        /// Texto que nasce sobre algo no alto da tela (o chefe la no fundo da sala) saia cortado pela borda de cima e
+        /// caia por cima da barra do chefe: fica abaixo de 85% da altura e dentro das laterais.
+        void KeepOnScreen()
+        {
+            var cam = Camera.main;
+            if (cam == null) return;
+            var vp = cam.WorldToViewportPoint(transform.position);
+            if (vp.z <= 0f) return;
+            float x = Mathf.Clamp(vp.x, 0.06f, 0.94f), y = Mathf.Min(vp.y, TopLimit);
+            if (Mathf.Approximately(x, vp.x) && Mathf.Approximately(y, vp.y)) return;
+            transform.position = cam.ViewportToWorldPoint(new Vector3(x, y, vp.z));
+            if (y < vp.y) velocity.y = 0.4f;
+        }
+
+        public const float TopLimit = 0.85f;
 
         void Apply()
         {

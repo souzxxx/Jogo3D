@@ -301,6 +301,11 @@ namespace Quintessence.Game.PlayTests
             var hp = Object.FindFirstObjectByType<Quintessence.Combat.PlayerController>().GetComponent<Health>();
             for (int k = 0; k < 5; k++) yield return null;
             Assert.Less(hud.HurtEdgeAlpha, 0.01f, "sem dano, a borda fica apagada");
+            // texto que nasce no alto da tela desce para dentro dela (nao corta na borda nem cobre a barra do chefe)
+            Quintessence.Feel.DamageNumber.Spawn(Camera.main.ViewportToWorldPoint(new Vector3(0.5f, 0.99f, 20f)), "ALTO", Color.white);
+            for (int k = 0; k < 3; k++) yield return null;
+            foreach (var dn in Object.FindObjectsByType<Quintessence.Feel.DamageNumber>(FindObjectsSortMode.None))
+                Assert.LessOrEqual(Camera.main.WorldToViewportPoint(dn.transform.position).y, Quintessence.Feel.DamageNumber.TopLimit + 0.01f, "texto flutuante dentro da tela");
             HealthPool.ForceEvade = false; // sem esquiva sorteada: o golpe tem que entrar
             float before = hp.Current;
             hp.TakeDamage(new DamageInfo(hp.Max * 0.15f, ElementType.None, Team.Enemy));
