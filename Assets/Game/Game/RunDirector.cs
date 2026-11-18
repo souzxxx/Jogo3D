@@ -1587,6 +1587,7 @@ namespace Quintessence.Game
                     + (node.Layer >= EncounterPlanner.MiniBossDepth ? "\ne " + MiniBossName(GameFlow.Seed, node.Id) : "");
                 string label = kind + (reward.Length > 0 ? "\n" + reward : "");
                 var go = BuildDoor(new Vector3(x, 0, doorLine), node.Type, label);
+                StartCoroutine(SwingDoor(go, 0.35f + 0.15f * i));
                 interactables.Add(new Interactable
                 {
                     Object = go, Prompt = "entrar: " + RoomInfo.Name(node.Type),
@@ -1596,6 +1597,37 @@ namespace Quintessence.Game
         }
 
         /// Porta: vao de pedra do pack encostado na parede do fundo, com o estandarte do tipo da sala em cima.
+        /// Quantas portas ja abriram as folhas (para os testes).
+        public int DoorsSwung { get; private set; }
+
+        /// A folha de madeira da porta (parte do modelo do pack) gira na dobradica para dentro da parede, longe do heroi:
+        /// a sala acabou e o caminho abriu. So visual: o colisor da porta continua o mesmo.
+        IEnumerator SwingDoor(GameObject door, float delay)
+        {
+            Transform leaf = null;
+            foreach (var t in door.GetComponentsInChildren<Transform>(true)) if (t.name == "wall_doorway_door") { leaf = t; break; }
+            if (leaf == null) yield break;
+            var r = leaf.GetComponentInChildren<Renderer>();
+            if (r == null) yield break;
+            for (float t = 0f; t < delay; t += Time.deltaTime) yield return null;
+            if (door == null || leaf == null) yield break;
+            var b = r.bounds;
+            var hinge = new Vector3(b.min.x, b.center.y, b.center.z);
+            const float Open = -100f, Seconds = 0.7f;
+            float done = 0f;
+            for (float t = 0f; t < Seconds; t += Time.deltaTime)
+            {
+                if (leaf == null) yield break;
+                float k = 1f - Mathf.Pow(1f - Mathf.Clamp01(t / Seconds), 3f);
+                float step = Open * k - done;
+                leaf.RotateAround(hinge, Vector3.up, step);
+                done += step;
+                yield return null;
+            }
+            if (leaf != null) leaf.RotateAround(hinge, Vector3.up, Open - done);
+            DoorsSwung++;
+        }
+
         GameObject BuildDoor(Vector3 pos, RoomType type, string label)
         {
             var root = new GameObject("Door");
@@ -1639,7 +1671,8 @@ namespace Quintessence.Game
             {
                 if (a == e) continue;
                 string r = ReactionHint(e, a);
-                if (r.Length > 0) return text + "\ncom " + ElementNames[(int)a] + ": " + r;
+                // tres linhas curtas: na mesma linha o texto de um pedestal invadia o do vizinho (4,3 m entre eles)
+                if (r.Length > 0) return text + "\ncom " + ElementNames[(int)a] + ": " + r.Replace(" (", "\n(");
             }
             return text;
         }

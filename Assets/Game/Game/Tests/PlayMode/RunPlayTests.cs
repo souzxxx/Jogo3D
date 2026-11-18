@@ -407,6 +407,7 @@ namespace Quintessence.Game.PlayTests
             var build = director.BuildLine();
             Assert.IsTrue(build.Length == 0 || build.StartsWith("\nBuild: "), "linha de build no resultado: " + build);
             Assert.IsTrue(sawDoors, "as portas deveriam abrir depois de limpar a sala");
+            Assert.Greater(director.DoorsSwung, 0, "e as folhas das portas giram");
             Assert.IsTrue(sawShrine, "o caminho passa por um santuario");
             Assert.AreEqual(4, maxDepth, "chegou a ultima camada");
             Assert.AreEqual(2, player.Loadout.Awakened.Count, "o santuario desperta um elemento");
