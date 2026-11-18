@@ -216,15 +216,23 @@ namespace Quintessence.Game.PlayTests
             Assert.IsTrue(foeModel.GetComponentsInChildren<SkinnedMeshRenderer>().All(r => r.gameObject.layer == enemyLayer), "o modelo do inimigo deveria estar na camada da silhueta");
             foreach (var other in Object.FindObjectsByType<EnemyBrain>(FindObjectsSortMode.None)) other.enabled = false;
             foe.GetComponent<UnityEngine.AI.NavMeshAgent>().enabled = false;
-            var pillar = GameObject.Find("Layout").GetComponentsInChildren<Collider>().Where(c => !c.isTrigger)
-                .First(c => Free(new Vector3(c.bounds.center.x, 0.05f, c.bounds.max.z + 0.9f)));
-            foe.transform.position = new Vector3(pillar.bounds.center.x, 0f, pillar.bounds.max.z + 0.9f);
-            hero.Teleport(new Vector3(pillar.bounds.center.x + 6f, 0.05f, pillar.bounds.center.z - 4f), Vector3.forward);
-            for (int k = 0; k < 10; k++) yield return null;
-            var foeChest = foe.transform.position + Vector3.up * 0.9f;
-            var (fa, fb, _) = CompareModel(cam, foeModel, () => Silhouette.MarkEnemy(foe.gameObject), foeChest);
-            yield return AspectShots.Shoot(cam, "docs/img/s6_silhueta_inimigo.png", new Vector2Int(960, 540));
-            Assert.Greater(Diff(fa, fb), 0.04f, "o inimigo atras do pilar deveria aparecer como silhueta");
+            // ate tres pilares: na bateria inteira, as vezes o primeiro deixava o peito do inimigo de fora (outro inimigo na frente,
+            // pose de ataque); basta um deles mostrar a silhueta
+            var pillars = GameObject.Find("Layout").GetComponentsInChildren<Collider>().Where(c => !c.isTrigger)
+                .Where(c => Free(new Vector3(c.bounds.center.x, 0.05f, c.bounds.max.z + 0.9f))).Take(3).ToList();
+            Assert.IsNotEmpty(pillars, "nenhum pilar com espaco atras");
+            float best = 0f;
+            foreach (var pillar in pillars)
+            {
+                foe.transform.position = new Vector3(pillar.bounds.center.x, 0f, pillar.bounds.max.z + 0.9f);
+                hero.Teleport(new Vector3(pillar.bounds.center.x + 6f, 0.05f, pillar.bounds.center.z - 4f), Vector3.forward);
+                for (int k = 0; k < 10; k++) yield return null;
+                var foeChest = foe.transform.position + Vector3.up * 0.9f;
+                var (fa, fb, _) = CompareModel(cam, foeModel, () => Silhouette.MarkEnemy(foe.gameObject), foeChest);
+                if (Diff(fa, fb) > best) { best = Diff(fa, fb); yield return AspectShots.Shoot(cam, "docs/img/s6_silhueta_inimigo.png", new Vector2Int(960, 540)); }
+                if (best > 0.04f) break;
+            }
+            Assert.Greater(best, 0.04f, "o inimigo atras do pilar deveria aparecer como silhueta");
 
             Time.captureFramerate = 0;
             Assert.Greater(tested, 4, "poucos pontos com o heroi atras de uma peca para testar");

@@ -18,6 +18,13 @@ namespace Quintessence.Combat
         /// O jogador esta no controle (o HUD troca as dicas de tecla).
         public bool UsingGamepad => usingPad;
 
+        void Awake()
+        {
+            // quem chegou do titulo jogando de controle continua com os textos do controle
+            usingPad = Quintessence.Core.InputMode.Gamepad;
+            if (Mouse.current != null) lastMouse = Mouse.current.position.ReadValue();
+        }
+
         void Update()
         {
             // quem mexeu por ultimo manda na mira
