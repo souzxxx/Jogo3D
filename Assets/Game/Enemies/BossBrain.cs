@@ -116,6 +116,18 @@ namespace Quintessence.Enemies
             if (health.IsDead) return;
             float dt = Time.deltaTime;
             if (spawnLeft > 0f) { spawnLeft -= dt; return; }
+            if ((safetyCheck -= dt) <= 0f)
+            {
+                // chefe fora das paredes, fora do NavMesh ou numa ilha sem caminho ate o heroi: volta para a sala
+                // (os inimigos comuns ja tinham isso; o mini-chefe da Elite chegou a nascer atras da parede do fundo)
+                safetyCheck = 0.5f;
+                // sem caminho ate o heroi so conta depois de tres checagens seguidas (1,5 s): um dash do heroi por cima
+                // de uma peca nao deve teleportar o chefe
+                bool cut = target != null && !target.IsDead && !RoomNav.Reachable(transform.position, target.transform.position);
+                cutChecks = cut ? cutChecks + 1 : 0;
+                bool lost = !agent.enabled || !agent.isOnNavMesh || !RoomNav.InsideWalls(transform.position) || cutChecks >= 3;
+                if (lost && chargeLeft <= 0f && blinkWait <= 0f && Rescue(transform.position)) cutChecks = 0;
+            }
 
             int phase = BossRules.PhaseFor(health.Current / health.Max);
             if (phase > Phase) EnterPhase(phase);
@@ -194,6 +206,23 @@ namespace Quintessence.Enemies
             addTimer = definition.addInterval;
             GameEvents.RaiseArmorChanged(health, true);
             GameEvents.RaiseBossShield(true, canUse);
+        }
+
+        float safetyCheck;
+        int cutChecks;
+        /// Vezes que o chefe foi trazido de volta para dentro da sala (para os testes).
+        public int Rescues { get; private set; }
+
+        /// Traz o chefe para o chao bom mais perto de around: dentro das paredes e com caminho ate o heroi.
+        public bool Rescue(Vector3 around)
+        {
+            if (health.IsDead) return false;
+            var from = target != null ? target.transform.position : Vector3.zero;
+            if (!RoomNav.Nearest(around, from, out var point)) return false;
+            if (!agent.enabled) { transform.position = point; agent.enabled = true; }
+            if (!agent.Warp(point)) transform.position = point;
+            Rescues++;
+            return true;
         }
 
         /// Lacaios que nao tinham onde nascer no chao andavel (para os testes).

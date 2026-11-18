@@ -99,6 +99,8 @@ namespace Quintessence.Enemies
                 int k = 0;
                 foreach (var brain in GetComponentsInChildren<EnemyBrain>())
                     brain.Rescue(player.position + Quaternion.Euler(0, 70f * k++, 0) * Vector3.forward * 5f);
+                foreach (var boss in GetComponentsInChildren<BossBrain>())
+                    boss.Rescue(player.position + Quaternion.Euler(0, 70f * k++, 0) * Vector3.forward * 6f);
             }
             if (State.Cleared && !announcedClear)
             {
@@ -188,14 +190,17 @@ namespace Quintessence.Enemies
             for (int attempt = 0; attempt < 12; attempt++)
             {
                 var dir = Quaternion.Euler(0, angle + attempt * 31f, 0) * Vector3.forward;
-                var p = transform.position + dir * (spawnRadius * UnityEngine.Random.Range(0.7f, 1f));
+                // o gerador fica em z = 1 e o raio passa da parede do fundo: puxa o ponto para dentro antes de procurar o
+                // chao, e so aceita chao dentro das paredes com caminho ate o heroi (havia ilha de malha atras da parede)
+                var p = Arena.Clamp(transform.position + dir * (spawnRadius * UnityEngine.Random.Range(0.7f, 1f)));
                 if (!NavMesh.SamplePosition(p, out var hit, 2.5f, NavMesh.AllAreas)) continue;
+                if (player != null ? !RoomNav.Reachable(hit.position, player.position) : !RoomNav.InsideWalls(hit.position)) continue;
                 float d = player != null ? Vector3.Distance(hit.position, player.position) : float.MaxValue;
                 if (d >= minDistance) return hit.position;
                 if (d > far) { far = d; farthest = hit.position; }
             }
             if (farthest.HasValue) return farthest.Value;
-            return NavMesh.SamplePosition(transform.position, out var center, 5f, NavMesh.AllAreas) ? center.position : transform.position;
+            return RoomNav.Nearest(transform.position, player != null ? player.position : transform.position, out var safe) ? safe : transform.position;
         }
     }
 }

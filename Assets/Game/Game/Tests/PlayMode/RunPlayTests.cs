@@ -3293,6 +3293,63 @@ namespace Quintessence.Game.PlayTests
             if (frame++ % 3 != 0 || cam == null) yield break;
             Render(cam);
             File.WriteAllBytes($"{FrameDir}/f{saved++:00000}.jpg", tex.EncodeToJPG(85));
+        /// Bug do playtest de 18/11: a Sacerdotisa da Elite nasceu atras da parede do fundo (o gerador fica em z = 1 e o
+        /// raio passava da parede; havia malha de navegacao do lado de fora) e o chefe nao tinha o resgate dos comuns.
+        [UnityTest, Timeout(600000)]
+        public IEnumerator Nobody_Spawns_Or_Stays_Behind_The_Walls()
+        {
+            GameEvents.Clear();
+            Time.timeScale = 1f;
+            Time.captureFramerate = 30;
+            GameFlow.StartElement = ElementType.Water;
+            GameFlow.Seed = 5; GameFlow.Layers = 5; GameFlow.Shrines = 1;
+            yield return EditorSceneManager.LoadSceneAsyncInPlayMode("Assets/Scenes/Run.unity", new LoadSceneParameters(LoadSceneMode.Single));
+            yield return null;
+            yield return null;
+            var director = Object.FindFirstObjectByType<RunDirector>();
+            var spawner = Object.FindFirstObjectByType<WaveSpawner>();
+            var hero = Object.FindFirstObjectByType<PlayerController>();
+            for (int k = 0; k < 2000 && director.Busy; k++) yield return null;
+            hero.GetComponent<Health>().Pool.Invulnerable = true;
+            hero.GetComponent<PlayerInputReader>().enabled = false;
+            hero.Input = hero.gameObject.AddComponent<ScriptedInput>();
+            var prefab = spawner.Waves[0].entries[0].prefab; // inimigo comum da primeira sala (o asset, nao a copia)
+            var heroSpots = new[] { new Vector3(0, 0.05f, -6f), new Vector3(0, 0.05f, 6f), new Vector3(-9f, 0.05f, 0f), new Vector3(9f, 0.05f, 4f) };
+            int checkedSpawns = 0;
+            for (int layout = -1; layout < director.LayoutCount; layout++)
+            {
+                foreach (var e in Object.FindObjectsByType<EnemyBrain>(FindObjectsSortMode.None)) Object.Destroy(e.gameObject);
+                director.ApplyLayout(layout);
+                yield return null;
+                var spot = heroSpots[(layout + 1) % heroSpots.Length];
+                if (UnityEngine.AI.NavMesh.SamplePosition(spot, out var s, 3f, UnityEngine.AI.NavMesh.AllAreas)) spot = s.position;
+                hero.Teleport(spot, Vector3.forward);
+                spawner.Run(new System.Collections.Generic.List<Wave> { new() { entries = { new WaveEntry { prefab = prefab, count = 14 } } } });
+                yield return null;
+                for (int k = 0; k < 300 && Object.FindObjectsByType<EnemyBrain>(FindObjectsSortMode.None).Length < 14; k++) yield return null;
+                foreach (var e in Object.FindObjectsByType<EnemyBrain>(FindObjectsSortMode.None))
+                {
+                    checkedSpawns++;
+                    Assert.IsTrue(RoomNav.Reachable(e.transform.position, hero.transform.position),
+                        $"cenario {layout}: inimigo nasceu em {e.transform.position}, fora das paredes ou sem caminho ate o heroi em {hero.transform.position}");
+                }
+            }
+            Assert.Greater(checkedSpawns, 14 * director.LayoutCount, "as ondas nasceram em todos os cenarios");
+            spawner.enabled = false;
+            foreach (var e in Object.FindObjectsByType<EnemyBrain>(FindObjectsSortMode.None)) Object.Destroy(e.gameObject);
+            director.ApplyLayout(-1);
+            hero.Teleport(new Vector3(0, 0.05f, -4f), Vector3.forward);
+            yield return null;
+
+            // chefe que ja esta atras da parede do fundo volta para dentro da sala
+            var priestess = Object.Instantiate(director.MiniBossFor(Biome.Crypt), new Vector3(0, 0, Arena.HalfZ + 1.4f), Quaternion.identity).GetComponent<BossBrain>();
+            for (int k = 0; k < 120; k++) yield return null;
+            Assert.GreaterOrEqual(priestess.Rescues, 1, "o chefe fora da sala e resgatado");
+            Assert.IsTrue(RoomNav.Reachable(priestess.transform.position, hero.transform.position), $"chefe ficou em {priestess.transform.position}");
+            Object.Destroy(priestess.gameObject);
+            Time.captureFramerate = 0;
+        }
+
         }
     }
 }
