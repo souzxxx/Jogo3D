@@ -1006,6 +1006,25 @@ namespace Quintessence.Game.PlayTests
                     Assert.GreaterOrEqual(upper.min.y, lower.max.y - 0.02f, $"{root.name}: '{labels[i].text}' cai por cima de '{labels[i + 1].text}'");
                 }
             }
+
+            // Mestre: baus mais perto da entrada; na porta, a dica sobe para cima do aviso "E entrar"
+            director.ShowRoom(RoomType.Master);
+            for (int k = 0; k < 20; k++) yield return null;
+            var chests = Object.FindObjectsByType<Transform>(FindObjectsSortMode.None).Where(x => x.name.StartsWith("Boon_")).ToList();
+            Assert.Greater(chests.Count, 0, "a sala do Mestre tem baus");
+            foreach (var c in chests) Assert.AreEqual(RunDirector.BoonZ, c.position.z, 0.01f);
+            player.Teleport(director.EntryPoint, Vector3.forward);
+            for (int k = 0; k < 40; k++) yield return null;
+            Shot(cam, "Logs/r14/mestre_entrada.png");
+            var hud = Object.FindFirstObjectByType<Hud>();
+            hud.ShowTip("dica de teste", 30f);
+            var near = director.Interactables[0].Position;
+            player.Teleport(near + new Vector3(0f, 0f, -1.2f), Vector3.forward);
+            for (int k = 0; k < 10; k++) yield return null;
+            Assert.AreEqual(Hud.TipAbovePrompt, hud.TipY, 0.5f, "com o aviso de interacao a dica fica acima dele");
+            player.Teleport(director.EntryPoint, Vector3.forward);
+            for (int k = 0; k < 10; k++) yield return null;
+            Assert.Less(hud.TipY, Hud.TipAbovePrompt, "sem o aviso, a dica volta para baixo");
             Time.captureFramerate = 0;
         }
 
