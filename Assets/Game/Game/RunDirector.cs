@@ -1704,6 +1704,7 @@ namespace Quintessence.Game
 
         void OpenDoors()
         {
+            Feel.DamageNumber.ClearNumbers(); // numeros de dano que sobraram da luta cobriam o texto das portas
             Tip("map");
             var choices = Run.Choices;
             // a camera da uma espiada nas portas (ficavam coladas na borda de cima com o valor cortado), sem tirar o controle
@@ -1894,7 +1895,7 @@ namespace Quintessence.Game
                     {
                         if (!player.Awaken(e)) return;
                         Sfx.Play("pickup");
-                        Feel.DamageNumber.Spawn(player.transform.position + Vector3.up * 3.6f, names[(int)e].ToUpperInvariant() + " DESPERTO!", c, 1.3f, 1.8f);
+                        Feel.DamageNumber.Spawn(player.transform.position + Vector3.up * 3.6f, names[(int)e].ToUpperInvariant() + (e == ElementType.Water || e == ElementType.Earth ? " DESPERTA!" : " DESPERTO!"), c, 1.3f, 1.8f); // Agua e Terra: desperta
                         foreach (var it in interactables) if (it.Object != null) Destroy(it.Object);
                         interactables.Clear();
                         Run.RoomCleared();

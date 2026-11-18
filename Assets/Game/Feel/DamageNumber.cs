@@ -33,6 +33,19 @@ namespace Quintessence.Feel
             live.Clear();
         }
 
+        /// So os numeros de dano no ar (as palavras ficam): ao abrir as portas, os "7 7" da luta cobriam o texto delas.
+        public static void ClearNumbers()
+        {
+            for (int i = live.Count - 1; i >= 0; i--)
+            {
+                var n = live[i];
+                if (n == null) { live.RemoveAt(i); continue; }
+                if (!n.isNumber || (n.front != null && n.front.text.StartsWith("+"))) continue; // "+25% de vida" e curas ficam
+                Destroy(n.gameObject);
+                live.RemoveAt(i);
+            }
+        }
+
         public static void ClearAll()
         {
             foreach (var n in live) if (n != null) Destroy(n.gameObject);
