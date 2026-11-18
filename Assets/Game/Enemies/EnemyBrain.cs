@@ -86,8 +86,11 @@ namespace Quintessence.Enemies
             }
         }
 
+        void OnDisable() => MeleeTokens.Release(this);
+
         void OnDestroy()
         {
+            MeleeTokens.Release(this);
             GameEvents.StatusApplied -= OnStatusApplied;
             if (health == null) return;
             health.Damaged -= OnDamaged;
@@ -177,6 +180,7 @@ namespace Quintessence.Enemies
 
         void OnDied(DamageInfo info)
         {
+            MeleeTokens.Release(this);
             if (fsm.Kill()) GameEvents.RaiseTelegraphCancelled(gameObject);
             if (agent.enabled) agent.enabled = false;
             if (body != null) body.enabled = false;
@@ -220,7 +224,15 @@ namespace Quintessence.Enemies
             float distance = hasTarget ? to.magnitude : float.MaxValue;
             var toDir = distance > 0.01f && hasTarget ? to / distance : transform.forward;
 
-            switch (fsm.Tick(dt, distance, canAct, hasTarget))
+            // corpo a corpo espera a vez quando ja ha MeleeTokens.Max atacando (so muda a decisao de COMECAR o aviso)
+            bool melee = definition.attack == EnemyAttackKind.Melee;
+            bool mayStart = canAct, tookNow = false;
+            if (melee && canAct && fsm.Phase == EnemyPhase.Chase && hasTarget && distance <= definition.attackRange && !MeleeTokens.Has(this))
+                mayStart = tookNow = MeleeTokens.TryTake(this);
+            var action = fsm.Tick(dt, distance, fsm.Phase == EnemyPhase.Chase ? mayStart : canAct, hasTarget);
+            // pegou a vez mas a recarga nao deixou comecar: devolve na hora (senao seguraria a vez sem atacar)
+            if (tookNow && action != EnemyAction.StartWindup) MeleeTokens.Release(this);
+            switch (action)
             {
                 case EnemyAction.StartWindup:
                     strikeDir = toDir;
@@ -258,9 +270,11 @@ namespace Quintessence.Enemies
                     break;
                 case EnemyAction.Strike:
                     Strike(miss);
+                    MeleeTokens.Release(this);
                     break;
                 case EnemyAction.Cancel:
                     GameEvents.RaiseTelegraphCancelled(gameObject);
+                    MeleeTokens.Release(this);
                     break;
             }
 
