@@ -293,6 +293,10 @@ namespace Quintessence.UI
             }, 74);
             UiKit.Text(UiKit.Rect("Hint", box, new Vector2(0.5f, 0), new Vector2(0, 112), new Vector2(1500, 30)),
                 "Uma skill marca o inimigo; a skill de outro elemento detona a reação. O golpe básico não tem elemento.", 20, UiKit.Dim, TextAnchor.MiddleCenter, false);
+            // o cenario tambem entra no jogo dos elementos (rodadas 21, 29-31): no espaco livre sob a maestria
+            UiKit.Text(UiKit.Rect("SceneryH", box, top, new Vector2(70, -778), new Vector2(500, 28)), "CENÁRIO", 22, UiKit.Dim, TextAnchor.MiddleLeft);
+            UiKit.Fit(UiKit.Text(UiKit.Rect("Scenery", box, top, new Vector2(70, -806), new Vector2(500, 60)),
+                "Água apaga velas e respiradouros e molha a pólvora; Fogo reacende; o vento apaga velas. A poça e a erupção marcam quem está em cima.", 16, UiKit.Paper, TextAnchor.UpperLeft, false), 14, 16);
             // fusoes: abaixo das reacoes
             UiKit.Text(UiKit.Rect("FusH", box, new Vector2(0, 1), new Vector2(1130, -606), new Vector2(500, 30)), "FUSÕES · TERCEIRO ELEMENTO", 22, UiKit.Dim, TextAnchor.MiddleLeft);
             var fusions = new[] { FusionKind.Obsidian, FusionKind.Wildfire, FusionKind.Cyclone, FusionKind.Geyser, FusionKind.Kiln, FusionKind.DustStorm };
