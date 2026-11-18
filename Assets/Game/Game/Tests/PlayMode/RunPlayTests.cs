@@ -1339,7 +1339,8 @@ namespace Quintessence.Game.PlayTests
             Assert.IsFalse(director.SlowWarned, "rodando bem, nenhum aviso");
             director.ReportFrameRate(22f);
             Assert.IsTrue(director.SlowWarned, "lento na luta: avisa");
-            for (int k = 0; k < 600 && !hud.LastTip.Contains("leves"); k++) yield return null;
+            // por tempo, nao por quadros: a dica de inicio fica ~9 s antes (em maquina rapida 600 quadros nao bastavam)
+            for (float t0 = Time.unscaledTime; Time.unscaledTime - t0 < 14f && !hud.LastTip.Contains("leves");) yield return null;
             StringAssert.Contains("Gráficos: leves", hud.LastTip, "a dica aponta a opcao");
             Tips.UseKey(Tips.DefaultKey);
         }

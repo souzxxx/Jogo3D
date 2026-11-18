@@ -950,6 +950,8 @@ namespace Quintessence.Game
             Cleanup();
             tipThisRoom = false;
             tipQueue.Clear(); // dica da sala anterior nao aparece fora de contexto (na proxima vez ela volta)
+            // o aviso de jogo lento que ainda esperava na fila nao se perde na troca de sala: pode voltar a aparecer
+            if (SlowWarned && !Tips.WasSeen("slow")) SlowWarned = false;
             SaveRun();
             ApplyLayout(LayoutPicker.UsesLayout(node.Type) ? PickLayout(node) : -1);
             Dress(node.Type);
