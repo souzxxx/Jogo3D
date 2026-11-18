@@ -145,16 +145,25 @@ namespace Quintessence.UI
         /// Com controle ligado, deixa este botao escolhido para o direcional navegar a partir dele.
         public static void Focus(GameObject go)
         {
-            if (go == null || UnityEngine.InputSystem.Gamepad.current == null || EventSystem.current == null) return;
+            if (go == null) return;
+            FocusGuard.Remember(go); // o controle pode ser ligado depois: o FocusGuard devolve o foco a ele
+            if (UnityEngine.InputSystem.Gamepad.current == null || EventSystem.current == null) return;
             EventSystem.current.SetSelectedGameObject(go);
+            FocusGuard.Hold(EventSystem.current);
         }
 
         public static void EnsureEventSystem()
         {
-            if (UnityEngine.Object.FindFirstObjectByType<EventSystem>() != null) return;
+            var existing = UnityEngine.Object.FindFirstObjectByType<EventSystem>();
+            if (existing != null)
+            {
+                if (existing.GetComponent<FocusGuard>() == null) existing.gameObject.AddComponent<FocusGuard>();
+                return;
+            }
             var go = new GameObject("EventSystem");
             go.AddComponent<EventSystem>();
             go.AddComponent<InputSystemUIInputModule>();
+            go.AddComponent<FocusGuard>();
         }
 
         /// Retangulo preso a um ponto (anchor = pivot).
