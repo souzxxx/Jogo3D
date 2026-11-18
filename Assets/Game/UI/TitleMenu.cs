@@ -446,7 +446,7 @@ namespace Quintessence.UI
             var treino = root.Find("Button_TREINO");
             treinoEdge = treino != null ? treino.Find("Edge").GetComponent<UnityEngine.UI.Image>() : null;
             treinoEdgeColor = treinoEdge != null ? treinoEdge.color : Color.white;
-            firstTimeHint = UiKit.Text(UiKit.Rect("FirstTime", root, new Vector2(0.5f, 0), new Vector2(170, 124), new Vector2(420, 30)),
+            firstTimeHint = UiKit.Text(UiKit.Rect("FirstTime", root, new Vector2(0.5f, 0), new Vector2(170, 132), new Vector2(420, 30)), // 132: em 124 encostava no botao
                 "Primeira vez? Comece pelo treino", 22, new Color(0.9f, 0.76f, 0.42f), TextAnchor.MiddleCenter, false);
             Small("OPÇÕES", 390, ShowOptions);
             Small("CRÉDITOS", 610, ShowCredits);
