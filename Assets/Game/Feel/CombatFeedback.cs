@@ -337,7 +337,10 @@ namespace Quintessence.Feel
                 if (e.Mark != ElementType.None) accents.Emit(e.Mark, p, Vector3.forward, 180f, 26, e.Radius * 2.2f);
                 if (e.Trigger != ElementType.None) accents.Emit(e.Trigger, p, Vector3.forward, 180f, 26, e.Radius * 2.2f);
             }
-            DamageNumber.Spawn(e.Point + Vector3.up * 3.6f, (e.Name ?? "REACAO").ToUpperInvariant() + "!", Color.Lerp(Color.Lerp(a, b, 0.5f), Color.white, 0.5f), 1.25f, 1.1f);
+            // o mesmo nome de reacao nao reaparece em 0,6 s (em cadeia, um Vapor por inimigo empilhava cinco)
+            string rname = (e.Name ?? "REACAO").ToUpperInvariant() + "!";
+            if (!DamageNumber.Recently(rname, 0.6f))
+                DamageNumber.Spawn(e.Point + Vector3.up * 3.6f, rname, Color.Lerp(Color.Lerp(a, b, 0.5f), Color.white, 0.5f), 1.25f, 1.1f);
             CameraShake.Add(0.55f);
             Stop(0.08f);
         }
@@ -354,7 +357,8 @@ namespace Quintessence.Feel
                 StatusType.Stun => "ATORDOADO", StatusType.Frozen => "CONGELADO", StatusType.Rooted => "ENRAIZADO",
                 StatusType.ArmorBroken => "ARMADURA QUEBRADA", StatusType.Blinded => "CEGO", _ => null,
             };
-            if (isNew && label != null)
+            // status: uma vez por alvo a cada 1,5 s (a mesma palavra em varios alvos ao mesmo tempo sai uma vez so)
+            if (isNew && label != null && !DamageNumber.Recently(label + target.GetHashCode(), 1.5f) && !DamageNumber.Recently(label, 0.35f))
                 DamageNumber.Spawn(target.transform.position + Vector3.up * 3.3f, label, tint ?? Color.white, 0.62f, 0.9f);
         }
 
@@ -486,8 +490,7 @@ namespace Quintessence.Feel
         {
             if (boss == null) return;
             DamageNumber.Spawn(boss.transform.position + Vector3.up * 5.6f, up ? "ESCUDO!" : "ESCUDO QUEBRADO!", Steel, 1.4f, 1.8f);
-            if (up && needsQuintessence)
-                DamageNumber.Spawn(boss.transform.position + Vector3.up * 4.6f, "só a Quintessência quebra", Color.white, 0.9f, 2.6f);
+            // o "so a Quintessencia quebra" ja fica na linha sob a barra do chefe (Hud.bossHint) enquanto o escudo dura
             if (shieldCage == null && flatMaterial != null) BuildShieldCage();
             bool was = shieldUp;
             shieldUp = up; shieldNeedsQuint = needsQuintessence;

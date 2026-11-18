@@ -16,13 +16,38 @@ namespace Quintessence.Feel
         TextMesh front, shadow;
         Vector3 velocity;
         float life, total, baseSize;
+        bool isNumber;
         bool still; // nasceu no alto da tela: fica parado em vez de subir
         Color color;
+
+        /// No maximo tantos textos vivos: no climax (Quintessencia, reacoes em cadeia, chefe) passavam de 15 e viravam sopa.
+        public const int MaxLive = 8;
+        static readonly System.Collections.Generic.Dictionary<string, float> lastWord = new();
+
+        /// Quantos textos estao no ar (para os testes).
+        public static int LiveCount { get { live.RemoveAll(x => x == null); return live.Count; } }
+
+        /// Mesma palavra (nome de reacao, status) ha menos de 'seconds': nao repete. Numeros nunca sao filtrados aqui.
+        public static bool Recently(string word, float seconds)
+        {
+            float now = Time.unscaledTime;
+            if (lastWord.TryGetValue(word, out float at) && now - at < seconds) return true;
+            lastWord[word] = now;
+            return false;
+        }
 
         public static void Spawn(Vector3 position, string text, Color color, float size = 1f, float seconds = 0.75f)
         {
             if (font == null) font = GameFonts.Display;
             live.RemoveAll(x => x == null);
+            // lotado: sai primeiro o rotulo mais velho (palavra), so depois numero: o dano e o que o jogador precisa ler
+            while (live.Count >= MaxLive)
+            {
+                int victim = live.FindIndex(x => x != null && !x.isNumber);
+                if (victim < 0) victim = 0;
+                var old = live[victim]; live.RemoveAt(victim);
+                if (old != null) Destroy(old.gameObject);
+            }
             var spot = position + new Vector3(Random.Range(-0.25f, 0.25f), 0f, 0f);
             // nascendo no alto da tela (sobre o chefe no fundo da sala): desce para dentro dela, nao sobe e empilha para baixo,
             // senao varios textos do mesmo instante (FASE 3, ESCUDO!) ficavam todos presos na mesma linha do limite
@@ -56,6 +81,7 @@ namespace Quintessence.Feel
             n.shadow = Make(go.transform, text, new Vector3(0.05f, -0.05f, 0.02f));
             n.front = Make(go.transform, text, Vector3.zero);
             n.color = color; n.total = n.life = seconds; n.baseSize = size;
+            n.isNumber = text.Length > 0 && (char.IsDigit(text[0]) || text[0] == '+');
             n.velocity = new Vector3(Random.Range(-0.3f, 0.3f), 2.2f, 0f);
             n.still = atTop;
             if (atTop) n.velocity.y = 0f;
@@ -100,7 +126,20 @@ namespace Quintessence.Feel
             if (cam == null) return;
             var vp = cam.WorldToViewportPoint(transform.position);
             if (vp.z <= 0f) return;
-            float x = Mathf.Clamp(vp.x, 0.06f, 0.94f), y = Mathf.Min(vp.y, TopLimit);
+            // a borda considera a metade da largura do texto (o centro preso a 6% ainda deixava "TEMPESTADE DE FOGO!" cortado)
+            float half = 0.06f;
+            if (front != null)
+            {
+                var r = front.GetComponent<Renderer>();
+                if (r != null)
+                {
+                    var b = r.bounds;
+                    var l = cam.WorldToViewportPoint(b.center - cam.transform.right * b.extents.magnitude * 0.7f);
+                    var rr = cam.WorldToViewportPoint(b.center + cam.transform.right * b.extents.magnitude * 0.7f);
+                    half = Mathf.Clamp(Mathf.Abs(rr.x - l.x) * 0.5f + 0.015f, 0.06f, 0.45f);
+                }
+            }
+            float x = Mathf.Clamp(vp.x, half, 1f - half), y = Mathf.Min(vp.y, TopLimit);
             if (Mathf.Approximately(x, vp.x) && Mathf.Approximately(y, vp.y)) return;
             transform.position = cam.ViewportToWorldPoint(new Vector3(x, y, vp.z));
             if (y < vp.y) velocity.y = 0.4f;

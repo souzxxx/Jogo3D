@@ -317,6 +317,9 @@ namespace Quintessence.Game.PlayTests
             Assert.LessOrEqual(ys[2], Quintessence.Feel.DamageNumber.TopLimit + 0.01f, "texto flutuante dentro da tela");
             Assert.Greater(ys[1] - ys[0], 0.02f, "os do mesmo instante empilham para baixo em vez de se sobrepor");
             Assert.Greater(ys[2] - ys[1], 0.02f, "os do mesmo instante empilham para baixo em vez de se sobrepor");
+            // no climax nunca passa de MaxLive textos no ar
+            for (int k = 0; k < 20; k++) Quintessence.Feel.DamageNumber.Spawn(Camera.main.transform.position + Camera.main.transform.forward * 20f, "VAPOR!", Color.white);
+            Assert.LessOrEqual(Quintessence.Feel.DamageNumber.LiveCount, Quintessence.Feel.DamageNumber.MaxLive, "textos flutuantes limitados");
             HealthPool.ForceEvade = false; // sem esquiva sorteada: o golpe tem que entrar
             float before = hp.Current;
             hp.TakeDamage(new DamageInfo(hp.Max * 0.15f, ElementType.None, Team.Enemy));
