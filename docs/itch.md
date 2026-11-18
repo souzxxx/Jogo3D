@@ -98,4 +98,4 @@ Vídeo: `docs/img/run_noite.mp4` (run curta gravada pelo teste, visual de 16/11)
 
 ## Prints para a página (18/11)
 
-Em `docs/itch_prints/`, 1280 x 720: título, onda de inimigos, sala limpa, loja e Descanso. Gerados por `AspectShots.Title_In_Many_Aspects`, `Itch_Action_Shots` e `Room_Tour` (testes Explicit). Para subir: Edit game → Screenshots.
+Em `docs/itch_prints/`, 1280 x 720 (refeitos em 18/11 de madrugada, com as placas e o Treino novos): título, onda de inimigos, sala limpa, loja, Descanso, Santuário e Mestre. Gerados por `AspectShots.Title_In_Many_Aspects`, `Itch_Action_Shots` e `Room_Tour` (testes Explicit). Para subir: Edit game → Screenshots.
