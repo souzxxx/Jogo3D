@@ -25,7 +25,8 @@ namespace Quintessence.Game
             hud.SetRoom("Treino", RoomType.Rest);
             hud.SetEssence(0);
             if (dummyPrefab != null)
-                foreach (var p in new[] { new Vector3(-4f, 0, 0.5f), new Vector3(0, 0, 1.8f), new Vector3(4f, 0, 0.5f) })
+                // bonecos mais perto da entrada: no fundo da sala ficavam por baixo do painel do passo ("bata num boneco")
+                foreach (var p in new[] { new Vector3(-4f, 0, -1.2f), new Vector3(0, 0, 0f), new Vector3(4f, 0, -1.2f) })
                     Instantiate(dummyPrefab, p, Quaternion.Euler(0, 180, 0), transform);
             player.DashStarted += OnDash;
             player.SkillStarted += OnSkill;
