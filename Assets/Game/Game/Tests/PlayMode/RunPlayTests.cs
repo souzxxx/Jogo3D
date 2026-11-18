@@ -347,7 +347,8 @@ namespace Quintessence.Game.PlayTests
             Shot(cam, "docs/img/mapa.png");
             hud.ShowMap(director.Run, false);
 
-            bool sawDoors = false, sawShrine = false, shrineShot = false;
+            bool sawDoors = false, sawShrine = false, shrineShot = false, bossChipSaidWave = false;
+            int hushedBefore = Quintessence.Feel.CombatFeedback.WaveCallsHushed;
             int maxDepth = 0;
             float limit = 420f, sinceSwitch = 0f, sinceInteract = 0f;
             while (!director.Finished && limit > 0f)
@@ -356,6 +357,7 @@ namespace Quintessence.Game.PlayTests
                 limit -= dt; sinceSwitch += dt; sinceInteract += dt;
                 maxDepth = Mathf.Max(maxDepth, director.Run.Depth);
                 if (director.Run.Current.Type == RoomType.Shrine) sawShrine = true;
+                if (director.Run.Current.Type == RoomType.Boss && !director.Busy && hud.RoomLabel.Contains("onda")) bossChipSaidWave = true;
                 var target = Nearest();
                 input.AttackHeld = false;
                 if (director.Busy) input.Move = Vector2.zero;
@@ -405,6 +407,8 @@ namespace Quintessence.Game.PlayTests
             Assert.Contains(Feat.FirstWin, director.NewFeats, "a primeira vitoria cumpre o feito");
             Assert.IsTrue(player.GetComponentInChildren<PlayerAnimator>().Celebrating, "o heroi comemora quando o chefe cai");
             StringAssert.DoesNotContain("onda", hud.RoomLabel, "com o chefe caido o chip nao fala mais de onda");
+            Assert.IsFalse(bossChipSaidWave, "na luta do chefe o chip nao fala de onda");
+            Assert.Greater(Quintessence.Feel.CombatFeedback.WaveCallsHushed, hushedBefore, "e o ONDA 1/1 nao aparece no chefe");
             Assert.Greater(hud.PhasePulses, 0, "a barra do chefe pulsou nas fases");
             Assert.LessOrEqual(Quintessence.Feel.DamageNumber.LiveCount, 0, "na vitoria os textos no ar somem");
             Assert.AreEqual(1, director.BossPresented, "a camera apresenta o chefe final uma vez");

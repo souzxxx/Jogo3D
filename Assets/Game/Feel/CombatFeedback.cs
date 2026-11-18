@@ -67,6 +67,7 @@ namespace Quintessence.Feel
 
         void Awake()
         {
+            QuietWaves = false; // cena nova: so o diretor liga, na sala do chefe
             if (RingMesh == null) RingMesh = BuildRing(0.9f, 1f, 48);
             if (RuneRingMesh == null) RuneRingMesh = BuildRuneRing(10, 0.8f, 1f, 0.07f, 7f);
             // o anel do heroi e inteiro e mais largo: o tracejado era igual ao da marca nos inimigos e o heroi se perdia no meio deles
@@ -686,9 +687,17 @@ namespace Quintessence.Feel
             CameraShake.Add(0.6f);
         }
 
+        /// O diretor liga na sala do chefe: sem o aviso flutuante de onda.
+        public static bool QuietWaves;
+        /// Avisos de onda calados na sala do chefe (para os testes).
+        public static int WaveCallsHushed;
+
         void OnWave(int index, int total)
         {
             FindPlayer();
+            // na sala do chefe "ONDA 1/1" logo depois do letreiro dele nao informava nada (nas outras salas o aviso fica:
+            // e o unico sinal de onda perto do olho, e no Cerco/Provacao o "REFORCOS" e o unico aviso)
+            if (QuietWaves) { WaveCallsHushed++; return; }
             if (player != null)
                 // aviso menor e curto: o chip do alto ja mostra a onda e quantos faltam; o grande cobria a luta
                 DamageNumber.Spawn(player.position + Vector3.up * 4.2f, total > 0 ? $"ONDA {index + 1}/{total}" : "REFORÇOS", new Color(0.93f, 0.88f, 0.78f), 0.7f, 0.85f);

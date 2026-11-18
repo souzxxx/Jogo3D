@@ -327,7 +327,7 @@ namespace Quintessence.Game
             ApplyLayout(-1);
             Dress(type);
             roomBase = $"Sala {Run.Depth + 1}/{Run.Map.LayerCount} · {RoomInfo.Name(type)}";
-            roomKind = type;
+            roomKind = type; Feel.CombatFeedback.QuietWaves = type == RoomType.Boss;
             hud.SetRoom(roomBase, type);
             switch (type)
             {
@@ -638,7 +638,8 @@ namespace Quintessence.Game
             string label = roomBase;
             // ultima onda sem ninguem vivo (o chefe caiu, a sala esta limpando) ou run encerrada: so o nome da sala
             bool done = Finished || (st.CurrentWave >= st.TotalWaves - 1 && st.Alive <= 0 && !st.Repeat);
-            if (st.Started && !st.Cleared && st.CurrentWave >= 0 && !done)
+            // no chefe a barra dele ja diz tudo: o chip fica so com o nome da sala
+            if (st.Started && !st.Cleared && st.CurrentWave >= 0 && !done && roomKind != RoomType.Boss)
                 label += $" · onda {st.CurrentWave + 1}/{st.TotalWaves} · " + (st.Alive > 0 ? $"{st.Alive} {(st.Alive == 1 ? "inimigo" : "inimigos")}" : "próxima onda");
             // so mexe no rotulo que e dela (Provacao e Cerco escrevem o proprio)
             if (label != hud.RoomLabel && hud.RoomLabel.StartsWith(roomBase)) hud.SetRoom(label);
@@ -927,7 +928,7 @@ namespace Quintessence.Game
             if (node.Type == RoomType.Boss && QueenRun && dresser != null) dresser.Apply(Biome.Crypt);
             player.Teleport(entryPoint, Vector3.forward);
             roomBase = $"Sala {Run.Depth + 1}/{Run.Map.LayerCount} · {RoomInfo.Name(node.Type)}";
-            roomKind = node.Type;
+            roomKind = node.Type; Feel.CombatFeedback.QuietWaves = node.Type == RoomType.Boss; // chefe: sem "ONDA 1/1"
             hud.SetRoom(roomBase, node.Type);
             yield return null;
             entering = false;
