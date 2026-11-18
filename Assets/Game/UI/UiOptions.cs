@@ -104,7 +104,7 @@ namespace Quintessence.UI
             UiKit.Focus(back.gameObject);
         }
 
-        static string DifficultyLabel() => GamePrefs.Relaxed ? "Dificuldade: Tranquila (você recebe 35% menos dano)" : "Dificuldade: Normal";
+        static string DifficultyLabel() => GamePrefs.Relaxed ? "Dificuldade: Tranquila (35% menos dano)" : "Dificuldade: Normal";
 
         static string ShakeLabel() => FxPrefs.ScreenShake ? "Tremor e vibração: sim" : "Tremor e vibração: não";
 
