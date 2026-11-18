@@ -921,6 +921,94 @@ namespace Quintessence.Game.PlayTests
             Time.captureFramerate = 0;
         }
 
+        /// Sala limpa = sala segura (explosao de morte e tiro no ar sao desarmados), letreiro discreto com a luta
+        /// seguindo, placas do Santuario sem um texto por cima do outro e camera sem adiantar alem da parede do fundo.
+        [UnityTest, Timeout(300000)]
+        public IEnumerator Cleared_Room_Is_Safe_And_Signs_Stay_Out_Of_The_Fight()
+        {
+            GameEvents.Clear();
+            Time.timeScale = 1f;
+            Time.captureFramerate = 30;
+            GameFlow.StartElement = ElementType.Water;
+            GameFlow.Seed = 3; GameFlow.Layers = 5; GameFlow.Shrines = 1;
+            yield return EditorSceneManager.LoadSceneAsyncInPlayMode("Assets/Scenes/Run.unity", new LoadSceneParameters(LoadSceneMode.Single));
+            yield return null;
+            yield return null;
+            var director = Object.FindFirstObjectByType<RunDirector>();
+            var spawner = Object.FindFirstObjectByType<WaveSpawner>();
+            var player = Object.FindFirstObjectByType<PlayerController>();
+            var hp = player.GetComponent<Health>();
+            for (int k = 0; k < 2000 && director.Busy; k++) yield return null;
+            for (int k = 0; k < 900 && (spawner.State == null || spawner.State.Alive <= 0); k++) yield return null;
+            Assert.Greater(spawner.State.Alive, 0, "a primeira onda chegou");
+
+            int quiet = director.QuietBanners;
+            director.Banner("TESTE", Color.white, 3.9f, 1f, 1.8f);
+            Assert.AreEqual(quiet + 1, director.QuietBanners, "com inimigo vivo o letreiro sai discreto");
+
+            // abate tudo; a cada leva uma explosao de morte armada debaixo do heroi: a da ultima leva tem de ser desarmada
+            int cleared = director.Run.RoomsCleared;
+            for (int k = 0; k < 3000 && director.Run.RoomsCleared == cleared; k++)
+            {
+                hp.Heal(hp.Max);
+                var alive = Object.FindObjectsByType<EnemyBrain>(FindObjectsSortMode.None).Select(e => e.GetComponent<Health>()).Where(h => h != null && !h.IsDead).ToList();
+                if (alive.Count > 0)
+                {
+                    VolatileBurst.Spawn(player.transform.position, 2f, 0.85f, 5f);
+                    foreach (var h in alive) h.TakeDamage(new DamageInfo(99999f, ElementType.None, Team.Player, player.gameObject));
+                }
+                yield return null;
+            }
+            Assert.Greater(director.Run.RoomsCleared, cleared, "a sala foi limpa");
+            yield return null;
+            float after = hp.Current;
+            Assert.Greater(director.Defused, 0, "o sala limpa desarmou a explosao pendente");
+            Assert.AreEqual(0, Object.FindObjectsByType<VolatileBurst>(FindObjectsSortMode.None).Length);
+            for (int k = 0; k < 45; k++) yield return null;
+            Assert.GreaterOrEqual(hp.Current, after, "depois do SALA LIMPA o heroi nao leva dano");
+            int beforeQuiet = director.QuietBanners;
+            director.Banner("TESTE", Color.white, 3.9f, 1f, 1.8f);
+            Assert.AreEqual(beforeQuiet, director.QuietBanners, "sem luta o letreiro sai grande como antes");
+
+            // camera: mirando para o norte encostado na parede do fundo, o centro nao passa de HalfZ - NorthMargin
+            var cam = Camera.main;
+            player.Teleport(new Vector3(0f, 0.05f, Arena.HalfZ - 1f), Vector3.forward);
+            player.GetComponent<PlayerInputReader>().enabled = false;
+            var scripted = player.gameObject.AddComponent<ScriptedInput>();
+            player.Input = scripted;
+            scripted.AimPoint = player.transform.position + Vector3.forward * 9f;
+            for (int k = 0; k < 60; k++) yield return null;
+            var ray = cam.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0f));
+            float t = (player.transform.position.y - ray.origin.y) / ray.direction.y; // o foco fica na altura do heroi
+            float centerZ = (ray.origin + ray.direction * t).z;
+            Assert.LessOrEqual(centerZ, Arena.HalfZ - FollowCamera.NorthMargin + 0.05f, "a camera nao adianta alem da parede do fundo");
+            var vp = cam.WorldToViewportPoint(player.transform.position);
+            Assert.Less(vp.y, 0.85f, "e o heroi na porta continua no quadro");
+            Directory.CreateDirectory("Logs/r14");
+            Shot(cam, "Logs/r14/porta.png");
+
+            // Santuario: o nome do elemento nao invade a descricao
+            director.ShowRoom(RoomType.Shrine);
+            for (int k = 0; k < 20; k++) yield return null;
+            var shrines = Object.FindObjectsByType<Transform>(FindObjectsSortMode.None).Where(x => x.name.StartsWith("Shrine_") || x.name.StartsWith("Deepen_")).ToList();
+            Assert.Greater(shrines.Count, 0, "a sala tem pedestais");
+            player.Teleport(director.EntryPoint, Vector3.forward);
+            for (int k = 0; k < 40; k++) yield return null;
+            Shot(cam, "Logs/r14/santuario_entrada.png");
+            foreach (var root in shrines)
+            {
+                Assert.AreEqual(RunDirector.ShrineZ, root.position.z, 0.01f, "pedestal mais perto da entrada");
+                var labels = root.GetComponentsInChildren<TextMesh>().OrderByDescending(l => l.transform.position.y).ToList();
+                for (int i = 0; i + 1 < labels.Count; i++)
+                {
+                    var upper = labels[i].GetComponent<MeshRenderer>().bounds;
+                    var lower = labels[i + 1].GetComponent<MeshRenderer>().bounds;
+                    Assert.GreaterOrEqual(upper.min.y, lower.max.y - 0.02f, $"{root.name}: '{labels[i].text}' cai por cima de '{labels[i + 1].text}'");
+                }
+            }
+            Time.captureFramerate = 0;
+        }
+
         [UnityTest, Timeout(300000)]
         public IEnumerator Escudeiro_Blocks_From_The_Front_But_Not_From_Behind()
         {

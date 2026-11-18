@@ -74,9 +74,14 @@ namespace Quintessence.Combat
             var rot = Quaternion.Euler(pitch, 0f, 0f);
             var center = focus;
             center.x = ClampX(center.x);
-            center.z = ClampSouth(center.z);
+            center.z = ClampSouth(Mathf.Min(center.z, Quintessence.Core.Arena.HalfZ - NorthMargin)); // em sala pequena o sul vence
             transform.SetPositionAndRotation(center - rot * Vector3.forward * distance, rot);
         }
+
+        /// Perto da parede do fundo a camera nao adianta mais para o norte: alem dela so ha o vazio preto, e mirando
+        /// para as portas ele chegava a um quarto da tela. Prender de vez nao da (com 41 graus o topo da tela passa por
+        /// cima da parede ate o centro da sala), entao so o adiantamento e cortado; o heroi na porta fica um pouco acima do meio.
+        public const float NorthMargin = 2.5f;
 
         /// Quanto do chao alem da borda sul pode aparecer: o bastante para o heroi na porta nao ficar embaixo da barra de skills.
         const float SouthMargin = 2.0f;
