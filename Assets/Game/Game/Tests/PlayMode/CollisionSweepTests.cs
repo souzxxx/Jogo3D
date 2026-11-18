@@ -216,10 +216,10 @@ namespace Quintessence.Game.PlayTests
             Assert.IsTrue(foeModel.GetComponentsInChildren<SkinnedMeshRenderer>().All(r => r.gameObject.layer == enemyLayer), "o modelo do inimigo deveria estar na camada da silhueta");
             foreach (var other in Object.FindObjectsByType<EnemyBrain>(FindObjectsSortMode.None)) other.enabled = false;
             foe.GetComponent<UnityEngine.AI.NavMeshAgent>().enabled = false;
-            // ate tres pilares: na bateria inteira, as vezes o primeiro deixava o peito do inimigo de fora (outro inimigo na frente,
+            // ate cinco pilares: na bateria inteira, as vezes o primeiro deixava o peito do inimigo de fora (outro inimigo na frente,
             // pose de ataque); basta um deles mostrar a silhueta
             var pillars = GameObject.Find("Layout").GetComponentsInChildren<Collider>().Where(c => !c.isTrigger)
-                .Where(c => Free(new Vector3(c.bounds.center.x, 0.05f, c.bounds.max.z + 0.9f))).Take(3).ToList();
+                .Where(c => Free(new Vector3(c.bounds.center.x, 0.05f, c.bounds.max.z + 0.9f))).Take(5).ToList();
             Assert.IsNotEmpty(pillars, "nenhum pilar com espaco atras");
             float best = 0f;
             foreach (var pillar in pillars)

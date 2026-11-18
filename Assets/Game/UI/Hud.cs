@@ -403,8 +403,9 @@ namespace Quintessence.UI
                 var t = skillTiles[i];
                 float cd = has ? hero.SkillCooldown01(e) : 0f;
                 bool usable = has && cd <= 0f;
-                t.Icon.sprite = UiKit.Icon(has ? SkillIcon[i + 1] : "lock");
-                t.Icon.color = !has ? new Color(1, 1, 1, 0.28f) : usable ? Color.Lerp(c, UiKit.Cream, 0.3f) : new Color(1, 1, 1, 0.35f);
+                // skill ainda nao desperta: o icone dela em cinza bem apagado (o cadeado lia como conteudo faltando)
+                t.Icon.sprite = UiKit.Icon(SkillIcon[i + 1]);
+                t.Icon.color = !has ? new Color(0.62f, 0.6f, 0.66f, 0.22f) : usable ? Color.Lerp(c, UiKit.Cream, 0.3f) : new Color(1, 1, 1, 0.35f);
                 t.Cooldown.fillAmount = cd;
                 t.Ring.color = usable ? Color.Lerp(c, UiKit.Cream, 0.35f) : new Color(1, 1, 1, 0.15f);
                 t.Key.color = has ? UiKit.Cream : UiKit.Dim;
