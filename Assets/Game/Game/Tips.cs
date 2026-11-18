@@ -38,7 +38,7 @@ namespace Quintessence.Game
         static string PadText(string id) => id switch
         {
             "melee" => "Esqueleto de arma erguida: o golpe sai quando ela desce. Desvie com A nessa hora.",
-            "start" => "RT ataca. O direcional solta as skills dos elementos. A desvia.",
+            "start" => "X ataca. LB, LT, RT e RB soltam as skills dos elementos. A desvia.",
             "level" => "Subiu de nível: escolha um talento com o direcional e confirme com A.",
             "quint" => "Quatro elementos despertos: cause reações para encher a Quintessência e aperte Y.",
             "map" => "Portas abertas: cada uma leva a um tipo de sala. Segure R3 para ver o mapa inteiro e planejar o caminho.",

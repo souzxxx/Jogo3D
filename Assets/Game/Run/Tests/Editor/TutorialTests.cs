@@ -98,10 +98,11 @@ namespace Quintessence.Run.Tests
                 Assert.IsNotEmpty(t);
                 StringAssert.DoesNotContain("Aperte 1", t); StringAssert.DoesNotContain("W A S D", t); StringAssert.DoesNotContain("Clique", t);
             }
-            StringAssert.Contains("direcional para baixo", TutorialState.Text(TutorialStep.Skill, E, F, true));
+            StringAssert.Contains("Aperte RT", TutorialState.Text(TutorialStep.Skill, E, F, true));
             var react = TutorialState.Text(TutorialStep.React, E, F, true);
-            StringAssert.Contains("para baixo", react);
-            StringAssert.Contains("para cima", react);
+            StringAssert.Contains("com RT", react);
+            StringAssert.Contains("com LB", react);
+            Assert.AreEqual("Aperte X para bater num boneco três vezes. O golpe básico não tem elemento.", TutorialState.Text(TutorialStep.Attack, E, F, true));
             Assert.AreEqual(TutorialState.Text(TutorialStep.Skill, E, F), TutorialState.Text(TutorialStep.Skill, E, F, false));
         }
     }

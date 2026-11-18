@@ -5,15 +5,15 @@ namespace Quintessence.Combat
 {
     /// Teclado + mouse e controle ao mesmo tempo; vale o ultimo que mexeu.
     /// Teclado: WASD move, mouse mira, clique esquerdo ataca, 1-4 skills, Espaco dash, R Quintessencia, E interage.
-    /// Controle: analogico esquerdo move, direito mira, RT ou X ataca, direcional (cima, direita, baixo, esquerda) = skills 1-4,
-    /// LT = primeira skill pronta, A dash, Y Quintessencia, B interage.
+    /// Controle: analogico esquerdo move, direito mira, X ataca, LB LT RT RB = skills 1-4 (Fogo, Agua, Terra, Ar),
+    /// A dash, Y Quintessencia, B interage. O direcional fica para os menus.
     public class PlayerInputReader : MonoBehaviour, IPlayerInput
     {
         const float StickDeadzone = 0.25f, TriggerPoint = 0.45f;
         Camera cam;
         Vector3 aim;
         Vector2 lastMouse;
-        bool usingPad, leftTriggerWas;
+        bool usingPad, leftTriggerWas, rightTriggerWas;
         Vector3 padAimDir = Vector3.forward;
 
         /// O jogador esta no controle (o HUD troca as dicas de tecla).
@@ -34,7 +34,8 @@ namespace Quintessence.Combat
             if (pad != null && (pad.leftStick.ReadValue().sqrMagnitude > 0.1f || pad.rightStick.ReadValue().sqrMagnitude > 0.1f
                 || pad.buttonSouth.isPressed || pad.buttonNorth.isPressed || pad.buttonEast.isPressed || pad.buttonWest.isPressed
                 || pad.startButton.isPressed || pad.selectButton.isPressed || pad.dpad.ReadValue().sqrMagnitude > 0.1f
-                || pad.leftTrigger.ReadValue() > 0.3f || pad.rightTrigger.ReadValue() > 0.3f))
+                || pad.leftTrigger.ReadValue() > 0.3f || pad.rightTrigger.ReadValue() > 0.3f
+                || pad.leftShoulder.isPressed || pad.rightShoulder.isPressed))
                 usingPad = true;
             var m = Mouse.current;
             if (m != null)
@@ -108,7 +109,7 @@ namespace Quintessence.Combat
             {
                 if (Mouse.current != null && Mouse.current.leftButton.isPressed) return true;
                 var pad = Gamepad.current;
-                return pad != null && (pad.rightTrigger.ReadValue() > TriggerPoint || pad.buttonWest.isPressed);
+                return pad != null && pad.buttonWest.isPressed; // so o X: os gatilhos sao skills
             }
         }
 
@@ -116,16 +117,8 @@ namespace Quintessence.Combat
             (Keyboard.current != null && Keyboard.current.spaceKey.wasPressedThisFrame) ||
             (Gamepad.current != null && Gamepad.current.buttonSouth.wasPressedThisFrame);
 
-        public bool ConsumeSkill()
-        {
-            if (Mouse.current != null && Mouse.current.rightButton.wasPressedThisFrame) return true;
-            var pad = Gamepad.current;
-            if (pad == null) return false;
-            bool down = pad.leftTrigger.ReadValue() > TriggerPoint;
-            bool pressed = down && !leftTriggerWas;
-            leftTriggerWas = down;
-            return pressed;
-        }
+        /// Repetir a ultima skill: so o clique direito (no controle os quatro botoes de cima ja sao as skills).
+        public bool ConsumeSkill() => Mouse.current != null && Mouse.current.rightButton.wasPressedThisFrame;
 
         public int ConsumeElementSkill()
         {
@@ -138,13 +131,16 @@ namespace Quintessence.Combat
                 if (k.digit4Key.wasPressedThisFrame || k.numpad4Key.wasPressedThisFrame) return 4;
             }
             var pad = Gamepad.current;
-            if (pad != null)
-            {
-                if (pad.dpad.up.wasPressedThisFrame) return 1;
-                if (pad.dpad.right.wasPressedThisFrame) return 2;
-                if (pad.dpad.down.wasPressedThisFrame) return 3;
-                if (pad.dpad.left.wasPressedThisFrame) return 4;
-            }
+            if (pad == null) { leftTriggerWas = rightTriggerWas = false; return 0; }
+            // gatilho e eixo: conta a passagem do ponto, para segurar nao repetir a skill
+            bool lt = pad.leftTrigger.ReadValue() > TriggerPoint, rt = pad.rightTrigger.ReadValue() > TriggerPoint;
+            bool ltPressed = lt && !leftTriggerWas, rtPressed = rt && !rightTriggerWas;
+            leftTriggerWas = lt; rightTriggerWas = rt;
+            // da esquerda para a direita na mao: LB, LT, RT, RB
+            if (pad.leftShoulder.wasPressedThisFrame) return 1;
+            if (ltPressed) return 2;
+            if (rtPressed) return 3;
+            if (pad.rightShoulder.wasPressedThisFrame) return 4;
             return 0;
         }
 

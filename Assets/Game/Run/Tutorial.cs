@@ -69,9 +69,9 @@ namespace Quintessence.Run
             _ => Text(s),
         };
 
-        static readonly string[] PadDir = { "", "cima", "direita", "baixo", "esquerda" };
+        static readonly string[] PadDir = { "", "LB", "LT", "RT", "RB" };
 
-        /// Texto do passo para quem joga de controle: analogicos, gatilhos e o direcional no lugar de teclado e mouse.
+        /// Texto do passo para quem joga de controle: analogicos e os botoes de cima (LB LT RT RB) no lugar de teclado e mouse.
         public static string Text(TutorialStep s, Quintessence.Core.ElementType hero, Quintessence.Core.ElementType second, bool gamepad)
         {
             if (!gamepad) return Text(s, hero, second);
@@ -79,9 +79,9 @@ namespace Quintessence.Run
             {
                 TutorialStep.Move => "Ande com o analógico esquerdo. O analógico direito aponta a mira.",
                 TutorialStep.Dash => "Aperte A para dar um dash. Durante o dash você não leva dano.",
-                TutorialStep.Attack => "Aperte RT para bater num boneco três vezes. O golpe básico não tem elemento.",
-                TutorialStep.Skill => $"Aperte o direcional para {PadDir[(int)hero]} perto de um boneco: é a skill de {Bare(hero)}. Ela deixa a marca do elemento no inimigo e tem recarga.",
-                TutorialStep.React => $"Você despertou {Named(second)}. Marque um boneco com o direcional para {PadDir[(int)hero]} e acerte o mesmo boneco com o direcional para {PadDir[(int)second]}: skills de elementos diferentes reagem.",
+                TutorialStep.Attack => "Aperte X para bater num boneco três vezes. O golpe básico não tem elemento.",
+                TutorialStep.Skill => $"Aperte {PadDir[(int)hero]} perto de um boneco: é a skill de {Bare(hero)}. Ela deixa a marca do elemento no inimigo e tem recarga.",
+                TutorialStep.React => $"Você despertou {Named(second)}. Marque um boneco com {PadDir[(int)hero]} e acerte o mesmo boneco com {PadDir[(int)second]}: skills de elementos diferentes reagem.",
                 TutorialStep.Quintessence => "Reações enchem a Quintessência. Com os quatro elementos e a barra cheia, aperte Y.",
                 _ => Text(s),
             };
@@ -91,7 +91,7 @@ namespace Quintessence.Run
         {
             TutorialStep.Move => "Ande pela sala com W A S D. O herói mira onde o mouse aponta.",
             TutorialStep.Dash => "Aperte Espaço (A no controle) para dar um dash. Durante o dash você não leva dano.",
-            TutorialStep.Attack => "Clique esquerdo (RT no controle) para bater num boneco três vezes. O golpe básico não tem elemento.",
+            TutorialStep.Attack => "Clique esquerdo (X no controle) para bater num boneco três vezes. O golpe básico não tem elemento.",
             TutorialStep.Skill => "Aperte 1 perto de um boneco: é a skill de Fogo. Ela deixa a marca do elemento no inimigo e tem recarga.",
             TutorialStep.React => "Você despertou a Água. Marque um boneco com 1 e acerte o mesmo boneco com 2: skills de elementos diferentes reagem.",
             TutorialStep.Quintessence => "Reações enchem a Quintessência. Com os quatro elementos e a barra cheia, aperte R.",

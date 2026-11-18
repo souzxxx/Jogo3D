@@ -31,8 +31,8 @@ Os quatro elementos se separaram e estão corrompendo o mundo. Escolha um dos qu
 |---|---|---|
 | Mover | W A S D | analógico esquerdo |
 | Mirar | mouse (a seta e o anel no chão mostram para onde) | analógico direito (com ajuda de mira) |
-| Golpe básico | clique esquerdo (segurar faz o combo) | RT ou X |
-| Skills dos elementos | 1 Fogo · 2 Água · 3 Terra · 4 Ar | direcional |
+| Golpe básico | clique esquerdo (segurar faz o combo) | X |
+| Skills dos elementos | 1 Fogo · 2 Água · 3 Terra · 4 Ar | LB Fogo · LT Água · RT Terra · RB Ar |
 | Desviar (dash) | Espaço | A |
 | Quintessência (com os quatro elementos) | R | Y |
 | Interagir (portas, baús, totens) | E | B |

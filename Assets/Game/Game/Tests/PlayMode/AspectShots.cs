@@ -48,8 +48,8 @@ namespace Quintessence.Game.PlayTests
             hud.UseCamera(Camera.main);
             var labels = hud.GetComponentsInChildren<UnityEngine.UI.Text>(true).Select(t => t.text).ToList();
             Assert.Contains("A", labels, "o dash mostra o botao A");
-            Assert.Contains("DIREITA", labels, "a skill de Agua mostra o direcional");
-            StringAssert.Contains("direcional para a direita", hud.LastTip, "a dica inicial fala do controle");
+            Assert.Contains("LT", labels, "a skill de Agua mostra o LT");
+            StringAssert.Contains("sai no LT", hud.LastTip, "a dica inicial fala do controle");
             yield return Shoot(Camera.main, "docs/img/s6_controle.png", new Vector2Int(960, 540));
             // no controle, levar golpe vibra forte e curto
             var pc = Object.FindFirstObjectByType<Quintessence.Combat.PlayerController>();

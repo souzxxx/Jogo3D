@@ -289,8 +289,8 @@ namespace Quintessence.UI
         }
 
         Text promptKey;
-        /// Rotulo do direcional para cada skill no controle (Fogo cima, Agua direita, Terra baixo, Ar esquerda).
-        static readonly string[] PadSkill = { "", "CIMA", "DIREITA", "BAIXO", "ESQUERDA" };
+        /// Botao de cada skill no controle, da esquerda para a direita na mao (Fogo LB, Agua LT, Terra RT, Ar RB).
+        static readonly string[] PadSkill = { "", "LB", "LT", "RT", "RB" };
         static bool Pad => InputMode.Gamepad;
 
         static Image Bar(RectTransform parent, Color color)
@@ -852,7 +852,7 @@ namespace Quintessence.UI
                 }
             }
             UiKit.Text(UiKit.Rect("Keys", pausePanel, new Vector2(0.5f, 0), new Vector2(0, 18), new Vector2(1700, 30)),
-                Pad ? "analógico esquerdo move · direito mira · RT ataca · direcional skills · A dash · Y Quintessência · B interagir · Select inventário · R3 mapa"
+                Pad ? "analógico esquerdo move · direito mira · X ataca · LB LT RT RB skills · A dash · Y Quintessência · B interagir · Select inventário · R3 mapa"
                     : "WASD mover · mouse mira · clique ataca · 1 2 3 4 skills · Espaço dash · R Quintessência · E interagir · I inventário · Tab mapa",
                 20, UiKit.Dim, TextAnchor.MiddleCenter, false);
         }

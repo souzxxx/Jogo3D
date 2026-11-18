@@ -61,9 +61,9 @@ namespace Quintessence.UI
         {
             ("Mover", "W A S D", "analógico esquerdo"),
             ("Mirar", "mouse", "analógico direito"),
-            ("Golpe básico (segure para o combo)", "clique esquerdo", "RT ou X"),
-            ("Skills de Fogo, Água, Terra e Ar", "1  2  3  4", "direcional"),
-            ("Repetir a última skill", "clique direito", "LT"),
+            ("Golpe básico (segure para o combo)", "clique esquerdo", "X"),
+            ("Skills de Fogo, Água, Terra e Ar", "1  2  3  4", "LB  LT  RT  RB"),
+            ("Repetir a última skill", "clique direito", "—"),
             ("Desviar (dash)", "Espaço", "A"),
             ("Quintessência (com os quatro elementos)", "R", "Y"),
             ("Interagir: portas, baús, totens", "E", "B"),

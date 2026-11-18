@@ -168,7 +168,7 @@ namespace Quintessence.UI
 
         /// Linha de comandos no pe do titulo: a do teclado ou a do controle, conforme o que o jogador usou por ultimo.
         public static string KeysLine(bool gamepad) => gamepad
-            ? "analógico esquerdo move · direito mira · RT ataca · direcional skills · A dash · Y Quintessência · B interagir · Select inventário"
+            ? "analógico esquerdo move · direito mira · X ataca · LB LT RT RB skills · A dash · Y Quintessência · B interagir · Select inventário"
             : "WASD mover · mouse mira · clique ataca · 1 2 3 4 skills · Espaço dash · R Quintessência · E interagir · I inventário  —  também funciona com controle";
 
         /// No titulo nao existe o leitor de controles do heroi: quem mexeu por ultimo (controle ou teclado e mouse) decide os textos.
