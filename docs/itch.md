@@ -3,7 +3,7 @@
 > **No ar desde 17/11:** https://souzxxx.itch.io/quintessence (embed 1280 × 758 com tela cheia, zip do Windows para baixar, capa `docs/img/capa_itch.png`, declaração de IA: código e texto). Falta inscrever na jam.
 
 > Rascunho da página do jogo na jam https://itch.io/jam/projeto-jogo-3d-insper-20262 (entrega até 25/11/2026).
-> A rubrica pede: como jogar, teclas diferentes, segredos, imagens e vídeo. Tudo abaixo existe no jogo de 17/11.
+> A rubrica pede: como jogar, teclas diferentes, segredos, imagens e vídeo. Tudo abaixo existe no jogo de 18/11.
 > Arquivos: `Builds/Quintessence-Windows.zip` (Windows, obrigatório) e `Builds/Quintessence-WebGL.zip` (jogar no navegador, marcar "This file will be played in the browser", tamanho 1280 × 720 e botão de tela cheia).
 
 ---
@@ -54,6 +54,7 @@ Roguelite de ação em 3D com câmera de cima. Uma run leva de 10 a 15 minutos.
 - **Fusões:** com três elementos, lance a skill do terceiro dentro da lava do Magma, da nuvem do Vapor ou do lamaçal da Lama.
 - **Esquiva perfeita:** dar dash através de um golpe enche a Quintessência e deixa o próximo golpe crítico.
 - **Escudeiro:** de frente o escudo segura quase tudo. Contorne.
+- **O cenário reage:** caixotes quebram com golpe, explosão ou pisada; tochas e velas apagam com Água e reacendem com Fogo; o Cristal de Ressonância se parte em lascas; portas e baús abrem de verdade.
 - **Três chefes finais**, sorteados por run.
 - **Ascensão:** depois da primeira vitória, o título libera 5 níveis de dificuldade a mais.
 - **Refúgio:** os Fragmentos de cada run compram 8 melhorias permanentes.
