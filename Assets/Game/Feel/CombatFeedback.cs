@@ -340,9 +340,47 @@ namespace Quintessence.Feel
             // o mesmo nome de reacao nao reaparece em 0,6 s (em cadeia, um Vapor por inimigo empilhava cinco)
             string rname = (e.Name ?? "REACAO").ToUpperInvariant() + "!";
             if (!DamageNumber.Recently(rname, 0.6f))
-                DamageNumber.Spawn(e.Point + Vector3.up * 3.6f, rname, Color.Lerp(Color.Lerp(a, b, 0.5f), Color.white, 0.5f), 1.25f, 1.1f);
+            {
+                // primeira vez desta reacao neste computador: o efeito vai junto, embaixo do nome
+                string effect = ReactionEffect(e.Name);
+                bool first = effect.Length > 0 && ReactionsSeen.Add(e.Name);
+                if (first) DamageNumber.Spawn(e.Point + Vector3.up * 2.9f, effect, new Color(0.93f, 0.88f, 0.78f), 0.7f, 2f);
+                DamageNumber.Spawn(e.Point + Vector3.up * 3.6f, rname, Color.Lerp(Color.Lerp(a, b, 0.5f), Color.white, 0.5f), 1.25f, first ? 2f : 1.1f);
+            }
             CameraShake.Add(0.55f);
             Stop(0.08f);
+        }
+
+        /// O que cada reacao faz, em poucas palavras (os mesmos efeitos do Santuario, do inventario e do Grimorio).
+        public static string ReactionEffect(string name) => name switch
+        {
+            "Vapor" => "inimigos dentro erram metade dos golpes",
+            "Magma" => "deixa uma poça de lava",
+            "Tempestade de Fogo" => "a maior explosão: todos ficam queimando",
+            "Lama" => "ninguém sai do lugar",
+            "Nevasca" => "congela; o próximo golpe estilhaça",
+            "Estilhacos" or "Estilhaços" => "lascas em área que empurram longe",
+            _ => "",
+        };
+
+        /// Reacoes que o jogador ja viu explicadas (guardado entre sessoes; os testes trocam a chave).
+        public static class ReactionsSeen
+        {
+            public const string DefaultKey = "quintessence.reactions";
+            static string key = DefaultKey;
+            static HashSet<string> seen;
+            public static void UseKey(string k) { key = k; seen = null; }
+            static HashSet<string> Set => seen ??= new HashSet<string>(PlayerPrefs.GetString(key, "").Split(new[] { ';' }, System.StringSplitOptions.RemoveEmptyEntries));
+            public static bool Has(string name) => Set.Contains(name);
+            /// Marca como vista; devolve true se era a primeira vez.
+            public static bool Add(string name)
+            {
+                if (!Set.Add(name)) return false;
+                PlayerPrefs.SetString(key, string.Join(";", Set));
+                PlayerPrefs.Save();
+                return true;
+            }
+            public static void ResetAll() { PlayerPrefs.DeleteKey(key); seen = null; }
         }
 
         void OnStatus(Health target, StatusType type, float duration)
