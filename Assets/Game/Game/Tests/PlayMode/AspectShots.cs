@@ -302,10 +302,15 @@ namespace Quintessence.Game.PlayTests
             for (int k = 0; k < 5; k++) yield return null;
             Assert.Less(hud.HurtEdgeAlpha, 0.01f, "sem dano, a borda fica apagada");
             // texto que nasce no alto da tela desce para dentro dela (nao corta na borda nem cobre a barra do chefe)
-            Quintessence.Feel.DamageNumber.Spawn(Camera.main.ViewportToWorldPoint(new Vector3(0.5f, 0.99f, 20f)), "ALTO", Color.white);
+            var high = Camera.main.ViewportToWorldPoint(new Vector3(0.5f, 0.99f, 20f));
+            foreach (var word in new[] { "FASE 3", "ESCUDO!", "ALTO" }) Quintessence.Feel.DamageNumber.Spawn(high, word, Color.white);
             for (int k = 0; k < 3; k++) yield return null;
-            foreach (var dn in Object.FindObjectsByType<Quintessence.Feel.DamageNumber>(FindObjectsSortMode.None))
-                Assert.LessOrEqual(Camera.main.WorldToViewportPoint(dn.transform.position).y, Quintessence.Feel.DamageNumber.TopLimit + 0.01f, "texto flutuante dentro da tela");
+            var ys = Object.FindObjectsByType<Quintessence.Feel.DamageNumber>(FindObjectsSortMode.None)
+                .Select(dn => Camera.main.WorldToViewportPoint(dn.transform.position).y).OrderBy(y => y).ToList();
+            Assert.AreEqual(3, ys.Count);
+            Assert.LessOrEqual(ys[2], Quintessence.Feel.DamageNumber.TopLimit + 0.01f, "texto flutuante dentro da tela");
+            Assert.Greater(ys[1] - ys[0], 0.02f, "os do mesmo instante empilham para baixo em vez de se sobrepor");
+            Assert.Greater(ys[2] - ys[1], 0.02f, "os do mesmo instante empilham para baixo em vez de se sobrepor");
             HealthPool.ForceEvade = false; // sem esquiva sorteada: o golpe tem que entrar
             float before = hp.Current;
             hp.TakeDamage(new DamageInfo(hp.Max * 0.15f, ElementType.None, Team.Enemy));

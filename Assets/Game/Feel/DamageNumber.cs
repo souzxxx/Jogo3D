@@ -16,6 +16,7 @@ namespace Quintessence.Feel
         TextMesh front, shadow;
         Vector3 velocity;
         float life, total, baseSize;
+        bool still; // nasceu no alto da tela: fica parado em vez de subir
         Color color;
 
         public static void Spawn(Vector3 position, string text, Color color, float size = 1f, float seconds = 0.75f)
@@ -23,6 +24,19 @@ namespace Quintessence.Feel
             if (font == null) font = GameFonts.Display;
             live.RemoveAll(x => x == null);
             var spot = position + new Vector3(Random.Range(-0.25f, 0.25f), 0f, 0f);
+            // nascendo no alto da tela (sobre o chefe no fundo da sala): desce para dentro dela, nao sobe e empilha para baixo,
+            // senao varios textos do mesmo instante (FASE 3, ESCUDO!) ficavam todos presos na mesma linha do limite
+            bool atTop = false;
+            var cam = Camera.main;
+            if (cam != null)
+            {
+                var vp = cam.WorldToViewportPoint(spot);
+                if (vp.z > 0f && vp.y > TopLimit - 0.08f)
+                {
+                    spot = cam.ViewportToWorldPoint(new Vector3(vp.x, Mathf.Min(vp.y, TopLimit - 0.03f), vp.z));
+                    atTop = true;
+                }
+            }
             for (int pass = 0; pass < 8; pass++)
             {
                 bool moved = false;
@@ -32,7 +46,7 @@ namespace Quintessence.Feel
                     // altura de uma linha no tamanho 1 (com o salto inicial de 1,25): ~0,72; a folga considera os dois tamanhos
                     float gap = 0.8f * (other.baseSize + size) * 0.5f + 0.12f;
                     if (Mathf.Abs(o.x - spot.x) < 1.8f * Mathf.Max(size, other.baseSize) && Mathf.Abs(o.z - spot.z) < 1.6f && o.y - spot.y < gap + CatchUp && spot.y - o.y < gap)
-                    { spot.y = o.y + gap; moved = true; }
+                    { spot.y = atTop ? o.y - gap : o.y + gap; moved = true; }
                 }
                 if (!moved) break;
             }
@@ -43,6 +57,8 @@ namespace Quintessence.Feel
             n.front = Make(go.transform, text, Vector3.zero);
             n.color = color; n.total = n.life = seconds; n.baseSize = size;
             n.velocity = new Vector3(Random.Range(-0.3f, 0.3f), 2.2f, 0f);
+            n.still = atTop;
+            if (atTop) n.velocity.y = 0f;
             n.Apply();
             live.Add(n);
         }
@@ -71,7 +87,7 @@ namespace Quintessence.Feel
             life -= dt;
             if (life <= 0f) { Destroy(gameObject); return; }
             transform.position += velocity * dt;
-            velocity.y = Mathf.Max(0.4f, velocity.y - 5f * dt);
+            velocity.y = still ? 0f : Mathf.Max(0.4f, velocity.y - 5f * dt);
             KeepOnScreen();
             Apply();
         }
