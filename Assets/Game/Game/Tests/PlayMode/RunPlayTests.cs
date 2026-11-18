@@ -654,11 +654,13 @@ namespace Quintessence.Game.PlayTests
             Assert.IsFalse(director.LevelUpOpen);
 
             // experiencia de sobra para um nivel: a escolha abre sozinha e o jogo para
+            Quintessence.Feel.DamageNumber.Spawn(hero.transform.position + Vector3.up * 3.9f, "NÍVEL 2!", Color.white, 1.3f, 1.8f);
             director.Run.Progress.AddXp(director.Run.Progress.XpToNext);
             for (int k = 0; k < 10 && !director.LevelUpOpen; k++) yield return null;
             Assert.IsTrue(director.LevelUpOpen, "subir de nivel abre a escolha de talento");
             Assert.IsTrue(GameClock.Paused, "o jogo para durante a escolha");
             Assert.IsTrue(hud.LevelUpVisible);
+            Assert.AreEqual(0, Quintessence.Feel.DamageNumber.LiveCount, "o painel limpa os textos do mundo (nada parado atras do titulo)");
             Assert.AreEqual(3, director.TalentOffer.Count);
             foreach (var t in director.TalentOffer)
                 Assert.IsTrue(t.Element == ElementType.None || t.Element == ElementType.Fire, "so talentos de corpo ou do elemento desperto: " + t.Id);
@@ -1167,6 +1169,15 @@ namespace Quintessence.Game.PlayTests
             GameEvents.RaiseArmorChanged(hero, false);
             yield return null;
             Assert.Greater(audio.ArmorCracks, cracks, "a armadura caindo estala");
+
+            // dano que arredonda para zero nao vira um "0" voando
+            var fb = Object.FindFirstObjectByType<Quintessence.Feel.CombatFeedback>();
+            int skipped = fb.ZeroNumbersSkipped;
+            int live = Quintessence.Feel.DamageNumber.LiveCount;
+            GameEvents.RaiseDamageDealt(hero, new DamageInfo(0.3f, ElementType.None, Team.Enemy, null) { Point = hero.transform.position }, 0.3f);
+            yield return null;
+            Assert.Greater(fb.ZeroNumbersSkipped, skipped, "o 0 nao aparece");
+            Assert.LessOrEqual(Quintessence.Feel.DamageNumber.LiveCount, live, "nenhum numero novo no ar");
         }
 
         /// Rodada 21: o respiradouro de brasa reage aos elementos: Agua apaga por 6 s, Fogo adianta a erupcao (com o aviso inteiro).

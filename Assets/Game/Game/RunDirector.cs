@@ -1590,6 +1590,7 @@ namespace Quintessence.Game
             levelUpOpen = true;
             levelUpOpenedAt = Time.unscaledTime;
             GameClock.SetPaused(true);
+            Feel.DamageNumber.ClearLive();
             hud.ShowMap(Run, false);
             ShowLevelUpPanel();
             if (masteryPicks == 0) Tip("level"); // depois do painel: a dica fica por cima dele

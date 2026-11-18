@@ -25,6 +25,14 @@ namespace Quintessence.Feel
         static readonly System.Collections.Generic.Dictionary<string, float> lastWord = new();
 
         /// Some com todos os textos no ar (vitoria: so o VITORIA! fica).
+        /// Tira os textos no ar sem calar os proximos (painel de talento: o "NIVEL 2!" do mundo ficava parado atras do
+        /// titulo "NIVEL 2" do painel, e numeros vazavam por cima dele com o jogo pausado).
+        public static void ClearLive()
+        {
+            foreach (var n in live) if (n != null) Destroy(n.gameObject);
+            live.Clear();
+        }
+
         public static void ClearAll()
         {
             foreach (var n in live) if (n != null) Destroy(n.gameObject);

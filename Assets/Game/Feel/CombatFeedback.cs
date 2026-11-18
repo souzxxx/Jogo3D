@@ -206,8 +206,11 @@ namespace Quintessence.Feel
                     Sfx.Play("block");
                 }
             }
-            DamageNumber.Spawn(target.transform.position + Vector3.up * 2.7f, Mathf.RoundToInt(applied) + (info.IsCrit ? "!" : ""),
-                enemy ? Color.Lerp(c, Color.white, 0.35f) : new Color(1f, 0.25f, 0.25f), size);
+            // dano que arredonda para zero (tique de queimadura, golpe quase todo no escudo): sem o "0" voando, so as faiscas
+            if (Mathf.RoundToInt(applied) > 0)
+                DamageNumber.Spawn(target.transform.position + Vector3.up * 2.7f, Mathf.RoundToInt(applied) + (info.IsCrit ? "!" : ""),
+                    enemy ? Color.Lerp(c, Color.white, 0.35f) : new Color(1f, 0.25f, 0.25f), size);
+            else ZeroNumbersSkipped++;
             var p = info.Point.sqrMagnitude > 0.001f ? info.Point : target.transform.position + Vector3.up * 1.2f;
             Burst(p, info.Direction.sqrMagnitude > 0.01f ? info.Direction : Vector3.up, 70f, applied >= 8f ? 16 : 8, 3f, 9f, 0.12f, 0.3f, 0.3f, Color.Lerp(c, Color.white, 0.3f));
             if (enemy) Display(target).Touch();
@@ -633,12 +636,15 @@ namespace Quintessence.Feel
         }
 
         /// Cura do Xama: numero verde e um sopro de folhas no aliado curado.
+        /// Danos que arredondavam para zero e nao viraram numero (para os testes).
+        public int ZeroNumbersSkipped { get; private set; }
+
         void OnEnemyHealed(Health target, float amount)
         {
             if (target == null) return;
             var green = new Color(0.45f, 0.75f, 0.5f);
             var p = target.transform.position + Vector3.up * 1.4f;
-            DamageNumber.Spawn(p + Vector3.up * 1.2f, "+" + Mathf.RoundToInt(amount), green, 0.8f, 0.9f);
+            if (Mathf.RoundToInt(amount) > 0) DamageNumber.Spawn(p + Vector3.up * 1.2f, "+" + Mathf.RoundToInt(amount), green, 0.8f, 0.9f);
             accents?.Emit(ElementType.Air, p, Vector3.up, 60f, 10, 2.5f, green);
         }
 
