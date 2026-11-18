@@ -145,6 +145,9 @@ namespace Quintessence.Enemies.PlayTests
                 bomber.GetComponent<Health>().Pool.Invulnerable = true;
                 for (float t = 10f; t > 0f && !sawExplosion; t -= Time.deltaTime) yield return Step();
                 hp.Pool.ExtraDamageTakenMultiplier = keepDamage;
+                // o Explosivo do teste e invulneravel: o estouro dele tira vida dele mesmo e nao derruba; sai a mao
+                // (dependendo da ordem dos scripts na cena ele ainda estava de pe na checagem final)
+                if (bomber != null) Object.Destroy(bomber);
             }
             Assert.IsTrue(sawExplosion, "Explosivo deveria explodir (ou ser morto antes: entao este teste precisa de outro roteiro)");
             Assert.IsTrue(sawProjectile, "o atirador deveria ter avisado ou disparado um tiro");
