@@ -1272,6 +1272,53 @@ namespace Quintessence.Game.PlayTests
             Time.captureFramerate = 0;
         }
 
+        /// Rodada 25: num grupo de seis corpo a corpo em volta do heroi, no maximo tres avisam/batem ao mesmo tempo,
+        /// os outros esperam a vez e os golpes continuam saindo (ninguem segura a vez para sempre).
+        [UnityTest, Timeout(300000)]
+        public IEnumerator A_Melee_Crowd_Takes_Turns_To_Attack()
+        {
+            GameEvents.Clear();
+            Time.timeScale = 1f;
+            Time.captureFramerate = 30;
+            yield return EditorSceneManager.LoadSceneAsyncInPlayMode("Assets/Scenes/Run.unity", new LoadSceneParameters(LoadSceneMode.Single));
+            yield return null;
+            yield return null;
+            var director = Object.FindFirstObjectByType<RunDirector>();
+            for (int k = 0; k < 2000 && director.Busy; k++) yield return null;
+            Object.FindFirstObjectByType<WaveSpawner>().enabled = false;
+            foreach (var e in Object.FindObjectsByType<EnemyBrain>(FindObjectsSortMode.None)) Object.Destroy(e.gameObject);
+            yield return null;
+            var hero = Object.FindFirstObjectByType<PlayerController>();
+            var hp = hero.GetComponent<Health>();
+            hp.Pool.ExtraDamageTakenMultiplier = 0f;
+            hero.Teleport(Vector3.zero, Vector3.forward);
+            var prefab = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Game/Enemies/Prefabs/Rastejante.prefab");
+            Assert.IsNotNull(prefab);
+            var crowd = new System.Collections.Generic.List<EnemyBrain>();
+            for (int i = 0; i < 6; i++)
+            {
+                var at = Quaternion.Euler(0, i * 60f, 0) * Vector3.forward * 2.2f;
+                crowd.Add(Object.Instantiate(prefab, at, Quaternion.identity).GetComponent<EnemyBrain>());
+            }
+            int maxWinding = 0, strikes = 0, waitsBefore = MeleeTokens.Waits;
+            GameEvents.TelegraphStarted += e => { if (e.Melee) strikes++; }; // cada aviso de golpe que comecou
+            for (float t = 0; t < 6f; t += Time.deltaTime)
+            {
+                int winding = 0;
+                foreach (var e in crowd) if (e != null && e.Phase == EnemyPhase.Windup) winding++;
+                maxWinding = Mathf.Max(maxWinding, winding);
+                Assert.LessOrEqual(MeleeTokens.Held, MeleeTokens.Max);
+                yield return null;
+            }
+            Assert.LessOrEqual(maxWinding, MeleeTokens.Max, "no maximo tres erguendo a arma ao mesmo tempo");
+            Assert.Greater(MeleeTokens.Waits, waitsBefore, "com seis em volta, alguem esperou a vez");
+            Assert.Greater(strikes, 6, "e os golpes continuam saindo (a vez volta depois de cada golpe)");
+            foreach (var e in crowd) if (e != null) e.GetComponent<Health>().TakeDamage(new DamageInfo(99999f, ElementType.None, Team.Player, hero.gameObject));
+            yield return null;
+            Assert.AreEqual(0, MeleeTokens.Held, "mortos devolvem a vez");
+            Time.captureFramerate = 0;
+        }
+
         [UnityTest, Timeout(300000)]
         public IEnumerator Escudeiro_Blocks_From_The_Front_But_Not_From_Behind()
         {
