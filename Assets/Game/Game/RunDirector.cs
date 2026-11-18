@@ -545,7 +545,7 @@ namespace Quintessence.Game
             if (!trialLostShown && !TrialHolding)
             {
                 trialLostShown = true;
-                Feel.DamageNumber.Spawn(player.transform.position + Vector3.up * 3.6f, "PROVAÇÃO PERDIDA", new Color(0.66f, 0.68f, 0.74f), 1f, 1.8f);
+                Banner("PROVAÇÃO PERDIDA", new Color(0.66f, 0.68f, 0.74f), 3.6f, 1f, 1.8f);
                 // o save da sala guarda que esta Provacao ja foi perdida
                 restoredTrialLost = Run.Current.Id;
                 if (currentSave != null && currentSave.current == Run.Current.Id) { currentSave.trialLost = Run.Current.Id; RunSaveStore.Save(currentSave); }
@@ -577,7 +577,7 @@ namespace Quintessence.Game
                 Sfx.Play("level_up");
             }
             else if (!trialLostShown)
-                Feel.DamageNumber.Spawn(player.transform.position + Vector3.up * 3.9f, "PROVAÇÃO PERDIDA", new Color(0.66f, 0.68f, 0.74f), 1f, 1.8f);
+                Banner("PROVAÇÃO PERDIDA", new Color(0.66f, 0.68f, 0.74f), 3.9f, 1f, 1.8f);
             hud.SetRoom($"Sala {Run.Depth + 1}/{Run.Map.LayerCount} · Provação · {(passed ? "cumprida" : "perdida")}", RoomType.Trial);
         }
 
@@ -1535,8 +1535,20 @@ namespace Quintessence.Game
             int levels = Run.Progress.AddXp(Mathf.RoundToInt(Progression.XpForEnemy(baseHealth, boss) * (champion ? 3 : 1) * player.Modifiers.XpMult));
             if (levels <= 0) return;
             Sfx.Play("level_up");
-            Feel.DamageNumber.Spawn(player.transform.position + Vector3.up * 3.9f, "NÍVEL " + Run.Progress.Level + "!", new Color(0.9f, 0.76f, 0.42f), 1.3f, 1.8f);
+            Banner("NÍVEL " + Run.Progress.Level + "!", new Color(0.9f, 0.76f, 0.42f), 3.9f, 1.3f, 1.8f);
         }
+
+        /// Letreiro sobre o heroi. Com inimigo vivo ele fica menor, mais alto e mais curto: grande e parado 1,8 s
+        /// em cima do heroi, cobria os inimigos e os avisos de ataque no meio da luta.
+        public void Banner(string text, Color color, float height, float scale, float seconds)
+        {
+            bool fighting = !RoomQuiet;
+            if (fighting) { height += 0.9f; scale *= 0.72f; seconds = Mathf.Min(seconds, 1.1f); QuietBanners++; }
+            Feel.DamageNumber.Spawn(player.transform.position + Vector3.up * height, text, color, scale, seconds);
+        }
+
+        /// Letreiros que sairam discretos porque a luta seguia (para os testes).
+        public int QuietBanners { get; private set; }
 
         void OpenLevelUp()
         {
@@ -1759,6 +1771,9 @@ namespace Quintessence.Game
 
         static readonly string[] ElementNames = { "", "Fogo", "Água", "Terra", "Ar" };
 
+        /// Pedestais 1 m mais perto da entrada: ao entrar, os nomes ficavam colados no topo da tela, um deles sob o contador de Essencia.
+        public const float ShrineZ = -1f;
+
         void SetupShrine()
         {
             var missing = new List<ElementType>();
@@ -1790,7 +1805,7 @@ namespace Quintessence.Game
                 var c = ElementColors.Of(e);
                 int next = Run.SkillRank[(int)e] + 1;
                 var root = new GameObject("Deepen_" + e);
-                root.transform.position = new Vector3((missing.Count + d - (total - 1) / 2f) * 4.3f, 0, 0f);
+                root.transform.position = new Vector3((missing.Count + d - (total - 1) / 2f) * 4.3f, 0, ShrineZ);
                 float top = 1.25f;
                 if (shrinePrefab != null) Instantiate(shrinePrefab, root.transform).transform.localPosition = Vector3.zero;
                 Emblem(root.transform, e, new Vector3(0, top + 0.12f, 0), 1.3f);
@@ -1817,7 +1832,7 @@ namespace Quintessence.Game
                 var e = missing[i];
                 var c = ElementColors.Of(e);
                 var root = new GameObject("Shrine_" + e);
-                root.transform.position = new Vector3((i - (total - 1) / 2f) * 4.3f, 0, 0f);
+                root.transform.position = new Vector3((i - (total - 1) / 2f) * 4.3f, 0, ShrineZ);
                 float top = 1.25f;
                 if (shrinePrefab != null) Instantiate(shrinePrefab, root.transform).transform.localPosition = Vector3.zero;
                 else Matte(GameObject.CreatePrimitive(PrimitiveType.Cube), root.transform, new Vector3(0, 0.6f, 0), new Vector3(1f, 1.2f, 1f), new Color(0.4f, 0.4f, 0.45f));
@@ -2130,7 +2145,9 @@ namespace Quintessence.Game
                 foreach (char ch in r.text) if (ch == '\n') lines++;
                 float h = lines * LabelLine * r.scale;
                 made[i] = Label(parent, new Vector3(baseLocal.x, y + h * 0.5f, baseLocal.z), r.text, r.color, r.scale);
-                y += h + 0.08f;
+                // texto de varias linhas ocupa mais que LabelLine por linha (o espaco entre linhas da fonte): sem essa folga
+                // o nome do Santuario ("Fogo") invadia a primeira linha da descricao
+                y += h + (lines > 1 ? 0.2f : 0.1f);
             }
             return made;
         }

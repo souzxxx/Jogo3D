@@ -156,6 +156,10 @@ namespace Quintessence.UI
         float phasePulse;
         /// A barra do chefe pulsou para anunciar a fase (para os testes).
         public int PhasePulses { get; private set; }
+        int shownLevel;
+        float levelPulse;
+        /// Quantas vezes a barra de nivel pulsou (subiu de nivel).
+        public int LevelPulses { get; private set; }
         void OnBossPhase(int phase, int total) { bossPhase = phase; if (phase > 1) { phasePulse = 0.9f; PhasePulses++; } }
         void OnBossShield(bool up, bool needsQuintessence) { bossShield = up; bossNeedsQuint = needsQuintessence; }
 
@@ -403,6 +407,17 @@ namespace Quintessence.UI
             {
                 SetBar(xpFill, progress.Normalized);
                 levelText.text = "NÍVEL " + progress.Level;
+                // nivel novo: o texto da barra cresce e fica ambar por um instante (o letreiro na luta e discreto)
+                if (progress.Level > shownLevel && shownLevel > 0) { levelPulse = 0.9f; LevelPulses++; }
+                shownLevel = progress.Level;
+                if (levelPulse > 0f)
+                {
+                    levelPulse = Mathf.Max(0f, levelPulse - Time.unscaledDeltaTime);
+                    float k = Mathf.Sin(Mathf.Clamp01(levelPulse / 0.9f) * Mathf.PI);
+                    levelText.transform.localScale = Vector3.one * (1f + 0.35f * k);
+                    levelText.color = Color.Lerp(UiKit.Cream, new Color(1f, 0.8f, 0.4f), k);
+                }
+                else if (levelText.transform.localScale.x != 1f) { levelText.transform.localScale = Vector3.one; levelText.color = UiKit.Cream; }
             }
 
             var awakened = hero.AwakenedElements;
