@@ -45,6 +45,7 @@ Para quem for mexer no código depois: o que entrou, onde está e qual teste cob
 | Aviso de jogo lento (média < 30 fps por 4 s na luta, uma vez) | `RunDirector.TickSlowCheck` / `ReportFrameRate`, `Tips` id `slow` |
 | Treino vestido como Salões; bonecos mais perto | `RunDirector.Start` (ramo do tutorial), `TutorialDirector` |
 | Com run salva, a carta de herói pede um segundo clique antes de apagar a salva | `TitleMenu.PickCard` (`ArmedCard`); teste em `Title_Starts_A_Run_With_The_Picked_Element` |
+| Só com o controle: botões do título desligados sob os painéis; A ignorado por 0,35 s quando um painel pede foco; foco volta ao último botão quando o controle mexe sem nada escolhido; Refúgio mantém o foco na compra | `UI/FocusGuard.cs` (`Hold`, `TryRecover`, posto no EventSystem por `UiKit.EnsureEventSystem`; `UiKit.Focus` lembra o botão mesmo sem controle), `TitleMenu.SyncOverlayBlock`, `keepFocus` em `BuildRefuge`; teste `Gamepad_Only_Title_Overlays_Lock_The_Buttons_Behind` |
 | Esc na troca de sala fica guardado e pausa quando a sala abre (o cartão do trecho não cobre o painel) | `RunDirector.PressPause` (`pauseQueued`, `PausesQueued`); teste em `Short_Run_From_First_Room_To_Victory` |
 
 ## Som
