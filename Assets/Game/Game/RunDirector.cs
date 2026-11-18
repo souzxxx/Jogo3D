@@ -38,6 +38,9 @@ namespace Quintessence.Game
         [Tooltip("Estandarte por tipo de sala, na ordem do enum RoomType.")]
         [SerializeField] GameObject[] bannerByRoom = new GameObject[0];
         [SerializeField] GameObject shrinePrefab;
+        [SerializeField] GameObject pactAltarPrefab;
+        /// Altar proprio do Pacto (ArtSource/Pact); sem ele, o Pacto usa a coluna do Santuario.
+        public void BindPactAltar(GameObject altar) => pactAltarPrefab = altar;
         /// Emblemas modelados de Fogo, Agua, Terra e Ar (nessa ordem) que ficam sobre os totens no lugar das esferas.
         [SerializeField] GameObject[] emblems;
         [SerializeField] GameObject chestPrefab;
@@ -1313,7 +1316,8 @@ namespace Quintessence.Game
                 var o = offers[i];
                 var root = new GameObject("Pact_" + i);
                 root.transform.position = new Vector3((i - (offers.Length - 1) / 2f) * 5.4f, 0, 0.2f);
-                if (shrinePrefab != null) Instantiate(shrinePrefab, root.transform).transform.localPosition = Vector3.zero;
+                var altar = pactAltarPrefab != null ? pactAltarPrefab : shrinePrefab;
+                if (altar != null) Instantiate(altar, root.transform).transform.localPosition = Vector3.zero;
                 Medal(root.transform, new Vector3(0, 2.25f, 0), o.icon, wine, 1.1f);
                 Stack(root.transform, new Vector3(0, 2.85f, 0), (o.name, Cream, 0.8f),
                     (Wrap(o.gain, 22), new Color(0.62f, 0.82f, 0.6f), 0.55f), (Wrap(o.cost, 24), new Color(0.85f, 0.45f, 0.4f), 0.55f));
