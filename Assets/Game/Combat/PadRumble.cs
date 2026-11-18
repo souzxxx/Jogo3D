@@ -12,6 +12,7 @@ namespace Quintessence.Combat
         Health self;
         float low, high, left;
         bool running;
+        Gamepad rumblePad; // o controle que esta vibrando (se outro virar o atual, este ainda precisa parar)
 
         /// Ultimo pedido de vibracao (para os testes): motor grave, motor agudo, duracao.
         public Vector3 Last { get; private set; }
@@ -61,10 +62,12 @@ namespace Quintessence.Combat
         void Update()
         {
             var pad = Gamepad.current;
-            if (pad == null) return;
+            if (running && pad != rumblePad) Stop(); // controle trocado ou desligado: para o antigo e esquece o pulso
+            if (pad == null) { low = high = left = 0f; return; }
             if (GameClock.Paused || !InputMode.Gamepad || !FxPrefs.ScreenShake || left <= 0f) { Stop(); return; }
             left -= Time.unscaledDeltaTime;
             pad.SetMotorSpeeds(low, high);
+            rumblePad = pad;
             running = true;
             if (left <= 0f) Stop();
         }
@@ -74,7 +77,8 @@ namespace Quintessence.Combat
             low = high = left = 0f;
             if (!running) return;
             running = false;
-            Gamepad.current?.SetMotorSpeeds(0f, 0f);
+            rumblePad?.SetMotorSpeeds(0f, 0f);
+            rumblePad = null;
         }
     }
 }

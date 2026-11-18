@@ -178,7 +178,7 @@ namespace Quintessence.Feel
         void OnBossShield(bool up, bool needs) => Play(up ? "shield" : "shatter", 1f, 0f);
         void OnAwakened(ElementType e) { }
 
-        // o batimento de vida baixa fica por baixo da luta: so se ouve quando a sala acalma
+        // o batimento de vida baixa fica em meio volume, por baixo dos golpes
         void Play(string id) => Play(id, id == "heartbeat" ? 0.5f : 1f, 0f);
 
         /// volume: 0..1 relativo. jitter: variacao aleatoria de tom, para o mesmo som nao soar identico em sequencia.
