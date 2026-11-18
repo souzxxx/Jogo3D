@@ -10,6 +10,8 @@ namespace Quintessence.Enemies
         float t, cd;
 
         public EnemyPhase Phase { get; private set; } = EnemyPhase.Spawning;
+        /// A recarga acabou: pode comecar um aviso assim que tiver alcance (e a vez, no corpo a corpo).
+        public bool CooldownReady => cd <= 0f;
 
         public EnemyFsm(float windupTime, float recoverTime, float cooldown, float attackRange, float spawnTime = 0.7f)
         {

@@ -41,7 +41,7 @@ namespace Quintessence.Enemies
             if (definition.guardArc > 0f) (guard = GetComponent<FrontGuard>() ?? gameObject.AddComponent<FrontGuard>()).Configure(definition.guardArc, definition.guardDamageTaken);
             if (definition.auraRadius > 0f) (GetComponent<RallyAura>() ?? gameObject.AddComponent<RallyAura>()).Configure(definition.auraRadius, definition.auraDamageMult, definition.auraSpeedMult);
             fsm = new EnemyFsm(definition.telegraphTime, definition.recoverTime, definition.cooldown * Scaling.Cooldown, definition.attackRange);
-            circleSign = Random.value < 0.5f ? -1f : 1f; // metade rodeia para cada lado
+            circleSign = (GetHashCode() & 1) == 0 ? -1f : 1f; // metade rodeia para cada lado (sem gastar o Random do jogo)
             agent.speed = definition.moveSpeed * Scaling.Speed;
             agent.updateRotation = false;
             agent.acceleration = 40f;
@@ -74,6 +74,7 @@ namespace Quintessence.Enemies
 
         void Start()
         {
+            isChampion = GetComponent<Champion>() != null; // o WaveSpawner poe o Champion depois do Awake
             var p = GameObject.FindGameObjectWithTag("Player");
             if (p != null) target = p.GetComponent<Health>();
             Play("Spawn", 0f);
@@ -226,9 +227,9 @@ namespace Quintessence.Enemies
             var toDir = distance > 0.01f && hasTarget ? to / distance : transform.forward;
 
             // corpo a corpo espera a vez quando ja ha MeleeTokens.Max atacando (so muda a decisao de COMECAR o aviso)
-            bool melee = definition.attack == EnemyAttackKind.Melee;
+            bool melee = UsesTurns;
             bool mayStart = canAct, tookNow = false;
-            if (melee && canAct && fsm.Phase == EnemyPhase.Chase && hasTarget && distance <= definition.attackRange && !MeleeTokens.Has(this))
+            if (melee && canAct && fsm.Phase == EnemyPhase.Chase && fsm.CooldownReady && hasTarget && distance <= definition.attackRange && !MeleeTokens.Has(this))
                 mayStart = tookNow = MeleeTokens.TryTake(this);
             var action = fsm.Tick(dt, distance, fsm.Phase == EnemyPhase.Chase ? mayStart : canAct, hasTarget);
             // pegou a vez mas a recarga nao deixou comecar: devolve na hora (senao seguraria a vez sem atacar)
@@ -270,8 +271,8 @@ namespace Quintessence.Enemies
                     syncWindup = true;
                     break;
                 case EnemyAction.Strike:
+                    MeleeTokens.Release(this); // antes do golpe: se algo no dano falhar, a vez nao fica presa
                     Strike(miss);
-                    MeleeTokens.Release(this);
                     break;
                 case EnemyAction.Cancel:
                     GameEvents.RaiseTelegraphCancelled(gameObject);
@@ -321,9 +322,10 @@ namespace Quintessence.Enemies
                 var away = transform.position - target.transform.position; away.y = 0f;
                 if (away.sqrMagnitude < 0.01f) away = -toDir;
                 var side = Quaternion.Euler(0f, circleSign * 40f, 0f) * away.normalized;
-                goal = target.transform.position + side * (definition.attackRange * 1.15f);
-                agent.speed *= 0.5f;
-                Circling++;
+                // dentro do alcance: quando uma vez abre, quem esta rodeando ja pega, sem o grupo todo correr junto
+                goal = Arena.Clamp(target.transform.position + side * (definition.attackRange * 0.95f));
+                if (NavMesh.SamplePosition(goal, out var spot, 1f, NavMesh.AllAreas)) { goal = spot.position; agent.speed *= 0.5f; Circling++; }
+                else stop = true; // encostado na parede: espera parado em vez de mirar o outro lado dela
             }
             else if (distance <= Mathf.Min(definition.attackRange * 0.8f, definition.attack == EnemyAttackKind.Charge ? 3.5f : 999f)) stop = true;
 
@@ -335,7 +337,10 @@ namespace Quintessence.Enemies
         }
 
         /// Corpo a corpo perto do heroi sem a vez de atacar (MeleeTokens cheio).
-        bool WaitingTurn(float distance) => definition.attack == EnemyAttackKind.Melee && distance <= definition.attackRange * 1.4f
+        /// Corpo a corpo comum entra na fila; o Campeao da sala de Elite (o mais perigoso dela) nao espera a vez.
+        bool UsesTurns => definition.attack == EnemyAttackKind.Melee && !isChampion;
+        bool isChampion;
+        bool WaitingTurn(float distance) => UsesTurns && distance <= definition.attackRange * 1.4f
             && !MeleeTokens.Has(this) && MeleeTokens.Held >= MeleeTokens.Max;
         /// Quadros rodeando o heroi a espera da vez (para os testes).
         public int Circling { get; private set; }
