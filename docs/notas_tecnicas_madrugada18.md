@@ -17,6 +17,7 @@ Para quem for mexer no código depois: o que entrou, onde está e qual teste cob
 
 | O quê | Onde | Teste |
 |---|---|---|
+| Skill de Ar apaga velas (não tochas) | `TorchReact.OnAttack` → `TouchCandles(..., "cast_air")`, contador `CandlesBlown` | `Candles_Go_Out_With_Water_And_Camera_Leans_To_The_Boss` |
 | Velas apagam com Água (troca a malha acesa/apagada do pack) e ganham uma chama pequena (cópia da `TorchFlame`) | `Game/TorchReact.cs` (`CandlePairs`, `RefreshCandles`, `AddCandleFlame`), pares ligados em `GameSceneBuilder` → `RunDirector.BindCandles` | `Candles_Go_Out_With_Water_And_Camera_Leans_To_The_Boss` |
 | Barril de pólvora molhado: Água deixa molhado 6 s (azulado, sem a faixa do alcance); o golpe seguinte quebra sem explodir; seca e volta ao normal | `Enemies/ExplosiveBarrel.cs` (`Intercept`, `Soak`, `WetSeconds`), gancho `Core/IDamageIntercept` em `Health.TakeDamage`, evento `GameEvents.PowderDoused` → `CombatFeedback.OnPowderDoused` (gotas, "MOLHADO", vapor) e `AudioDirector.OnPowder` (som `fizz` de `tools/gen_audio.py`) | `Hazards_Treasure_Pact_And_Biomes` |
 | Respiradouro de brasa: Água apaga 6 s (miolo cinza), Fogo adianta a erupção com o aviso inteiro | `Enemies/EmberVent.cs` (`Touch`, `Quenched`, `SetEmbers`) | `Ember_Vent_Goes_Out_With_Water_And_Erupts_With_Fire` |
