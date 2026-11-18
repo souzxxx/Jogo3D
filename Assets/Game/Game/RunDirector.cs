@@ -146,6 +146,42 @@ namespace Quintessence.Game
         };
 
         /// Poe os Cristais de Ressonancia da sala: um da segunda sala em diante, dois do meio da run. Publico para os testes.
+        [SerializeField] GameObject[] breakablePrefabs = new GameObject[0];
+        public void BindBreakables(GameObject[] list) => breakablePrefabs = list ?? new GameObject[0];
+        public int BreakablesPlaced { get; private set; }
+
+        /// Caixotes pequenos que quebram (Breakable), encostados nas paredes laterais e na de baixo, longe da entrada,
+        /// so onde nao ha peca do arranjo nem adereco e o chao e navegavel. Sem colisor: nao mexem em nada da fisica.
+        public int PlaceBreakables(int seed, int count)
+        {
+            BreakablesPlaced = 0;
+            if (breakablePrefabs.Length == 0 || count <= 0) return 0;
+            if (layoutRoot == null) layoutRoot = new GameObject("Layout").transform;
+            var rng = new System.Random(seed);
+            for (int tries = 0; tries < 60 && BreakablesPlaced < count; tries++)
+            {
+                Vector3 pos;
+                if (rng.Next(3) > 0)
+                    pos = new Vector3((rng.Next(2) == 0 ? -1f : 1f) * (Arena.HalfX - 2.2f), 0f, Mathf.Lerp(-0.6f, 0.75f, (float)rng.NextDouble()) * Arena.HalfZ);
+                else
+                {
+                    pos = new Vector3(Mathf.Lerp(-0.8f, 0.8f, (float)rng.NextDouble()) * Arena.HalfX, 0f, -(Arena.HalfZ - 2.2f));
+                    if (Mathf.Abs(pos.x - entryPoint.x) < 3.5f) continue;
+                }
+                // esfera acima do piso (o colisor do chao nao conta), larga o bastante para nao encostar em peca nem parede
+                if (Physics.CheckSphere(pos + Vector3.up * 0.95f, 0.65f, ~0, QueryTriggerInteraction.Ignore)) continue;
+                if (!UnityEngine.AI.NavMesh.SamplePosition(pos, out var hit, 0.8f, UnityEngine.AI.NavMesh.AllAreas)) continue;
+                bool crowded = false;
+                foreach (var b in Breakable.Active) if (b != null && (b.transform.position - hit.position).sqrMagnitude < 1.4f) crowded = true;
+                if (crowded) continue;
+                var prefab = breakablePrefabs[rng.Next(breakablePrefabs.Length)];
+                var go = Instantiate(prefab, new Vector3(hit.position.x, 0f, hit.position.z), Quaternion.Euler(0, rng.Next(360), 0), layoutRoot);
+                go.name = prefab.name;
+                BreakablesPlaced++;
+            }
+            return BreakablesPlaced;
+        }
+
         public int PlaceCrystals(Biome biome, int seed, int count)
         {
             if (crystalPrefab == null || biome == Biome.Heart || count <= 0) return 0;
@@ -910,6 +946,9 @@ namespace Quintessence.Game
             // a sala anterior ja saiu da fisica e da malha de navegacao
             if (node.Type != RoomType.Boss && LayoutPicker.UsesLayout(node.Type) && Run.Depth >= 1)
                 PlaceCrystals(Biomes.For(Run.Depth, Run.Map.LayerCount), GameFlow.Seed + node.Id * 13, Run.Depth >= 4 ? 2 : 1);
+            // caixotes que quebram nas salas de luta (o chefe fica sem: a sala dele e o palco)
+            if (node.Type != RoomType.Boss && LayoutPicker.UsesLayout(node.Type))
+                PlaceBreakables(GameFlow.Seed + node.Id * 17, 4);
             switch (node.Type)
             {
                 case RoomType.Shrine:

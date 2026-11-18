@@ -36,7 +36,9 @@ namespace Quintessence.Feel
                 spin *= 0.8f;
             }
             // nao atravessa as paredes da sala
-            p.x = Mathf.Clamp(p.x, -9.6f, 9.6f); p.z = Mathf.Clamp(p.z, -7.6f, 7.6f);
+            // (a sala da run e maior que a de 20 x 16 de antes: o limite vem do tamanho atual)
+            float hx = Quintessence.Core.Arena.HalfX - 0.9f, hz = Quintessence.Core.Arena.HalfZ - 0.9f;
+            p.x = Mathf.Clamp(p.x, -hx, hx); p.z = Mathf.Clamp(p.z, -hz, hz);
             transform.position = p;
             transform.Rotate(spin * dt, Space.World);
             rest = p.y <= floor + 0.01f && velocity.sqrMagnitude < 0.2f ? rest + dt : 0f;

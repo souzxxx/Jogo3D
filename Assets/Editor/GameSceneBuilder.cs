@@ -105,6 +105,7 @@ public static class GameSceneBuilder
         director.BindProps(Prop("wall_doorway", 1f), bannerPrefabs, StaticPropPrefab("Assets/Art/Shrine/shrine_pedestal.fbx", "ShrinePedestal", 1f) ?? Prop("column", 1f), Prop("chest_gold", 1f), stone);
         director.BindEmblems(EmblemPrefabs());
         director.BindPactAltar(PactAltarPrefab());
+        director.BindBreakables(new[] { BreakablePrefab("box_small"), BreakablePrefab("box_small_decorated") });
         EditorUtility.SetDirty(director);
         var hud = new GameObject("Hud");
         hud.transform.SetParent(root, false);
@@ -410,6 +411,20 @@ public static class GameSceneBuilder
     static GameObject PactAltarPrefab() => StaticPropPrefab("Assets/Art/Pact/pact_altar.fbx", "PactAltar", 1.2f);
 
     /// Peca fixa feita no Blender virando prefab solido (colisor de caixa e recorte na malha de navegacao), fosca como o resto.
+    /// Caixote pequeno que quebra (Game/Breakable): so o modelo, sem colisor nem recorte de navegacao.
+    static GameObject BreakablePrefab(string model)
+    {
+        var mat = LookDevBuilder.Mat("DungeonProp", CombatDevSceneBuilder.KK + "Dungeon/dungeon_texture.png", Color.white, Color.black, 0f);
+        var root = new GameObject("Breakable_" + model);
+        var visual = LookDevBuilder.Spawn("Dungeon/" + model + ".fbx", Vector3.zero, 0, mat, 1f);
+        visual.name = "Model";
+        visual.transform.SetParent(root.transform, false);
+        root.AddComponent<Breakable>();
+        var prefab = PrefabUtility.SaveAsPrefabAsset(root, "Assets/Game/Game/Prefabs/Breakable_" + model + ".prefab");
+        Object.DestroyImmediate(root);
+        return prefab;
+    }
+
     static GameObject StaticPropPrefab(string fbx, string prefabName, float scale)
     {
         AssetDatabase.Refresh();

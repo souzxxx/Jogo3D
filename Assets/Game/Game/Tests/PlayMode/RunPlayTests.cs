@@ -807,6 +807,59 @@ namespace Quintessence.Game.PlayTests
             Time.captureFramerate = 0;
         }
 
+        /// Caixotes que quebram: nascem encostados nas bordas, quebram com o golpe do heroi e com o heroi passando por cima,
+        /// e nao entram em nada da luta (sem vida, sem colisor).
+        [UnityTest, Timeout(300000)]
+        public IEnumerator Crates_Break_On_Hit_And_Underfoot()
+        {
+            GameEvents.Clear();
+            Time.timeScale = 1f;
+            Time.captureFramerate = 30;
+            GameFlow.StartElement = ElementType.Fire;
+            GameFlow.Seed = 3; GameFlow.Layers = 5; GameFlow.Shrines = 1;
+            yield return EditorSceneManager.LoadSceneAsyncInPlayMode("Assets/Scenes/Run.unity", new LoadSceneParameters(LoadSceneMode.Single));
+            yield return null;
+            yield return null;
+            var director = Object.FindFirstObjectByType<RunDirector>();
+            Object.FindFirstObjectByType<WaveSpawner>().enabled = false;
+            for (int k = 0; k < 2000 && director.Busy; k++) yield return null;
+            foreach (var e in Object.FindObjectsByType<EnemyBrain>(FindObjectsSortMode.None)) Object.Destroy(e.gameObject);
+            Assert.Greater(Breakable.Active.Count, 0, $"a sala de luta ja nasce com caixotes (colocados {director.BreakablesPlaced}, quebrados {Breakable.Broken}, HalfX {Arena.HalfX})");
+            director.ApplyLayout(-1);
+            yield return null;
+            Assert.AreEqual(4, director.PlaceBreakables(5, 4), "quatro caixotes nas bordas da sala vazia");
+            foreach (var b in Breakable.Active)
+            {
+                Assert.IsNull(b.GetComponentInChildren<Collider>(), "caixote nao tem colisor");
+                Assert.IsNull(b.GetComponent<Health>(), "nem vida: nao conta abate nem entra na mira");
+                Assert.Greater(Mathf.Max(Mathf.Abs(b.transform.position.x) / Arena.HalfX, Mathf.Abs(b.transform.position.z) / Arena.HalfZ), 0.6f, "encostado na borda");
+            }
+            var hero = Object.FindFirstObjectByType<PlayerController>();
+            hero.GetComponent<PlayerInputReader>().enabled = false;
+            var scripted = hero.gameObject.AddComponent<ScriptedInput>();
+            hero.Input = scripted;
+            // golpe: o heroi para a 1,6 m do caixote, de frente, e bate
+            var target = Breakable.Active[0];
+            var spot = target.transform.position;
+            var toward = (new Vector3(0f, 0f, 0f) - spot); toward.y = 0f; toward.Normalize();
+            hero.Teleport(spot + toward * 1.6f + Vector3.up * 0.05f, -toward);
+            for (int k = 0; k < 3; k++) yield return null;
+            int before = Breakable.Broken;
+            scripted.AimPoint = spot;
+            scripted.AttackHeld = true;
+            for (int k = 0; k < 40 && !target.IsBroken; k++) yield return null;
+            scripted.AttackHeld = false;
+            Assert.IsTrue(target == null || target.IsBroken, "o golpe quebra o caixote");
+            Assert.AreEqual(before + 1, Breakable.Broken);
+            // passando por cima
+            yield return null;
+            var other = Breakable.Active[0];
+            hero.Teleport(other.transform.position + Vector3.up * 0.05f, Vector3.forward);
+            for (int k = 0; k < 5; k++) yield return null;
+            Assert.AreEqual(before + 2, Breakable.Broken, "o heroi passando por cima quebra o caixote");
+            Time.captureFramerate = 0;
+        }
+
         [UnityTest, Timeout(300000)]
         public IEnumerator Escudeiro_Blocks_From_The_Front_But_Not_From_Behind()
         {

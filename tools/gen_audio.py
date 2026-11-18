@@ -69,6 +69,9 @@ def beat(at, f0, f1, amp):
 S["heartbeat"] = ([tone(beat(0, 75, 42, 0.8) + "+" + beat(0.19, 65, 38, 0.55), 0.55) + ",lowpass=f=300"], "")
 # passo do heroi: baque curto e abafado de bota na pedra (toca baixo e com tom variado)
 S["step"] = ([tone(f"0.6*sin({P}*(55*t+60*(1-exp(-60*t))/60))*exp(-38*t)", 0.12), noise(0.08, "brown", "lowpass=f=900,highpass=f=120," + env("exp(-45*t)*1.4"))], "")
+# caixote quebrando: estalo seco de madeira (ruido em banda media com ataque rapido) e um baque curto
+S["crate"] = ([noise(0.35, "pink", "bandpass=f=1400:w=1800," + env("min(t*120,1)*exp(-16*t)*1.6")),
+    noise(0.25, "brown", "lowpass=f=500," + env("exp(-22*t)*1.2")), tone(thump(140, 70, 30, 20, 0.5), 0.2)], "")
 S["ui_click"] = ([tone(f"0.3*sin({P}*900*t)*exp(-60*t)", 0.06)], "")
 S["boss_spawn"] = ([tone(f"0.5*sin({P}*55*t)*(1+0.5*sin({P}*6*t))*min(t/0.3,1)*exp(-1.2*max(t-1,0))", 2.2), noise(2.2, "brown", "lowpass=f=200," + env("min(t/0.3,1)*exp(-1.5*max(t-0.8,0))*2")), tone(f"0.22*(sin({P}*110*t)+0.5*sin({P}*220*t)+0.33*sin({P}*330*t))*min(t/0.4,1)*exp(-1.5*max(t-1.2,0))", 2.2)], ECHO)
 S["boss_phase"] = ([tone(thump(180, 32, 6, 3, 1.0), 1.3), tone(f"0.2*(sin({P}*98*t)+0.5*sin({P}*196*t)+0.33*sin({P}*294*t))*exp(-2.5*t)", 1.3)], ECHO)
