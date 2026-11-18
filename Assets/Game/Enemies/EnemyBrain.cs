@@ -103,7 +103,8 @@ namespace Quintessence.Enemies
             if (!NavMesh.SamplePosition(want, out var hit, 6f, NavMesh.AllAreas) &&
                 !NavMesh.SamplePosition(Vector3.zero, out hit, 12f, NavMesh.AllAreas)) return false;
             knock = Vector3.zero;
-            if (!agent.enabled) agent.enabled = true;
+            // agente desligado: poe no ponto bom antes de religar (religar fora do NavMesh avisava "Failed to create agent")
+            if (!agent.enabled) { transform.position = hit.position; agent.enabled = true; }
             if (!agent.Warp(hit.position)) transform.position = hit.position;
             Rescues++;
             return true;
