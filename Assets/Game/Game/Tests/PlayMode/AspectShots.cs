@@ -232,9 +232,15 @@ namespace Quintessence.Game.PlayTests
             pc.GetComponent<Health>().Pool.ExtraDamageTakenMultiplier = 0f;
             Directory.CreateDirectory("Logs/aspect");
             director.Run.AddEssence(60);
-            foreach (var type in new[] { RoomType.Shop, RoomType.Shrine, RoomType.Master, RoomType.Treasure, RoomType.Pact, RoomType.Rest })
+            hud.SetEssence(director.Run.Essence); // o contador so atualiza por evento do jogo
+            // na ordem de uma run de verdade: o chip diz a sala certa e o HUD tem os elementos que o heroi teria ali
+            // (o jurado da pagina do itch estranhou loja e Descanso na "Sala 1/10" com tres cadeados)
+            foreach (var (type, room) in new[] { (RoomType.Shrine, 3), (RoomType.Master, 4), (RoomType.Shop, 5), (RoomType.Treasure, 5), (RoomType.Pact, 6), (RoomType.Rest, 7) })
             {
+                if (room >= 4) pc.Awaken(ElementType.Water);
+                if (room >= 6) pc.Awaken(ElementType.Earth);
                 director.ShowRoom(type);
+                hud.SetRoom($"Sala {room}/10 · {RoomInfo.Name(type)}", type);
                 pc.Teleport(director.EntryPoint + new Vector3(0f, 0f, 2.5f), Vector3.forward);
                 for (float t = 0; t < 1.6f; t += Time.unscaledDeltaTime) yield return null;
                 yield return Shoot(Camera.main, $"Logs/aspect/sala_{type}.png", new Vector2Int(1280, 720));
