@@ -91,3 +91,8 @@ Projeto 3D de Jogos Digitais e Interação, Insper, 2026.2.
 6. `mapa.png`: mapa ramificado
 
 Vídeo: `docs/img/run_noite.mp4` (run curta gravada pelo teste, visual de 16/11). Um vídeo jogado por gente, de 30 a 60 s, rende mais na página.
+
+
+## Prints para a página (18/11)
+
+Em `docs/itch_prints/`, 1280 x 720: título, onda de inimigos, sala limpa, loja e Descanso. Gerados por `AspectShots.Title_In_Many_Aspects`, `Itch_Action_Shots` e `Room_Tour` (testes Explicit). Para subir: Edit game → Screenshots.

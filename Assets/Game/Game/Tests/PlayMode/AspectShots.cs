@@ -242,6 +242,48 @@ namespace Quintessence.Game.PlayTests
             MetaStore.UseKey(MetaStore.DefaultKey);
         }
 
+        /// Prints para a pagina do itch.io: o heroi lutando com duas skills (marca e reacao) contra a primeira sala,
+        /// uma foto a cada 1,2 s em Logs/itch/luta_*.png (1280 x 720); escolher as melhores a mao.
+        [UnityTest, Explicit, Timeout(300000)]
+        public IEnumerator Itch_Action_Shots()
+        {
+            PlayerPrefs.DeleteKey("quintessence.meta.test");
+            MetaStore.UseKey("quintessence.meta.test");
+            Tips.UseKey("quintessence.meta.test.tips");
+            GameEvents.Clear();
+            GameFlow.Seed = 11; GameFlow.StartElement = ElementType.Fire;
+            yield return EditorSceneManager.LoadSceneAsyncInPlayMode("Assets/Scenes/Run.unity", new LoadSceneParameters(LoadSceneMode.Single));
+            yield return null;
+            var director = Object.FindFirstObjectByType<RunDirector>();
+            for (float t = 0; t < 10f && director.Busy; t += Time.unscaledDeltaTime) yield return null;
+            var hud = Object.FindFirstObjectByType<Hud>();
+            hud.UseCamera(Camera.main);
+            var pc = Object.FindFirstObjectByType<Quintessence.Combat.PlayerController>();
+            pc.GetComponent<Quintessence.Combat.PlayerInputReader>().enabled = false;
+            var input = pc.gameObject.AddComponent<Quintessence.Combat.ScriptedInput>();
+            pc.Input = input;
+            pc.Awaken(ElementType.Water);
+            pc.GetComponent<Health>().Pool.ExtraDamageTakenMultiplier = 0.1f;
+            Directory.CreateDirectory("Logs/itch");
+            int shot = 0;
+            for (float t = 0; t < 26f && shot < 18; t += Time.deltaTime)
+            {
+                var foe = Object.FindObjectsByType<Quintessence.Enemies.EnemyBrain>(FindObjectsSortMode.None)
+                    .OrderBy(e => (e.transform.position - pc.transform.position).sqrMagnitude).FirstOrDefault();
+                if (foe != null)
+                {
+                    var to = foe.transform.position - pc.transform.position; to.y = 0f;
+                    input.AimPoint = foe.transform.position;
+                    input.Move = to.magnitude > 2.4f ? new Vector2(to.x, to.z).normalized : Vector2.zero;
+                    input.AttackHeld = to.magnitude < 3.4f;
+                    if (to.magnitude < 5f && Random.value < 0.02f) input.PressElementSkill(Random.value < 0.5f ? 1 : 2);
+                }
+                if (t > 2.5f + shot * 1.2f) { yield return Shoot(Camera.main, $"Logs/itch/luta_{shot:00}.png", new Vector2Int(1280, 720)); shot++; }
+                yield return null;
+            }
+            MetaStore.UseKey(MetaStore.DefaultKey);
+        }
+
         /// Golpe no heroi acende a borda vermelho-escura; com pouca vida ela fica pulsando. Foto para a pagina.
         [UnityTest, Timeout(300000)]
         public IEnumerator Hurt_Edge_Flashes_On_Hit_And_Pulses_On_Low_Health()
