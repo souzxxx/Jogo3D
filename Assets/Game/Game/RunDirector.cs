@@ -1106,6 +1106,7 @@ namespace Quintessence.Game
                 foreach (var v in FindObjectsByType<VolatileBurst>(FindObjectsSortMode.None)) Destroy(v.gameObject);
                 var anim = player.GetComponentInChildren<PlayerAnimator>();
                 if (anim != null) anim.Celebrate();
+                Feel.DamageNumber.ClearAll(); // nivel, finalizador e numeros sairiam empilhados por cima do VITORIA
                 hud.ShowFlash("VITÓRIA!", new Color(0.97f, 0.88f, 0.58f), 1.5f, player.transform);
                 StartCoroutine(Finish(true));
                 return;

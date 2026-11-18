@@ -153,7 +153,10 @@ namespace Quintessence.UI
         }
 
         void OnBoss(Health b, string name) { boss = b; bossTitle = name; bossPhase = 1; bossShield = false; }
-        void OnBossPhase(int phase, int total) => bossPhase = phase;
+        float phasePulse;
+        /// A barra do chefe pulsou para anunciar a fase (para os testes).
+        public int PhasePulses { get; private set; }
+        void OnBossPhase(int phase, int total) { bossPhase = phase; if (phase > 1) { phasePulse = 0.9f; PhasePulses++; } }
         void OnBossShield(bool up, bool needsQuintessence) { bossShield = up; bossNeedsQuint = needsQuintessence; }
 
         /// Para gravacoes: desenha o HUD pela camera (o modo Overlay nao aparece em captura de camera).
@@ -376,6 +379,15 @@ namespace Quintessence.UI
                 SetBar(bossFill, boss.Current / boss.Max);
                 bossFill.color = bossShield ? new Color(0.55f, 0.62f, 0.75f) : new Color(0.8f, 0.42f, 0.16f);
                 bossName.text = $"{bossTitle.ToUpperInvariant()}  ·  FASE {bossPhase}/3";
+                // fase nova: o nome cresce e fica ambar por um instante
+                if (phasePulse > 0f)
+                {
+                    phasePulse = Mathf.Max(0f, phasePulse - Time.unscaledDeltaTime);
+                    float k = Mathf.Sin(Mathf.Clamp01(phasePulse / 0.9f) * Mathf.PI);
+                    bossName.transform.localScale = Vector3.one * (1f + 0.18f * k);
+                    bossName.color = Color.Lerp(UiKit.Cream, new Color(1f, 0.66f, 0.3f), k);
+                }
+                else if (bossName.transform.localScale.x != 1f) { bossName.transform.localScale = Vector3.one; bossName.color = UiKit.Cream; }
                 bossHint.text = !bossShield ? "" : bossNeedsQuint
                     ? (hero.QuintessenceReady ? $"ESCUDO — aperte {(Pad ? "Y" : "R")} e ataque!" : hero.QuintessenceActive ? "ESCUDO — ataque agora!" : "ESCUDO — bata nele e cause reações para encher a Quintessência")
                     : "ESCUDO — aguente firme, ele vai ceder";
@@ -1035,11 +1047,12 @@ namespace Quintessence.UI
                 UiKit.Text(UiKit.Rect("Value", box, center, new Vector2(0, 18), new Vector2(230, 70)), tiles[i].value, 56, i == 0 ? accent : UiKit.Cream).font = GameFonts.Title;
                 UiKit.Text(UiKit.Rect("Label", box, center, new Vector2(0, -42), new Vector2(230, 30)), tiles[i].label, 22, UiKit.Dim);
             }
-            var statsText = UiKit.Text(UiKit.Rect("Stats", resultPanel, center, new Vector2(0, -55), new Vector2(1400, 170)), details, 25, UiKit.Cream, TextAnchor.MiddleCenter, false);
+            // bloco mais alto e botoes mais baixos: com 170 o texto de 5-6 linhas encolhia ate ficar miudo
+            var statsText = UiKit.Text(UiKit.Rect("Stats", resultPanel, center, new Vector2(0, -88), new Vector2(1400, 236)), details, 25, UiKit.Cream, TextAnchor.MiddleCenter, false);
             // com subida de maestria, feito e Ascensao nova o texto passa de cinco linhas: encolhe em vez de vazar
             UiKit.Fit(statsText, 16, 25);
-            UiKit.Focus(UiKit.Button(resultPanel, "Jogar de novo", center, new Vector2(-200, -210), new Vector2(380, 70), UiKit.Primary, again).gameObject);
-            UiKit.Button(resultPanel, "Menu principal", center, new Vector2(200, -210), new Vector2(380, 70), UiKit.Secondary, menu);
+            UiKit.Focus(UiKit.Button(resultPanel, "Jogar de novo", center, new Vector2(-200, -262), new Vector2(380, 70), UiKit.Primary, again).gameObject);
+            UiKit.Button(resultPanel, "Menu principal", center, new Vector2(200, -262), new Vector2(380, 70), UiKit.Secondary, menu);
         }
     }
 }

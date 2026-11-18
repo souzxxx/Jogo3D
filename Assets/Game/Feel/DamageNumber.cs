@@ -24,6 +24,19 @@ namespace Quintessence.Feel
         public const int MaxLive = 8;
         static readonly System.Collections.Generic.Dictionary<string, float> lastWord = new();
 
+        /// Some com todos os textos no ar (vitoria: so o VITORIA! fica).
+        public static void ClearAll()
+        {
+            foreach (var n in live) if (n != null) Destroy(n.gameObject);
+            live.Clear();
+            Hush = true;
+        }
+
+        /// Depois do ClearAll da vitoria: nenhum texto novo ate a cena trocar.
+        public static bool Hush;
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        static void ResetHush() => Hush = false;
+
         /// Quantos textos estao no ar (para os testes).
         public static int LiveCount { get { live.RemoveAll(x => x == null); return live.Count; } }
 
@@ -38,6 +51,7 @@ namespace Quintessence.Feel
 
         public static void Spawn(Vector3 position, string text, Color color, float size = 1f, float seconds = 0.75f)
         {
+            if (Hush) return;
             if (font == null) font = GameFonts.Display;
             live.RemoveAll(x => x == null);
             // lotado: sai primeiro o rotulo mais velho (palavra), so depois numero: o dano e o que o jogador precisa ler
@@ -90,6 +104,8 @@ namespace Quintessence.Feel
         }
 
         void OnDestroy() => live.Remove(this);
+        // cena nova (titulo, run nova): textos voltam a aparecer
+        static DamageNumber() { UnityEngine.SceneManagement.SceneManager.sceneLoaded += (_, _) => Hush = false; }
 
         static TextMesh Make(Transform parent, string text, Vector3 offset)
         {

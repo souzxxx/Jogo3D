@@ -402,6 +402,8 @@ namespace Quintessence.Game.PlayTests
             Assert.Contains(Feat.FirstWin, director.NewFeats, "a primeira vitoria cumpre o feito");
             Assert.IsTrue(player.GetComponentInChildren<PlayerAnimator>().Celebrating, "o heroi comemora quando o chefe cai");
             StringAssert.DoesNotContain("onda", hud.RoomLabel, "com o chefe caido o chip nao fala mais de onda");
+            Assert.Greater(hud.PhasePulses, 0, "a barra do chefe pulsou nas fases");
+            Assert.LessOrEqual(Quintessence.Feel.DamageNumber.LiveCount, 0, "na vitoria os textos no ar somem");
             Assert.AreEqual(1, Camera.main.GetComponent<FollowCamera>().Peeks, "a camera apresenta o chefe final uma vez");
             StringAssert.Contains(director.WeaverRun ? "Tecelã" : director.QueenRun ? "Rainha" : "Guardião", director.Epilogue(true), "a vitoria fala do chefe que caiu");
             Assert.IsTrue(MetaStore.Current.Has(Feat.FirstWin));
