@@ -328,6 +328,7 @@ namespace Quintessence.Game
             Dress(type);
             roomBase = $"Sala {Run.Depth + 1}/{Run.Map.LayerCount} · {RoomInfo.Name(type)}";
             roomKind = type; Feel.CombatFeedback.QuietWaves = type == RoomType.Boss;
+            SetCalmCamera(type);
             hud.SetRoom(roomBase, type);
             switch (type)
             {
@@ -669,6 +670,13 @@ namespace Quintessence.Game
         }
 
         /// O chefe nao passa pela escala das salas: a Ascensao entra aqui.
+        static bool IsFight(RoomType t) => t == RoomType.Combat || t == RoomType.Elite || t == RoomType.Boss || t == RoomType.Trial || t == RoomType.Siege;
+
+        void SetCalmCamera(RoomType t)
+        {
+            if (Camera.main != null && Camera.main.TryGetComponent(out FollowCamera f)) f.Calm = !IsFight(t);
+        }
+
         /// Letreiro de Provacao e Cerco: 4 s ainda estava na tela com a primeira onda chegando; o objetivo segue no chip.
         public const float SpecialBannerSeconds = 3.2f;
 
@@ -932,6 +940,7 @@ namespace Quintessence.Game
             player.Teleport(entryPoint, Vector3.forward);
             roomBase = $"Sala {Run.Depth + 1}/{Run.Map.LayerCount} · {RoomInfo.Name(node.Type)}";
             roomKind = node.Type; Feel.CombatFeedback.QuietWaves = node.Type == RoomType.Boss; // chefe: sem "ONDA 1/1"
+            SetCalmCamera(node.Type);
             hud.SetRoom(roomBase, node.Type);
             yield return null;
             entering = false;
@@ -1807,7 +1816,7 @@ namespace Quintessence.Game
         static readonly string[] ElementNames = { "", "Fogo", "Água", "Terra", "Ar" };
 
         /// Pedestais 1 m mais perto da entrada: ao entrar, os nomes ficavam colados no topo da tela, um deles sob o contador de Essencia.
-        public const float ShrineZ = -1f;
+        public const float ShrineZ = -2f;
 
         void SetupShrine()
         {

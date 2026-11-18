@@ -999,7 +999,17 @@ namespace Quintessence.Game.PlayTests
             var shrines = Object.FindObjectsByType<Transform>(FindObjectsSortMode.None).Where(x => x.name.StartsWith("Shrine_") || x.name.StartsWith("Deepen_")).ToList();
             Assert.Greater(shrines.Count, 0, "a sala tem pedestais");
             player.Teleport(director.EntryPoint, Vector3.forward);
-            for (int k = 0; k < 40; k++) yield return null;
+            // rodada 23: mirando la em cima dos pedestais, a camera nao adianta tanto numa sala sem luta
+            scripted.AimPoint = director.EntryPoint + Vector3.forward * 14f;
+            for (int k = 0; k < 60; k++) yield return null;
+            Assert.IsTrue(cam.GetComponent<FollowCamera>().Calm, "Santuario e sala calma");
+            foreach (var plate in Object.FindObjectsByType<TextMesh>(FindObjectsSortMode.None))
+            {
+                if (!plate.transform.parent || !(plate.transform.parent.name.StartsWith("Shrine_") || plate.transform.parent.name.StartsWith("Deepen_"))) continue;
+                var top = cam.WorldToViewportPoint(plate.GetComponent<MeshRenderer>().bounds.max);
+                // o chip da sala ocupa os 48 px de cima numa tela de 720 (ate ~0,933 da altura): a placa tem de ficar abaixo dele
+                Assert.Less(top.y, 0.93f, $"'{plate.text}' sobe para baixo do chip da sala com o mouse nos pedestais");
+            }
             Shot(cam, "Logs/r14/santuario_entrada.png");
             foreach (var root in shrines)
             {
