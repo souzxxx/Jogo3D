@@ -65,12 +65,14 @@ namespace Quintessence.UI
             int unlocked = meta != null ? Quintessence.Run.Ascension.Unlocked(meta.Wins) : 0;
             if (unlocked <= 0) { Ascension = 0; return; }
             Ascension = Mathf.Clamp(Ascension, 0, unlocked);
-            var asc = UiKit.Rect("Ascension", root, new Vector2(0.5f, 0), new Vector2(0, 122), new Vector2(860, 32));
+            // cabe na faixa entre o topo da fileira de botoes (74 + 58 = 132) e o pe das cartas (164); em 122 o "−" e o "+"
+            // invadiam o REFUGIO e o OPCOES
+            var asc = UiKit.Rect("Ascension", root, new Vector2(0.5f, 0), new Vector2(0, 132), new Vector2(860, 32));
             if (refuge != null) asc.SetSiblingIndex(refuge.GetSiblingIndex());
             var label = UiKit.Text(UiKit.Rect("Label", asc, mid, Vector2.zero, new Vector2(740, 30)), "", 20, UiKit.Cream, TextAnchor.MiddleCenter, false);
             void Refresh() => label.text = $"ASCENSÃO {Ascension}/{unlocked}  ·  {Quintessence.Run.Ascension.Describe(Ascension)}";
-            UiKit.Button(asc, "−", new Vector2(0, 0.5f), new Vector2(22, 0), new Vector2(44, 30), UiKit.Secondary, () => { Ascension = Mathf.Max(0, Ascension - 1); Refresh(); });
-            UiKit.Button(asc, "+", new Vector2(1, 0.5f), new Vector2(-22, 0), new Vector2(44, 30), UiKit.Secondary, () => { Ascension = Mathf.Min(unlocked, Ascension + 1); Refresh(); });
+            UiKit.Button(asc, "−", new Vector2(0, 0.5f), new Vector2(22, 0), new Vector2(44, 28), UiKit.Secondary, () => { Ascension = Mathf.Max(0, Ascension - 1); Refresh(); });
+            UiKit.Button(asc, "+", new Vector2(1, 0.5f), new Vector2(-22, 0), new Vector2(44, 28), UiKit.Secondary, () => { Ascension = Mathf.Min(unlocked, Ascension + 1); Refresh(); });
             Refresh();
         }
 
@@ -502,8 +504,11 @@ namespace Quintessence.UI
                 noteLabels[i] = UiKit.Text(UiKit.Rect("Note", card, new Vector2(0.5f, 0), new Vector2(0, 10), new Vector2(236, 54)), notes[i], 21, UiKit.Paper, TextAnchor.MiddleCenter, false);
                 noteTexts[i] = notes[i];
                 UiKit.Fit(noteLabels[i], 15, 21);
-                heroWinLabels[i] = UiKit.Text(UiKit.Rect("Wins", card, new Vector2(1, 1), new Vector2(-38, -18), new Vector2(70, 22)), "", 17, new Color(0.9f, 0.76f, 0.42f), TextAnchor.MiddleRight, false);
-                heroMasteryLabels[i] = UiKit.Text(UiKit.Rect("Mastery", card, new Vector2(0, 1), new Vector2(12, -18), new Vector2(80, 22)), "", 17, UiKit.Cream, TextAnchor.MiddleLeft, false);
+                // nos cantos de cima, fora do circulo do icone (o halo vai de 86 a 170 px na carta de 256): o "1 vitoria" em
+                // -38 e o "Maestria 1" largo encostavam no circulo
+                heroWinLabels[i] = UiKit.Text(UiKit.Rect("Wins", card, new Vector2(1, 1), new Vector2(-10, -18), new Vector2(74, 22)), "", 17, new Color(0.9f, 0.76f, 0.42f), TextAnchor.MiddleRight, false);
+                UiKit.Fit(heroWinLabels[i], 12, 17);
+                heroMasteryLabels[i] = UiKit.Text(UiKit.Rect("Mastery", card, new Vector2(0, 1), new Vector2(10, -18), new Vector2(74, 22)), "", 17, UiKit.Cream, TextAnchor.MiddleLeft, false);
                 UiKit.Fit(heroMasteryLabels[i], 12, 17);
             }
             var open = UiKit.Button(root, "REFÚGIO", new Vector2(0.5f, 0), new Vector2(-560, 74), new Vector2(340, 58), UiKit.Primary, () => ShowRefuge(true));

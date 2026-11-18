@@ -40,6 +40,9 @@ namespace Quintessence.Feel
             var go = new GameObject("AudioDirector");
             DontDestroyOnLoad(go);
             instance = go.AddComponent<AudioDirector>();
+            // as cenas sao geradas por codigo e a camera nasce sem AudioListener: todo som e 2D, entao o ouvido mora
+            // aqui, junto de quem toca, e vale para o titulo e para a run
+            if (FindAnyObjectByType<AudioListener>() == null) go.AddComponent<AudioListener>();
         }
 
         void Awake()

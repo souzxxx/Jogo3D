@@ -67,7 +67,9 @@ namespace Quintessence.UI
         /// Icone de Assets/Resources/Icons (silhueta branca, para tingir).
         public static Sprite Icon(string name)
         {
-            if (icons.TryGetValue(name, out var s)) return s;
+            // o sprite e criado em tempo de jogo e o Unity o destroi ao sair do Play; sem recarregar o dominio o
+            // dicionario sobrevive com a entrada morta e a imagem saia como um quadrado branco no segundo Play
+            if (icons.TryGetValue(name, out var s) && s != null) return s;
             var tex = Resources.Load<Texture2D>("Icons/" + name);
             s = tex != null ? Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), new Vector2(0.5f, 0.5f), 100f) : Circle;
             icons[name] = s;

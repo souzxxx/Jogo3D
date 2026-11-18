@@ -84,11 +84,17 @@ namespace Quintessence.Game.PlayTests
 
             // passar o mouse numa carta acende o pedestal daquele elemento no altar
             var title = Object.FindFirstObjectByType<TitleController>();
+            // com um controle de verdade ligado na maquina, a primeira carta ja nasce escolhida (e conta como acesa):
+            // este trecho e sobre o mouse, entao comeca sem nada escolhido
+            if (UnityEngine.EventSystems.EventSystem.current != null) UnityEngine.EventSystems.EventSystem.current.SetSelectedGameObject(null);
+            // o pedestal que a selecao acendeu volta ao normal (a luz anda em tempo real, entao espera ela parar)
+            float last = -1f;
+            for (int i = 0; i < 600 && Mathf.Abs(title.LightOf(0) - last) > 0.002f; i++) { last = title.LightOf(0); yield return null; }
             Assert.AreEqual(-1, menu.HoveredElement);
             float before = title.LightOf(0);
             GameObject.Find("Card_Rax").GetComponent<UiHover>().OnPointerEnter(null);
             Assert.AreEqual(0, menu.HoveredElement);
-            for (int i = 0; i < 40; i++) yield return null;
+            for (int i = 0; i < 600 && title.LightOf(0) <= before + 2f; i++) yield return null;
             Assert.Greater(title.LightOf(0), before + 2f, "o pedestal de Fogo deveria acender");
             Assert.AreEqual(0, title.Cheering, "o Rax comemora quando a carta dele esta sob o mouse");
             Assert.Less(title.LightOf(1), before + 1f, "os outros ficam como estavam");
@@ -3287,12 +3293,6 @@ namespace Quintessence.Game.PlayTests
             File.WriteAllBytes(path, tex.EncodeToPNG());
         }
 
-        IEnumerator Step()
-        {
-            yield return null;
-            if (frame++ % 3 != 0 || cam == null) yield break;
-            Render(cam);
-            File.WriteAllBytes($"{FrameDir}/f{saved++:00000}.jpg", tex.EncodeToJPG(85));
         /// Bug do playtest de 18/11: a Sacerdotisa da Elite nasceu atras da parede do fundo (o gerador fica em z = 1 e o
         /// raio passava da parede; havia malha de navegacao do lado de fora) e o chefe nao tinha o resgate dos comuns.
         [UnityTest, Timeout(600000)]
@@ -3350,6 +3350,12 @@ namespace Quintessence.Game.PlayTests
             Time.captureFramerate = 0;
         }
 
+        IEnumerator Step()
+        {
+            yield return null;
+            if (frame++ % 3 != 0 || cam == null) yield break;
+            Render(cam);
+            File.WriteAllBytes($"{FrameDir}/f{saved++:00000}.jpg", tex.EncodeToJPG(85));
         }
     }
 }
