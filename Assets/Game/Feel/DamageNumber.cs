@@ -35,7 +35,7 @@ namespace Quintessence.Feel
         /// Depois do ClearAll da vitoria: nenhum texto novo ate a cena trocar.
         public static bool Hush;
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-        static void ResetHush() => Hush = false;
+        static void ResetHush() { Hush = false; lastWord.Clear(); }
 
         /// Quantos textos estao no ar (para os testes).
         public static int LiveCount { get { live.RemoveAll(x => x == null); return live.Count; } }
@@ -44,7 +44,8 @@ namespace Quintessence.Feel
         public static bool Recently(string word, float seconds)
         {
             float now = Time.unscaledTime;
-            if (lastWord.TryGetValue(word, out float at) && now - at < seconds) return true;
+            // (now < at: relogio de outra sessao de Play sem recarga de dominio; nao conta como recente)
+            if (lastWord.TryGetValue(word, out float at) && now >= at && now - at < seconds) return true;
             lastWord[word] = now;
             return false;
         }
@@ -105,7 +106,7 @@ namespace Quintessence.Feel
 
         void OnDestroy() => live.Remove(this);
         // cena nova (titulo, run nova): textos voltam a aparecer
-        static DamageNumber() { UnityEngine.SceneManagement.SceneManager.sceneLoaded += (_, _) => Hush = false; }
+        static DamageNumber() { UnityEngine.SceneManagement.SceneManager.sceneLoaded += (_, _) => { Hush = false; lastWord.Clear(); }; }
 
         static TextMesh Make(Transform parent, string text, Vector3 offset)
         {

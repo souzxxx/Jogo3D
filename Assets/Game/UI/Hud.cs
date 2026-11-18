@@ -776,9 +776,10 @@ namespace Quintessence.UI
         public void ShowPause(bool show, Action resume = null, Action menu = null, Action restart = null)
         {
             if (show) { ClearChapter(); SuspendTip(); } // a dica e o cartao ficariam por cima do painel
-            else PanelClosed();
+            // fecha o painel antes de devolver a dica: com ele ainda ativo o PanelClosed saia sem soltar a dica,
+            // e a fila de dicas ficava travada para o resto da run
             pausePanel.gameObject.SetActive(show);
-            if (!show) return;
+            if (!show) { PanelClosed(); return; }
             foreach (Transform child in pausePanel) Destroy(child.gameObject);
             var center = new Vector2(0.5f, 0.5f);
             bool hasBoons = boons != null && boons.Count > 0;
