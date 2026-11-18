@@ -2586,6 +2586,9 @@ namespace Quintessence.Game.PlayTests
             for (int i = 0; i < 10; i++) yield return null;
             var tut = Object.FindFirstObjectByType<TutorialDirector>();
             Assert.IsNotNull(tut, "a cena de run deveria abrir o treino");
+            var dresser = Object.FindFirstObjectByType<BiomeDresser>();
+            Assert.IsNotNull(dresser);
+            Assert.AreEqual(Biome.Ashes, dresser.Current, "o treino tem a cara dos Saloes de Cinza (sem o brilho cru das rachaduras)");
             var hud = Object.FindFirstObjectByType<Hud>();
             player = Object.FindFirstObjectByType<PlayerController>();
             hp = player.GetComponent<Health>();

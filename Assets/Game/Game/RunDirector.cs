@@ -715,6 +715,9 @@ namespace Quintessence.Game
             {
                 // treino: sem mapa nem ondas; outro diretor cuida da sala
                 Run = new RunState(RunMapGenerator.Generate(1, 3, 0));
+                // o treino nao passava pelo vestidor: rachaduras com o brilho cru do construtor (laranja quase neon),
+                // diferente da run. Fica com a cara dos Saloes de Cinza
+                if (dresser != null) dresser.Apply(Biome.Ashes);
                 hud.SetBoons(null);
                 hud.SetFade(0f);
                 gameObject.AddComponent<TutorialDirector>().Begin(player, hud, dummyPrefab);
