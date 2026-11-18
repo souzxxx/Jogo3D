@@ -634,7 +634,8 @@ namespace Quintessence.Feel
         {
             FindPlayer();
             if (player != null)
-                DamageNumber.Spawn(player.position + Vector3.up * 4.2f, total > 0 ? $"ONDA {index + 1}/{total}" : "REFORÇOS", Color.white, 1.1f, 1.3f);
+                // aviso menor e curto: o chip do alto ja mostra a onda e quantos faltam; o grande cobria a luta
+                DamageNumber.Spawn(player.position + Vector3.up * 4.2f, total > 0 ? $"ONDA {index + 1}/{total}" : "REFORÇOS", new Color(0.93f, 0.88f, 0.78f), 0.7f, 0.85f);
         }
 
         void OnRoomCleared()

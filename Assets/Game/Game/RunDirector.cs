@@ -637,7 +637,7 @@ namespace Quintessence.Game
             var st = spawner.State;
             string label = roomBase;
             if (st.Started && !st.Cleared && st.CurrentWave >= 0)
-                label += $" · onda {st.CurrentWave + 1}/{st.TotalWaves} · {st.Alive} {(st.Alive == 1 ? "inimigo" : "inimigos")}";
+                label += $" · onda {st.CurrentWave + 1}/{st.TotalWaves} · " + (st.Alive > 0 ? $"{st.Alive} {(st.Alive == 1 ? "inimigo" : "inimigos")}" : "próxima onda");
             // so mexe no rotulo que e dela (Provacao e Cerco escrevem o proprio)
             if (label != hud.RoomLabel && hud.RoomLabel.StartsWith(roomBase)) hud.SetRoom(label);
         }

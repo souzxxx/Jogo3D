@@ -482,6 +482,7 @@ namespace Quintessence.UI
         void TickTip()
         {
             if (tipRoot == null || !tipRoot.gameObject.activeSelf) return;
+            if (GameClock.Paused) return; // quem pausa para ler nao perde a dica
             if ((tipLeft -= Time.unscaledDeltaTime) <= 0f) tipRoot.gameObject.SetActive(false);
         }
 
