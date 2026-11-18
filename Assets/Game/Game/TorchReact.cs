@@ -170,7 +170,11 @@ namespace Quintessence.Game
             main.startSize = new ParticleSystem.MinMaxCurve(0.2f, 0.34f);
             main.startSpeed = new ParticleSystem.MinMaxCurve(0.15f, 0.35f);
             main.startLifetime = new ParticleSystem.MinMaxCurve(0.25f, 0.4f);
-            main.startColor = new ParticleSystem.MinMaxGradient(new Color(0.9f, 0.42f, 0.1f), new Color(1f, 0.58f, 0.2f));
+            // a cor vem da chama das tochas (o vestidor tinge por bioma; na sala da Rainha fica fria como elas)
+            var tc = template.main.startColor;
+            Color lo = tc.mode == ParticleSystemGradientMode.TwoColors ? tc.colorMin : tc.color;
+            Color hi = tc.mode == ParticleSystemGradientMode.TwoColors ? tc.colorMax : tc.color;
+            main.startColor = new ParticleSystem.MinMaxGradient(lo * 0.9f, hi * 0.95f);
             var em = ps.emission; em.rateOverTime = 18f;
             var sh = ps.shape; sh.radius = 0.02f;
             ps.Clear(); ps.Play();

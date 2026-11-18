@@ -909,7 +909,7 @@ namespace Quintessence.UI
                 UiKit.Image(UiKit.Rect("Icon", disc, center, Vector2.zero, new Vector2(42, 42)), UiKit.Icon(SkillIcon[i + 1]), has ? UiKit.Cream : new Color(1, 1, 1, 0.22f));
                 UiKit.Text(UiKit.Rect("Name", row, new Vector2(0, 0.5f), new Vector2(94, 20), new Vector2(470, 34)),
                     $"{i + 1}  ·  {SkillName[i + 1]}" + (has && run != null && run.SkillRank[i + 1] > 1 ? " " + RunState.Roman(run.SkillRank[i + 1]) : ""), 28, has ? UiKit.Cream : UiKit.Dim, TextAnchor.MiddleLeft);
-                var note = UiKit.Text(UiKit.Rect("Role", row, new Vector2(0, 0.5f), new Vector2(94, -19), new Vector2(470, 48)),
+                var note = UiKit.Text(UiKit.Rect("Role", row, new Vector2(0, 0.5f), new Vector2(94, -20), new Vector2(470, 44)), // cartao de 86: sem encostar no nome
                     has ? role[i + 1] : "Desperte este elemento num Santuário.", 20, has ? UiKit.Paper : UiKit.Dim, TextAnchor.MiddleLeft, false);
                 note.lineSpacing = 0.9f;
                 UiKit.Fit(note, 15, 20); // duas linhas cabiam so com folga: a de Agua vazava pela borda do cartao

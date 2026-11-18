@@ -1100,6 +1100,7 @@ namespace Quintessence.Game.PlayTests
             Assert.Greater(torches.CandleFlames, 0, "as velas acesas ganham uma chama pequena");
             Assert.IsTrue(torches.CandleFlameOn(candle), "a chama da vela esta acesa");
             Shot(cam, "Logs/r15/velas_acesas.png");
+            File.WriteAllText("Logs/r15/vela.txt", cam.WorldToViewportPoint(candle.transform.position).ToString("F3")); // onde recortar o print
             torches.Touch(candle.transform.position, 3f, false);
             for (int k = 0; k < 20; k++) yield return null;
             Assert.IsFalse(torches.CandleFlameOn(candle), "Agua apaga a chama da vela");
