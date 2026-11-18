@@ -1238,6 +1238,30 @@ namespace Quintessence.Game.PlayTests
             Time.captureFramerate = 0;
         }
 
+        /// Rodada 22: na sala de Elite o modificador fica no chip a sala inteira (antes sumia na primeira onda).
+        [UnityTest, Timeout(300000)]
+        public IEnumerator Elite_Modifier_Stays_In_The_Room_Chip()
+        {
+            GameEvents.Clear();
+            Time.timeScale = 1f;
+            Time.captureFramerate = 30;
+            yield return EditorSceneManager.LoadSceneAsyncInPlayMode("Assets/Scenes/Run.unity", new LoadSceneParameters(LoadSceneMode.Single));
+            yield return null;
+            yield return null;
+            var director = Object.FindFirstObjectByType<RunDirector>();
+            var hud = Object.FindFirstObjectByType<Hud>();
+            for (int k = 0; k < 2000 && director.Busy; k++) yield return null;
+            Object.FindFirstObjectByType<PlayerController>().GetComponent<Health>().Pool.ExtraDamageTakenMultiplier = 0f;
+            foreach (var e in Object.FindObjectsByType<EnemyBrain>(FindObjectsSortMode.None)) Object.Destroy(e.gameObject);
+            director.StartEncounter(RoomType.Elite, 3, EliteModifier.Sturdy);
+            var spawner = Object.FindFirstObjectByType<WaveSpawner>();
+            for (int k = 0; k < 900 && (spawner.State == null || spawner.State.Alive <= 0); k++) yield return null;
+            for (int k = 0; k < 10; k++) yield return null;
+            StringAssert.Contains("Resistentes", hud.RoomLabel, "o modificador de Elite continua no chip");
+            StringAssert.Contains("onda", hud.RoomLabel, "junto com o objetivo da onda");
+            Time.captureFramerate = 0;
+        }
+
         [UnityTest, Timeout(300000)]
         public IEnumerator Escudeiro_Blocks_From_The_Front_But_Not_From_Behind()
         {

@@ -1023,7 +1023,10 @@ namespace Quintessence.Game
             CurrentTrait = trait;
             if (trait != EliteModifier.None)
             {
-                hud.SetRoom($"Sala {depth + 1}/{Run.Map.LayerCount} · Elite: {DifficultyCurve.Name(trait)}", type);
+                // o modificador fica no chip a sala inteira: antes o objetivo ("onda 1/2 · 3 inimigos") reescrevia o rotulo a
+                // partir de "Sala N · Elite" e o ": Resistentes" sumia na primeira onda, junto com o letreiro
+                roomBase = $"Sala {depth + 1}/{Run.Map.LayerCount} · Elite: {DifficultyCurve.Name(trait)}";
+                hud.SetRoom(roomBase, type);
                 Feel.DamageNumber.Spawn(player.transform.position + Vector3.up * 3.6f,
                     $"ELITE {DifficultyCurve.Name(trait).ToUpperInvariant()}: {DifficultyCurve.Describe(trait)}", new Color(0.86f, 0.62f, 0.34f), 1f, 2.6f);
             }
