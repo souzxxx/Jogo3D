@@ -484,6 +484,9 @@ namespace Quintessence.UI
         const float TipHigh = 236f, TipLow = 96f;
 
         /// Ha uma dica na tela (ou esperando um painel fechar para voltar).
+        /// Altura da caixa de dica agora (para os testes).
+        public float TipY => tipRoot != null ? tipRoot.anchoredPosition.y : 0f;
+
         public bool TipVisible => tipRoot != null && tipLeft > 0f && (tipRoot.gameObject.activeSelf || tipSuspended);
 
         public void HideTip() { if (tipRoot != null) tipRoot.gameObject.SetActive(false); }
@@ -506,9 +509,18 @@ namespace Quintessence.UI
             tipRoot.SetSiblingIndex(Mathf.Max(0, fade.transform.GetSiblingIndex() - 1));
         }
 
+        /// Com o aviso de interacao ("E entrar: Mestre") na tela, a dica sobe para cima dele: as duas caixas ficavam
+        /// na mesma altura e a dica cobria o aviso justamente na porta.
+        public const float TipAbovePrompt = 318f;
+
         void TickTip()
         {
             if (tipRoot == null || !tipRoot.gameObject.activeSelf) return;
+            if (!LevelUpVisible)
+            {
+                float want = promptBox != null && promptBox.gameObject.activeSelf ? TipAbovePrompt : TipHigh;
+                if (tipRoot.anchoredPosition.y != want) tipRoot.anchoredPosition = new Vector2(0, want);
+            }
             if (GameClock.Paused) return; // quem pausa para ler nao perde a dica
             if ((tipLeft -= Time.unscaledDeltaTime) <= 0f) tipRoot.gameObject.SetActive(false);
         }
