@@ -407,7 +407,8 @@ namespace Quintessence.Game.PlayTests
             StringAssert.DoesNotContain("onda", hud.RoomLabel, "com o chefe caido o chip nao fala mais de onda");
             Assert.Greater(hud.PhasePulses, 0, "a barra do chefe pulsou nas fases");
             Assert.LessOrEqual(Quintessence.Feel.DamageNumber.LiveCount, 0, "na vitoria os textos no ar somem");
-            Assert.AreEqual(1, Camera.main.GetComponent<FollowCamera>().Peeks, "a camera apresenta o chefe final uma vez");
+            Assert.AreEqual(1, director.BossPresented, "a camera apresenta o chefe final uma vez");
+            Assert.Greater(Camera.main.GetComponent<FollowCamera>().Peeks, 1, "e espia as portas quando as salas acabam");
             StringAssert.Contains(director.WeaverRun ? "Tecelã" : director.QueenRun ? "Rainha" : "Guardião", director.Epilogue(true), "a vitoria fala do chefe que caiu");
             Assert.IsTrue(MetaStore.Current.Has(Feat.FirstWin));
             var build = director.BuildLine();
@@ -835,6 +836,7 @@ namespace Quintessence.Game.PlayTests
             director.ApplyLayout(-1);
             yield return null;
             Assert.AreEqual(4, director.PlaceBreakables(5, 4), "quatro caixotes nas bordas da sala vazia");
+            Assert.IsTrue(Breakable.Active.All(b => Mathf.Abs(b.transform.position.x) > Arena.HalfX * 0.7f), "so nas paredes laterais (a borda de baixo fica atras da barra de skills)");
             foreach (var b in Breakable.Active)
             {
                 Assert.IsNull(b.GetComponentInChildren<Collider>(), "caixote nao tem colisor");
@@ -857,20 +859,23 @@ namespace Quintessence.Game.PlayTests
             for (int k = 0; k < 40 && !target.IsBroken; k++) yield return null;
             scripted.AttackHeld = false;
             Assert.IsTrue(target == null || target.IsBroken, "o golpe quebra o caixote");
-            Assert.AreEqual(before + 1, Breakable.Broken);
+            // (dois caixotes vizinhos na mesma parede podem cair no mesmo golpe)
+            Assert.GreaterOrEqual(Breakable.Broken, before + 1);
             // passando por cima
             yield return null;
+            int afterHit = Breakable.Broken;
             var other = Breakable.Active[0];
             hero.Teleport(other.transform.position + Vector3.up * 0.05f, Vector3.forward);
             for (int k = 0; k < 5; k++) yield return null;
-            Assert.AreEqual(before + 2, Breakable.Broken, "o heroi passando por cima quebra o caixote");
+            Assert.GreaterOrEqual(Breakable.Broken, afterHit + 1, "o heroi passando por cima quebra o caixote");
+            before = Breakable.Broken - 2;
             // inimigo por cima tambem quebra (sem dano nem credito)
             var foePrefab = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Game/Enemies/Prefabs/Rastejante.prefab");
             var third = Breakable.Active[0];
             var foe = Object.Instantiate(foePrefab, third.transform.position, Quaternion.identity);
             foe.GetComponent<EnemyBrain>().enabled = false;
             for (int k = 0; k < 8; k++) yield return null;
-            Assert.AreEqual(before + 3, Breakable.Broken, "inimigo passando por cima quebra o caixote");
+            Assert.GreaterOrEqual(Breakable.Broken, before + 3, "inimigo passando por cima quebra o caixote");
             Object.Destroy(foe);
             // golpe na parede: faisca e "tec"
             var feedback = Object.FindFirstObjectByType<Quintessence.Feel.CombatFeedback>();

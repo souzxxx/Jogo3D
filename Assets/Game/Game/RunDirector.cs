@@ -160,14 +160,8 @@ namespace Quintessence.Game
             var rng = new System.Random(seed);
             for (int tries = 0; tries < 60 && BreakablesPlaced < count; tries++)
             {
-                Vector3 pos;
-                if (rng.Next(3) > 0)
-                    pos = new Vector3((rng.Next(2) == 0 ? -1f : 1f) * (Arena.HalfX - 2.2f), 0f, Mathf.Lerp(-0.6f, 0.75f, (float)rng.NextDouble()) * Arena.HalfZ);
-                else
-                {
-                    pos = new Vector3(Mathf.Lerp(-0.8f, 0.8f, (float)rng.NextDouble()) * Arena.HalfX, 0f, -(Arena.HalfZ - 2.2f));
-                    if (Mathf.Abs(pos.x - entryPoint.x) < 3.5f) continue;
-                }
+                // so nas paredes laterais: na borda de baixo o caixote ficava meio escondido atras da barra de skills
+                var pos = new Vector3((rng.Next(2) == 0 ? -1f : 1f) * (Arena.HalfX - 2.2f), 0f, Mathf.Lerp(-0.45f, 0.75f, (float)rng.NextDouble()) * Arena.HalfZ);
                 // esfera acima do piso (o colisor do chao nao conta), larga o bastante para nao encostar em peca nem parede
                 if (Physics.CheckSphere(pos + Vector3.up * 0.95f, 0.65f, ~0, QueryTriggerInteraction.Ignore)) continue;
                 if (!UnityEngine.AI.NavMesh.SamplePosition(pos, out var hit, 0.8f, UnityEngine.AI.NavMesh.AllAreas)) continue;
@@ -676,7 +670,7 @@ namespace Quintessence.Game
                 bool final = Run.Current.Type == RoomType.Boss;
                 hud.ShowBanner(name.ToUpperInvariant(), final ? "Chefe final" : "Mini-chefe", final ? new Color(0.95f, 0.62f, 0.32f) : new Color(0.8f, 0.78f, 0.9f), 3f);
                 // chefe final: a camera vai ate ele enquanto ele sai do chao
-                if (final && boss != null && Camera.main != null && Camera.main.TryGetComponent(out FollowCamera follow)) follow.Peek(boss.transform, 2.2f);
+                if (final && boss != null && Camera.main != null && Camera.main.TryGetComponent(out FollowCamera follow)) { follow.Peek(boss.transform, 2.2f); BossPresented++; }
             }
             if (GameFlow.Ascension <= 0 || boss == null) return;
             boss.Pool.SetMax(boss.Max * Ascension.HealthMult(GameFlow.Ascension));
@@ -1170,6 +1164,8 @@ namespace Quintessence.Game
         IEnumerator Finish(bool victory)
         {
             Finished = true;
+            // o Update para de atualizar o objetivo com a run encerrada: o chip volta ao nome da sala aqui
+            if (!string.IsNullOrEmpty(roomBase)) hud.SetRoom(roomBase);
             Victory = victory;
             RunSaveStore.Clear(); // run acabou: nada para continuar
             hud.HidePrompt();
@@ -1616,10 +1612,21 @@ namespace Quintessence.Game
             };
         }
 
+        Transform doorPeek;
+        /// Quantas vezes a camera apresentou o chefe final (para os testes; a espiada das portas conta a parte).
+        public int BossPresented { get; private set; }
+
         void OpenDoors()
         {
             Tip("map");
             var choices = Run.Choices;
+            // a camera da uma espiada nas portas (ficavam coladas na borda de cima com o valor cortado), sem tirar o controle
+            if (choices.Count > 0 && Camera.main != null && Camera.main.TryGetComponent(out FollowCamera follow))
+            {
+                if (doorPeek == null) doorPeek = new GameObject("DoorPeek").transform;
+                doorPeek.position = new Vector3(0f, 0f, doorLine - 1.5f);
+                follow.Peek(doorPeek, 1.4f);
+            }
             for (int i = 0; i < choices.Count; i++)
             {
                 var node = choices[i];
