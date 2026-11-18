@@ -358,10 +358,13 @@ namespace Quintessence.UI
                 else
                 {
                     bool can = meta.CanBuy(u);
-                    var b = UiKit.Button(row, $"{meta.Cost(u)} Fragmentos", new Vector2(1, 0.5f), new Vector2(-16, 0), new Vector2(210, 56),
+                    // apagado: diz quanto falta, dentro do proprio botao (antes so o preco, sem dizer por que nao dava)
+                    int missing = Mathf.Max(0, meta.Cost(u) - meta.Shards);
+                    var b = UiKit.Button(row, can ? $"{meta.Cost(u)} Fragmentos" : $"{meta.Cost(u)} Fragmentos\nfaltam {missing}", new Vector2(1, 0.5f), new Vector2(-16, 0), new Vector2(210, 56),
                         can ? UiKit.Primary : UiKit.Disabled, () => Buy(u));
                     var t = b.transform.Find("Label").GetComponent<UnityEngine.UI.Text>();
-                    t.fontSize = 23;
+                    t.fontSize = can ? 23 : 19;
+                    t.lineSpacing = 0.85f;
                     if (!can) t.color = UiKit.Dim;
                 }
             }

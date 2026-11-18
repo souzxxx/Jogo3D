@@ -11,7 +11,8 @@ namespace Quintessence.UI
     {
         public static readonly Color Ink = new(0.05f, 0.04f, 0.09f, 0.88f);
         public static readonly Color Paper = new(0.93f, 0.91f, 0.96f);
-        public static readonly Color Dim = new(0.62f, 0.59f, 0.72f);
+        // texto secundario um pouco mais claro: o cinza-lilas antigo cansava a leitura nos paineis (rodada de criticas 8)
+        public static readonly Color Dim = new(0.7f, 0.67f, 0.79f);
         public static readonly Color Cream = new(0.93f, 0.88f, 0.78f);
 
         static Sprite circle, ring, panel, frame, vignette;
