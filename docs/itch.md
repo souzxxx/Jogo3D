@@ -54,7 +54,7 @@ Roguelite de ação em 3D com câmera de cima. Uma run leva de 10 a 15 minutos.
 - **Fusões:** com três elementos, lance a skill do terceiro dentro da lava do Magma, da nuvem do Vapor ou do lamaçal da Lama.
 - **Esquiva perfeita:** dar dash através de um golpe enche a Quintessência e deixa o próximo golpe crítico.
 - **Escudeiro:** de frente o escudo segura quase tudo. Contorne.
-- **O cenário reage:** caixotes quebram com golpe, explosão ou pisada; tochas, velas e respiradouros de brasa apagam com Água e reacendem com Fogo (o vento do Ar também apaga as velas) (o Fogo faz o respiradouro entrar em erupção em cima dos inimigos); a Água molha o barril de pólvora (o próximo golpe só o quebra, sem explodir); o Cristal de Ressonância se parte em lascas; portas e baús abrem de verdade.
+- **O cenário reage:** caixotes quebram com golpe, explosão ou pisada; tochas, velas e respiradouros de brasa apagam com Água e reacendem com Fogo (o vento do Ar também apaga as velas) (o Fogo faz o respiradouro entrar em erupção em cima dos inimigos, e a erupção deixa neles a marca de Fogo para a próxima reação); a Água molha o barril de pólvora (o próximo golpe só o quebra, sem explodir); o Cristal de Ressonância se parte em lascas; portas e baús abrem de verdade.
 - **Três chefes finais**, sorteados por run.
 - **Ascensão:** depois da primeira vitória, o título libera 5 níveis de dificuldade a mais.
 - **Refúgio:** os Fragmentos de cada run compram 8 melhorias permanentes.
