@@ -1995,7 +1995,8 @@ namespace Quintessence.Game
                 var stall = decor.transform.Find("Merchant");
                 if (stall != null)
                 {
-                    Label(stall, new Vector3(0, 2.95f, 0), "MERCADOR", new Color(0.88f, 0.74f, 0.42f), 0.7f);
+                    // logo acima da cabeca: a 2,95 m o nome ia para baixo do chip da sala com a camera calma
+                    Label(stall, new Vector3(0, 2.3f, 0), "MERCADOR", new Color(0.88f, 0.74f, 0.42f), 0.7f);
                     merchant = stall.GetComponent<Merchant>();
                     if (merchant != null) merchant.Bind(player.transform);
                 }
