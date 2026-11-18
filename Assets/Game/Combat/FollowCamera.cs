@@ -50,9 +50,23 @@ namespace Quintessence.Combat
                 float w = Mathf.Clamp01(Mathf.Min(done / 0.45f, peekLeft / 0.6f)); // entra e sai sem tranco
                 want = Vector3.Lerp(want, (target.position + peek.position) * 0.5f, w * 0.9f);
             }
+            if (lean != null && !lean.IsDead && lean.gameObject.activeInHierarchy)
+            {
+                var pull = lean.transform.position - target.position; pull.y = 0f;
+                want += Vector3.ClampMagnitude(pull * BossLean, BossLeanMax);
+            }
             focus = Vector3.SmoothDamp(focus, want, ref velocity, smoothTime);
             Apply();
         }
+
+        Quintessence.Core.Health lean;
+        /// Parte do caminho ate o chefe que a camera puxa durante a luta, e o maximo em metros (o adiantamento do mouse
+        /// soma por cima; com teto pequeno o heroi nunca sai do quadro).
+        public const float BossLean = 0.1f, BossLeanMax = 1.2f;
+        public bool Leaning => lean != null && !lean.IsDead;
+
+        /// Durante a luta com o chefe a camera puxa um pouco para ele; para sozinha quando ele cai.
+        public void Lean(Quintessence.Core.Health boss) => lean = boss;
 
         /// Com o mouse, a camera adianta mais quanto mais longe do heroi esta o cursor (ate 2,6 m): da para ver o que vem
         /// na direcao em que se mira. No controle o adiantamento e fixo (o analogico nao diz distancia).

@@ -1028,6 +1028,73 @@ namespace Quintessence.Game.PlayTests
             Time.captureFramerate = 0;
         }
 
+        /// Rodada 15: velas apagam com Agua e reacendem com Fogo; a camera puxa um pouco para o chefe (com teto).
+        [UnityTest, Timeout(300000)]
+        public IEnumerator Candles_Go_Out_With_Water_And_Camera_Leans_To_The_Boss()
+        {
+            GameEvents.Clear();
+            Time.timeScale = 1f;
+            Time.captureFramerate = 30;
+            GameFlow.StartElement = ElementType.Water;
+            GameFlow.Seed = 3; GameFlow.Layers = 5; GameFlow.Shrines = 1;
+            yield return EditorSceneManager.LoadSceneAsyncInPlayMode("Assets/Scenes/Run.unity", new LoadSceneParameters(LoadSceneMode.Single));
+            yield return null;
+            yield return null;
+            var director = Object.FindFirstObjectByType<RunDirector>();
+            var player = Object.FindFirstObjectByType<PlayerController>();
+            for (int k = 0; k < 2000 && director.Busy; k++) yield return null;
+            Assert.AreEqual(3.2f, RunDirector.SpecialBannerSeconds, 0.01f);
+
+            // camera: com um "chefe" ao norte, o centro anda para ele, no maximo BossLeanMax
+            var spawner = Object.FindFirstObjectByType<WaveSpawner>();
+            for (int k = 0; k < 900 && (spawner.State == null || spawner.State.Alive <= 0); k++) yield return null;
+            var enemy = Object.FindObjectsByType<EnemyBrain>(FindObjectsSortMode.None).First().GetComponent<Health>();
+            spawner.enabled = false;
+            enemy.GetComponent<EnemyBrain>().enabled = false;
+            player.GetComponent<Health>().Pool.ExtraDamageTakenMultiplier = 0f;
+            player.GetComponent<PlayerInputReader>().enabled = false;
+            var scripted = player.gameObject.AddComponent<ScriptedInput>();
+            player.Input = scripted;
+            player.Teleport(new Vector3(0f, 0.05f, -2f), Vector3.forward);
+            scripted.AimPoint = player.transform.position;
+            if (enemy.TryGetComponent(out UnityEngine.AI.NavMeshAgent agent)) agent.enabled = false;
+            enemy.transform.position = new Vector3(0f, 0.05f, 5f);
+            var cam = Camera.main;
+            var follow = cam.GetComponent<FollowCamera>();
+            float CenterZ()
+            {
+                var ray = cam.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0f));
+                return (ray.origin + ray.direction * ((player.transform.position.y - ray.origin.y) / ray.direction.y)).z;
+            }
+            for (int k = 0; k < 40; k++) yield return null;
+            float plain = CenterZ();
+            follow.Lean(enemy);
+            for (int k = 0; k < 40; k++) yield return null;
+            float leaned = CenterZ();
+            Assert.IsTrue(follow.Leaning);
+            Assert.Greater(leaned, plain + 0.3f, "a camera puxa para o chefe");
+            Assert.LessOrEqual(leaned - plain, FollowCamera.BossLeanMax + 0.05f, "com teto");
+            enemy.TakeDamage(new DamageInfo(99999f, ElementType.None, Team.Player, player.gameObject));
+            for (int k = 0; k < 40; k++) yield return null;
+            Assert.IsFalse(follow.Leaning, "o chefe caiu: a camera volta ao heroi");
+
+            // velas do Pacto: Agua apaga (troca para a malha apagada), Fogo reacende
+            director.ShowRoom(RoomType.Pact);
+            for (int k = 0; k < 10; k++) yield return null;
+            var torches = Object.FindFirstObjectByType<TorchReact>();
+            var lit = new System.Collections.Generic.HashSet<Mesh>();
+            for (int i = 0; i + 1 < TorchReact.CandlePairs.Length; i += 2) lit.Add(TorchReact.CandlePairs[i]);
+            Assert.Greater(lit.Count, 0, "o diretor recebeu as velas do pack");
+            var candle = Object.FindObjectsByType<MeshFilter>(FindObjectsSortMode.None).FirstOrDefault(f => lit.Contains(f.sharedMesh));
+            Assert.IsNotNull(candle, "a sala do Pacto tem vela acesa");
+            torches.Touch(candle.transform.position, 1f, false);
+            Assert.Greater(torches.CandlesDoused, 0, "Agua apaga a vela");
+            Assert.IsFalse(lit.Contains(candle.sharedMesh), "e a chama some (malha apagada)");
+            torches.Touch(candle.transform.position, 1f, true);
+            Assert.IsTrue(lit.Contains(candle.sharedMesh), "Fogo reacende");
+            Time.captureFramerate = 0;
+        }
+
         [UnityTest, Timeout(300000)]
         public IEnumerator Escudeiro_Blocks_From_The_Front_But_Not_From_Behind()
         {

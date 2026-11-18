@@ -680,6 +680,8 @@ namespace Quintessence.Game
                 // chefe final: a camera vai ate ele enquanto ele sai do chao
                 if (final && boss != null && Camera.main != null && Camera.main.TryGetComponent(out FollowCamera follow)) { follow.Peek(boss.transform, 2.2f); BossPresented++; }
             }
+            // a luta toda: a camera puxa um pouco para o chefe (a Rainha ficava no alto, metade sob a barra dele)
+            if (boss != null && Camera.main != null && Camera.main.TryGetComponent(out FollowCamera lean)) lean.Lean(boss);
             if (GameFlow.Ascension <= 0 || boss == null) return;
             boss.Pool.SetMax(boss.Max * Ascension.HealthMult(GameFlow.Ascension));
         }
