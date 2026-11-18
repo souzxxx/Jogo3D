@@ -1208,6 +1208,16 @@ namespace Quintessence.Game.PlayTests
             torches.Touch(candle.transform.position, 1f, true);
             Assert.IsTrue(lit.Contains(candle.sharedMesh), "Fogo reacende");
             Assert.IsTrue(torches.CandleFlameOn(candle), "e a chama volta");
+            // vento tambem apaga vela (skill de Ar), mas o golpe basico de Ar nao
+            int blown = torches.CandlesBlown;
+            GameEvents.RaiseAttackPerformed(new AttackEvent { Origin = candle.transform.position, Direction = Vector3.forward, Element = ElementType.Air, Range = 2f, Arc = 360f, Kind = AttackKind.Basic });
+            Assert.IsTrue(lit.Contains(candle.sharedMesh), "golpe basico nao apaga vela");
+            GameEvents.RaiseAttackPerformed(new AttackEvent { Origin = candle.transform.position, Direction = Vector3.forward, Element = ElementType.Air, Range = 2f, Arc = 360f, Kind = AttackKind.Skill });
+            Assert.IsFalse(lit.Contains(candle.sharedMesh), "o vento da skill de Ar apaga a vela");
+            Assert.IsFalse(torches.CandleFlameOn(candle));
+            Assert.Greater(torches.CandlesBlown, blown);
+            torches.Touch(candle.transform.position, 1f, true);
+            Assert.IsTrue(lit.Contains(candle.sharedMesh), "Fogo reacende a vela soprada");
             Time.captureFramerate = 0;
         }
 

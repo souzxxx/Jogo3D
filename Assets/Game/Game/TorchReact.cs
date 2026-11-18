@@ -56,7 +56,12 @@ namespace Quintessence.Game
             if (e.Kind != AttackKind.Skill) return;
             if (e.Element == ElementType.Water) Touch(e.Origin, Mathf.Max(Reach, e.Range + 1f), false);
             else if (e.Element == ElementType.Fire) Touch(e.Origin, Mathf.Max(Reach, e.Range + 1f), true);
+            // vento apaga vela (soprar), mas nao a tocha grande da parede
+            else if (e.Element == ElementType.Air) { int before = CandlesDoused; TouchCandles(e.Origin, Mathf.Max(Reach, e.Range + 1f), false, "cast_air"); CandlesBlown += CandlesDoused - before; }
         }
+
+        /// Velas apagadas pelo vento (skill de Ar), para os testes.
+        public int CandlesBlown { get; private set; }
 
         void OnReaction(ReactionEvent e)
         {
@@ -91,7 +96,7 @@ namespace Quintessence.Game
             return null;
         }
 
-        void TouchCandles(Vector3 at, float reach, bool fire)
+        void TouchCandles(Vector3 at, float reach, bool fire, string sound = "cast_water")
         {
             if (fire)
             {
@@ -122,7 +127,7 @@ namespace Quintessence.Game
                 if (feedback == null) feedback = FindFirstObjectByType<Feel.CombatFeedback>();
                 feedback?.Burst(f.transform.position + Vector3.up * 0.5f, Vector3.up, 25f, 3, 0.4f, 1f, 0.08f, 0.16f, 0.9f, new Color(0.6f, 0.6f, 0.62f));
             }
-            if (any) Sfx.Play("cast_water"); // o chiado de apagar
+            if (any) Sfx.Play(sound); // o chiado de apagar (ou o sopro, no vento)
         }
 
         Feel.CombatFeedback feedback;
