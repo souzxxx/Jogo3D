@@ -12,6 +12,8 @@ namespace Quintessence.Enemies
         ElementType element;
         GameObject source;
         static readonly Collider[] buffer = new Collider[16];
+        /// Tiro do time inimigo (o "sala limpa" desarma os que ainda voam).
+        public bool FromEnemy => team == Team.Enemy;
 
         public static Projectile Spawn(GameObject prefab, Vector3 position, Vector3 direction, float speed, float range,
             float damage, float knockback, ElementType element, Team team, GameObject source)

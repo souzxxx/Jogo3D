@@ -1111,9 +1111,32 @@ namespace Quintessence.Game
                 StartCoroutine(Finish(true));
                 return;
             }
+            // sala limpa = sala segura: a explosao de morte do ultimo esqueleto e o tiro que ainda voava nao ferem
+            // mais o heroi depois do letreiro (somem com uma fumacinha)
+            DefuseLeftovers();
             hud.ShowFlash("SALA LIMPA!", new Color(0.97f, 0.88f, 0.58f), 1.4f, player != null ? player.transform : null);
             if (node.Reward == RewardType.Boon && SetupBoons()) return; // as portas abrem depois de escolher
             OpenDoors();
+        }
+
+        /// Quantas explosoes de morte e tiros inimigos o ultimo "sala limpa" desarmou (para os testes).
+        public int Defused { get; private set; }
+
+        void DefuseLeftovers()
+        {
+            foreach (var v in FindObjectsByType<VolatileBurst>(FindObjectsSortMode.None))
+            {
+                feedback?.Burst(v.transform.position + Vector3.up * 0.4f, Vector3.up, 60f, 6, 0.6f, 1.6f, 0.2f, 0.45f, 0.6f, new Color(0.55f, 0.52f, 0.5f));
+                Destroy(v.gameObject);
+                Defused++;
+            }
+            foreach (var p in FindObjectsByType<Projectile>(FindObjectsSortMode.None))
+            {
+                if (!p.FromEnemy) continue;
+                feedback?.Burst(p.transform.position, Vector3.up, 60f, 4, 0.4f, 1.2f, 0.15f, 0.35f, 0.5f, new Color(0.55f, 0.52f, 0.5f));
+                Destroy(p.gameObject);
+                Defused++;
+            }
         }
 
         void OnDied(Health target, DamageInfo info)

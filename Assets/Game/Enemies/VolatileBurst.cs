@@ -39,5 +39,8 @@ namespace Quintessence.Enemies
             }
             Destroy(gameObject);
         }
+
+        // desarmada antes de estourar (sala limpa, troca de sala): o circulo avisado some junto
+        void OnDestroy() => GameEvents.RaiseTelegraphCancelled(gameObject);
     }
 }
