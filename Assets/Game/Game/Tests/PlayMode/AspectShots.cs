@@ -271,6 +271,7 @@ namespace Quintessence.Game.PlayTests
             hp.TakeDamage(new DamageInfo(hp.Current - hp.Max * 0.12f, ElementType.None, Team.Enemy));
             for (float t = 0; t < 1.5f; t += Time.unscaledDeltaTime) yield return null;
             Assert.Greater(hud.HurtEdgeAlpha, 0.05f, "com pouca vida a borda continua acesa");
+            Assert.Greater(hud.Heartbeats, 0, "e o coracao bate");
             Directory.CreateDirectory("Logs/aspect");
             yield return Shoot(Camera.main, "docs/img/s6_vida_baixa.png", new Vector2Int(960, 540));
             HealthPool.ForceEvade = null;

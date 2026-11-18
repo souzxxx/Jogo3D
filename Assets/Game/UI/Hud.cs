@@ -327,6 +327,10 @@ namespace Quintessence.UI
             hurtFlash = Mathf.Max(hurtFlash, Mathf.Clamp(applied / Mathf.Max(1f, target.Max) * 4f, 0.25f, 0.7f));
         }
 
+        float beatLeft;
+        /// Quantas batidas de vida baixa tocaram (para os testes).
+        public int Heartbeats { get; private set; }
+
         void TickHurt()
         {
             if (hurtEdge == null)
@@ -346,6 +350,9 @@ namespace Quintessence.UI
                 if (frac < 0.25f) low = (0.18f + 0.12f * Mathf.Sin(Time.unscaledTime * 3.2f)) * Mathf.InverseLerp(0.25f, 0.1f, frac) + 0.06f;
             }
             if (ResultVisible) { hurtFlash = 0f; low = 0f; }
+            // com pouca vida o coracao bate no ritmo da borda (um tum-tum por pulso)
+            if (low > 0f) { if ((beatLeft -= dt) <= 0f) { Sfx.Play("heartbeat"); Heartbeats++; beatLeft = 2f * Mathf.PI / 3.2f; } }
+            else beatLeft = 0f;
             hurtEdge.color = new Color(HurtTint.r, HurtTint.g, HurtTint.b, Mathf.Max(hurtFlash, low));
         }
 
