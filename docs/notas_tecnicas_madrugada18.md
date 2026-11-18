@@ -1,4 +1,4 @@
-# Notas técnicas da madrugada 17→18/11 (rodadas 13 a 27)
+# Notas técnicas da madrugada 17→18/11 (rodadas 13 a 27 e revisão dos estados)
 
 Para quem for mexer no código depois: o que entrou, onde está e qual teste cobre. O que mudou para o jogador está em `progresso.html`.
 
@@ -44,6 +44,8 @@ Para quem for mexer no código depois: o que entrou, onde está e qual teste cob
 | Dica da Tranquila na derrota até a sala 4 (até 3 vezes) | `RunDirector.ShowRelaxedHint` (PlayerPrefs `quintessence.relaxedHint`) |
 | Aviso de jogo lento (média < 30 fps por 4 s na luta, uma vez) | `RunDirector.TickSlowCheck` / `ReportFrameRate`, `Tips` id `slow` |
 | Treino vestido como Salões; bonecos mais perto | `RunDirector.Start` (ramo do tutorial), `TutorialDirector` |
+| Com run salva, a carta de herói pede um segundo clique antes de apagar a salva | `TitleMenu.PickCard` (`ArmedCard`); teste em `Title_Starts_A_Run_With_The_Picked_Element` |
+| Esc na troca de sala fica guardado e pausa quando a sala abre (o cartão do trecho não cobre o painel) | `RunDirector.PressPause` (`pauseQueued`, `PausesQueued`); teste em `Short_Run_From_First_Room_To_Victory` |
 
 ## Som
 
