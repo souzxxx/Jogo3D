@@ -1134,6 +1134,7 @@ namespace Quintessence.Game
 
         void DefuseLeftovers()
         {
+            if (feedback == null) feedback = FindFirstObjectByType<Feel.CombatFeedback>(); // na 1a sala limpa ainda nao tinha sido procurado
             foreach (var v in FindObjectsByType<VolatileBurst>(FindObjectsSortMode.None))
             {
                 feedback?.Burst(v.transform.position + Vector3.up * 0.4f, Vector3.up, 60f, 6, 0.6f, 1.6f, 0.2f, 0.45f, 0.6f, new Color(0.55f, 0.52f, 0.5f));

@@ -612,7 +612,9 @@ namespace Quintessence.UI
             var uiCam = canvas.renderMode == RenderMode.ScreenSpaceOverlay ? null : canvas.worldCamera;
             if (!RectTransformUtility.ScreenPointToLocalPointInRectangle(rect, screen, uiCam, out var local)) return;
             float bottom = -rect.rect.height * 0.5f;
-            float y = Mathf.Max(local.y - 105f, bottom + TipHigh + 100f);
+            // fica acima da dica onde ela estiver (ela sobe para cima do aviso de interacao)
+            float tipY = tipRoot != null && tipRoot.gameObject.activeSelf ? Mathf.Max(TipHigh, tipRoot.anchoredPosition.y) : TipHigh;
+            float y = Mathf.Max(local.y - 105f, bottom + tipY + 100f);
             float halfW = rect.rect.width * 0.5f - 360f;
             ((RectTransform)flashText.transform).anchoredPosition = new Vector2(Mathf.Clamp(local.x, -halfW, halfW), y);
         }

@@ -106,10 +106,11 @@ namespace Quintessence.Game
                 return;
             }
             if (CandlePairs.Length < 2) return;
-            // a decoracao muda a cada sala: procura as velas na hora (skill e rara, a busca e barata)
+            RefreshCandles();
             bool any = false;
-            foreach (var f in FindObjectsByType<MeshFilter>(FindObjectsSortMode.None))
+            foreach (var f in candles)
             {
+                if (f == null) continue;
                 var unlit = UnlitOf(f.sharedMesh);
                 if (unlit == null || !Near(f.transform.position, at, reach)) continue;
                 candlesOut.Add((f, f.sharedMesh, Relight));
@@ -123,6 +124,24 @@ namespace Quintessence.Game
         }
 
         Feel.CombatFeedback feedback;
+        readonly System.Collections.Generic.List<MeshFilter> candles = new();
+        float scannedAt = -10f;
+
+        /// A decoracao muda a cada sala: refaz a lista de velas quando alguma sumiu (troca de sala) ou a cada segundo,
+        /// nunca a cada reacao (uma skill de area dispara varias reacoes de Agua no mesmo quadro).
+        void RefreshCandles()
+        {
+            bool stale = Time.time - scannedAt > 1f;
+            foreach (var c in candles) if (c == null) { stale = true; break; }
+            if (!stale) return;
+            scannedAt = Time.time;
+            candles.Clear();
+            foreach (var f in FindObjectsByType<MeshFilter>(FindObjectsSortMode.None))
+            {
+                if (f.sharedMesh == null) continue;
+                for (int i = 0; i < CandlePairs.Length; i++) if (CandlePairs[i] == f.sharedMesh) { candles.Add(f); break; }
+            }
+        }
 
         void SetFlame(int i, bool on)
         {

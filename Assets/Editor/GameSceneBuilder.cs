@@ -163,7 +163,7 @@ public static class GameSceneBuilder
         Solid(P("chest_gold", -3.2f, 0.2f, 165));
         P("coin_stack_large", -4.3f, -0.9f, 0);
         P("coin_stack_medium", -2.2f, -0.9f, 40);
-        P("coin_stack_small", -2.5f, -1.6f, 10);
+        P("coin_stack_small", -1.4f, -1.0f, 10); // em (-2,5; -1,6) caia dentro da 1a mesa da loja (mercadorias mais perto da entrada)
         P("coin_stack_small", -4.3f, -2.1f, 70);
         // lado leste, para a sala nao ficar torta
         Solid(P("trunk_large_A", 8.7f, 1.6f, -90));
@@ -336,6 +336,8 @@ public static class GameSceneBuilder
         };
         for (int i = 0; i < 10; i++)
         {
+            // sem as duas velas atras dos altares laterais: com os altares mais perto da entrada elas ficavam dentro deles
+            if (i == 1 || i == 9) continue;
             float a = i * 36f * Mathf.Deg2Rad;
             pact.Add((i % 2 == 0 ? "candle_thin_lit" : "candle_melted", Mathf.Sin(a) * 8.2f * 0.82f, -1.6f + Mathf.Cos(a) * 2.2f - 1.2f, i * 40f, 1f, 0f, false));
         }
