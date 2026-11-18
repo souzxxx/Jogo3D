@@ -835,7 +835,8 @@ namespace Quintessence.Game.PlayTests
             var guard = guardBody.GetComponent<FrontGuard>();
             Assert.IsNotNull(guard, "o Escudeiro traz o escudo");
             yield return null; yield return null;
-            Assert.AreEqual(Tips.Text("guard"), hud.LastTip, "o primeiro Escudeiro traz a dica");
+            // a dica aparece ou espera a vez na fila (a de controles do comeco da sala fica ate o fim)
+            Assert.IsTrue(hud.LastTip == Tips.Text("guard") || Object.FindFirstObjectByType<RunDirector>().TipQueued("guard"), "o primeiro Escudeiro traz a dica");
             Assert.IsTrue(guardBody.GetComponentsInChildren<Transform>(true).Any(t => t.name == "Skeleton_Shield_Large_B"), "segura o escudo do pack");
             Assert.IsTrue(guardBody.GetComponentsInChildren<Transform>(true).Any(t => t.name == "Skeleton_Blade"), "e a lamina");
             for (int k = 0; k < 40; k++) yield return null;
@@ -1487,7 +1488,8 @@ namespace Quintessence.Game.PlayTests
             hp.TakeDamage(new DamageInfo(12f, ElementType.None, Team.Enemy, foe.gameObject));
             Assert.GreaterOrEqual(hp.Current, life, "o dash atravessa o golpe (nenhum dano entra)");
             Assert.AreEqual(1, hero.PerfectDodges, "dois golpes no mesmo instante contam uma esquiva");
-            Assert.AreEqual(Tips.Text("perfect"), hud.LastTip, "a primeira esquiva perfeita explica o que aconteceu");
+            // a dica aparece ou espera a vez na fila (a de controles do comeco da sala fica ate o fim)
+            Assert.IsTrue(hud.LastTip == Tips.Text("perfect") || Object.FindFirstObjectByType<RunDirector>().TipQueued("perfect"), "a primeira esquiva perfeita explica o que aconteceu");
             Assert.AreEqual(meter + PlayerController.PerfectDodgeCharge, hero.Quintessence.Meter, 0.01f, "enche a Quintessencia");
             Assert.IsTrue(hero.PerfectCritReady);
             Assert.Greater(hp.Current, life, "Vey: a esquiva perfeita cura (Passo de Brisa)");
@@ -1554,7 +1556,8 @@ namespace Quintessence.Game.PlayTests
             for (int i = 0; i < 3; i++) Object.Instantiate(Load("Cinzento"), new Vector3(-0.8f + i * 0.8f, 0, 3.5f), Quaternion.Euler(0, 180, 0));
             for (int k = 0; k < 40; k++) yield return null;
             StatusHolder.GetOrAdd(ember).Apply(StatusType.Rooted, 60f, Team.Player, hero.gameObject);
-            Assert.AreEqual(Tips.Text("affinity"), hud.LastTip, "o primeiro elemental traz a dica de afinidade");
+            // a dica aparece ou espera a vez na fila (a de controles do comeco da sala fica ate o fim)
+            Assert.IsTrue(hud.LastTip == Tips.Text("affinity") || Object.FindFirstObjectByType<RunDirector>().TipQueued("affinity"), "o primeiro elemental traz a dica de afinidade");
 
             // Brasa Viva: resiste a Fogo, e fraca a Agua, nao queima
             float full = ember.Current;
@@ -2012,7 +2015,8 @@ namespace Quintessence.Game.PlayTests
             Assert.AreEqual(ElementType.Fire, soaked.GetComponent<ElementMark>().State.Element, "inimigo na poca fica marcado com Fogo");
             Assert.AreEqual(ElementType.Earth, keeps.GetComponent<ElementMark>().State.Element, "a marca que o heroi pos nao e trocada");
             Assert.Greater(pool.Marks, 0);
-            Assert.AreEqual(Tips.Text("terrain"), hud.LastTip, "a primeira marca da poca traz a dica");
+            // a dica aparece ou espera a vez na fila (a de controles do comeco da sala fica ate o fim)
+            Assert.IsTrue(hud.LastTip == Tips.Text("terrain") || Object.FindFirstObjectByType<RunDirector>().TipQueued("terrain"), "a primeira marca da poca traz a dica");
             string reaction = null;
             void OnReaction(ReactionEvent e) { if (e.Target == soaked.gameObject) reaction = e.Name; }
             GameEvents.ReactionTriggered += OnReaction;
@@ -2249,7 +2253,8 @@ namespace Quintessence.Game.PlayTests
             float afterThorns = heroHp.Current;
             Assert.Less(afterThorns, beforeThorns, "o golpe basico volta em parte para o heroi");
             Assert.AreEqual(1, thornEvents, "e o feedback avisa ESPINHOS");
-            Assert.AreEqual(Tips.Text("thorns"), hud.LastTip, "o primeiro espinho explica a Elite");
+            // a dica aparece ou espera a vez na fila (a de controles do comeco da sala fica ate o fim)
+            Assert.IsTrue(hud.LastTip == Tips.Text("thorns") || Object.FindFirstObjectByType<RunDirector>().TipQueued("thorns"), "o primeiro espinho explica a Elite");
             hitThorny(ElementType.None);
             Assert.AreEqual(afterThorns, heroHp.Current, 0.001f, "dentro do intervalo nao volta de novo");
             for (float t0 = Time.time; Time.time - t0 < EnemyBrain.ThornsInterval + 0.05f;) yield return null;

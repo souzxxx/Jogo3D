@@ -452,7 +452,11 @@ namespace Quintessence.UI
         public string LastTip { get; private set; } = "";
 
         /// Dica curta no rodape, acima da barra de habilidades. Some sozinha.
-        const float TipHigh = 330f, TipLow = 96f;
+        // logo acima da barra de skills e do nome da skill: em 330 a caixa cobria os pes do heroi na entrada da sala
+        const float TipHigh = 236f, TipLow = 96f;
+
+        /// Ha uma dica na tela (ou esperando um painel fechar para voltar).
+        public bool TipVisible => tipRoot != null && tipLeft > 0f && (tipRoot.gameObject.activeSelf || tipSuspended);
 
         public void HideTip() { if (tipRoot != null) tipRoot.gameObject.SetActive(false); }
 
@@ -460,9 +464,9 @@ namespace Quintessence.UI
         {
             if (tipRoot == null)
             {
-                tipRoot = UiKit.Box("Tip", canvas.transform, new Vector2(0.5f, 0), new Vector2(0, 330), new Vector2(1100, 54), 0.85f);
+                tipRoot = UiKit.Box("Tip", canvas.transform, new Vector2(0.5f, 0), new Vector2(0, TipHigh), new Vector2(960, 54), 0.85f);
                 UiKit.Image(UiKit.Rect("Mark", tipRoot, new Vector2(0, 0.5f), new Vector2(14, 0), new Vector2(30, 30)), UiKit.Icon("boon_skill"), new Color(0.9f, 0.76f, 0.42f));
-                tipText = UiKit.Text(UiKit.Rect("Text", tipRoot, new Vector2(0.5f, 0.5f), new Vector2(24, 0), new Vector2(1020, 46)), "", 24, UiKit.Cream, TextAnchor.MiddleCenter, false);
+                tipText = UiKit.Text(UiKit.Rect("Text", tipRoot, new Vector2(0.5f, 0.5f), new Vector2(24, 0), new Vector2(880, 46)), "", 24, UiKit.Cream, TextAnchor.MiddleCenter, false);
                 UiKit.Fit(tipText, 16, 24);
             }
             LastTip = text;

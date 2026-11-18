@@ -293,7 +293,9 @@ namespace Quintessence.Game
             Cleanup();
             ApplyLayout(-1);
             Dress(type);
-            hud.SetRoom($"Sala {Run.Depth + 1}/{Run.Map.LayerCount} · {RoomInfo.Name(type)}", type);
+            roomBase = $"Sala {Run.Depth + 1}/{Run.Map.LayerCount} · {RoomInfo.Name(type)}";
+            roomKind = type;
+            hud.SetRoom(roomBase, type);
             switch (type)
             {
                 case RoomType.Shop: SetupShop(); break;
@@ -573,9 +575,45 @@ namespace Quintessence.Game
         /// A sala ja mostrou uma dica (o rodape so tem uma: a segunda apagaria a primeira).
         bool tipThisRoom;
 
+        // dicas esperam a vez: uma so na tela e so marcada como vista quando aparece (antes a da arma erguida
+        // apagava a de controles em segundos e as duas ja contavam como vistas)
+        readonly Queue<string> tipQueue = new();
+        /// Dicas esperando a vez (para os testes).
+        public int TipsQueued => tipQueue.Count;
+        /// A dica id esta esperando a vez (para os testes).
+        public bool TipQueued(string id) => tipQueue.Contains(id);
+
         void Tip(string id)
         {
-            if (GameFlow.Tutorial || !Tips.Consume(id)) return;
+            if (GameFlow.Tutorial || Tips.WasSeen(id) || tipQueue.Contains(id)) return;
+            if (hud.TipVisible) { tipQueue.Enqueue(id); return; }
+            ShowTipNow(id);
+        }
+
+        string roomBase = "";
+        RoomType roomKind;
+
+        /// Objetivo fixo da sala de luta no chip do alto: onda e quantos inimigos faltam (antes so um "ONDA 1/2" flutuante).
+        void TickObjective()
+        {
+            if (string.IsNullOrEmpty(roomBase) || spawner == null || spawner.State == null || Busy || TrialActive || SiegeActive) return;
+            if (roomKind != RoomType.Combat && roomKind != RoomType.Elite && roomKind != RoomType.Boss) return;
+            var st = spawner.State;
+            string label = roomBase;
+            if (st.Started && !st.Cleared && st.CurrentWave >= 0)
+                label += $" · onda {st.CurrentWave + 1}/{st.TotalWaves} · {st.Alive} {(st.Alive == 1 ? "inimigo" : "inimigos")}";
+            // so mexe no rotulo que e dela (Provacao e Cerco escrevem o proprio)
+            if (label != hud.RoomLabel && hud.RoomLabel.StartsWith(roomBase)) hud.SetRoom(label);
+        }
+
+        void TickTips()
+        {
+            if (tipQueue.Count > 0 && !hud.TipVisible && !Busy && !GameClock.Paused && !Finished) ShowTipNow(tipQueue.Dequeue());
+        }
+
+        void ShowTipNow(string id)
+        {
+            if (!Tips.Consume(id)) return;
             tipThisRoom = true;
             if (id == "start")
             {
@@ -759,6 +797,8 @@ namespace Quintessence.Game
             if (playerHealth != null) playerHealth.Pool.AssistMultiplier = GameFlow.Tutorial ? 1f : GamePrefs.HeroDamageTaken;
             TickTrial();
             TickSiege();
+            TickTips();
+            TickObjective();
             if ((saveHealthTimer -= Time.unscaledDeltaTime) <= 0f) { saveHealthTimer = 2f; SyncSavedHealth(); }
             if (levelUpOpen) { }
             else if (MenuInput.InventoryPressed && !Busy && (!GameClock.Paused || hud.InventoryVisible)) SetInventory(!hud.InventoryVisible);
@@ -842,7 +882,9 @@ namespace Quintessence.Game
             // a Rainha Afogada alaga o Coracao: a luz e a cor da sala final viram as da Cripta (o nome continua o do Coracao)
             if (node.Type == RoomType.Boss && QueenRun && dresser != null) dresser.Apply(Biome.Crypt);
             player.Teleport(entryPoint, Vector3.forward);
-            hud.SetRoom($"Sala {Run.Depth + 1}/{Run.Map.LayerCount} · {RoomInfo.Name(node.Type)}", node.Type);
+            roomBase = $"Sala {Run.Depth + 1}/{Run.Map.LayerCount} · {RoomInfo.Name(node.Type)}";
+            roomKind = node.Type;
+            hud.SetRoom(roomBase, node.Type);
             yield return null;
             entering = false;
             if (chapter.HasValue)
@@ -918,6 +960,8 @@ namespace Quintessence.Game
         const float ChapterHold = 1.3f;
 
         /// Comeca as ondas de uma sala com a dificuldade da profundidade e, em Elite, o traco. Publico para os testes e as capturas.
+        public const float FirstRoomGrace = 1.5f;
+
         public void StartEncounter(RoomType type, int depth, EliteModifier trait)
         {
             var diff = DifficultyCurve.For(type, depth, trait);
@@ -935,7 +979,8 @@ namespace Quintessence.Game
             spawner.Champion = type == RoomType.Elite && depth < EncounterPlanner.MiniBossDepth;
             encounterBiome = Run != null ? Biomes.For(depth, Run.Map.LayerCount) : Biome.Ashes;
             encounterMiniBoss = Run != null ? MiniBossForRoom(GameFlow.Seed, Run.Current.Id) : MiniBossFor(encounterBiome);
-            spawner.Run(BuildWaves(EncounterPlanner.Plan(type, depth, encounterBiome)));
+            // primeira sala: o primeiro esqueleto chegava em ~3 s, antes de dar para ler a dica de controles
+            spawner.Run(BuildWaves(EncounterPlanner.Plan(type, depth, encounterBiome)), depth == 0 && Run != null && Run.Depth == 0 ? FirstRoomGrace : 0f);
         }
 
         IEnumerator Fade(float from, float to, float seconds)
