@@ -101,6 +101,7 @@ namespace Quintessence.Game
                     if (c.filter == null) { candlesOut.RemoveAt(i); continue; }
                     if (!Near(c.filter.transform.position, at, reach)) continue;
                     c.filter.sharedMesh = c.lit;
+                    SetCandleFlame(c.filter, true);
                     candlesOut.RemoveAt(i);
                 }
                 return;
@@ -115,6 +116,7 @@ namespace Quintessence.Game
                 if (unlit == null || !Near(f.transform.position, at, reach)) continue;
                 candlesOut.Add((f, f.sharedMesh, Relight));
                 f.sharedMesh = unlit;
+                SetCandleFlame(f, false);
                 CandlesDoused++;
                 any = true;
                 if (feedback == null) feedback = FindFirstObjectByType<Feel.CombatFeedback>();
@@ -141,6 +143,48 @@ namespace Quintessence.Game
                 if (f.sharedMesh == null) continue;
                 for (int i = 0; i < CandlePairs.Length; i++) if (CandlePairs[i] == f.sharedMesh) { candles.Add(f); break; }
             }
+            // velas da sala anterior (destruidas) saem do dicionario
+            var gone = new System.Collections.Generic.List<MeshFilter>();
+            foreach (var k in candleFlames.Keys) if (k == null) gone.Add(k);
+            foreach (var k in gone) candleFlames.Remove(k);
+            foreach (var c in candles) if (UnlitOf(c.sharedMesh) != null && !candleFlames.ContainsKey(c)) AddCandleFlame(c);
+        }
+
+        /// A chama da vela do pack tem uns 6 pixels na camera: apagar nao se via. Cada vela acesa ganha uma copia pequena
+        /// e mais fraca da chama das tochas (o mesmo estilo ja aprovado, sem luz nova); ela some quando a vela apaga.
+        readonly System.Collections.Generic.Dictionary<MeshFilter, ParticleSystem> candleFlames = new();
+        public int CandleFlames => candleFlames.Count;
+
+        void AddCandleFlame(MeshFilter candle)
+        {
+            ParticleSystem template = null;
+            foreach (var f in flames) if (f != null) { template = f; break; }
+            if (template == null) return;
+            var r = candle.GetComponent<Renderer>();
+            var top = r != null ? new Vector3(r.bounds.center.x, r.bounds.max.y, r.bounds.center.z) : candle.transform.position + Vector3.up * 0.5f;
+            var ps = Instantiate(template, top + Vector3.up * 0.04f, template.transform.rotation, candle.transform);
+            ps.name = "CandleFlame";
+            ps.transform.localScale = Vector3.one; // a escala vem das curvas abaixo (a vela do pack tem escala propria)
+            var main = ps.main;
+            main.scalingMode = ParticleSystemScalingMode.Local;
+            main.startSize = new ParticleSystem.MinMaxCurve(0.2f, 0.34f);
+            main.startSpeed = new ParticleSystem.MinMaxCurve(0.15f, 0.35f);
+            main.startLifetime = new ParticleSystem.MinMaxCurve(0.25f, 0.4f);
+            main.startColor = new ParticleSystem.MinMaxGradient(new Color(0.9f, 0.42f, 0.1f), new Color(1f, 0.58f, 0.2f));
+            var em = ps.emission; em.rateOverTime = 18f;
+            var sh = ps.shape; sh.radius = 0.02f;
+            ps.Clear(); ps.Play();
+            candleFlames[candle] = ps;
+        }
+
+        public string CandleFlameInfo(MeshFilter candle) => candle != null && candleFlames.TryGetValue(candle, out var ps) && ps != null
+            ? $"n={ps.particleCount} pos={ps.transform.position} vela={candle.transform.position} escala={ps.transform.lossyScale} pai={candle.transform.lossyScale} emit={ps.isEmitting} rend={ps.GetComponent<ParticleSystemRenderer>().enabled}" : "sem chama";
+        public bool CandleFlameOn(MeshFilter candle) => candle != null && candleFlames.TryGetValue(candle, out var ps) && ps != null && ps.isEmitting;
+
+        void SetCandleFlame(MeshFilter candle, bool on)
+        {
+            if (candle == null || !candleFlames.TryGetValue(candle, out var ps) || ps == null) return;
+            if (on) ps.Play(); else ps.Stop(true, ParticleSystemStopBehavior.StopEmitting);
         }
 
         void SetFlame(int i, bool on)
@@ -158,9 +202,10 @@ namespace Quintessence.Game
                 var c = candlesOut[i];
                 if (c.filter == null) { candlesOut.RemoveAt(i); continue; }
                 c.left -= dt;
-                if (c.left <= 0f) { c.filter.sharedMesh = c.lit; candlesOut.RemoveAt(i); }
+                if (c.left <= 0f) { c.filter.sharedMesh = c.lit; SetCandleFlame(c.filter, true); candlesOut.RemoveAt(i); }
                 else candlesOut[i] = c;
             }
+            if (CandlePairs.Length >= 2) RefreshCandles(); // sala nova: as velas acesas ganham a chama (no maximo 1 busca por segundo)
             for (int i = 0; i < lights.Length; i++)
             {
                 if (lights[i] == null) continue;

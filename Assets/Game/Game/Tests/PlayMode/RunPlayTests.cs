@@ -1089,13 +1089,26 @@ namespace Quintessence.Game.PlayTests
             var lit = new System.Collections.Generic.HashSet<Mesh>();
             for (int i = 0; i + 1 < TorchReact.CandlePairs.Length; i += 2) lit.Add(TorchReact.CandlePairs[i]);
             Assert.Greater(lit.Count, 0, "o diretor recebeu as velas do pack");
-            var candle = Object.FindObjectsByType<MeshFilter>(FindObjectsSortMode.None).FirstOrDefault(f => lit.Contains(f.sharedMesh));
+            // a vela acesa mais ao sul (na frente dos altares, dentro do quadro)
+            var candle = Object.FindObjectsByType<MeshFilter>(FindObjectsSortMode.None).Where(f => lit.Contains(f.sharedMesh))
+                .OrderBy(f => f.transform.position.z).FirstOrDefault();
             Assert.IsNotNull(candle, "a sala do Pacto tem vela acesa");
-            torches.Touch(candle.transform.position, 1f, false);
+            player.Teleport(candle.transform.position + new Vector3(candle.transform.position.x > 0f ? -2.5f : 2.5f, 0f, 0f), Vector3.forward);
+            for (int k = 0; k < 30; k++) yield return null;
+            Directory.CreateDirectory("Logs/r15");
+            for (int k = 0; k < 40; k++) yield return null; // a varredura de velas roda 1x por segundo
+            Assert.Greater(torches.CandleFlames, 0, "as velas acesas ganham uma chama pequena");
+            Assert.IsTrue(torches.CandleFlameOn(candle), "a chama da vela esta acesa");
+            Shot(cam, "Logs/r15/velas_acesas.png");
+            torches.Touch(candle.transform.position, 3f, false);
+            for (int k = 0; k < 20; k++) yield return null;
+            Assert.IsFalse(torches.CandleFlameOn(candle), "Agua apaga a chama da vela");
+            Shot(cam, "Logs/r15/velas_apagadas.png");
             Assert.Greater(torches.CandlesDoused, 0, "Agua apaga a vela");
             Assert.IsFalse(lit.Contains(candle.sharedMesh), "e a chama some (malha apagada)");
             torches.Touch(candle.transform.position, 1f, true);
             Assert.IsTrue(lit.Contains(candle.sharedMesh), "Fogo reacende");
+            Assert.IsTrue(torches.CandleFlameOn(candle), "e a chama volta");
             Time.captureFramerate = 0;
         }
 
