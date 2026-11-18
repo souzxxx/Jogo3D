@@ -27,9 +27,12 @@ namespace Quintessence.Feel
             }
         }
 
-        public void Flash(Color color, float seconds = 0.14f)
+        float strength = 1f;
+
+        /// strength: quanto da cor do clarao cobre a do material no pico (1 = toda).
+        public void Flash(Color color, float seconds = 0.14f, float strength = 1f)
         {
-            flash = color; duration = seconds; left = seconds; dirty = true;
+            flash = color; duration = seconds; left = seconds; dirty = true; this.strength = Mathf.Clamp01(strength);
         }
 
         public void SetTint(Color color) { tint = color; dirty = true; }
@@ -38,7 +41,7 @@ namespace Quintessence.Feel
         {
             if (!dirty) return;
             left -= Time.unscaledDeltaTime;
-            float k = duration > 0f ? Mathf.Clamp01(left / duration) : 0f;
+            float k = (duration > 0f ? Mathf.Clamp01(left / duration) : 0f) * strength;
             for (int i = 0; i < renderers.Length; i++)
             {
                 var r = renderers[i];

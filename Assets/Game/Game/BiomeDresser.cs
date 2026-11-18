@@ -32,10 +32,12 @@ namespace Quintessence.Game
             },
             Biome.Heart => new Look
             {
-                Sky = new Color(0.3f, 0.16f, 0.2f), Equator = new Color(0.22f, 0.12f, 0.14f), Ground = new Color(0.1f, 0.05f, 0.05f),
-                Fog = new Color(0.08f, 0.03f, 0.03f), Sun = new Color(1f, 0.5f, 0.36f), SunIntensity = 0.8f,
-                Torch = new Color(1f, 0.45f, 0.18f), Crack = new Color(0.86f, 0.32f, 0.12f), CrackGlow = 0.5f,
-                Crystal = new Color(0.9f, 0.4f, 0.14f), CrystalGlow = 0.7f, Stone = new Color(0.6f, 0.44f, 0.5f),
+                // a sala do chefe era toda vermelha (chao, luz, chefe e heroi de Fogo no mesmo tom): luz principal
+                // quase neutra e pedra menos tingida; o vermelho fica nas rachaduras, nos cristais e nas tochas
+                Sky = new Color(0.25f, 0.19f, 0.22f), Equator = new Color(0.18f, 0.14f, 0.16f), Ground = new Color(0.08f, 0.05f, 0.05f),
+                Fog = new Color(0.07f, 0.035f, 0.035f), Sun = new Color(1f, 0.8f, 0.68f), SunIntensity = 0.82f,
+                Torch = new Color(1f, 0.5f, 0.22f), Crack = new Color(0.86f, 0.32f, 0.12f), CrackGlow = 0.5f,
+                Crystal = new Color(0.9f, 0.4f, 0.14f), CrystalGlow = 0.6f, Stone = new Color(0.55f, 0.5f, 0.55f),
             },
             _ => new Look
             {

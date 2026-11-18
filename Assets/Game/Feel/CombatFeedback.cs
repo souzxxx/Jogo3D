@@ -20,6 +20,7 @@ namespace Quintessence.Feel
         public static Mesh RingMesh { get; private set; }
         /// Anel de gomos com chanfro, no estilo das pecas low-poly do pack: le como objeto do chao, nao como luz.
         public static Mesh RuneRingMesh { get; private set; }
+        public static Mesh HeroRingMesh { get; private set; }
 
         static readonly Color Stone = new(0.16f, 0.13f, 0.12f);
         /// Cor de elemento como acento fosco: puxada para a pedra do pack e meio transparente.
@@ -68,6 +69,8 @@ namespace Quintessence.Feel
         {
             if (RingMesh == null) RingMesh = BuildRing(0.9f, 1f, 48);
             if (RuneRingMesh == null) RuneRingMesh = BuildRuneRing(10, 0.8f, 1f, 0.07f, 7f);
+            // o anel do heroi e inteiro e mais largo: o tracejado era igual ao da marca nos inimigos e o heroi se perdia no meio deles
+            if (HeroRingMesh == null) HeroRingMesh = BuildRuneRing(24, 0.7f, 1f, 0.09f, 0f);
             if (DiscMesh == null) DiscMesh = BuildRing(0f, 1f, 40);
             var go = new GameObject("FxParticles");
             go.transform.SetParent(transform, false);
@@ -173,7 +176,8 @@ namespace Quintessence.Feel
         {
             var c = ElementColors.Of(info.Element);
             bool enemy = target.Team == Team.Enemy;
-            Flash(target).Flash(enemy ? new Color(1.9f, 0.5f, 0.42f) : new Color(2.2f, 2.2f, 2.2f), 0.16f);
+            // clarao branco-quente e curto, cobrindo so parte da cor: o vermelho chapado com bloom virava uma mancha neon
+            Flash(target).Flash(enemy ? new Color(1.35f, 1.28f, 1.18f) : new Color(1.45f, 1.38f, 1.3f), 0.1f, 0.6f);
             float size = applied >= 15f ? 1.5f : applied >= 8f ? 1.15f : applied <= 3f ? 0.7f : 0.95f;
             if (info.IsCrit) size *= 1.3f;
             bool resisted = enemy && displays.TryGetValue(target, out var shown) && shown != null && shown.Armored && !info.IsReaction;
@@ -224,7 +228,7 @@ namespace Quintessence.Feel
                 accents?.Emit(BossElement, bp, Vector3.forward, 180f, 200, 9f);
                 accents?.Emit(ElementType.Earth, bp, Vector3.forward, 180f, 120, 10f, Ash);
                 foreach (var e in Elements.All) Ring(bp + Vector3.up * (0.3f * (int)e), 70, 10f + 3f * (int)e, 0.5f, 1.1f, 0.8f, ElementColors.Of(e));
-                LightFlash(bp, Color.white, 22f, 24f, 1f);
+                LightFlash(bp, Color.white, 22f, 24f, 1f, true);
                 CameraShake.Add(1.2f);
                 Stop(0.3f);
                 if (shieldCage != null) shieldCage.gameObject.SetActive(false);
@@ -778,7 +782,7 @@ namespace Quintessence.Feel
             if (presence != null) presenceBase = presence.intensity;
             var r = new GameObject("PlayerElementRing");
             r.transform.SetParent(transform, false);
-            r.AddComponent<MeshFilter>().sharedMesh = RuneRingMesh;
+            r.AddComponent<MeshFilter>().sharedMesh = HeroRingMesh != null ? HeroRingMesh : RuneRingMesh;
             playerRingMat = RingMaterial(new Color(0.95f, 0.88f, 0.72f));
             r.AddComponent<MeshRenderer>().sharedMaterial = playerRingMat;
             playerRing = r.transform;
@@ -869,8 +873,16 @@ namespace Quintessence.Feel
             }
         }
 
-        void LightFlash(Vector3 pos, Color color, float intensity, float range, float seconds)
+        /// Luz de impacto. As intensidades antigas (6 a 18) estouravam o chao de branco perto das tochas (2 a 3):
+        /// ficam a 40%, no maximo 4,5, alcance ate 10 e a cor branca puxada para o quente. big: so a morte do chefe.
+        void LightFlash(Vector3 pos, Color color, float intensity, float range, float seconds, bool big = false)
         {
+            if (!big)
+            {
+                intensity = Mathf.Min(intensity * 0.4f, 4.5f);
+                range = Mathf.Min(range, 10f);
+                if (color.r > 0.95f && color.g > 0.95f && color.b > 0.95f) color = new Color(1f, 0.9f, 0.78f);
+            }
             Light l;
             if (lightPool.Count > 0) { l = lightPool[^1]; lightPool.RemoveAt(lightPool.Count - 1); l.gameObject.SetActive(true); }
             else

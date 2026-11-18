@@ -21,7 +21,8 @@ namespace Quintessence.Feel
             float dt = Time.deltaTime;
             life -= dt;
             if (life <= 0f) { Destroy(gameObject); return; }
-            if (life < Fade) transform.localScale = baseScale * (life / Fade);
+            // no fim encolhe e afunda no chao (antes ficava 3 s inteiro e parecia objeto da sala ou inimigo caido)
+            if (life < Fade) { transform.localScale = baseScale * (life / Fade); transform.position += Vector3.down * 0.9f * dt; }
             if (rest > 0.25f) return; // ja parou: nao gasta mais nada
 
             velocity.y -= Gravity * dt;
@@ -45,8 +46,9 @@ namespace Quintessence.Feel
     /// Desmonta um inimigo morto nas proprias pecas: cada malha do modelo vira um osso solto.
     public static class BonePile
     {
+        static readonly int BaseColorId = Shader.PropertyToID("_BaseColor");
         /// Devolve quantas pecas soltou. Esconde o modelo original.
-        public static int Scatter(GameObject enemy, Vector3 hitDirection, float seconds = 3.2f)
+        public static int Scatter(GameObject enemy, Vector3 hitDirection, float seconds = 1.8f)
         {
             if (enemy == null) return 0;
             var origin = enemy.transform.position;
@@ -109,6 +111,13 @@ namespace Quintessence.Feel
             var r = visual.gameObject.AddComponent<MeshRenderer>();
             r.sharedMaterials = mats;
             r.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            // osso solto mais escuro que inimigo de pe: le como resto, nao como alguem vivo
+            if (mats != null && mats.Length > 0 && mats[0] != null && mats[0].HasProperty(BaseColorId))
+            {
+                var block = new MaterialPropertyBlock();
+                block.SetColor(BaseColorId, mats[0].GetColor(BaseColorId) * new Color(0.55f, 0.53f, 0.5f, 1f));
+                r.SetPropertyBlock(block);
+            }
             if (ownsMesh) go.AddComponent<OwnedMesh>().mesh = mesh;
 
             var away = pos - origin; away.y = 0f;
