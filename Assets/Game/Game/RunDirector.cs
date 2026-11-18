@@ -595,6 +595,8 @@ namespace Quintessence.Game
             {
                 bool final = Run.Current.Type == RoomType.Boss;
                 hud.ShowBanner(name.ToUpperInvariant(), final ? "Chefe final" : "Mini-chefe", final ? new Color(0.95f, 0.62f, 0.32f) : new Color(0.8f, 0.78f, 0.9f), 3f);
+                // chefe final: a camera vai ate ele enquanto ele sai do chao
+                if (final && boss != null && Camera.main != null && Camera.main.TryGetComponent(out FollowCamera follow)) follow.Peek(boss.transform, 2.2f);
             }
             if (GameFlow.Ascension <= 0 || boss == null) return;
             boss.Pool.SetMax(boss.Max * Ascension.HealthMult(GameFlow.Ascension));
@@ -1004,8 +1006,14 @@ namespace Quintessence.Game
             hud.SetEssence(Run.Essence);
             if (node.Type == RoomType.Boss)
             {
-                // o heroi para e comemora enquanto o resultado nao aparece
+                // o heroi para e comemora enquanto o resultado nao aparece: o que sobrou do chefe no chao (areas, tiros,
+                // pocas, estilhacos) some e ele nao leva mais dano, senao apanharia parado debaixo do VITORIA
                 GameClock.Holding = true;
+                playerHealth.Pool.Invulnerable = true;
+                foreach (var z in FindObjectsByType<DamageZone>(FindObjectsSortMode.None)) Destroy(z.gameObject);
+                foreach (var p in FindObjectsByType<Projectile>(FindObjectsSortMode.None)) Destroy(p.gameObject);
+                foreach (var w in FindObjectsByType<WaterPuddle>(FindObjectsSortMode.None)) Destroy(w.gameObject);
+                foreach (var v in FindObjectsByType<VolatileBurst>(FindObjectsSortMode.None)) Destroy(v.gameObject);
                 var anim = player.GetComponentInChildren<PlayerAnimator>();
                 if (anim != null) anim.Celebrate();
                 hud.ShowFlash("VITÓRIA!", new Color(0.97f, 0.88f, 0.58f), 1.5f, player.transform);

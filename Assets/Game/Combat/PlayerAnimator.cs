@@ -63,7 +63,7 @@ namespace Quintessence.Combat
         void OnDamage(Health target, DamageInfo info, float applied)
         {
             // so reage se nao estiver no meio de um golpe, dash ou skill: apanhar nao corta a acao do jogador
-            if (dead || target != controller.Health || controller.IsAttacking || controller.IsDashing || controller.IsCasting) return;
+            if (dead || Celebrating || target != controller.Health || controller.IsAttacking || controller.IsDashing || controller.IsCasting) return;
             Play("Hit", 0.03f, true);
             hold = 0.22f;
         }

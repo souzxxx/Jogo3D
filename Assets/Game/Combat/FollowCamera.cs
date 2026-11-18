@@ -25,11 +25,31 @@ namespace Quintessence.Combat
 
         void Start() { if (target != null) SetTarget(target); }
 
+        Transform peek;
+        float peekLeft, peekTotal;
+        /// Quantas vezes a camera olhou para outra coisa (para os testes).
+        public int Peeks { get; private set; }
+
+        /// Apresenta o chefe: por alguns segundos a camera vai ate o meio do caminho entre o heroi e ele e volta.
+        /// O heroi continua no quadro e o jogador continua no controle.
+        public void Peek(Transform other, float seconds = 2f)
+        {
+            if (other == null) return;
+            peek = other; peekLeft = peekTotal = seconds; Peeks++;
+        }
+
         void LateUpdate()
         {
             if (target == null) return;
             var want = target.position;
             if (player != null) want += player.AimDirection * lookAhead;
+            if (peekLeft > 0f && peek != null)
+            {
+                peekLeft -= Time.unscaledDeltaTime;
+                float done = peekTotal - peekLeft;
+                float w = Mathf.Clamp01(Mathf.Min(done / 0.45f, peekLeft / 0.6f)); // entra e sai sem tranco
+                want = Vector3.Lerp(want, (target.position + peek.position) * 0.5f, w * 0.9f);
+            }
             focus = Vector3.SmoothDamp(focus, want, ref velocity, smoothTime);
             Apply();
         }
