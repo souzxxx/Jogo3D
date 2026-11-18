@@ -902,10 +902,11 @@ namespace Quintessence.UI
                 bool has = false;
                 if (hero != null) foreach (var a in hero.AwakenedElements) if (a == e) has = true;
                 var c = ElementColors.Of(e);
-                var row = UiKit.Box("Skill" + i, box, new Vector2(0, 1), new Vector2(60, -176 - i * 104), new Vector2(580, 92), 0.5f);
+                var row = UiKit.Box("Skill" + i, box, new Vector2(0, 1), new Vector2(60, -176 - i * 96), new Vector2(580, 86), 0.5f);
                 var disc = UiKit.Rect("Disc", row, new Vector2(0, 0.5f), new Vector2(14, 0), new Vector2(64, 64));
                 UiKit.Image(disc, UiKit.Circle, has ? Color.Lerp(c, new Color(0.05f, 0.04f, 0.08f), 0.4f) : Slate);
-                UiKit.Image(UiKit.Rect("Icon", disc, center, Vector2.zero, new Vector2(42, 42)), UiKit.Icon(has ? SkillIcon[i + 1] : "lock"), has ? UiKit.Cream : new Color(1, 1, 1, 0.3f));
+                // nao desperto: o icone do elemento apagado, como na barra de skills (antes um cadeado aqui e o icone la)
+                UiKit.Image(UiKit.Rect("Icon", disc, center, Vector2.zero, new Vector2(42, 42)), UiKit.Icon(SkillIcon[i + 1]), has ? UiKit.Cream : new Color(1, 1, 1, 0.22f));
                 UiKit.Text(UiKit.Rect("Name", row, new Vector2(0, 0.5f), new Vector2(94, 20), new Vector2(470, 34)),
                     $"{i + 1}  ·  {SkillName[i + 1]}" + (has && run != null && run.SkillRank[i + 1] > 1 ? " " + RunState.Roman(run.SkillRank[i + 1]) : ""), 28, has ? UiKit.Cream : UiKit.Dim, TextAnchor.MiddleLeft);
                 var note = UiKit.Text(UiKit.Rect("Role", row, new Vector2(0, 0.5f), new Vector2(94, -19), new Vector2(470, 48)),
@@ -914,8 +915,8 @@ namespace Quintessence.UI
                 UiKit.Fit(note, 15, 20); // duas linhas cabiam so com folga: a de Agua vazava pela borda do cartao
             }
             // as seis reacoes: claras as que o heroi ja pode detonar (tem os dois elementos)
-            UiKit.Text(UiKit.Rect("ReactH", box, new Vector2(0, 1), new Vector2(60, -590), new Vector2(580, 28)),
-                "REAÇÕES  ·  uma skill marca, outra de outro elemento detona", 19, UiKit.Dim, TextAnchor.MiddleLeft, false);
+            UiKit.Text(UiKit.Rect("ReactH", box, new Vector2(0, 1), new Vector2(60, -560), new Vector2(580, 30)),
+                "REAÇÕES  ·  uma skill marca, outra de outro elemento detona", 22, UiKit.Dim, TextAnchor.MiddleLeft, false);
             (string name, ElementType a, ElementType b)[] pairs =
             {
                 ("Vapor", ElementType.Fire, ElementType.Water), ("Magma", ElementType.Fire, ElementType.Earth), ("Tempestade", ElementType.Fire, ElementType.Air),
@@ -928,11 +929,18 @@ namespace Quintessence.UI
                 bool known = false, knownB = false;
                 if (hero != null) foreach (var x in hero.AwakenedElements) { if (x == ra) known = true; if (x == rb) knownB = true; }
                 bool can = known && knownB;
-                var pos = new Vector2(60 + (i % 3) * 196, -624 - (i / 3) * 30);
-                UiKit.Image(UiKit.Rect("Dot" + i, box, new Vector2(0, 1), pos + new Vector2(6, -8), new Vector2(10, 10)), UiKit.Circle, // no meio da linha de texto (antes ficava acima)
-                    can ? Color.Lerp(ElementColors.Of(ra), ElementColors.Of(rb), 0.5f) : new Color(1, 1, 1, 0.15f));
-                UiKit.Text(UiKit.Rect("React" + i, box, new Vector2(0, 1), pos + new Vector2(18, 0), new Vector2(180, 26)),
-                    $"{rname} · {short1[(int)ra]}+{short1[(int)rb]}", 17, can ? UiKit.Cream : UiKit.Dim, TextAnchor.MiddleLeft, false);
+                // letra maior e o que falta: a linha miuda no rodape era onde o jogador procura a mecanica principal
+                var pos = new Vector2(60 + (i % 3) * 196, -596 - (i / 3) * 40);
+                var mix = Color.Lerp(ElementColors.Of(ra), ElementColors.Of(rb), 0.5f);
+                UiKit.Image(UiKit.Rect("Dot" + i, box, new Vector2(0, 1), pos + new Vector2(4, -11), new Vector2(12, 12)), UiKit.Circle,
+                    can ? mix : new Color(1, 1, 1, 0.15f));
+                string label = can ? $"<color=#{ColorUtility.ToHtmlStringRGB(Color.Lerp(mix, UiKit.Cream, 0.35f))}>{rname}</color> · {short1[(int)ra]}+{short1[(int)rb]}"
+                    : known != knownB ? $"{rname} · falta {short1[(int)(known ? rb : ra)]}"
+                    : $"{rname} · {short1[(int)ra]}+{short1[(int)rb]}";
+                var rt = UiKit.Text(UiKit.Rect("React" + i, box, new Vector2(0, 1), pos + new Vector2(20, 0), new Vector2(176, 34)),
+                    label, 21, can ? UiKit.Cream : UiKit.Dim, TextAnchor.MiddleLeft, false);
+                rt.supportRichText = true;
+                UiKit.Fit(rt, 15, 21);
             }
 
             // coluna da direita: atributos e bencaos
