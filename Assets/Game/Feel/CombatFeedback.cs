@@ -293,7 +293,8 @@ namespace Quintessence.Feel
         /// Depois do salto, cada pontinho curva para o peito do heroi e some ao chegar.
         void HomeMotes(float dt)
         {
-            if (motes == null || player == null || motes.particleCount == 0) return;
+            // parado (pausa, congelada de impacto): a particula zerada so sai no proximo passo, e contaria de novo
+            if (dt <= 0f || motes == null || player == null || motes.particleCount == 0) return;
             int n = motes.GetParticles(moteBuffer);
             var target = player.position + Vector3.up * 1.2f;
             for (int i = 0; i < n; i++)
