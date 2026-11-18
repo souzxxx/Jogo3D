@@ -104,6 +104,7 @@ namespace Quintessence.UI
             confirmReset = false;
             refuge.gameObject.SetActive(show);
             if (show) { refuge.SetAsLastSibling(); BuildRefuge(); }
+            else SyncOverlayBlock();
             UpdateRefugeLabel();
         }
 
@@ -140,7 +141,7 @@ namespace Quintessence.UI
                 ArmedCard = i;
                 if (noteLabels[i] != null)
                 {
-                    noteLabels[i].text = "Run nova apaga a salva.\nClique de novo para jogar";
+                    noteLabels[i].text = "Run nova apaga a salva.\nEscolha de novo para jogar";
                     noteLabels[i].color = new Color(0.95f, 0.62f, 0.55f);
                 }
                 return;
@@ -193,6 +194,7 @@ namespace Quintessence.UI
             bool back = (UnityEngine.InputSystem.Keyboard.current != null && UnityEngine.InputSystem.Keyboard.current.escapeKey.wasPressedThisFrame)
                 || (UnityEngine.InputSystem.Gamepad.current != null && (UnityEngine.InputSystem.Gamepad.current.buttonEast.wasPressedThisFrame || UnityEngine.InputSystem.Gamepad.current.startButton.wasPressedThisFrame));
             if (back) CloseOverlay();
+            if ((SheetOpen || RefugeOpen) != (blocked.Count > 0)) SyncOverlayBlock();
             if (quintPip == null) return;
             // o quinto ponto do emblema respira devagar
             float k = 1f + 0.12f * Mathf.Sin(Time.unscaledTime * 1.6f);
@@ -204,8 +206,8 @@ namespace Quintessence.UI
         /// Fecha o painel que estiver aberto (Grimorio, Feitos, Opcoes, Creditos ou Refugio). Devolve se havia algum.
         public bool CloseOverlay()
         {
-            if (SheetOpen) { sheet.gameObject.SetActive(false); FocusFirstCard(); return true; }
-            if (RefugeOpen) { ShowRefuge(false); FocusFirstCard(); return true; }
+            if (SheetOpen) { sheet.gameObject.SetActive(false); SyncOverlayBlock(); FocusFirstCard(); return true; }
+            if (RefugeOpen) { ShowRefuge(false); SyncOverlayBlock(); FocusFirstCard(); return true; }
             return false;
         }
 
@@ -219,7 +221,8 @@ namespace Quintessence.UI
             var box = UiKit.Box("Box", sheet, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(width, height), 1f);
             var title = UiKit.Text(UiKit.Rect("Title", box, new Vector2(0.5f, 1), new Vector2(0, -40), new Vector2(900, 70)), heading, 56, UiKit.Paper);
             title.font = GameFonts.Title;
-            UiKit.Focus(UiKit.Button(box, "Voltar", new Vector2(0.5f, 0), new Vector2(0, 44), new Vector2(300, 60), UiKit.Primary, () => { sheet.gameObject.SetActive(false); FocusFirstCard(); }).gameObject);
+            UiKit.Focus(UiKit.Button(box, "Voltar", new Vector2(0.5f, 0), new Vector2(0, 44), new Vector2(300, 60), UiKit.Primary, () => { sheet.gameObject.SetActive(false); SyncOverlayBlock(); FocusFirstCard(); }).gameObject);
+            SyncOverlayBlock();
             return box;
         }
 
@@ -388,18 +391,19 @@ namespace Quintessence.UI
                     // apagado: diz quanto falta, dentro do proprio botao (antes so o preco, sem dizer por que nao dava)
                     int missing = Mathf.Max(0, meta.Cost(u) - meta.Shards);
                     var b = UiKit.Button(row, can ? $"{meta.Cost(u)} Fragmentos" : $"{meta.Cost(u)} Fragmentos\nfaltam {missing}", new Vector2(1, 0.5f), new Vector2(-16, 0), new Vector2(210, 56),
-                        can ? UiKit.Primary : UiKit.Disabled, () => Buy(u));
+                        can ? UiKit.Primary : UiKit.Disabled, () => { keepFocus = "Buy" + (int)u; Buy(u); });
+                    b.name = "Buy" + (int)u;
                     var t = b.transform.Find("Label").GetComponent<UnityEngine.UI.Text>();
                     t.fontSize = can ? 23 : 19;
                     t.lineSpacing = 0.85f;
                     if (!can) t.color = UiKit.Dim;
                 }
             }
-            UiKit.Focus(UiKit.Button(box, "Voltar", new Vector2(0.5f, 0), new Vector2(0, 56), new Vector2(300, 60), UiKit.Primary, () => { ShowRefuge(false); FocusFirstCard(); }).gameObject);
+            var back = UiKit.Button(box, "Voltar", new Vector2(0.5f, 0), new Vector2(0, 56), new Vector2(300, 60), UiKit.Primary, () => { ShowRefuge(false); FocusFirstCard(); });
             var wipe = UiKit.Button(box, confirmReset ? "Apagar mesmo?" : "Apagar progresso", new Vector2(1, 0), new Vector2(-50, 62), new Vector2(250, 46),
                 confirmReset ? UiKit.Danger : UiKit.Secondary, () =>
                 {
-                    if (!confirmReset) { confirmReset = true; BuildRefuge(); return; }
+                    if (!confirmReset) { confirmReset = true; keepFocus = "Wipe"; BuildRefuge(); return; }
                     confirmReset = false;
                     reset?.Invoke();
                     if (reload != null) meta = reload();
@@ -407,6 +411,40 @@ namespace Quintessence.UI
                     UpdateRefugeLabel();
                 });
             wipe.transform.Find("Label").GetComponent<UnityEngine.UI.Text>().fontSize = 21;
+            wipe.name = "Wipe";
+            // no controle, o foco fica no botao que foi apertado (comprar de novo, confirmar o apagar); senao no Voltar
+            Transform again = null;
+            if (keepFocus != null) foreach (var t in box.GetComponentsInChildren<Transform>()) if (t.name == keepFocus) { again = t; break; }
+            keepFocus = null;
+            UiKit.Focus(again != null ? again.gameObject : back.gameObject);
+            SyncOverlayBlock();
+        }
+
+        string keepFocus;
+        readonly System.Collections.Generic.List<UnityEngine.UI.Selectable> blocked = new();
+        /// Botoes do titulo desligados enquanto um painel esta aberto (para os testes).
+        public int BlockedBehindOverlay => blocked.Count;
+
+        /// Com Grimorio, Feitos, Opcoes, Creditos ou Refugio aberto, os botoes do titulo por baixo ficam desligados:
+        /// o direcional do controle navegava ate uma carta escondida sob o painel e o A comecava a run.
+        void SyncOverlayBlock()
+        {
+            if (canvas == null) return;
+            bool open = SheetOpen || RefugeOpen;
+            if (!open)
+            {
+                foreach (var sel in blocked) if (sel != null) sel.interactable = true;
+                blocked.Clear();
+                return;
+            }
+            foreach (var sel in canvas.GetComponentsInChildren<UnityEngine.UI.Selectable>(true))
+            {
+                var t = sel.transform;
+                if ((sheet != null && t.IsChildOf(sheet)) || (refuge != null && t.IsChildOf(refuge))) continue;
+                if (!sel.interactable) continue;
+                sel.interactable = false;
+                blocked.Add(sel);
+            }
         }
 
         void Awake()

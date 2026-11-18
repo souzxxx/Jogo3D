@@ -143,6 +143,61 @@ namespace Quintessence.Game.PlayTests
             Time.captureFramerate = 0;
         }
 
+        [UnityTest]
+        public IEnumerator Gamepad_Only_Title_Overlays_Lock_The_Buttons_Behind()
+        {
+            Time.timeScale = 1f;
+            Time.captureFramerate = 0; // o FocusGuard conta tempo real
+            GameEvents.Clear();
+            yield return EditorSceneManager.LoadSceneAsyncInPlayMode("Assets/Scenes/Title.unity", new LoadSceneParameters(LoadSceneMode.Single));
+            yield return null;
+            yield return null;
+            var pad = UnityEngine.InputSystem.InputSystem.AddDevice<UnityEngine.InputSystem.Gamepad>();
+            try
+            {
+                var menu = Object.FindFirstObjectByType<TitleMenu>();
+                var es = UnityEngine.EventSystems.EventSystem.current;
+                Assert.IsNotNull(es.GetComponent<FocusGuard>(), "o EventSystem do titulo cuida do foco");
+                var rax = GameObject.Find("Card_Rax").GetComponent<UnityEngine.UI.Selectable>();
+
+                // painel aberto: as cartas e botoes por baixo nao entram na navegacao do direcional
+                menu.ShowCredits();
+                yield return null;
+                Assert.Greater(menu.BlockedBehindOverlay, 4, "os botoes do titulo ficam desligados sob o painel");
+                Assert.IsFalse(rax.interactable, "a carta escondida nao pode ser escolhida pelo direcional");
+                Assert.IsFalse(es.sendNavigationEvents, "logo que o painel abre o A espera um instante (o A tambem e o dash)");
+                for (float t0 = Time.unscaledTime; Time.unscaledTime - t0 < FocusGuard.SubmitDelay + 0.2f;) yield return null;
+                Assert.IsTrue(es.sendNavigationEvents, "depois do instante o A volta");
+                Assert.IsTrue(menu.CloseOverlay());
+                yield return null;
+                Assert.AreEqual(0, menu.BlockedBehindOverlay);
+                Assert.IsTrue(rax.interactable, "fechado o painel, as cartas voltam");
+                Assert.AreEqual(rax.gameObject, es.currentSelectedGameObject, "e o foco volta para a primeira carta");
+
+                // Refugio: o foco fica no botao que foi apertado (aqui o apagar, que pede confirmacao)
+                menu.ShowRefuge(true);
+                yield return null;
+                Assert.IsFalse(rax.interactable);
+                GameObject.Find("Wipe").GetComponent<UnityEngine.UI.Button>().onClick.Invoke();
+                yield return null;
+                Assert.AreEqual("Wipe", es.currentSelectedGameObject != null ? es.currentSelectedGameObject.name : "nada", "a confirmacao do apagar fica em foco");
+                Assert.IsTrue(menu.CloseOverlay(), "B fecha o Refugio");
+                yield return null;
+                Assert.IsTrue(rax.interactable);
+
+                // foco perdido (clique do mouse no vazio): mexer o direcional devolve o foco
+                for (float t0 = Time.unscaledTime; Time.unscaledTime - t0 < FocusGuard.SubmitDelay + 0.2f;) yield return null;
+                es.SetSelectedGameObject(null);
+                // (o editor em lote nao entrega eventos do controle virtual ao jogo: o teste chama o que o Update chama)
+                var guard = es.GetComponent<FocusGuard>();
+                Assert.IsFalse(guard.TryRecover(false), "sem mexer o controle, nada muda");
+                Assert.IsTrue(guard.TryRecover(true), "mexer o direcional sem nada escolhido devolve o foco");
+                Assert.AreEqual(rax.gameObject, es.currentSelectedGameObject, "ao ultimo botao focado (a primeira carta)");
+                Assert.IsFalse(guard.TryRecover(true), "com algo escolhido, nao mexe");
+            }
+            finally { UnityEngine.InputSystem.InputSystem.RemoveDevice(pad); }
+        }
+
         [UnityTest, Timeout(600000)]
         public IEnumerator Refuge_Upgrades_Are_Saved_And_Change_The_Next_Run()
         {
