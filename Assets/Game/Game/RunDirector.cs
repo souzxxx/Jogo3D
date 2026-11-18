@@ -1082,7 +1082,7 @@ namespace Quintessence.Game
             int essence = EncounterPlanner.EssenceReward(node.Type, Run.Depth);
             if (node.Reward == RewardType.Health)
             {
-                playerHealth.Heal(playerHealth.Max * 0.25f);
+                playerHealth.Heal(playerHealth.Max * HealthReward);
                 Sfx.Play("heal");
                 Feel.DamageNumber.Spawn(player.transform.position + Vector3.up * 3.2f, "+25% DE VIDA", new Color(0.5f, 1f, 0.55f), 1f, 1.4f);
                 essence /= 2;
@@ -1555,14 +1555,33 @@ namespace Quintessence.Game
 
         // ---------- portas e santuario ----------
 
+        /// Quanto a sala de luta cura ao ser limpa quando a porta promete Vida (o resto vira metade da Essencia).
+        public const float HealthReward = 0.25f;
+
+        /// Segunda linha da porta: nas salas de luta, o valor de verdade (as mesmas contas do OnRoomCleared).
+        string DoorReward(MapNode node)
+        {
+            string name = RoomInfo.Name(node.Reward);
+            bool fight = node.Type == RoomType.Combat || node.Type == RoomType.Elite || node.Type == RoomType.Siege || node.Type == RoomType.Trial;
+            if (!fight || player == null) return name;
+            int essence = EncounterPlanner.EssenceReward(node.Type, node.Layer);
+            return node.Reward switch
+            {
+                RewardType.Essence => $"Essência +{Mathf.RoundToInt(essence * player.Modifiers.EssenceMult)}",
+                RewardType.Health => $"Vida +{Mathf.RoundToInt(HealthReward * 100)}%",
+                _ => name,
+            };
+        }
+
         void OpenDoors()
         {
+            Tip("map");
             var choices = Run.Choices;
             for (int i = 0; i < choices.Count; i++)
             {
                 var node = choices[i];
                 float x = (i - (choices.Count - 1) / 2f) * 6f;
-                string reward = RoomInfo.Name(node.Reward);
+                string reward = DoorReward(node);
                 string kind = RoomInfo.Name(node.Type);
                 if (node.Type == RoomType.Elite) kind += ": " + DifficultyCurve.Name(DifficultyCurve.PickElite(GameFlow.Seed, node.Id))
                     + (node.Layer >= EncounterPlanner.MiniBossDepth ? "\ne " + MiniBossName(GameFlow.Seed, node.Id) : "");
@@ -1596,6 +1615,36 @@ namespace Quintessence.Game
             Glow(root.transform, new Vector3(0, 2.2f, -1.4f), new Color(1f, 0.82f, 0.6f), 1.5f);
             return root;
         }
+
+        static readonly string[] SkillNames = { "", "Labareda", "Maré", "Pilar de Pedra", "Vendaval" };
+
+        /// Reacao de cada par de elementos e o que ela faz, em poucas palavras (os mesmos nomes do inventario e do Grimorio).
+        public static string ReactionHint(ElementType a, ElementType b)
+        {
+            bool Has(ElementType x, ElementType y) => (a == x && b == y) || (a == y && b == x);
+            if (Has(ElementType.Fire, ElementType.Water)) return "Vapor (inimigos erram)";
+            if (Has(ElementType.Fire, ElementType.Earth)) return "Magma (poça de lava)";
+            if (Has(ElementType.Fire, ElementType.Air)) return "Tempestade (explosão)";
+            if (Has(ElementType.Water, ElementType.Earth)) return "Lama (prende)";
+            if (Has(ElementType.Water, ElementType.Air)) return "Nevasca (congela)";
+            if (Has(ElementType.Earth, ElementType.Air)) return "Estilhaços (empurra)";
+            return "";
+        }
+
+        /// Texto do pedestal do Santuario: a skill do elemento e a reacao que ela abre com o primeiro elemento ja desperto.
+        public static string ShrineHint(ElementType e, IReadOnlyList<ElementType> awakened)
+        {
+            string text = "Skill: " + SkillNames[(int)e];
+            foreach (var a in awakened)
+            {
+                if (a == e) continue;
+                string r = ReactionHint(e, a);
+                if (r.Length > 0) return text + "\ncom " + ElementNames[(int)a] + ": " + r;
+            }
+            return text;
+        }
+
+        static readonly string[] ElementNames = { "", "Fogo", "Água", "Terra", "Ar" };
 
         void SetupShrine()
         {
@@ -1661,7 +1710,10 @@ namespace Quintessence.Game
                 else Matte(GameObject.CreatePrimitive(PrimitiveType.Cube), root.transform, new Vector3(0, 0.6f, 0), new Vector3(1f, 1.2f, 1f), new Color(0.4f, 0.4f, 0.45f));
                 // o elemento aparece como uma pedra fosca sobre o pedestal e na luz que ela joga em volta
                 Emblem(root.transform, e, new Vector3(0, top + 0.12f, 0), 1.4f);
-                Label(root.transform, new Vector3(0, top + 1.7f, 0), names[(int)e], Cream, 0.8f);
+                // nome do elemento, a skill que ele da e a reacao que ela abre com o que o heroi ja tem
+                // (so "Agua / Terra / Ar" nao dizia o que muda na luta: e a escolha mais importante da run)
+                Stack(root.transform, new Vector3(0, top + 1.42f, 0), (names[(int)e], Cream, 0.8f),
+                    (ShrineHint(e, player.Loadout.Awakened), new Color(0.8f, 0.76f, 0.7f), 0.5f));
                 Glow(root.transform, new Vector3(0, top + 0.7f, -0.7f), c, 2.2f);
                 interactables.Add(new Interactable
                 {

@@ -31,7 +31,7 @@ namespace Quintessence.Game
         /// Texto da dica para quem joga de controle: troca so as que falam de tecla.
         public static string Text(string id, bool gamepad) => gamepad && id switch
         {
-            "melee" or "start" or "level" or "quint" => true,
+            "melee" or "start" or "level" or "quint" or "map" => true,
             _ => false,
         } ? PadText(id) : Text(id);
 
@@ -41,6 +41,7 @@ namespace Quintessence.Game
             "start" => "RT ataca. O direcional solta as skills dos elementos. A desvia.",
             "level" => "Subiu de nível: escolha um talento com o direcional e confirme com A.",
             "quint" => "Quatro elementos despertos: cause reações para encher a Quintessência e aperte Y.",
+            "map" => "Portas abertas: cada uma leva a um tipo de sala. Segure R3 para ver o mapa inteiro e planejar o caminho.",
             _ => Text(id),
         };
 
@@ -66,6 +67,7 @@ namespace Quintessence.Game
             "fusion" => "Três elementos: lance a skill do terceiro na lava do Magma, na nuvem do Vapor ou no lamaçal da Lama. É uma Fusão.",
             "affinity" => "Elementais resistem ao próprio elemento e são fracos a outro: Água vence Fogo, Ar vence Pedra.",
             "quint" => "Quatro elementos despertos: cause reações para encher a Quintessência e aperte R.",
+            "map" => "Portas abertas: cada uma leva a um tipo de sala. Segure Tab para ver o mapa inteiro e planejar o caminho.",
             _ => "",
         };
     }

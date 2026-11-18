@@ -1471,6 +1471,7 @@ namespace Quintessence.Game.PlayTests
             crystal.GetComponent<Health>().TakeDamage(new DamageInfo(5f, ElementType.None, Team.Player, hero.gameObject) { Direction = Vector3.forward });
             yield return null;
             Assert.AreEqual(2, crystal.Marked);
+            Assert.AreEqual(7, crystal.Shards, "o cristal se parte em lascas");
             foreach (var e in new[] { a, b })
             {
                 Assert.AreEqual(ElementType.Water, e.GetComponent<ElementMark>().State.Element, "marcado com o elemento do trecho");
