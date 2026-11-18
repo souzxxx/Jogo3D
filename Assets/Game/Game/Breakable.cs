@@ -20,12 +20,38 @@ namespace Quintessence.Game
         static Transform hero;
         static Material chips;
 
-        void OnEnable() { active.Add(this); GameEvents.AttackPerformed += OnAttack; }
-        void OnDisable() { active.Remove(this); GameEvents.AttackPerformed -= OnAttack; }
+        void OnEnable()
+        {
+            active.Add(this);
+            GameEvents.AttackPerformed += OnAttack;
+            GameEvents.Exploded += OnBlast;
+            GameEvents.ReactionTriggered += OnReaction;
+        }
+
+        void OnDisable()
+        {
+            active.Remove(this);
+            GameEvents.AttackPerformed -= OnAttack;
+            GameEvents.Exploded -= OnBlast;
+            GameEvents.ReactionTriggered -= OnReaction;
+        }
+
+        // explosao (barril de polvora, Explosivo) e reacao de area tambem quebram o que estiver no raio
+        void OnBlast(Vector3 point, float blastRadius) => BreakIfInside(point, blastRadius);
+        void OnReaction(ReactionEvent e) => BreakIfInside(e.Point, e.Radius);
+
+        void BreakIfInside(Vector3 point, float blastRadius)
+        {
+            if (IsBroken) return;
+            var d = transform.position - point; d.y = 0f;
+            if (d.magnitude <= blastRadius + radius) Break(d.sqrMagnitude > 0.001f ? d.normalized : Vector3.forward);
+        }
 
         void OnAttack(AttackEvent e)
         {
-            if (IsBroken || e.Source == null || e.Source.GetComponent<PlayerController>() == null) return;
+            // golpes, skills e dash do heroi; e o estouro do Cristal de Ressonancia (em roda)
+            if (IsBroken || e.Source == null) return;
+            if (e.Source.GetComponent<PlayerController>() == null && e.Source.GetComponent<ResonanceCrystal>() == null) return;
             var to = transform.position - e.Origin; to.y = 0f;
             if (to.magnitude > e.Range + radius) return;
             if (e.Arc < 359f && to.sqrMagnitude > 0.36f && Vector3.Angle(e.Direction, to) > e.Arc * 0.5f + 12f) return;
