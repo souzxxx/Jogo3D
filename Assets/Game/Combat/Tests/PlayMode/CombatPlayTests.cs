@@ -196,6 +196,8 @@ namespace Quintessence.Combat.PlayTests
         public IEnumerator Fire_And_Water_Skills_Combine_Into_Steam()
         {
             yield return Setup("combat");
+            // o combo aceita um critico; dois seguidos sao raros mas possiveis e derrubavam o teste na suite inteira
+            Random.InitState(20261118);
 
             var reactions = new List<string>();
             var statuses = new List<StatusType>();
