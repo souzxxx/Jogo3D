@@ -35,6 +35,22 @@
   <h1>Quintessence 3D — Progresso</h1>
   <p class="sub">Entrega mais recente no topo. Escopo em <a href="ESCOPO.md">ESCOPO.md</a> · kanban em <a href="https://github.com/users/souzxxx/projects/4">GitHub Projects</a>. · <b>resumo da noite por tema em <a href="novidades.html">novidades.html</a></b>.</p>
 
+  <section id="resumo-madrugada-18">
+    <h2>Resumo da madrugada 17→18/11 (para ler de manhã)</h2>
+    <div class="meta"><span class="tag ok">553 testes de regra e 44 jogando passando</span><span class="tag ok">quatro revisões de bugs por subagente aplicadas</span><span class="tag ok">builds novas em Builds/ às 21h58 (WebGL 335-378 FPS, 0 erros)</span></div>
+    <p><b>O que você precisa fazer:</b></p>
+    <ol>
+      <li><b>Subir de novo os dois zips no itch</b> (Edit game → Uploads): <code>Builds/Quintessence-Windows.zip</code> e <code>Builds/Quintessence-WebGL.zip</code>. A build Windows que está lá (17h58) provavelmente mostra as armas em magenta (explicado abaixo).</li>
+      <li><b>Colar o texto novo da página</b> de <code>docs/itch.md</code>: agora explica como abrir no Windows (extrair a pasta; no aviso "O Windows protegeu o computador", Mais informações → Executar assim mesmo).</li>
+      <li>Opcional: prints para a página em <code>docs/itch_prints/</code>.</li>
+      <li>Inscrever o jogo na jam e rodar o <code>.exe</code> num Windows de verdade (eu não tenho como testar).</li>
+    </ol>
+    <p><b>O mais importante da noite:</b> desde a silhueta da tarde, as armas e garras presas aos ossos saíam <b>magenta</b> no perfil gráfico de PC. O Unity 6 desenha essas peças pelo GPU Resident Drawer, e o shader da silhueta não tinha a variante que esse caminho exige. O navegador não usa esse caminho (por isso estava certo). O shader foi corrigido e eu varri ~1.600 quadros dos testes: nenhum magenta.</p>
+    <p><b>Novidades:</b> Descanso com fogueira e escolha (dormir 35% ou afiar a arma +10%), altar próprio do Pacto, mercador e Mestre com peças do Blender, estalo da fogueira, passos, batimento de vida baixa, partículas de ar por trecho, Essência que voa dos inimigos, câmera que apresenta o chefe final, comemoração na vitória com epílogo no resultado, placas das salas sem sobreposição, câmera mostrando mais da sala na entrada, textos flutuantes sempre dentro da tela, convite do treino na primeira vez. No controle: mira assistida, vibração ("Tremor e vibração" nas opções), treino, talentos e avisos com os botões do controle.</p>
+    <p><b>Dificuldade:</b> sonda de 24 runs com jogador razoável: 17/24 com a cura de 40% no Descanso; baixei para 35% (as medições antigas ficavam entre 13 e 16). Nenhuma run presa. Registro em <code>docs/sonda_madrugada18.txt</code>.</p>
+    <p><b>Ainda falta alguém jogar:</b> a vibração e a mira assistida só dá para sentir num controle de verdade.</p>
+  </section>
+
   <section id="s7-madrugada">
     <h2>Madrugada 17→18/11: polimento das salas, do Descanso e dos textos</h2>
     <div class="meta"><span class="tag who">Miguel</span><span class="tag who">Leonardo</span><span class="tag ok">550 testes de regra e 44 jogando passando; revisão por subagente sem bug confirmado</span></div>
