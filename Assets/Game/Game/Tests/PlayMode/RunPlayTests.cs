@@ -1169,6 +1169,64 @@ namespace Quintessence.Game.PlayTests
             Assert.Greater(audio.ArmorCracks, cracks, "a armadura caindo estala");
         }
 
+        /// Rodada 21: o respiradouro de brasa reage aos elementos: Agua apaga por 6 s, Fogo adianta a erupcao (com o aviso inteiro).
+        [UnityTest, Timeout(300000)]
+        public IEnumerator Ember_Vent_Goes_Out_With_Water_And_Erupts_With_Fire()
+        {
+            GameEvents.Clear();
+            Time.timeScale = 1f;
+            Time.captureFramerate = 30;
+            yield return EditorSceneManager.LoadSceneAsyncInPlayMode("Assets/Scenes/Run.unity", new LoadSceneParameters(LoadSceneMode.Single));
+            yield return null;
+            yield return null;
+            var director = Object.FindFirstObjectByType<RunDirector>();
+            for (int k = 0; k < 2000 && director.Busy; k++) yield return null;
+            Object.FindFirstObjectByType<WaveSpawner>().enabled = false;
+            var hero = Object.FindFirstObjectByType<PlayerController>();
+            hero.GetComponent<Health>().Pool.ExtraDamageTakenMultiplier = 0f;
+            var vent = new GameObject("TestVent").AddComponent<EmberVent>();
+            vent.transform.position = new Vector3(6f, 0f, 3f);
+            var core = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+            Object.Destroy(core.GetComponent<Collider>());
+            core.name = "Core"; core.transform.SetParent(vent.transform, false);
+            int telegraphs = 0;
+            var ventGo = vent.gameObject;
+            GameEvents.TelegraphStarted += e => { if (e.Source == ventGo) telegraphs++; };
+
+            vent.Touch(vent.transform.position, 1f, false);
+            Assert.IsTrue(vent.Quenched, "Agua apaga o respiradouro");
+            Assert.IsTrue(vent.CoreDark, "e o miolo em brasa fica cinza");
+            int erupted = vent.Eruptions;
+            for (float t = 0; t < 5.5f; t += Time.deltaTime) yield return null;
+            Assert.AreEqual(erupted, vent.Eruptions, "apagado, ele nao entra em erupcao");
+            for (float t = 0; t < 1f; t += Time.deltaTime) yield return null;
+            Assert.IsFalse(vent.Quenched, "e reacende sozinho depois de 6 s");
+            Assert.IsFalse(vent.CoreDark, "com a brasa de volta");
+
+            int before = vent.Eruptions, warned = telegraphs;
+            vent.Touch(vent.transform.position, 1f, true);
+            for (float t = 0; t < 1.4f && vent.Eruptions == before; t += Time.deltaTime) yield return null;
+            Assert.Greater(vent.Eruptions, before, "Fogo adianta a erupcao");
+            Assert.Greater(telegraphs, warned, "sempre com o aviso no chao antes");
+            Object.Destroy(vent.gameObject);
+
+            // o respiradouro de verdade, perto do heroi: print aceso e apagado
+            var prefab = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Game/Game/Prefabs/Obstacles/EmberVent.prefab");
+            Assert.IsNotNull(prefab);
+            var real = Object.Instantiate(prefab, hero.transform.position + new Vector3(2.5f, 0f, 1f), Quaternion.identity).GetComponent<EmberVent>();
+            real.Touch(real.transform.position, 1f, true); // acende (e garante a brasa)
+            for (int k = 0; k < 10; k++) yield return null;
+            var cam = Camera.main;
+            Directory.CreateDirectory("Logs/r21");
+            Shot(cam, "Logs/r21/respiradouro_aceso.png");
+            real.Touch(real.transform.position, 1f, false);
+            for (int k = 0; k < 5; k++) yield return null;
+            Shot(cam, "Logs/r21/respiradouro_apagado.png");
+            File.WriteAllText("Logs/r21/pos.txt", cam.WorldToViewportPoint(real.transform.position).ToString("F3"));
+            Assert.IsTrue(real.CoreDark, "o respiradouro de verdade escurece");
+            Time.captureFramerate = 0;
+        }
+
         [UnityTest, Timeout(300000)]
         public IEnumerator Escudeiro_Blocks_From_The_Front_But_Not_From_Behind()
         {
