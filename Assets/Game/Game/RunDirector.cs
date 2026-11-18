@@ -461,7 +461,7 @@ namespace Quintessence.Game
             spawner.SetRepeat(true);
             SiegeLeft = seconds;
             SiegeActive = true;
-            hud.ShowBanner("CERCO", $"aguente {seconds:0} segundos: as ondas não param", RoomInfo.Color(RoomType.Siege) * 1.25f, 4f);
+            hud.ShowBanner("CERCO", $"aguente {seconds:0} segundos: as ondas não param", RoomInfo.Color(RoomType.Siege) * 1.25f, SpecialBannerSeconds);
             UpdateSiegeLabel();
         }
 
@@ -520,7 +520,7 @@ namespace Quintessence.Game
             trialLostShown = false;
             trialForfeit = node.Id == restoredTrialLost;
             TrialActive = true;
-            hud.ShowBanner("PROVAÇÃO", $"{Trials.Name(TrialKind)}: {Trials.Goal(TrialKind, TrialLimit)}", RoomInfo.Color(RoomType.Trial) * 1.25f, 4f);
+            hud.ShowBanner("PROVAÇÃO", $"{Trials.Name(TrialKind)}: {Trials.Goal(TrialKind, TrialLimit)}", RoomInfo.Color(RoomType.Trial) * 1.25f, SpecialBannerSeconds);
             UpdateTrialLabel();
         }
 
@@ -668,6 +668,9 @@ namespace Quintessence.Game
         }
 
         /// O chefe nao passa pela escala das salas: a Ascensao entra aqui.
+        /// Letreiro de Provacao e Cerco: 4 s ainda estava na tela com a primeira onda chegando; o objetivo segue no chip.
+        public const float SpecialBannerSeconds = 3.2f;
+
         void OnBossSpawned(Health boss, string name)
         {
             if (Run != null && !GameFlow.Tutorial)
