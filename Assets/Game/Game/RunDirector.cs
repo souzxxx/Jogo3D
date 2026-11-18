@@ -1170,7 +1170,7 @@ namespace Quintessence.Game
 
         /// Onde fica a fogueira do Descanso (o GameSceneBuilder poe a fogueira aqui; as duas escolhas ficam dos lados dela).
         public static readonly Vector3 CampfireAt = new(0f, 0f, 0.4f);
-        public const float RestHeal = 0.4f, RestSharpen = 0.1f;
+        public const float RestHeal = 0.35f, RestSharpen = 0.1f;
         /// O que o heroi escolheu no ultimo Descanso ("" = ainda nada). Para os testes.
         public string RestChoice { get; private set; } = "";
 
