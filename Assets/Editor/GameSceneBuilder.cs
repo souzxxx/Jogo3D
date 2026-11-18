@@ -886,7 +886,18 @@ public static class GameSceneBuilder
         for (int i = 0; i < 4; i++)
         {
             float x = (i - 1.5f) * 2.6f, z = 3.4f - Mathf.Abs(i - 1.5f) * 0.7f;
-            var col = LookDevBuilder.Spawn("Dungeon/column.fbx", new Vector3(x, 0, z), 0, prop);
+            // o mesmo pedestal do Santuario (ArtSource/Shrine): o titulo mostra onde os elementos despertam
+            HeroBuilder.MatteParts("Assets/Art/Shrine");
+            var pedestal = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Art/Shrine/shrine_pedestal.fbx");
+            GameObject col;
+            if (pedestal != null)
+            {
+                col = (GameObject)PrefabUtility.InstantiatePrefab(pedestal);
+                col.name = "TitlePedestal" + i;
+                col.transform.SetParent(root, false);
+                col.transform.SetPositionAndRotation(new Vector3(x, 0, z), Quaternion.Euler(0, 22.5f, 0));
+            }
+            else col = LookDevBuilder.Spawn("Dungeon/column.fbx", new Vector3(x, 0, z), 0, prop);
             var rs = col.GetComponentsInChildren<Renderer>();
             var b = rs[0].bounds; foreach (var r in rs) b.Encapsulate(r.bounds);
             // emblema modelado do elemento sobre a coluna (antes uma esfera lisa)
