@@ -19,15 +19,17 @@ Roguelite de ação em 3D com câmera de cima. Uma run leva de 10 a 15 minutos.
 | Ação | Teclado e mouse | Controle |
 |---|---|---|
 | Mover | W A S D | analógico esquerdo |
-| Mirar | mouse (a seta e o anel no chão mostram para onde) | analógico direito |
+| Mirar | mouse (a seta e o anel no chão mostram para onde) | analógico direito (com ajuda de mira) |
 | Golpe básico | clique esquerdo (segurar faz o combo) | RT ou X |
 | Skills dos elementos | 1 Fogo · 2 Água · 3 Terra · 4 Ar | direcional |
 | Desviar (dash) | Espaço | A |
 | Quintessência (com os quatro elementos) | R | Y |
 | Interagir (portas, baús, totens) | E | B |
 | Inventário | I | Select |
-| Mapa | Tab | — |
+| Mapa (segurar) | Tab | R3 (apertar o analógico direito) |
 | Pausa e opções | Esc | Start |
+
+**Windows:** baixe o zip, extraia a pasta inteira e abra `Quintessence.exe` (ele não roda de dentro do zip). Na primeira vez o Windows pode mostrar "O Windows protegeu o computador": clique em **Mais informações → Executar assim mesmo** (o jogo não tem assinatura digital, como quase todo jogo de jam). Abre em tela cheia; Alt+Enter alterna para janela.
 
 **O básico em uma frase:** uma skill **marca** o inimigo com o elemento dela; a skill de **outro** elemento **detona** a reação.
 
