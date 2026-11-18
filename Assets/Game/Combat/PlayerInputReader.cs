@@ -78,7 +78,12 @@ namespace Quintessence.Combat
                     var stick = pad.rightStick.ReadValue();
                     if (stick.magnitude < StickDeadzone) stick = pad.leftStick.ReadValue();
                     if (stick.magnitude >= StickDeadzone)
-                        aim = transform.position + new Vector3(stick.x, 0f, stick.y).normalized * 6f;
+                    {
+                        var dir = new Vector3(stick.x, 0f, stick.y).normalized;
+                        // ajuda de mira: um inimigo perto da direcao do analogico vira o alvo
+                        var target = AimAssist.Pick(transform.position, dir, AimAssist.EnemyPositions());
+                        aim = target ?? transform.position + dir * 6f;
+                    }
                     return aim;
                 }
                 if (cam == null) cam = Camera.main;

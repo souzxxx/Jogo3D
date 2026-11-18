@@ -13,6 +13,12 @@ namespace Quintessence.Core
         HealthPool pool;
         public HealthPool Pool => pool ??= new HealthPool(maxHealth);
 
+        static readonly System.Collections.Generic.List<Health> active = new();
+        /// Tudo que tem vida e esta ativo na cena (a mira do controle procura alvos aqui, sem varrer a cena a cada quadro).
+        public static System.Collections.Generic.IReadOnlyList<Health> Active => active;
+        void OnEnable() => active.Add(this);
+        void OnDisable() => active.Remove(this);
+
         public Team Team => team;
         public bool IsDead => Pool.IsDead;
         public float Current => Pool.Current;
