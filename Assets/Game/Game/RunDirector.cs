@@ -632,11 +632,14 @@ namespace Quintessence.Game
         /// Objetivo fixo da sala de luta no chip do alto: onda e quantos inimigos faltam (antes so um "ONDA 1/2" flutuante).
         void TickObjective()
         {
-            if (string.IsNullOrEmpty(roomBase) || spawner == null || spawner.State == null || Busy || TrialActive || SiegeActive) return;
+            if (string.IsNullOrEmpty(roomBase) || spawner == null || spawner.State == null || TrialActive || SiegeActive) return;
+            if (Busy && !Finished) return;
             if (roomKind != RoomType.Combat && roomKind != RoomType.Elite && roomKind != RoomType.Boss) return;
             var st = spawner.State;
             string label = roomBase;
-            if (st.Started && !st.Cleared && st.CurrentWave >= 0)
+            // ultima onda sem ninguem vivo (o chefe caiu, a sala esta limpando) ou run encerrada: so o nome da sala
+            bool done = Finished || (st.CurrentWave >= st.TotalWaves - 1 && st.Alive <= 0 && !st.Repeat);
+            if (st.Started && !st.Cleared && st.CurrentWave >= 0 && !done)
                 label += $" · onda {st.CurrentWave + 1}/{st.TotalWaves} · " + (st.Alive > 0 ? $"{st.Alive} {(st.Alive == 1 ? "inimigo" : "inimigos")}" : "próxima onda");
             // so mexe no rotulo que e dela (Provacao e Cerco escrevem o proprio)
             if (label != hud.RoomLabel && hud.RoomLabel.StartsWith(roomBase)) hud.SetRoom(label);
