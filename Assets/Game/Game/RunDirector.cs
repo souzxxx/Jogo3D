@@ -283,6 +283,9 @@ namespace Quintessence.Game
         public string CurrentDecor { get; private set; } = "";
         public void BindLayouts(RoomLayout[] list) => layouts = list;
         public void BindMaster(GameObject prefab) => masterPrefab = prefab;
+        /// Velas do pack em pares (acesa, apagada), para a Agua apagar.
+        [SerializeField] Mesh[] candlePairs = new Mesh[0];
+        public void BindCandles(params Mesh[] pairs) => candlePairs = pairs;
 
         public void BindShop(GameObject table, GameObject bottle, GameObject elixir, GameObject decor)
         {
@@ -373,7 +376,8 @@ namespace Quintessence.Game
             hud = FindFirstObjectByType<Hud>();
             if (hud == null) hud = new GameObject("Hud").AddComponent<Hud>();
             dresser = gameObject.AddComponent<BiomeDresser>();
-            gameObject.AddComponent<TorchReact>(); // tochas de parede apagam com Agua e reacendem com Fogo
+            TorchReact.CandlePairs = candlePairs ?? new Mesh[0];
+            gameObject.AddComponent<TorchReact>(); // tochas de parede (e velas) apagam com Agua e reacendem com Fogo
         }
 
         void OnDestroy() { Arena.ResetSize(); GameClock.Holding = false; }

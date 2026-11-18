@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using Quintessence.Enemies;
 using Quintessence.Game;
 using Quintessence.UI;
@@ -100,6 +101,9 @@ public static class GameSceneBuilder
         director.BindTutorial(DummyPrefab());
         director.BindDecor(RoomDecors());
         director.BindMaster(MasterPrefab());
+        // velas acesas e apagadas do pack (a chama e parte da malha): a Agua troca uma pela outra
+        static Mesh CandleMesh(string model) => AssetDatabase.LoadAllAssetsAtPath(CombatDevSceneBuilder.KK + "Dungeon/" + model + ".fbx").OfType<Mesh>().FirstOrDefault();
+        director.BindCandles(CandleMesh("candle_thin_lit"), CandleMesh("candle_thin"), CandleMesh("candle_lit"), CandleMesh("candle"));
         director.BindBiomeProps(BiomePropSets());
         // pedestal do Santuario feito no Blender (ArtSource/Shrine); sem ele, a coluna do pack
         director.BindProps(Prop("wall_doorway", 1f), bannerPrefabs, StaticPropPrefab("Assets/Art/Shrine/shrine_pedestal.fbx", "ShrinePedestal", 1f) ?? Prop("column", 1f), Prop("chest_gold", 1f), stone);

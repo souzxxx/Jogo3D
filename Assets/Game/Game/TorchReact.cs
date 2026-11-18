@@ -17,6 +17,14 @@ namespace Quintessence.Game
         public bool IsOut(int i) => outFor[i] > 0f;
         public int Count => lights.Length;
 
+        /// Velas do pack em pares (acesa, apagada): a chama faz parte da malha, entao apagar e trocar a malha.
+        /// So Agua apaga (Ar apagando seria regra nova); Fogo ou 8 s reacendem.
+        public static Mesh[] CandlePairs = new Mesh[0];
+        readonly System.Collections.Generic.List<(MeshFilter filter, Mesh lit, float left)> candlesOut = new();
+        /// Quantas velas apagaram (para os testes).
+        public int CandlesDoused { get; private set; }
+        public int CandlesOut => candlesOut.Count;
+
         void Start()
         {
             var ls = new System.Collections.Generic.List<Light>();
@@ -55,9 +63,10 @@ namespace Quintessence.Game
             if (e.Mark == ElementType.Water || e.Trigger == ElementType.Water) Touch(e.Point, e.Radius + 2f, false);
         }
 
-        /// Apaga (ou reacende) as tochas a ate reach do ponto, medindo no chao.
+        /// Apaga (ou reacende) as tochas e as velas a ate reach do ponto, medindo no chao.
         public void Touch(Vector3 at, float reach, bool fire)
         {
+            TouchCandles(at, reach, fire);
             for (int i = 0; i < lights.Length; i++)
             {
                 if (lights[i] == null) continue;
@@ -74,6 +83,47 @@ namespace Quintessence.Game
             }
         }
 
+        static bool Near(Vector3 p, Vector3 at, float reach) { var d = p - at; d.y = 0f; return d.magnitude <= reach; }
+
+        Mesh UnlitOf(Mesh m)
+        {
+            for (int i = 0; i + 1 < CandlePairs.Length; i += 2) if (CandlePairs[i] != null && CandlePairs[i] == m) return CandlePairs[i + 1];
+            return null;
+        }
+
+        void TouchCandles(Vector3 at, float reach, bool fire)
+        {
+            if (fire)
+            {
+                for (int i = candlesOut.Count - 1; i >= 0; i--)
+                {
+                    var c = candlesOut[i];
+                    if (c.filter == null) { candlesOut.RemoveAt(i); continue; }
+                    if (!Near(c.filter.transform.position, at, reach)) continue;
+                    c.filter.sharedMesh = c.lit;
+                    candlesOut.RemoveAt(i);
+                }
+                return;
+            }
+            if (CandlePairs.Length < 2) return;
+            // a decoracao muda a cada sala: procura as velas na hora (skill e rara, a busca e barata)
+            bool any = false;
+            foreach (var f in FindObjectsByType<MeshFilter>(FindObjectsSortMode.None))
+            {
+                var unlit = UnlitOf(f.sharedMesh);
+                if (unlit == null || !Near(f.transform.position, at, reach)) continue;
+                candlesOut.Add((f, f.sharedMesh, Relight));
+                f.sharedMesh = unlit;
+                CandlesDoused++;
+                any = true;
+                if (feedback == null) feedback = FindFirstObjectByType<Feel.CombatFeedback>();
+                feedback?.Burst(f.transform.position + Vector3.up * 0.5f, Vector3.up, 25f, 3, 0.4f, 1f, 0.08f, 0.16f, 0.9f, new Color(0.6f, 0.6f, 0.62f));
+            }
+            if (any) Sfx.Play("cast_water"); // o chiado de apagar
+        }
+
+        Feel.CombatFeedback feedback;
+
         void SetFlame(int i, bool on)
         {
             var f = flames[i];
@@ -84,6 +134,14 @@ namespace Quintessence.Game
         void LateUpdate()
         {
             float dt = Time.deltaTime;
+            for (int i = candlesOut.Count - 1; i >= 0; i--)
+            {
+                var c = candlesOut[i];
+                if (c.filter == null) { candlesOut.RemoveAt(i); continue; }
+                c.left -= dt;
+                if (c.left <= 0f) { c.filter.sharedMesh = c.lit; candlesOut.RemoveAt(i); }
+                else candlesOut[i] = c;
+            }
             for (int i = 0; i < lights.Length; i++)
             {
                 if (lights[i] == null) continue;
