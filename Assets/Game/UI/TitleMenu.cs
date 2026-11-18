@@ -89,7 +89,15 @@ namespace Quintessence.UI
                     if (heroMasteryLabels[i] != null) heroMasteryLabels[i].text = m > 0 ? $"Maestria {m}" : "";
                 }
             if (refugeLabel != null && meta != null) refugeLabel.text = $"REFÚGIO  ·  {meta.Shards} Fragmentos";
+            if (firstTimeHint != null) firstTimeHint.gameObject.SetActive(FirstTime);
+            if (treinoEdge != null && !FirstTime) treinoEdge.color = treinoEdgeColor;
         }
+
+        UnityEngine.UI.Text firstTimeHint;
+        UnityEngine.UI.Image treinoEdge;
+        Color treinoEdgeColor;
+        /// Ninguem jogou ainda neste computador: o titulo convida para o treino.
+        public bool FirstTime => meta != null && meta.Runs == 0;
 
         public void ShowRefuge(bool show)
         {
@@ -152,6 +160,8 @@ namespace Quintessence.UI
         void Update()
         {
             TrackInputMode();
+            if (treinoEdge != null && FirstTime)
+                treinoEdge.color = new Color(0.95f, 0.78f, 0.4f, 0.65f + 0.35f * Mathf.Sin(Time.unscaledTime * 3f));
             // Esc (ou B/Start no controle) fecha o painel aberto e volta para as cartas
             bool back = (UnityEngine.InputSystem.Keyboard.current != null && UnityEngine.InputSystem.Keyboard.current.escapeKey.wasPressedThisFrame)
                 || (UnityEngine.InputSystem.Gamepad.current != null && (UnityEngine.InputSystem.Gamepad.current.buttonEast.wasPressedThisFrame || UnityEngine.InputSystem.Gamepad.current.startButton.wasPressedThisFrame));
@@ -429,6 +439,12 @@ namespace Quintessence.UI
             Small("GRIMÓRIO", -270, ShowGrimoire);
             Small("FEITOS", -50, ShowFeats);
             Small("TREINO", 170, () => OnTutorial?.Invoke());
+            // primeira vez no jogo (nenhuma run): o contorno do treino pulsa em ambar e um convite aparece em cima
+            var treino = root.Find("Button_TREINO");
+            treinoEdge = treino != null ? treino.Find("Edge").GetComponent<UnityEngine.UI.Image>() : null;
+            treinoEdgeColor = treinoEdge != null ? treinoEdge.color : Color.white;
+            firstTimeHint = UiKit.Text(UiKit.Rect("FirstTime", root, new Vector2(0.5f, 0), new Vector2(170, 124), new Vector2(420, 30)),
+                "Primeira vez? Comece pelo treino", 22, new Color(0.9f, 0.76f, 0.42f), TextAnchor.MiddleCenter, false);
             Small("OPÇÕES", 390, ShowOptions);
             Small("CRÉDITOS", 610, ShowCredits);
             // na build de PC nao ha aba para fechar: Sair no canto oposto ao Continuar (no navegador e no editor ele nao aparece)

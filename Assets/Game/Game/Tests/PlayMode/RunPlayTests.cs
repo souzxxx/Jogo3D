@@ -76,6 +76,8 @@ namespace Quintessence.Game.PlayTests
             var menu = Object.FindFirstObjectByType<TitleMenu>();
             Assert.IsNotNull(menu, "cena de titulo sem menu");
             Assert.IsNotNull(menu.OnPick, "o menu deveria estar ligado ao inicio da run");
+            var firstTime = GameObject.Find("FirstTime");
+            Assert.AreEqual(menu.FirstTime, firstTime != null && firstTime.activeSelf, "o convite para o treino aparece so na primeira vez");
             menu.UseCamera(Camera.main);
             yield return null;
             Shot(Camera.main, "docs/img/titulo.png");
