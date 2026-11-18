@@ -1245,7 +1245,8 @@ namespace Quintessence.Game
                 + $"\n+{shards} Fragmentos para o Refúgio (total: {MetaStore.Current.Shards})   ·   {hero} +{MasteryGained} de maestria"
                 + (MasteryLevelsUp > 0 ? $"\nMaestria {MetaStore.Current.MasteryLevel(GameFlow.StartElement)} de {hero}: {Mastery.Perk(MetaStore.Current.MasteryLevel(GameFlow.StartElement))}" : "")
                 + (NewFeats.Count > 0 ? $"\nFeito{(NewFeats.Count > 1 ? "s" : "")}: {string.Join(", ", NewFeats.ConvertAll(Feats.Name))} (+{NewFeats.Count * Feats.Reward} Fragmentos)" : "")
-                + (NewAscension > 0 ? $"\nAscensão {NewAscension} liberada: escolha no título para enfrentar inimigos mais fortes" : "");
+                + (NewAscension > 0 ? $"\nAscensão {NewAscension} liberada: escolha no título para enfrentar inimigos mais fortes" : "")
+                + (ShowRelaxedHint(victory) ? "\nQuer uma descida mais leve? Em Opções, a dificuldade Tranquila tira 35% do dano que você recebe." : "");
             Sfx.Play(victory ? "victory" : "defeat");
             hud.ShowResult(victory, header, tiles, details, GameFlow.RestartRun, GameFlow.ToTitle, Epilogue(victory));
             // feito novo: um sino depois do som do resultado
@@ -1254,6 +1255,22 @@ namespace Quintessence.Game
         }
 
         /// Frase de fechamento do resultado: na vitoria, o chefe final que caiu; na derrota, o trecho onde a run terminou.
+        /// Quem cai cedo (ate a sala 4, na dificuldade Normal) fica sabendo da Tranquila, que so existia nas Opcoes.
+        /// No maximo tres vezes, para nao virar ruido para quem ja sabe.
+        public const string RelaxedHintKey = "quintessence.relaxedHint";
+        public bool RelaxedHintShown { get; private set; }
+
+        bool ShowRelaxedHint(bool victory)
+        {
+            if (victory || GamePrefs.Relaxed || GameFlow.Tutorial || Run == null || Run.RoomsCleared > 3) return false;
+            int seen = PlayerPrefs.GetInt(RelaxedHintKey, 0);
+            if (seen >= 3) return false;
+            PlayerPrefs.SetInt(RelaxedHintKey, seen + 1);
+            PlayerPrefs.Save();
+            RelaxedHintShown = true;
+            return true;
+        }
+
         public string Epilogue(bool victory)
         {
             if (victory)

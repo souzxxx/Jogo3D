@@ -1112,6 +1112,37 @@ namespace Quintessence.Game.PlayTests
             Time.captureFramerate = 0;
         }
 
+        /// Rodada 19: quem cai cedo na dificuldade Normal fica sabendo da Tranquila (no maximo tres vezes).
+        [UnityTest, Timeout(300000)]
+        public IEnumerator Early_Defeat_Mentions_The_Relaxed_Difficulty()
+        {
+            GameEvents.Clear();
+            Time.timeScale = 1f;
+            Time.captureFramerate = 30;
+            int saved = PlayerPrefs.GetInt(RunDirector.RelaxedHintKey, 0);
+            PlayerPrefs.SetInt(RunDirector.RelaxedHintKey, 0);
+            GameFlow.StartElement = ElementType.Fire;
+            GameFlow.Seed = 3; GameFlow.Layers = 5; GameFlow.Shrines = 1;
+            yield return EditorSceneManager.LoadSceneAsyncInPlayMode("Assets/Scenes/Run.unity", new LoadSceneParameters(LoadSceneMode.Single));
+            yield return null;
+            yield return null;
+            var director = Object.FindFirstObjectByType<RunDirector>();
+            var hero = Object.FindFirstObjectByType<PlayerController>().GetComponent<Health>();
+            for (int k = 0; k < 2000 && director.Busy; k++) yield return null;
+            Assume.That(!GamePrefs.Relaxed, "o teste supoe a dificuldade Normal");
+            hero.TakeDamage(new DamageInfo(99999f, ElementType.None, Team.Enemy, null));
+            for (float t = 0; t < 6f && !director.RelaxedHintShown; t += Time.unscaledDeltaTime) yield return null;
+            Assert.IsTrue(director.RelaxedHintShown, "caiu na sala 1 na Normal: o resultado fala da Tranquila");
+            Assert.AreEqual(1, PlayerPrefs.GetInt(RunDirector.RelaxedHintKey, 0), "e conta quantas vezes mostrou");
+            for (float t = 0; t < 1.5f; t += Time.unscaledDeltaTime) yield return null;
+            var hud = Object.FindFirstObjectByType<Hud>();
+            hud.UseCamera(Camera.main);
+            Directory.CreateDirectory("Logs/r19");
+            Shot(Camera.main, "Logs/r19/derrota.png");
+            PlayerPrefs.SetInt(RunDirector.RelaxedHintKey, saved);
+            Time.captureFramerate = 0;
+        }
+
         [UnityTest, Timeout(300000)]
         public IEnumerator Escudeiro_Blocks_From_The_Front_But_Not_From_Behind()
         {
