@@ -1408,7 +1408,7 @@ namespace Quintessence.Game
             int amount = Mathf.RoundToInt((30 + 6 * Run.Depth) * player.Modifiers.EssenceMult);
             var gold = new Color(0.88f, 0.74f, 0.42f);
             var root = new GameObject("Treasure");
-            root.transform.position = new Vector3(0, 0, 0.6f);
+            root.transform.position = new Vector3(0, 0, 0f); // 0,6 m mais perto da entrada: o titulo "Tesouro" colava no alto da tela (as moedas do cenario ficam em volta)
             if (chestPrefab != null)
             {
                 var chest = Instantiate(chestPrefab, root.transform).transform;
@@ -1417,8 +1417,8 @@ namespace Quintessence.Game
                 chest.localScale *= 1.25f;
             }
             Medal(root.transform, new Vector3(0, 2.1f, 0), "essence", gold, 1.2f);
-            Label(root.transform, new Vector3(0, 3.6f, 0), "Tesouro", Cream, 0.9f);
-            Label(root.transform, new Vector3(0, 2.95f, 0), $"{amount} de Essência e um gole de vida", new Color(0.8f, 0.76f, 0.7f), 0.55f);
+            // nome e descricao empilhados logo acima do medalhao (altura de verdade do texto, como nas outras placas)
+            Stack(root.transform, new Vector3(0, 2.78f, 0), ("Tesouro", Cream, 0.9f), ($"{amount} de Essência e um gole de vida", new Color(0.8f, 0.76f, 0.7f), 0.55f));
             Glow(root.transform, new Vector3(0, 1.8f, -0.8f), gold, 2.2f);
             Interactable entry = null;
             entry = new Interactable
