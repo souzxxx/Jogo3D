@@ -881,12 +881,8 @@ namespace Quintessence.Game
             if ((saveHealthTimer -= Time.unscaledDeltaTime) <= 0f) { saveHealthTimer = 2f; SyncSavedHealth(); }
             if (levelUpOpen) { }
             else if (MenuInput.InventoryPressed && !Busy && (!GameClock.Paused || hud.InventoryVisible)) SetInventory(!hud.InventoryVisible);
-            else if (MenuInput.PausePressed)
-            {
-                // Esc fecha o inventario se ele estiver aberto; senao pausa
-                if (hud.InventoryVisible) SetInventory(false);
-                else SetPaused(!GameClock.Paused);
-            }
+            else if (MenuInput.PausePressed) PressPause();
+            else if (pauseQueued && !Busy) { pauseQueued = false; if (!GameClock.Paused) SetPaused(true); }
             // mapa enquanto segura; so fecha o que o proprio atalho abriu
             if (!GameClock.Paused && MenuInput.MapHeld != mapByTab)
             {
@@ -934,6 +930,19 @@ namespace Quintessence.Game
 
         // nome do trecho novo guardado durante a troca de sala: aparece na tela escura, antes da sala, e some com ela
         bool entering;
+        bool pauseQueued;
+        /// Esc apertado na troca de sala, guardado para quando a sala abrir (para os testes).
+        public int PausesQueued { get; private set; }
+
+        /// Esc / Start. Fecha o inventario se ele estiver aberto; senao pausa ou despausa. Na troca de sala
+        /// (escurecendo, cartao do trecho) a pausa espera a sala abrir: senao o cartao do capitulo nascia por
+        /// cima do painel. Apertar de novo antes disso desiste.
+        public void PressPause()
+        {
+            if (hud.InventoryVisible) SetInventory(false);
+            else if (Busy && !GameClock.Paused) { pauseQueued = !pauseQueued; if (pauseQueued) PausesQueued++; }
+            else SetPaused(!GameClock.Paused);
+        }
         (string title, string sub, Color color)? chapter;
 
         IEnumerator EnterRoom(MapNode node, bool first = false)

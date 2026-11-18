@@ -360,6 +360,7 @@ namespace Quintessence.Game.PlayTests
             hud.ShowMap(director.Run, false);
 
             bool sawDoors = false, sawShrine = false, shrineShot = false, bossChipSaidWave = false;
+            bool pauseTried = false, pauseShown = false;
             int hushedBefore = Quintessence.Feel.CombatFeedback.WaveCallsHushed;
             int maxDepth = 0;
             float limit = 420f, sinceSwitch = 0f, sinceInteract = 0f;
@@ -370,6 +371,23 @@ namespace Quintessence.Game.PlayTests
                 maxDepth = Mathf.Max(maxDepth, director.Run.Depth);
                 if (director.Run.Current.Type == RoomType.Shrine) sawShrine = true;
                 if (director.Run.Current.Type == RoomType.Boss && !director.Busy && hud.RoomLabel.Contains("onda")) bossChipSaidWave = true;
+                // Esc na troca de sala: a pausa espera a sala abrir (o cartao do trecho nao nasce por cima do painel)
+                if (director.Busy && sawDoors && !pauseTried)
+                {
+                    pauseTried = true;
+                    int queued = director.PausesQueued;
+                    director.PressPause();
+                    Assert.IsFalse(hud.PauseVisible, "na troca de sala a pausa nao abre por cima da tela escura");
+                    Assert.AreEqual(queued + 1, director.PausesQueued);
+                }
+                if (pauseTried && !pauseShown && !director.Busy)
+                {
+                    for (int i = 0; i < 4 && !hud.PauseVisible; i++) yield return null;
+                    Assert.IsTrue(hud.PauseVisible, "a pausa guardada abre quando a sala abre");
+                    pauseShown = true;
+                    director.SetPaused(false);
+                    yield return null;
+                }
                 var target = Nearest();
                 input.AttackHeld = false;
                 if (director.Busy) input.Move = Vector2.zero;
@@ -430,6 +448,7 @@ namespace Quintessence.Game.PlayTests
             var build = director.BuildLine();
             Assert.IsTrue(build.Length == 0 || build.StartsWith("\nBuild: "), "linha de build no resultado: " + build);
             Assert.IsTrue(sawDoors, "as portas deveriam abrir depois de limpar a sala");
+            Assert.IsTrue(pauseShown, "a pausa apertada na troca de sala deveria abrir depois");
             Assert.Greater(director.DoorsSwung, 0, "e as folhas das portas giram");
             Assert.IsTrue(sawShrine, "o caminho passa por um santuario");
             Assert.AreEqual(4, maxDepth, "chegou a ultima camada");
