@@ -118,7 +118,19 @@ namespace Quintessence.Game.PlayTests
             Assert.IsTrue(menu.SheetOpen);
             Shot(Camera.main, "docs/img/grimorio.png");
 
-            menu.OnPick(ElementType.Water);
+            // com run salva, a primeira carta so avisa que a run nova apaga a salva; a segunda na mesma carta comeca
+            menu.CloseOverlay();
+            menu.ShowContinue("teste", () => { });
+            menu.PickCard(ElementType.Fire);
+            Assert.AreEqual(0, menu.ArmedCard, "o clique com run salva so pede confirmacao");
+            yield return null; yield return null;
+            Assert.AreNotEqual(GameFlow.RunScene, SceneManager.GetActiveScene().name, "o primeiro clique nao apaga a run salva");
+            StringAssert.Contains("apaga a salva", GameObject.Find("Card_Rax").transform.Find("Note").GetComponent<UnityEngine.UI.Text>().text);
+            Shot(Camera.main, "Logs/titulo_confirma.png");
+            menu.PickCard(ElementType.Water);
+            Assert.AreEqual(1, menu.ArmedCard, "outra carta troca a confirmacao");
+            StringAssert.Contains("Fogo", GameObject.Find("Card_Rax").transform.Find("Note").GetComponent<UnityEngine.UI.Text>().text, "a carta anterior volta ao texto dela");
+            menu.PickCard(ElementType.Water);
             for (int i = 0; i < 30 && SceneManager.GetActiveScene().name != GameFlow.RunScene; i++) yield return null;
             Assert.AreEqual(GameFlow.RunScene, SceneManager.GetActiveScene().name, "escolher o elemento deveria carregar a run");
             for (int i = 0; i < 10; i++) yield return null;
