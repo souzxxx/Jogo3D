@@ -106,7 +106,9 @@ namespace Quintessence.Feel
                     var o = other.transform.position;
                     // altura de uma linha no tamanho 1 (com o salto inicial de 1,25): ~0,72; a folga considera os dois tamanhos
                     float gap = 0.8f * (other.baseSize + size) * 0.5f + 0.12f;
-                    if (Mathf.Abs(o.x - spot.x) < 1.8f * Mathf.Max(size, other.baseSize) && Mathf.Abs(o.z - spot.z) < 1.6f && o.y - spot.y < gap + CatchUp && spot.y - o.y < gap)
+                    // largura pelo tamanho do texto: duas palavras longas lado a lado (MAGMA! e BLOQUEOU) encostavam
+                    float wide = Mathf.Max(1.8f * Mathf.Max(size, other.baseSize), 0.2f * (text.Length * size + other.textLen * other.baseSize));
+                    if (Mathf.Abs(o.x - spot.x) < wide && Mathf.Abs(o.z - spot.z) < 1.6f && o.y - spot.y < gap + CatchUp && spot.y - o.y < gap)
                     { spot.y = atTop ? o.y - gap : o.y + gap; moved = true; }
                 }
                 if (!moved) break;
@@ -116,7 +118,7 @@ namespace Quintessence.Feel
             var n = go.AddComponent<DamageNumber>();
             n.shadow = Make(go.transform, text, new Vector3(0.05f, -0.05f, 0.02f));
             n.front = Make(go.transform, text, Vector3.zero);
-            n.color = color; n.total = n.life = seconds; n.baseSize = size;
+            n.color = color; n.total = n.life = seconds; n.baseSize = size; n.textLen = text.Length;
             n.isNumber = text.Length > 0 && (char.IsDigit(text[0]) || text[0] == '+');
             n.velocity = new Vector3(Random.Range(-0.3f, 0.3f), 2.2f, 0f);
             n.still = atTop;
@@ -180,8 +182,28 @@ namespace Quintessence.Feel
             float x = Mathf.Clamp(vp.x, half, 1f - half), y = Mathf.Min(vp.y, TopLimit);
             if (Mathf.Approximately(x, vp.x) && Mathf.Approximately(y, vp.y)) return;
             transform.position = cam.ViewportToWorldPoint(new Vector3(x, y, vp.z));
-            if (y < vp.y) velocity.y = 0.4f;
+            if (y < vp.y)
+            {
+                velocity.y = 0.4f;
+                // numero que subiu ate o teto e encostou numa palavra parada ali (MAGMA! sobre o chefe no fundo):
+                // some logo em vez de ficar escrito por cima dela
+                // (vale tambem para outro texto que subiu antes e ja esta parado no teto: o primeiro fica, o seguinte some)
+                if (!still && !parked && life > CeilingFade)
+                    foreach (var other in live)
+                    {
+                        if (other == null || other == this || !(other.still || other.parked)) continue;
+                        var o = cam.WorldToViewportPoint(other.transform.position);
+                        if (Mathf.Abs(o.y - y) < 0.05f && Mathf.Abs(o.x - x) < 0.16f) { life = CeilingFade; CeilingFades++; break; }
+                    }
+                parked = true;
+            }
         }
+
+        const float CeilingFade = 0.12f;
+        bool parked;
+        int textLen;
+        /// Numeros que encostaram numa palavra parada no teto e sumiram (para os testes).
+        public static int CeilingFades { get; private set; }
 
         public const float TopLimit = 0.85f;
 
