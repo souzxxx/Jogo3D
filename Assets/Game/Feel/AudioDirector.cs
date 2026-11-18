@@ -15,7 +15,7 @@ namespace Quintessence.Feel
             "cast_fire", "cast_water", "cast_earth", "cast_air", "skill_fire", "skill_water", "skill_earth", "skill_air",
             "hit", "hit_heavy", "hurt", "enemy_die", "dash", "switch", "reaction", "telegraph", "explode", "block", "shield",
             "shatter", "quint_on", "quint_off", "room_clear", "wave", "door", "pickup", "heal", "ui_click",
-            "boss_spawn", "boss_phase", "victory", "defeat", "level_up", "champion", "quint_burst", "feat", "split", "heartbeat",
+            "boss_spawn", "boss_phase", "victory", "defeat", "level_up", "champion", "quint_burst", "feat", "split", "heartbeat", "step",
         };
         public const string AmbientMusic = "music_ambient", BossMusic = "music_boss";
         /// Ambiente de cada trecho, pelo indice do GameEvents.AmbientChanged.
@@ -179,7 +179,8 @@ namespace Quintessence.Feel
         void OnAwakened(ElementType e) { }
 
         // o batimento de vida baixa fica em meio volume, por baixo dos golpes
-        void Play(string id) => Play(id, id == "heartbeat" ? 0.5f : 1f, 0f);
+        // passos: baixos e com tom variado, para nao virar um metronomo
+        void Play(string id) => Play(id, id == "heartbeat" ? 0.5f : id == "step" ? 0.28f : 1f, id == "step" ? 0.12f : 0f);
 
         /// volume: 0..1 relativo. jitter: variacao aleatoria de tom, para o mesmo som nao soar identico em sequencia.
         void Play(string id, float volume, float jitter, float pitch = 1f)

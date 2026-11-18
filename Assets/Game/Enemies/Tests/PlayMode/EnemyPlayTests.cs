@@ -114,6 +114,7 @@ namespace Quintessence.Enemies.PlayTests
             var feedback = Object.FindFirstObjectByType<Quintessence.Feel.CombatFeedback>();
             Assert.Greater(feedback.LastBonesDropped, 3, "inimigo morto deveria se desmontar em ossos");
             Assert.Greater(feedback.MotesAbsorbed, 0, "a Essencia dos inimigos mortos voa ate o heroi");
+            Assert.Greater(player.GetComponentInChildren<Quintessence.Combat.PlayerAnimator>().Steps, 5, "andando, o heroi faz barulho de passo");
             Assert.IsTrue(cleared, "a sala deveria ficar limpa quando a ultima onda morre");
             Assert.AreEqual(3, waves, "tres ondas");
             Assert.AreEqual(12, spawned, "3 + 4 + 5 (Bruto, 2 Explosivos, 2 Rastejantes)");

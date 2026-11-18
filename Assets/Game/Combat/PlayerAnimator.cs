@@ -38,6 +38,11 @@ namespace Quintessence.Combat
 
         public void Bind(PlayerController c, Animator a) { controller = c; animator = a; }
 
+        const float StepInterval = 0.3f;
+        float stepLeft;
+        /// Quantos passos tocaram (para os testes).
+        public int Steps { get; private set; }
+
         void OnAttack(int index) { if (!dead) Play("Attack" + Mathf.Clamp(index, 0, 2), 0.05f, true); }
 
         void OnDash(Vector3 direction)
@@ -98,6 +103,9 @@ namespace Quintessence.Combat
             if (controller.IsAttacking || controller.IsDashing || controller.IsCasting) { hold = 0f; return; }
             if (hold > 0f) { hold -= Time.deltaTime; return; }
             Play(controller.IsMoving ? "Run" : "Idle", 0.1f, false);
+            // passos no ritmo da corrida (o primeiro sai logo que ele comeca a andar)
+            if (controller.IsMoving && !GameClock.Paused) { if ((stepLeft -= Time.deltaTime) <= 0f) { Sfx.Play("step"); Steps++; stepLeft = StepInterval; } }
+            else stepLeft = 0.05f;
         }
 
         void Play(string state, float fade, bool restart)
