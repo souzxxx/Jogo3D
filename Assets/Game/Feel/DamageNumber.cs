@@ -159,7 +159,7 @@ namespace Quintessence.Feel
         }
 
         /// Texto que nasce sobre algo no alto da tela (o chefe la no fundo da sala) saia cortado pela borda de cima e
-        /// caia por cima da barra do chefe: fica abaixo de 85% da altura e dentro das laterais.
+        /// caia por cima da barra do chefe: fica abaixo de 80% da altura e dentro das laterais.
         void KeepOnScreen()
         {
             var cam = Camera.main;
@@ -205,7 +205,8 @@ namespace Quintessence.Feel
         /// Numeros que encostaram numa palavra parada no teto e sumiram (para os testes).
         public static int CeilingFades { get; private set; }
 
-        public const float TopLimit = 0.85f;
+        // 0,8: abaixo da barra do chefe e da linha do escudo sob ela ("ESCUDO — aguente firme" ficava atras de "ESCUDO!")
+        public const float TopLimit = 0.8f;
 
         void Apply()
         {

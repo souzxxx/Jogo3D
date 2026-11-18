@@ -375,7 +375,7 @@ namespace Quintessence.Game.PlayTests
             var wordAt = Camera.main.ViewportToWorldPoint(new Vector3(0.5f, 0.97f, 20f));
             Quintessence.Feel.DamageNumber.Spawn(wordAt, "MAGMA!", Color.white);
             int fades = Quintessence.Feel.DamageNumber.CeilingFades;
-            var below = Camera.main.ViewportToWorldPoint(new Vector3(0.5f, 0.74f, 20f));
+            var below = Camera.main.ViewportToWorldPoint(new Vector3(0.5f, 0.64f, 20f));
             Quintessence.Feel.DamageNumber.Spawn(below, "9", Color.white);
             for (float t = 0; t < 1.2f && Quintessence.Feel.DamageNumber.CeilingFades == fades; t += Time.unscaledDeltaTime) yield return null;
             Assert.Greater(Quintessence.Feel.DamageNumber.CeilingFades, fades, "o numero que encosta na palavra parada no teto some");
