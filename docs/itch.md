@@ -10,11 +10,22 @@
 
 ## Quintessence
 
-**Os quatro elementos se separaram e estão corrompendo o mundo.** Escolha um dos quatro heróis, comece a descida com o elemento dele, desperte os outros três pelo caminho e combine as skills em reações até alcançar a Quintessência, o quinto estado.
+**Roguelite de ação em 3D com câmera de cima, para jogar no navegador ou no Windows. Uma run leva de 10 a 15 minutos.**
 
-Roguelite de ação em 3D com câmera de cima. Uma run leva de 10 a 15 minutos.
+Os quatro elementos se separaram e estão corrompendo o mundo. Escolha um dos quatro heróis, comece a descida com o elemento dele, desperte os outros três pelo caminho e combine as skills em reações até alcançar a Quintessência, o quinto estado.
+
+**O básico em uma frase:** uma skill **marca** o inimigo com o elemento dela; a skill de **outro** elemento **detona** a reação.
+
+- Fogo + Água = **Vapor** (quem está dentro erra metade dos ataques)
+- Fogo + Terra = **Magma** (poça de lava)
+- Fogo + Ar = **Tempestade de Fogo** (a maior explosão)
+- Água + Terra = **Lama** (ninguém sai do lugar)
+- Água + Ar = **Nevasca** (congela; o próximo golpe estilhaça)
+- Terra + Ar = **Estilhaços** (área grande que empurra)
 
 ### Como jogar
+
+**Resumo:** WASD move, o mouse mira, clique ataca, 1 2 3 4 são as skills e Espaço desvia. Também funciona com controle.
 
 | Ação | Teclado e mouse | Controle |
 |---|---|---|
@@ -31,15 +42,6 @@ Roguelite de ação em 3D com câmera de cima. Uma run leva de 10 a 15 minutos.
 
 **Windows:** baixe o zip, extraia a pasta inteira e abra `Quintessence.exe` (ele não roda de dentro do zip). Na primeira vez o Windows pode mostrar "O Windows protegeu o computador": clique em **Mais informações → Executar assim mesmo** (o jogo não tem assinatura digital, como quase todo jogo de jam). Abre em tela cheia; Alt+Enter alterna para janela.
 
-**O básico em uma frase:** uma skill **marca** o inimigo com o elemento dela; a skill de **outro** elemento **detona** a reação.
-
-- Fogo + Água = **Vapor** (quem está dentro erra metade dos ataques)
-- Fogo + Terra = **Magma** (poça de lava)
-- Fogo + Ar = **Tempestade de Fogo** (a maior explosão)
-- Água + Terra = **Lama** (ninguém sai do lugar)
-- Água + Ar = **Nevasca** (congela; o próximo golpe estilhaça)
-- Terra + Ar = **Estilhaços** (área grande que empurra)
-
 **Ler o inimigo:** esqueleto de arma erguida bate quando a arma desce; desvie com Espaço nessa hora. Bombas, explosões e golpes de chefe avisam um círculo vermelho no chão: saia dele. Atrás de pilar ou parede, herói e inimigos aparecem como silhueta.
 
 ### Os heróis
@@ -54,7 +56,11 @@ Roguelite de ação em 3D com câmera de cima. Uma run leva de 10 a 15 minutos.
 - **Fusões:** com três elementos, lance a skill do terceiro dentro da lava do Magma, da nuvem do Vapor ou do lamaçal da Lama.
 - **Esquiva perfeita:** dar dash através de um golpe enche a Quintessência e deixa o próximo golpe crítico.
 - **Escudeiro:** de frente o escudo segura quase tudo. Contorne.
-- **O cenário reage:** caixotes quebram com golpe, explosão ou pisada; tochas, velas e respiradouros de brasa apagam com Água e reacendem com Fogo (o vento do Ar também apaga as velas) (o Fogo faz o respiradouro entrar em erupção em cima dos inimigos, e a erupção deixa neles a marca de Fogo para a próxima reação); a Água molha o barril de pólvora (o próximo golpe só o quebra, sem explodir); o Cristal de Ressonância se parte em lascas; portas e baús abrem de verdade.
+- **O cenário reage:**
+  - Caixotes quebram com golpe, explosão ou pisada; portas e baús abrem de verdade; o Cristal de Ressonância se parte em lascas.
+  - Tochas, velas e respiradouros de brasa apagam com Água e reacendem com Fogo; o vento do Ar também apaga as velas.
+  - O Fogo faz o respiradouro entrar em erupção em cima dos inimigos, e a erupção deixa neles a marca de Fogo para a próxima reação.
+  - A Água molha o barril de pólvora: o próximo golpe só o quebra, sem explodir.
 - **Três chefes finais**, sorteados por run.
 - **Ascensão:** depois da primeira vitória, o título libera 5 níveis de dificuldade a mais.
 - **Refúgio:** os Fragmentos de cada run compram 8 melhorias permanentes.
@@ -98,4 +104,6 @@ Vídeo: `docs/img/run_rodadas.mp4` (31 s, run curta até o chefe gravada pelo te
 
 ## Prints para a página (18/11)
 
-Em `docs/itch_prints/`, 1280 x 720 (refeitos em 18/11 de madrugada, com as placas e o Treino novos): título, onda de inimigos, sala limpa, loja, Descanso, Santuário e Mestre. Gerados por `AspectShots.Title_In_Many_Aspects`, `Itch_Action_Shots` e `Room_Tour` (testes Explicit). Para subir: Edit game → Screenshots.
+Em `docs/itch_prints/`, 1280 x 720 (refeitos em 18/11 de madrugada, com as placas e o Treino novos): título, onda de inimigos, sala limpa, loja, Descanso, Santuário, Mestre e chefe final com reação. Gerados por `AspectShots.Title_In_Many_Aspects`, `Itch_Action_Shots`, `Itch_Boss_Shots` e `Room_Tour` (testes Explicit). Para subir: Edit game → Screenshots.
+
+Ordem sugerida por um jurado simulado (a capa em miniatura precisa mostrar ação): `2_onda`, `1_titulo`, `8_chefe`, `3_sala_limpa`, `6_santuario`, `4_loja`. `5_descanso` e `7_mestre` parecem iguais ao Santuário em miniatura (herói parado e três placas): ficam por último ou de fora.

@@ -42,6 +42,7 @@ Para quem for mexer no código depois: o que entrou, onde está e qual teste cob
 | Pulso do nível na barra | `Hud.LevelPulses` |
 | Chefe sem "ONDA 1/1"; Elite com o modificador no chip | `CombatFeedback.QuietWaves`; `roomBase` montado em `RunDirector.StartEncounter` |
 | Textos do mundo somem no painel de talento; números de dano somem quando as portas abrem | `DamageNumber.ClearLive`, `DamageNumber.ClearNumbers` |
+| Número que sobe até o teto onde já há texto parado some na hora; palavras longas lado a lado se empilham | `DamageNumber.KeepOnScreen` (`CeilingFade`, `parked`, `CeilingFades`), largura por `textLen` no `Spawn` |
 | Dano que arredonda para 0 não vira número | `CombatFeedback.OnDamage` (`ZeroNumbersSkipped`) |
 | Inventário: reações maiores com "falta X"; ícone apagado em vez de cadeado | `Hud` (inventário) |
 | Dica da Tranquila na derrota até a sala 4 (até 3 vezes) | `RunDirector.ShowRelaxedHint` (PlayerPrefs `quintessence.relaxedHint`) |

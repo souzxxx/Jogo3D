@@ -290,6 +290,56 @@ namespace Quintessence.Game.PlayTests
             MetaStore.UseKey(MetaStore.DefaultKey);
         }
 
+        /// Prints do chefe final para a pagina do itch (o jurado pediu: nenhum print mostrava chefe nem reacao).
+        /// Sala do chefe no Coracao das Cinzas, heroi com tres elementos, uma foto a cada 1 s em Logs/itch/chefe_*.png.
+        [UnityTest, Explicit, Timeout(300000)]
+        public IEnumerator Itch_Boss_Shots()
+        {
+            PlayerPrefs.DeleteKey("quintessence.meta.test");
+            MetaStore.UseKey("quintessence.meta.test");
+            Tips.UseKey("quintessence.meta.test.tips");
+            GameEvents.Clear();
+            Time.captureFramerate = 0;
+            GameFlow.Seed = 11; GameFlow.StartElement = ElementType.Water; GameFlow.Layers = 10; GameFlow.Shrines = 3;
+            yield return EditorSceneManager.LoadSceneAsyncInPlayMode("Assets/Scenes/Run.unity", new LoadSceneParameters(LoadSceneMode.Single));
+            yield return null;
+            var director = Object.FindFirstObjectByType<RunDirector>();
+            for (float t = 0; t < 10f && director.Busy; t += Time.unscaledDeltaTime) yield return null;
+            var hud = Object.FindFirstObjectByType<Hud>();
+            hud.UseCamera(Camera.main);
+            var pc = Object.FindFirstObjectByType<Quintessence.Combat.PlayerController>();
+            pc.GetComponent<Quintessence.Combat.PlayerInputReader>().enabled = false;
+            var input = pc.gameObject.AddComponent<Quintessence.Combat.ScriptedInput>();
+            pc.Input = input;
+            pc.Awaken(ElementType.Fire); pc.Awaken(ElementType.Earth);
+            pc.GetComponent<Health>().Pool.ExtraDamageTakenMultiplier = 0.05f;
+            foreach (var e in Object.FindObjectsByType<Quintessence.Enemies.EnemyBrain>(FindObjectsSortMode.None)) Object.Destroy(e.gameObject);
+            director.DressBiome(Biome.Heart);
+            director.StartEncounter(RoomType.Boss, 9, EliteModifier.None);
+            hud.SetRoom("Sala 10/10 · Chefe", RoomType.Boss);
+            Directory.CreateDirectory("Logs/itch");
+            int shot = 0, slot = 0;
+            for (float t = 0; t < 24f && shot < 16; t += Time.deltaTime)
+            {
+                var boss = Object.FindFirstObjectByType<Quintessence.Enemies.BossBrain>();
+                Transform target = boss != null ? boss.transform : null;
+                var adds = Object.FindObjectsByType<Quintessence.Enemies.EnemyBrain>(FindObjectsSortMode.None)
+                    .OrderBy(e => (e.transform.position - pc.transform.position).sqrMagnitude).FirstOrDefault();
+                if (adds != null && (target == null || (adds.transform.position - pc.transform.position).sqrMagnitude < 9f)) target = adds.transform;
+                if (target != null)
+                {
+                    var to = target.position - pc.transform.position; to.y = 0f;
+                    input.AimPoint = target.position;
+                    input.Move = to.magnitude > 4f ? new Vector2(to.x, to.z).normalized : Vector2.zero;
+                    input.AttackHeld = to.magnitude < 4.2f;
+                    if (Time.frameCount % 25 == 0) input.PressElementSkill(new[] { 2, 1, 3 }[slot++ % 3]);
+                }
+                if (t > 3f + shot * 1f) { yield return Shoot(Camera.main, $"Logs/itch/chefe_{shot:00}.png", new Vector2Int(1280, 720)); shot++; }
+                yield return null;
+            }
+            MetaStore.UseKey(MetaStore.DefaultKey);
+        }
+
         /// Golpe no heroi acende a borda vermelho-escura; com pouca vida ela fica pulsando. Foto para a pagina.
         [UnityTest, Timeout(300000)]
         public IEnumerator Hurt_Edge_Flashes_On_Hit_And_Pulses_On_Low_Health()
@@ -320,6 +370,15 @@ namespace Quintessence.Game.PlayTests
             // no climax nunca passa de MaxLive textos no ar
             for (int k = 0; k < 20; k++) Quintessence.Feel.DamageNumber.Spawn(Camera.main.transform.position + Camera.main.transform.forward * 20f, "VAPOR!", Color.white);
             Assert.LessOrEqual(Quintessence.Feel.DamageNumber.LiveCount, Quintessence.Feel.DamageNumber.MaxLive, "textos flutuantes limitados");
+            // numero que sobe ate o teto nao fica escrito por cima da palavra parada ali (MAGMA! sobre o chefe no fundo)
+            for (int k = 0; k < 90; k++) yield return null; // os de cima somem
+            var wordAt = Camera.main.ViewportToWorldPoint(new Vector3(0.5f, 0.97f, 20f));
+            Quintessence.Feel.DamageNumber.Spawn(wordAt, "MAGMA!", Color.white);
+            int fades = Quintessence.Feel.DamageNumber.CeilingFades;
+            var below = Camera.main.ViewportToWorldPoint(new Vector3(0.5f, 0.74f, 20f));
+            Quintessence.Feel.DamageNumber.Spawn(below, "9", Color.white);
+            for (float t = 0; t < 1.2f && Quintessence.Feel.DamageNumber.CeilingFades == fades; t += Time.unscaledDeltaTime) yield return null;
+            Assert.Greater(Quintessence.Feel.DamageNumber.CeilingFades, fades, "o numero que encosta na palavra parada no teto some");
             HealthPool.ForceEvade = false; // sem esquiva sorteada: o golpe tem que entrar
             float before = hp.Current;
             hp.TakeDamage(new DamageInfo(hp.Max * 0.15f, ElementType.None, Team.Enemy));
@@ -356,12 +415,3 @@ namespace Quintessence.Game.PlayTests
     }
 }
 #endif
-            // numero que sobe ate o teto nao fica escrito por cima da palavra parada ali (MAGMA! sobre o chefe no fundo)
-            for (int k = 0; k < 90; k++) yield return null; // os de cima somem
-            var wordAt = Camera.main.ViewportToWorldPoint(new Vector3(0.5f, 0.97f, 20f));
-            Quintessence.Feel.DamageNumber.Spawn(wordAt, "MAGMA!", Color.white);
-            int fades = Quintessence.Feel.DamageNumber.CeilingFades;
-            var below = Camera.main.ViewportToWorldPoint(new Vector3(0.5f, 0.74f, 20f));
-            Quintessence.Feel.DamageNumber.Spawn(below, "9", Color.white);
-            for (float t = 0; t < 1.2f && Quintessence.Feel.DamageNumber.CeilingFades == fades; t += Time.unscaledDeltaTime) yield return null;
-            Assert.Greater(Quintessence.Feel.DamageNumber.CeilingFades, fades, "o numero que encosta na palavra parada no teto some");
