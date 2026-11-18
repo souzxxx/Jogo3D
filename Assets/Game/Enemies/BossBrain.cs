@@ -196,15 +196,35 @@ namespace Quintessence.Enemies
             GameEvents.RaiseBossShield(true, canUse);
         }
 
+        /// Lacaios que nao tinham onde nascer no chao andavel (para os testes).
+        public int SummonsSkipped { get; private set; }
+
+        bool SummonPoint(out Vector3 pos)
+        {
+            float start = Random.Range(0f, 360f);
+            for (int k = 0; k < 8; k++)
+            {
+                var around = Quaternion.Euler(0, start + k * 45f, 0) * Vector3.forward * Random.Range(4f, 6f);
+                if (NavMesh.SamplePosition(transform.position + around, out var hit, 1.5f, NavMesh.AllAreas) && Arena.Contains(hit.position))
+                { pos = hit.position; return true; }
+            }
+            if (NavMesh.SamplePosition(transform.position, out var near, 6f, NavMesh.AllAreas)) { pos = near.position; return true; }
+            pos = transform.position;
+            return false;
+        }
+
+        /// Para os testes: invoca na hora, sem esperar a fase.
+        public void SummonNow(int count) => Summon(count);
+
         void Summon(int count)
         {
             adds.RemoveAll(a => a == null);
             if (definition.addPrefabs == null || definition.addPrefabs.Length == 0) return;
             for (int i = 0; i < count && adds.Count < definition.maxAdds; i++)
             {
-                var around = Quaternion.Euler(0, Random.Range(0f, 360f), 0) * Vector3.forward * Random.Range(4f, 6f);
-                var pos = transform.position + around;
-                if (NavMesh.SamplePosition(pos, out var hit, 3f, NavMesh.AllAreas)) pos = hit.position;
+                // chefe encostado na parede: o ponto sorteado caia fora da sala e o lacaio nascia fora do NavMesh, parado
+                // (as vezes atras da parede). Tenta outros angulos; senao, perto do proprio chefe; senao, nao invoca
+                if (!SummonPoint(out var pos)) { SummonsSkipped++; continue; }
                 var prefab = definition.addPrefabs[Random.Range(0, definition.addPrefabs.Length)];
                 adds.Add(Instantiate(prefab, pos, Quaternion.identity, transform.parent));
             }

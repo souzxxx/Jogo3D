@@ -169,6 +169,7 @@ namespace Quintessence.Enemies
             {
                 var p = at + Quaternion.Euler(0, 360f * i / count + 30f, 0) * Vector3.forward * 0.9f;
                 if (NavMesh.SamplePosition(p, out var hit, 2f, NavMesh.AllAreas)) p = hit.position;
+                else if (NavMesh.SamplePosition(at, out var back, 3f, NavMesh.AllAreas)) p = back.position; // na beira: nasce onde o pai caiu
                 var go = Instantiate(SplitPrefab, p, Quaternion.identity, transform);
                 go.GetComponent<Health>().Died += _ => State.NotifyDeath();
                 Splits++;

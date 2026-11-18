@@ -76,6 +76,39 @@ namespace Quintessence.Enemies.PlayTests
             return null;
         }
 
+        /// Chefe encostado no canto: os lacaios nascem no chao andavel e dentro da sala (antes podiam nascer fora do NavMesh, parados).
+        [UnityTest, Timeout(120000)]
+        public IEnumerator Boss_In_A_Corner_Summons_Adds_On_The_NavMesh()
+        {
+            GameEvents.Clear();
+            Time.timeScale = 1f;
+            Time.captureFramerate = 30;
+            yield return EditorSceneManager.LoadSceneAsyncInPlayMode(Scene, new LoadSceneParameters(LoadSceneMode.Single));
+            yield return null;
+            BossBrain boss = null;
+            for (int k = 0; k < 200 && boss == null; k++) { boss = Object.FindFirstObjectByType<BossBrain>(); yield return null; }
+            Assert.IsNotNull(boss);
+            player = Object.FindFirstObjectByType<PlayerController>();
+            player.GetComponent<Health>().Pool.ExtraDamageTakenMultiplier = 0f;
+            var corner = new Vector3(Arena.HalfX - 0.8f, 0f, Arena.HalfZ - 0.8f);
+            if (UnityEngine.AI.NavMesh.SamplePosition(corner, out var c, 3f, UnityEngine.AI.NavMesh.AllAreas)) corner = c.position;
+            var agent = boss.GetComponent<UnityEngine.AI.NavMeshAgent>();
+            if (agent != null && agent.isOnNavMesh) agent.Warp(corner); else boss.transform.position = corner;
+            boss.enabled = false; // parado no canto
+            int before = Object.FindObjectsByType<EnemyBrain>(FindObjectsSortMode.None).Length;
+            for (int round = 0; round < 4; round++) { boss.SummonNow(2); yield return null; }
+            yield return null;
+            var adds = Object.FindObjectsByType<EnemyBrain>(FindObjectsSortMode.None);
+            Assert.Greater(adds.Length, before, "o chefe invocou lacaios");
+            foreach (var a in adds)
+            {
+                var na = a.GetComponent<UnityEngine.AI.NavMeshAgent>();
+                Assert.IsTrue(na == null || na.isOnNavMesh, $"{a.name} nasceu fora do chao andavel em {a.transform.position}");
+                Assert.IsTrue(Arena.Contains(a.transform.position), $"{a.name} nasceu fora da sala em {a.transform.position}");
+            }
+            Time.captureFramerate = 0;
+        }
+
         [UnityTest, Timeout(900000)]
         public IEnumerator Guardian_Three_Phases_Shield_Needs_Quintessence_Then_Dies()
         {
