@@ -55,6 +55,9 @@ namespace Quintessence.Game.PlayTests
                     GameEvents.Clear();
                     GameFlow.StartElement = hero; GameFlow.Seed = seed * 7 + (int)hero; GameFlow.Layers = 10; GameFlow.Shrines = 3; GameFlow.Tutorial = false; GameFlow.Ascension = ProbeAscension;
                     yield return EditorSceneManager.LoadSceneAsyncInPlayMode("Assets/Scenes/Run.unity", new LoadSceneParameters(LoadSceneMode.Single));
+                    // sorteio do Unity fixo por run (a mesma semente vencia numa sonda e perdia na outra). Ainda sobra variacao de
+                    // tempo real (dicas, letreiros): duas sondas iguais deram 8 e 11 de 12. Comparar mudancas com 2 ou mais sondas
+                    Random.InitState(GameFlow.Seed * 7919 + 17);
                     yield return null; yield return null;
                     var director = Object.FindFirstObjectByType<RunDirector>();
                     player = Object.FindFirstObjectByType<PlayerController>();
