@@ -208,7 +208,7 @@ namespace Quintessence.Enemies
                 if (NavMesh.SamplePosition(transform.position + around, out var hit, 1.5f, NavMesh.AllAreas) && Arena.Contains(hit.position))
                 { pos = hit.position; return true; }
             }
-            if (NavMesh.SamplePosition(transform.position, out var near, 6f, NavMesh.AllAreas)) { pos = near.position; return true; }
+            // sem ponto bom nos oito angulos: nao invoca (antes caia perto do proprio chefe e amontoava lacaios em cima do heroi)
             pos = transform.position;
             return false;
         }
@@ -223,7 +223,7 @@ namespace Quintessence.Enemies
             for (int i = 0; i < count && adds.Count < definition.maxAdds; i++)
             {
                 // chefe encostado na parede: o ponto sorteado caia fora da sala e o lacaio nascia fora do NavMesh, parado
-                // (as vezes atras da parede). Tenta outros angulos; senao, perto do proprio chefe; senao, nao invoca
+                // (as vezes atras da parede). Tenta outros angulos; senao, nao invoca
                 if (!SummonPoint(out var pos)) { SummonsSkipped++; continue; }
                 var prefab = definition.addPrefabs[Random.Range(0, definition.addPrefabs.Length)];
                 adds.Add(Instantiate(prefab, pos, Quaternion.identity, transform.parent));
