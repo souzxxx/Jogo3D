@@ -72,8 +72,13 @@ namespace Quintessence.Combat
         /// na direcao em que se mira. No controle o adiantamento e fixo (o analogico nao diz distancia).
         public const float FarLookAhead = 2.6f;
 
+        /// Sala sem luta (Santuario, Mestre, loja, Pacto, Descanso, Tesouro): sem adiantamento. Mirando os
+        /// pedestais la em cima, a camera subia ate 2,6 m e as placas voltavam a ficar sob o chip da sala.
+        public bool Calm { get; set; }
+
         float LookAhead()
         {
+            if (Calm) return 0f; // sala sem luta: a camera fica no heroi (ali nao ha o que antecipar)
             if (Quintessence.Core.InputMode.Gamepad) return lookAhead;
             var to = player.AimPoint - player.transform.position; to.y = 0f;
             return Mathf.Lerp(lookAhead, FarLookAhead, Mathf.InverseLerp(2.5f, 9f, to.magnitude));
