@@ -385,6 +385,7 @@ namespace Quintessence.Game
 
         void OnEnable()
         {
+            GameEvents.VentErupted += OnVentErupted;
             GameEvents.RoomCleared += OnRoomCleared;
             GameEvents.Died += OnDied;
             GameEvents.BossSpawned += OnBossSpawned;
@@ -719,8 +720,35 @@ namespace Quintessence.Game
             boss.Pool.SetMax(boss.Max * Ascension.HealthMult(GameFlow.Ascension));
         }
 
+        /// Inimigos marcados com Fogo por uma erupcao de respiradouro (para os testes).
+        public int VentMarks { get; private set; }
+
+        /// Rodada 31: a erupcao marca com Fogo as criaturas em cima, como a poca marca com Agua; Terra, Agua ou Ar nelas
+        /// disparam a reacao. So marca quem esta sem marca (nao renova nem troca a marca de ninguem, para nao virar
+        /// reacao em laco a cada erupcao) e nao marca quem e de Fogo (Brasa Viva).
+        void OnVentErupted(Vector3 at, float radius)
+        {
+            var all = Health.Active;
+            for (int i = all.Count - 1; i >= 0; i--)
+            {
+                var h = all[i];
+                if (h == null || h.IsDead || h.Team != Team.Enemy) continue;
+                if (h.GetComponent<UnityEngine.AI.NavMeshAgent>() == null) continue;
+                var flat = h.transform.position - at; flat.y = 0f;
+                if (flat.magnitude > radius + 0.3f) continue;
+                if (h.TryGetComponent(out ElementalAffinity own) && own.Element == ElementType.Fire) continue;
+                var mark = h.GetComponent<ElementMark>();
+                if (mark == null) mark = h.gameObject.AddComponent<ElementMark>();
+                if (mark.State.HasMark) continue;
+                mark.State.Hit(ElementType.Fire, out _);
+                GameEvents.RaiseMarkApplied(ElementType.Fire, h);
+                VentMarks++;
+            }
+        }
+
         void OnDisable()
         {
+            GameEvents.VentErupted -= OnVentErupted;
             GameEvents.RoomCleared -= OnRoomCleared;
             GameEvents.Died -= OnDied;
             GameEvents.BossSpawned -= OnBossSpawned;

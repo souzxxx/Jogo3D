@@ -138,6 +138,8 @@ namespace Quintessence.Enemies
                     Knockback = 4f, IsReaction = true,
                 });
             }
+            // quem sobreviveu em cima fica marcado com Fogo (como a poca marca com Agua): o diretor aplica a marca
+            GameEvents.RaiseVentErupted(transform.position, radius);
         }
     }
 }

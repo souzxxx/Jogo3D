@@ -1325,6 +1325,31 @@ namespace Quintessence.Game.PlayTests
             for (float t = 0; t < 1.4f && vent.Eruptions == before; t += Time.deltaTime) yield return null;
             Assert.Greater(vent.Eruptions, before, "Fogo adianta a erupcao");
             Assert.Greater(telegraphs, warned, "sempre com o aviso no chao antes");
+
+            // rodada 31: a erupcao marca com Fogo quem fica em cima (sem renovar marca de ninguem); Terra na marca vira Magma
+            var minionPrefab = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Game/Enemies/Prefabs/Rastejante.prefab");
+            var onVent = Object.Instantiate(minionPrefab, vent.transform.position + new Vector3(0.4f, 0f, 0f), Quaternion.identity).GetComponent<Health>();
+            var marked = Object.Instantiate(minionPrefab, vent.transform.position + new Vector3(-0.4f, 0f, 0.3f), Quaternion.identity).GetComponent<Health>();
+            StatusHolder.GetOrAdd(onVent).Apply(StatusType.Rooted, 30f, Team.Player, hero.gameObject);
+            StatusHolder.GetOrAdd(marked).Apply(StatusType.Rooted, 30f, Team.Player, hero.gameObject);
+            yield return null;
+            var waterMark = marked.gameObject.AddComponent<ElementMark>();
+            waterMark.State.Hit(ElementType.Water, out _);
+            int ventMarks = director.VentMarks;
+            before = vent.Eruptions;
+            vent.Touch(vent.transform.position, 1f, true);
+            for (float t = 0; t < 1.6f && vent.Eruptions == before; t += Time.deltaTime) yield return null;
+            Assert.Greater(vent.Eruptions, before);
+            var fireMark = onVent.GetComponent<ElementMark>();
+            Assert.IsNotNull(fireMark, "quem estava em cima ficou marcado");
+            Assert.IsTrue(fireMark.State.HasMark && fireMark.State.Element == ElementType.Fire, "com Fogo");
+            Assert.AreEqual(ElementType.Water, waterMark.State.Element, "a marca que ja existia nao muda");
+            Assert.AreEqual(ventMarks + 1, director.VentMarks);
+            int reactions = 0;
+            GameEvents.ReactionTriggered += _ => reactions++;
+            ElementCombat.Deliver(onVent, new DamageInfo(5, ElementType.Earth, Team.Player, hero.gameObject) { Point = onVent.transform.position }, UnityEditor.AssetDatabase.LoadAssetAtPath<ReactionTable>("Assets/Game/Combat/Data/Reactions.asset"));
+            Assert.Greater(reactions, 0, "Terra na marca do respiradouro dispara a reacao");
+            Object.Destroy(onVent.gameObject); Object.Destroy(marked.gameObject);
             Object.Destroy(vent.gameObject);
 
             // o respiradouro de verdade, perto do heroi: print aceso e apagado
