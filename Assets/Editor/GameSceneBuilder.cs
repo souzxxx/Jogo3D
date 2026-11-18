@@ -101,7 +101,8 @@ public static class GameSceneBuilder
         director.BindDecor(RoomDecors());
         director.BindMaster(MasterPrefab());
         director.BindBiomeProps(BiomePropSets());
-        director.BindProps(Prop("wall_doorway", 1f), bannerPrefabs, Prop("column", 1f), Prop("chest_gold", 1f), stone);
+        // pedestal do Santuario feito no Blender (ArtSource/Shrine); sem ele, a coluna do pack
+        director.BindProps(Prop("wall_doorway", 1f), bannerPrefabs, StaticPropPrefab("Assets/Art/Shrine/shrine_pedestal.fbx", "ShrinePedestal", 1f) ?? Prop("column", 1f), Prop("chest_gold", 1f), stone);
         director.BindEmblems(EmblemPrefabs());
         director.BindPactAltar(PactAltarPrefab());
         EditorUtility.SetDirty(director);
@@ -406,24 +407,27 @@ public static class GameSceneBuilder
 
     /// O Mestre da sala de bencaos: o mesmo corpo do Mercador, com o cajado e outra paleta.
     /// Altar do Pacto feito no Blender (ArtSource/Pact): bloco escuro, pano vinho, bacia e velas. Solido e recortado da malha.
-    static GameObject PactAltarPrefab()
+    static GameObject PactAltarPrefab() => StaticPropPrefab("Assets/Art/Pact/pact_altar.fbx", "PactAltar", 1.2f);
+
+    /// Peca fixa feita no Blender virando prefab solido (colisor de caixa e recorte na malha de navegacao), fosca como o resto.
+    static GameObject StaticPropPrefab(string fbx, string prefabName, float scale)
     {
         AssetDatabase.Refresh();
-        HeroBuilder.MatteParts("Assets/Art/Pact");
-        var asset = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Art/Pact/pact_altar.fbx");
-        if (asset == null) { Debug.LogWarning("sem o altar do Pacto"); return null; }
-        var root = new GameObject("PactAltar");
+        HeroBuilder.MatteParts(System.IO.Path.GetDirectoryName(fbx).Replace('\\', '/'));
+        var asset = AssetDatabase.LoadAssetAtPath<GameObject>(fbx);
+        if (asset == null) { Debug.LogWarning("peca nao encontrada: " + fbx); return null; }
+        var root = new GameObject(prefabName);
         var model = (GameObject)PrefabUtility.InstantiatePrefab(asset);
         model.name = "Model";
         model.transform.SetParent(root.transform, false);
-        model.transform.localScale = Vector3.one * 1.2f;
+        model.transform.localScale = Vector3.one * scale;
         var rs = model.GetComponentsInChildren<Renderer>();
         var b = rs[0].bounds; foreach (var r in rs) b.Encapsulate(r.bounds);
         var col = root.AddComponent<BoxCollider>();
         col.center = new Vector3(b.center.x, b.size.y * 0.4f, b.center.z); col.size = new Vector3(b.size.x * 0.9f, b.size.y * 0.8f, b.size.z * 0.9f);
         var carve = root.AddComponent<UnityEngine.AI.NavMeshObstacle>();
         carve.shape = UnityEngine.AI.NavMeshObstacleShape.Box; carve.center = col.center; carve.size = col.size + new Vector3(0.3f, 0, 0.3f); carve.carving = true;
-        var prefab = PrefabUtility.SaveAsPrefabAsset(root, "Assets/Game/Game/Prefabs/PactAltar.prefab");
+        var prefab = PrefabUtility.SaveAsPrefabAsset(root, "Assets/Game/Game/Prefabs/" + prefabName + ".prefab");
         Object.DestroyImmediate(root);
         return prefab;
     }
