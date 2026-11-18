@@ -582,8 +582,7 @@ namespace Quintessence.Feel
         {
             var p = at + Vector3.up * 1.2f;
             DamageNumber.Spawn(p + Vector3.up * 2.2f, "ESQUIVA PERFEITA", new Color(0.95f, 0.88f, 0.62f), 0.9f, 1f);
-            Ring(p, 40, 4f, 0.35f, 0.5f, 0.5f, new Color(0.95f, 0.9f, 0.7f));
-            Sfx.Play("dash");
+            Ring(p, 40, 4f, 0.35f, 0.5f, 0.5f, new Color(0.95f, 0.9f, 0.7f)); // o som (dash mais agudo) sai no AudioDirector
             Stop(0.06f);
         }
 

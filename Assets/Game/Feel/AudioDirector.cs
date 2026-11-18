@@ -15,7 +15,7 @@ namespace Quintessence.Feel
             "cast_fire", "cast_water", "cast_earth", "cast_air", "skill_fire", "skill_water", "skill_earth", "skill_air",
             "hit", "hit_heavy", "hurt", "enemy_die", "dash", "switch", "reaction", "telegraph", "explode", "block", "shield",
             "shatter", "quint_on", "quint_off", "room_clear", "wave", "door", "pickup", "heal", "ui_click",
-            "boss_spawn", "boss_phase", "victory", "defeat", "level_up", "champion", "quint_burst", "feat", "split", "heartbeat", "step", "crate", "clink",
+            "boss_spawn", "boss_phase", "victory", "defeat", "level_up", "champion", "quint_burst", "feat", "split", "heartbeat", "step", "crate", "clink", "crack",
         };
         public const string AmbientMusic = "music_ambient", BossMusic = "music_boss";
         /// Ambiente de cada trecho, pelo indice do GameEvents.AmbientChanged.
@@ -45,6 +45,9 @@ namespace Quintessence.Feel
         void Awake()
         {
             foreach (var id in Ids) clips[id] = Resources.Load<AudioClip>("Audio/" + id);
+            // esquiva perfeita: o proprio dash mais agudo, com chave propria (o dash comum sai no mesmo quadro e o
+            // filtro de 50 ms por id engolia o segundo: a esquiva perfeita ficava sem som proprio)
+            clips["dash_perfect"] = clips["dash"];
             for (int i = 0; i < 12; i++)
             {
                 var s = gameObject.AddComponent<AudioSource>();
@@ -112,6 +115,8 @@ namespace Quintessence.Feel
             GameEvents.BossPhaseChanged += OnBossPhase;
             GameEvents.BossShieldChanged += OnBossShield;
             GameEvents.ElementAwakened += OnAwakened;
+            GameEvents.PerfectDodge += OnPerfectDodge;
+            GameEvents.ArmorChanged += OnArmor;
         }
 
         void Unsubscribe()
@@ -135,6 +140,8 @@ namespace Quintessence.Feel
             GameEvents.BossPhaseChanged -= OnBossPhase;
             GameEvents.BossShieldChanged -= OnBossShield;
             GameEvents.ElementAwakened -= OnAwakened;
+            GameEvents.PerfectDodge -= OnPerfectDodge;
+            GameEvents.ArmorChanged -= OnArmor;
         }
 
         static string Suffix(ElementType e) => e switch
@@ -180,6 +187,13 @@ namespace Quintessence.Feel
 
         // o batimento de vida baixa fica em meio volume, por baixo dos golpes
         // passos: baixos e com tom variado, para nao virar um metronomo
+        /// Quantas vezes tocou a esquiva perfeita e a armadura quebrando (para os testes).
+        public int PerfectDodgeSounds { get; private set; }
+        public int ArmorCracks { get; private set; }
+        void OnPerfectDodge(Vector3 at) { PerfectDodgeSounds++; Play("dash_perfect", 1f, 0f, 1.5f); }
+        // so quando a armadura cai (Pilar de Pedra), nao quando o inimigo nasce armado
+        void OnArmor(Health enemy, bool armored) { if (!armored) { ArmorCracks++; Play("crack", 0.9f, 0.06f); } }
+
         void Play(string id) => Play(id, id == "heartbeat" ? 0.5f : id == "step" ? 0.28f : 1f, id == "step" ? 0.12f : 0f);
 
         /// volume: 0..1 relativo. jitter: variacao aleatoria de tom, para o mesmo som nao soar identico em sequencia.

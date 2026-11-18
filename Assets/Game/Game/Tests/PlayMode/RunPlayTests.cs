@@ -1144,6 +1144,31 @@ namespace Quintessence.Game.PlayTests
             Time.captureFramerate = 0;
         }
 
+        /// Rodada 20: esquiva perfeita com o dash mais agudo (sem ser engolido pelo dash comum) e estalo quando a armadura cai.
+        [UnityTest, Timeout(300000)]
+        public IEnumerator Perfect_Dodge_And_Broken_Armor_Have_Their_Own_Sound()
+        {
+            GameEvents.Clear();
+            Time.timeScale = 1f;
+            yield return EditorSceneManager.LoadSceneAsyncInPlayMode("Assets/Scenes/Run.unity", new LoadSceneParameters(LoadSceneMode.Single));
+            yield return null;
+            yield return null;
+            var audio = Object.FindFirstObjectByType<Quintessence.Feel.AudioDirector>();
+            Assert.IsNotNull(audio);
+            Assert.IsNotNull(Resources.Load<AudioClip>("Audio/crack"), "o estalo da armadura existe");
+            var hero = Object.FindFirstObjectByType<PlayerController>().GetComponent<Health>();
+            // diferencas, nao valores: na suite inteira o diretor de audio de outra cena pode ainda estar ouvindo
+            int dodges = audio.PerfectDodgeSounds, cracks = audio.ArmorCracks;
+            GameEvents.RaisePerfectDodge(hero.transform.position);
+            GameEvents.RaiseArmorChanged(hero, true);
+            yield return null;
+            Assert.Greater(audio.PerfectDodgeSounds, dodges, "a esquiva perfeita toca o proprio som");
+            Assert.AreEqual(cracks, audio.ArmorCracks, "nascer com armadura nao estala");
+            GameEvents.RaiseArmorChanged(hero, false);
+            yield return null;
+            Assert.Greater(audio.ArmorCracks, cracks, "a armadura caindo estala");
+        }
+
         [UnityTest, Timeout(300000)]
         public IEnumerator Escudeiro_Blocks_From_The_Front_But_Not_From_Behind()
         {
