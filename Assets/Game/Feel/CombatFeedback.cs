@@ -702,8 +702,38 @@ namespace Quintessence.Feel
 
         ElementAccents accents;
 
+        float lastClink;
+        static readonly RaycastHit[] wallHits = new RaycastHit[8];
+        /// Quantas vezes um golpe bateu em peca fixa (para os testes).
+        public int WallHits { get; private set; }
+
+        /// Golpe basico que acerta parede, pilar ou caixa de pedra: faisca cinza e um "tec" seco (antes o golpe na
+        /// cobertura nao dava retorno nenhum). So pecas fixas: nada com vida, nem gatilho, nem o chao.
+        void WallSpark(AttackEvent e)
+        {
+            if (e.Kind != AttackKind.Basic && e.Kind != AttackKind.Finisher) return;
+            if (Time.time - lastClink < 0.15f || e.Direction.sqrMagnitude < 0.01f) return;
+            var from = e.Origin + Vector3.up * 1f;
+            int n = Physics.RaycastNonAlloc(from, e.Direction.normalized, wallHits, Mathf.Max(0.5f, e.Range), ~0, QueryTriggerInteraction.Ignore);
+            float best = float.MaxValue; int pick = -1;
+            for (int i = 0; i < n; i++)
+            {
+                var h = wallHits[i];
+                if (h.normal.y > 0.6f || h.collider.GetComponentInParent<Health>() != null) continue;
+                if (e.Source != null && h.collider.transform.IsChildOf(e.Source.transform)) continue;
+                if (h.distance < best) { best = h.distance; pick = i; }
+            }
+            if (pick < 0) return;
+            lastClink = Time.time;
+            WallHits++;
+            var p = wallHits[pick].point;
+            Burst(p, wallHits[pick].normal, 55f, 14, 2.5f, 6f, 0.08f, 0.18f, 0.25f, new Color(0.72f, 0.7f, 0.68f));
+            Sfx.Play("clink");
+        }
+
         void OnAttack(AttackEvent e)
         {
+            WallSpark(e);
             if (accents != null && e.Element != ElementType.None)
             {
                 bool radial = e.Kind == AttackKind.Skill && e.Arc >= 300f;
