@@ -3,6 +3,12 @@ using UnityEngine;
 
 namespace Quintessence.Core
 {
+    /// Componente que trata um golpe antes de ele virar dano (devolve true: o golpe para ali).
+    public interface IDamageIntercept
+    {
+        bool Intercept(in DamageInfo info);
+    }
+
     /// Vida de qualquer coisa que apanha (heroi, inimigo, pilar). Avisa por eventos locais e pelo GameEvents.
     [DisallowMultipleComponent]
     public class Health : MonoBehaviour, IDamageable
@@ -39,6 +45,8 @@ namespace Quintessence.Core
         public float TakeDamage(in DamageInfo info)
         {
             if (info.SourceTeam == team) return 0f;
+            // quem quer tratar o golpe antes da vida (barril de polvora molhando com Agua) fica com ele
+            if (TryGetComponent(out IDamageIntercept intercept) && intercept.Intercept(info)) return 0f;
             float amount = info.Amount;
             if (TryGetComponent(out ElementalAffinity affinity)) amount *= affinity.Multiplier(info.Element);
             if (TryGetComponent(out FrontGuard guard)) amount *= guard.Multiplier(info);

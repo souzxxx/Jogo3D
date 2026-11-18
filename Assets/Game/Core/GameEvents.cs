@@ -72,6 +72,8 @@ namespace Quintessence.Core
         public static event Action<Health, DamageInfo> HitBlocked;
         /// Alvo Congelado levou um golpe e estilhacou.
         public static event Action<Health> Shattered;
+        /// Barril de polvora molhado pela Agua (fizzled = false) ou quebrado molhado, sem explodir (fizzled = true).
+        public static event Action<Vector3, bool> PowderDoused;
         public static event Action<ElementType, Health> MarkApplied;
         public static event Action<Health> MarkCleared;
         public static event Action<ReactionEvent> ReactionTriggered;
@@ -132,6 +134,7 @@ namespace Quintessence.Core
         public static void RaiseDied(Health target, DamageInfo info) => Died?.Invoke(target, info);
         public static void RaiseHitBlocked(Health target, DamageInfo info) => HitBlocked?.Invoke(target, info);
         public static void RaiseShattered(Health target) => Shattered?.Invoke(target);
+        public static void RaisePowderDoused(Vector3 point, bool fizzled) => PowderDoused?.Invoke(point, fizzled);
         public static void RaiseMarkApplied(ElementType element, Health target) => MarkApplied?.Invoke(element, target);
         public static void RaiseMarkCleared(Health target) => MarkCleared?.Invoke(target);
         public static void RaiseReaction(ReactionEvent e) => ReactionTriggered?.Invoke(e);
@@ -177,7 +180,7 @@ namespace Quintessence.Core
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         public static void Clear()
         {
-            DamageDealt = null; Died = null; HitBlocked = null; Shattered = null; MarkApplied = null; ReactionTriggered = null;
+            DamageDealt = null; Died = null; HitBlocked = null; Shattered = null; PowderDoused = null; MarkApplied = null; ReactionTriggered = null;
             MarkCleared = null; StatusApplied = null; StatusEnded = null; AttackPerformed = null; ZoneSpawned = null;
             TelegraphStarted = null; TelegraphCancelled = null; AttackMissed = null; EnemySpawned = null; WaveStarted = null; ArmorChanged = null; Exploded = null; PuddleLanded = null; QuintessenceBurst = null;
             EnemyHealed = null; ChampionSpawned = null; AmbientChanged = null; QuintessenceCharge = null; Evaded = null; Dodged = null; PerfectDodge = null; Cadence = null; Thorns = null;
