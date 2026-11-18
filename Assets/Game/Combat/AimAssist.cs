@@ -4,11 +4,16 @@ using UnityEngine;
 
 namespace Quintessence.Combat
 {
-    /// Ajuda de mira do controle: o analogico aponta mais ou menos; se houver um inimigo vivo dentro de um cone estreito
-    /// em volta dessa direcao, a mira vai nele. Pesa angulo e distancia (o mais alinhado ganha, o perto desempata).
+    /// Ajuda de mira do controle: o analogico aponta mais ou menos; se houver um inimigo vivo dentro do cone em volta
+    /// dessa direcao, a mira vai nele. O cone abre de perto (o golpe basico e corpo a corpo: um inimigo colado a 40 graus
+    /// do analogico e o alvo obvio) e fecha de longe. Pesa angulo e distancia; de perto, o perto ganha.
     public static class AimAssist
     {
         public const float MaxAngle = 28f, MaxDistance = 9f;
+        /// Cone de perto (ate NearDistance) e onde ele termina de fechar ate MaxAngle.
+        public const float NearAngle = 75f, NearDistance = 1.5f, FarDistance = 7f;
+        /// Analogicos soltos: X bate no inimigo mais perto na frente do heroi, ate essa distancia.
+        public const float IdleAngle = 100f, IdleDistance = 4.5f;
 
         /// Melhor alvo para quem esta em from apontando para dir (no chao). Nulo se nenhum serve.
         public static Vector3? Pick(Vector3 from, Vector3 dir, IEnumerable<Vector3> targets, float maxAngle = MaxAngle, float maxDistance = MaxDistance)
@@ -24,8 +29,9 @@ namespace Quintessence.Combat
                 float dist = to.magnitude;
                 if (dist < 0.3f || dist > maxDistance) continue;
                 float angle = Vector3.Angle(dir, to);
-                if (angle > maxAngle) continue;
-                float score = angle / maxAngle + 0.35f * dist / maxDistance;
+                float allowed = Mathf.Max(maxAngle, Mathf.Lerp(NearAngle, maxAngle, Mathf.InverseLerp(NearDistance, FarDistance, dist)));
+                if (angle > allowed) continue;
+                float score = angle / allowed + 0.9f * dist / maxDistance;
                 if (score < bestScore) { bestScore = score; best = t; }
             }
             return best;

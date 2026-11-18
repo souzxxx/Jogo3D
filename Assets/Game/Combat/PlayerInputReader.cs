@@ -89,7 +89,16 @@ namespace Quintessence.Combat
                         if (flat.sqrMagnitude > 0.01f) padAimDir = flat.normalized;
                         return aim;
                     }
-                    // analogicos soltos: guarda a direcao, nao o ponto (um ponto perto ficaria para tras depois de um dash)
+                    // analogicos soltos: o inimigo mais perto na frente vira o alvo (parado ao lado de um esqueleto, o X
+                    // batia no ar para onde o heroi olhava por ultimo). Sem ninguem perto, guarda a direcao, nao o ponto
+                    // (um ponto perto ficaria para tras depois de um dash)
+                    var near = AimAssist.Pick(transform.position, padAimDir, AimAssist.EnemyPositions(transform.position), AimAssist.IdleAngle, AimAssist.IdleDistance);
+                    if (near.HasValue)
+                    {
+                        var flat = near.Value - transform.position; flat.y = 0f;
+                        if (flat.sqrMagnitude > 0.01f) padAimDir = flat.normalized;
+                        return aim = near.Value;
+                    }
                     aim = transform.position + padAimDir * 6f;
                     return aim;
                 }
